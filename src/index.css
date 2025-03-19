@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --radius: 0.5rem;
+
+    /* 设计稿宽度 */
+    --design-width: 1440px;
+    /* 基础字体大小 */
+    --base-font-size: 16px;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    /* 添加径向渐变背景 */
+    background: radial-gradient(circle at 35.69% 103.83%, #181E31 0%, #090B12 100%);
+    min-height: 100vh;
+  }
+}
+
+/* 在宽度小于等于1920px时，font-size随视窗宽度等比例变化 */
+/* 计算方式仍然基于设计稿宽度：100vw / 1440 * 16px = 1.11vw */
+html {
+  font-size: 1.11vw;
+}
+
+/* 移除container的固定宽度设置，允许内容继续占满屏幕 */
+.container {
+  max-width: 100% !important;
+}
+
+/* 当宽度超过1920px时，固定font-size不再增长，但依然占满宽度 */
+@media screen and (min-width: 1440px) {
+  html {
+    font-size: 16px; /* 相当于1920px宽度下的1.11vw，即1920 * 1.11% = 21.33px */
+    /*font-size: 21.33px; *//* 相当于1920px宽度下的1.11vw，即1920 * 1.11% = 21.33px */
+  }
+}
+
+/* 针对特小屏幕的额外调整 */
+@media screen and (max-width: 768px) {
+  html {
+    font-size: 14px; /* 可根据需要调整小屏幕的基础字体大小 */
+  }
+}

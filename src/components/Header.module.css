@@ -1,0 +1,165 @@
+/* 为确保Orbitron字体可用，添加字体导入 */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+/* 添加Jura字体 */
+@import url('https://fonts.googleapis.com/css2?family=Jura:wght@400;500;600;700&display=swap');
+
+.header {
+  width: 100%;
+  height: 3.125rem; /* 50px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625rem 1.5rem; /* 10px 24px */
+  border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+  
+.title {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 1.5rem; /* 24px */
+  line-height: 100%;
+  letter-spacing: 0;
+  color: white;
+  margin: 0;
+}
+  
+.logoSection {
+  display: flex;
+  align-items: center;
+}
+  
+.actionSection {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem; /* 10px */
+}
+
+/* 图标按钮样式 */
+.iconButton {
+  width: 1.75rem; /* 28px */
+  height: 1.75rem; /* 28px */
+  border-radius: 0.25rem; /* 4px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.iconButton:hover {
+  background: rgba(55, 65, 81, 0.3); /* #3741514D */
+}
+
+/* Doc按钮样式 */
+.docButton {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* 4px */
+  height: 1.8125rem; /* 29px */
+  padding: 0.375rem 0.75rem; /* 6px 12px */
+  border-radius: 0.25rem; /* 4px */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.docButton span {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #9CA3AF;
+  vertical-align: middle;
+}
+
+.docButton:hover {
+  background: rgba(55, 65, 81, 0.3); /* #3741514D */
+}
+
+/* Login按钮样式 */
+.loginButton {
+  height: 1.8125rem; /* 29px */
+  padding: 0.375rem 0.75rem; /* 6px 12px */
+  border-radius: 0.25rem; /* 4px */
+  background: var(--main, #6366F1);
+  backdrop-filter: blur(8px);
+  border: none;
+  cursor: pointer;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #000000;
+  vertical-align: middle;
+}
+
+/* Credits组件样式 */
+.creditsContainer {
+  height: 1.8125rem; /* 29px */
+  padding: 0.375rem 0.75rem; /* 6px 12px */
+  border-radius: 0.25rem; /* 4px */
+  display: flex;
+  align-items: center;
+  gap: 0.375rem; /* 6px */
+  background: #1F293766;
+  backdrop-filter: blur(8px);
+}
+
+.creditsAmount {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #4ADE80;
+  vertical-align: middle;
+}
+
+.creditsLabel {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0;
+  background: linear-gradient(0deg, #9CA3AF, #9CA3AF),
+              linear-gradient(0deg, #88A4C2, #88A4C2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  vertical-align: middle;
+}
+
+/* 账户组件样式 */
+.accountContainer {
+  height: 1.8125rem; /* 29px */
+  padding: 0.375rem 0.75rem; /* 6px 12px */
+  border-radius: 0.25rem; /* 4px */
+  display: flex;
+  align-items: center;
+  gap: 0.625rem; /* 10px */
+  background: #1F293766;
+  backdrop-filter: blur(8px);
+}
+
+.accountAddress {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0;
+  background: linear-gradient(0deg, #9CA3AF, #9CA3AF),
+              linear-gradient(0deg, #88A4C2, #88A4C2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  vertical-align: middle;
+}
