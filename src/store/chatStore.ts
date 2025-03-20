@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { imageUploadAtom, setImageUploadStateAtom, updateMessageUrlsAtom, showToastAtom, uploadImages } from './imagesStore';
 
 export interface Message {
   role: string;
@@ -18,6 +19,8 @@ export interface ChatState {
   error: string | null;
   userUuid: string;
   walletAddress?: string;
+  urls: Array<{name: string, url: string}>;
+  task_type?: string;
 }
 
 // 初始状态
@@ -26,7 +29,9 @@ const initialState: ChatState = {
   isLoading: false,
   error: null,
   userUuid: '',
-  walletAddress: ''
+  walletAddress: '',
+  urls: [],
+  task_type: 'chat'
 };
 
 // 创建原子状态
@@ -37,6 +42,10 @@ export async function sendChatRequest(message: string, history: Message[], userU
   const API_URL = '/api/chat';
   
   try {
+    const conversation_history = history.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
@@ -44,7 +53,7 @@ export async function sendChatRequest(message: string, history: Message[], userU
       },
       body: JSON.stringify({
         message,
-        conversation_history: history,
+        conversation_history: conversation_history,
         user_uuid: userUuid,
         wallet_address: walletAddress,
         urls: urls || []
@@ -103,3 +112,332 @@ export function removeUploadedFile(messages: Message[], messageIndex: number, fi
     return msg;
   });
 }
+
+// ==== 新增的操作函数 ====
+
+// 发送消息的操作
+export const sendMessage = atom(
+  null,
+  async (get, set, message: string) => {
+    if (!message.trim()) return;
+    
+    const chatState = get(chatAtom);
+    
+    // 添加用户消息到聊天记录
+    const userMessage: Message = { 
+      role: 'user', 
+      content: message
+    };
+    
+    // 更新状态为加载中
+    set(chatAtom, {
+      ...chatState,
+      messages: [...chatState.messages, userMessage],
+      isLoading: true,
+      error: null
+    });
+    
+    try {
+      // 发送请求到API
+      const response = await sendChatRequest(
+        userMessage.content,
+        chatState.messages,
+        chatState.userUuid,
+        chatState.walletAddress,
+        chatState.urls.map(url => url.url)
+      );
+
+      const status = response.status;
+      const content = response.content;
+      const task_type = response.task_type;
+      
+      // 处理API响应
+      if (status === 'error') {
+        throw new Error(content || '发送消息时出错');
+      }
+
+      // 根据status的类型，更新消息的类型
+      let messageType = 'text';
+      if (status === 'upload_image') {
+        messageType = 'upload_image';
+      }
+
+      const receivedMessage: Message = {
+        role: 'assistant',
+        content: content,
+        type: messageType as 'text' | 'upload_image',
+        imageUploadState: messageType === 'upload_image' 
+          ? { totalCount: 0, uploadedCount: 0, isUploading: false } 
+          : undefined
+      };
+
+      // 更新消息历史
+      set(chatAtom, {
+        ...chatState,
+        messages: [...chatState.messages, userMessage, receivedMessage],
+        isLoading: false,
+        task_type: task_type
+      });
+    } catch (error) {
+      console.error('发送消息时出错:', error);
+      
+      // 更新错误状态
+      set(chatAtom, {
+        ...chatState,
+        messages: [...chatState.messages, { 
+          role: 'system', 
+          content: error instanceof Error ? error.message : '发送消息时出错，请重试。'
+        }],
+        isLoading: false,
+        error: error instanceof Error ? error.message : '发送消息时出错',
+      });
+    }
+  }
+);
+
+// 添加图片操作
+export const addImage = atom(
+  null,
+  async (get, set, messageIndex: number) => {
+    // 创建一个文件选择对话框
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+    
+    input.onchange = async (event) => {
+      const target = event.target as HTMLInputElement;
+      const files = target.files;
+      
+      if (!files || files.length === 0) return;
+      
+      const chatState = get(chatAtom);
+      const showToastAction = get(showToastAtom);
+      
+      // 根据现有的uploadedFiles获取当前消息
+      const currentMessage = chatState.messages[messageIndex];
+      const existingFiles = currentMessage.uploadedFiles || [];
+      
+      try {
+        // 设置上传状态
+        set(chatAtom, {
+          ...chatState,
+          messages: updateImageUploadState(chatState.messages, messageIndex, {
+            totalCount: files.length,
+            uploadedCount: 0,
+            isUploading: true
+          })
+        });
+        
+        // 准备要上传的文件信息
+        const filesWithNames = Array.from(files).map(file => ({
+          file,
+          name: file.name
+        }));
+        
+        // 使用uploadImages函数上传图片
+        const uploadedUrls = await uploadImages(
+          messageIndex,
+          Array.from(files),
+          // 设置上传状态的回调
+          (state) => set(setImageUploadStateAtom, state),
+          // 更新消息URL的回调
+          ({ messageId, url, progress }) => {
+            const updatedChatState = get(chatAtom);
+            
+            // 更新上传进度
+            set(chatAtom, {
+              ...updatedChatState,
+              messages: updateImageUploadState(updatedChatState.messages, messageId, {
+                uploadedCount: Math.floor(files.length * (progress / 100)),
+                isUploading: progress < 100
+              })
+            });
+            
+            // 更新URL到状态
+            set(updateMessageUrlsAtom, { messageId, url, progress });
+          },
+          // 显示通知的回调
+          (params) => set(showToastAtom, params)
+        );
+        
+        // 上传完成后，更新uploadedFiles
+        if (uploadedUrls && uploadedUrls.length > 0) {
+          // 将新上传的文件与之前的合并
+          const newUploadedFiles = [
+            ...existingFiles,
+            ...uploadedUrls.map((url, index) => ({
+              name: filesWithNames[index]?.name || `image_${index}.jpg`,
+              url
+            }))
+          ];
+          
+          const finalChatState = get(chatAtom);
+          
+          // 更新消息的uploadedFiles
+          set(chatAtom, {
+            ...finalChatState,
+            messages: updateUploadedFiles(finalChatState.messages, messageIndex, newUploadedFiles),
+            urls: newUploadedFiles
+          });
+        }
+        
+        // 上传完成，更新上传状态
+        const lastChatState = get(chatAtom);
+        set(chatAtom, {
+          ...lastChatState,
+          messages: updateImageUploadState(lastChatState.messages, messageIndex, {
+            isUploading: false
+          })
+        });
+      } catch (error) {
+        console.error('Error uploading images:', error);
+        
+        const errorChatState = get(chatAtom);
+        
+        // 更新错误状态
+        set(chatAtom, {
+          ...errorChatState,
+          messages: updateImageUploadState(errorChatState.messages, messageIndex, {
+            isUploading: false
+          })
+        });
+        
+        // 显示错误通知
+        set(showToastAtom, { 
+          message: '图片上传失败',
+          severity: 'error'
+        });
+      }
+    };
+    
+    input.click();
+  }
+);
+
+// 确认图片操作
+export const confirmImages = atom(
+  null,
+  async (get, set, messageIndex: number) => {
+    const chatState = get(chatAtom);
+    
+    // 获取对应消息
+    const message = chatState.messages[messageIndex];
+    if (!message || message.type !== 'upload_image' || !message.uploadedFiles || message.uploadedFiles.length === 0) {
+      set(showToastAtom, { 
+        message: '请先上传图片',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    try {
+      // 获取已上传的图片URL
+      const uploadedUrls = message.uploadedFiles.map(file => file.url);
+      
+      // 显示确认中状态
+      set(chatAtom, {
+        ...chatState,
+        messages: chatState.messages.map((msg, idx) => {
+          if (idx === messageIndex) {
+            return {
+              ...msg,
+              content: msg.content + "\n[图片已确认]"
+            };
+          }
+          return msg;
+        })
+      });
+      
+      // 显示成功通知
+      set(showToastAtom, { 
+        message: '图片已确认',
+        severity: 'success'
+      });
+      
+      // 发送新的请求给后端，带上图片URL
+      const response = await sendChatRequest(
+        '处理已上传的图片',
+        chatState.messages,
+        chatState.userUuid,
+        chatState.walletAddress,
+        uploadedUrls
+      );
+      
+      // 处理响应
+      if (response.status === 'error') {
+        throw new Error(response.content || '处理图片时出错');
+      }
+      
+      // 更新消息历史
+      set(chatAtom, {
+        ...chatState,
+        messages: response.conversation.map((msg: Message) => msg)
+      });
+      
+      // 清空上传状态
+      set(setImageUploadStateAtom, {
+        isUploading: false,
+        progress: 0,
+        uploadedUrls: []
+      });
+    } catch (error) {
+      console.error('处理图片时出错:', error);
+      
+      // 显示错误通知
+      set(showToastAtom, { 
+        message: '处理图片失败',
+        severity: 'error'
+      });
+    }
+  }
+);
+
+// 移除图片操作
+export const removeImage = atom(
+  null,
+  (get, set, params: { messageIndex: number, fileUrl: string }) => {
+    const { messageIndex, fileUrl } = params;
+    const chatState = get(chatAtom);
+    const imageUploadState = get(imageUploadAtom);
+    
+    // 更新消息中的uploadedFiles
+    set(chatAtom, {
+      ...chatState,
+      messages: removeUploadedFile(chatState.messages, messageIndex, fileUrl),
+      urls: chatState.urls.filter(url => url.url !== fileUrl)
+    });
+    
+    // 从imageUploadState中也移除URL
+    set(setImageUploadStateAtom, {
+      uploadedUrls: imageUploadState.uploadedUrls.filter(url => url !== fileUrl)
+    });
+  }
+);
+
+// 清空聊天操作
+export const clearChat = atom(
+  null,
+  (get, set) => {
+    const chatState = get(chatAtom);
+    set(chatAtom, {
+      ...chatState,
+      messages: [],
+      urls: []
+    });
+  }
+);
+
+// 更新用户信息
+export const setUserInfo = atom(
+  null,
+  (get, set, params: { uuid: string, walletAddress?: string }) => {
+    const { uuid, walletAddress } = params;
+    const chatState = get(chatAtom);
+    set(chatAtom, {
+      ...chatState,
+      userUuid: uuid,
+      walletAddress: walletAddress
+    });
+  }
+);
