@@ -1,10 +1,9 @@
 /* 消息容器 */
 .messageContainer {
-  max-width: 27rem; /* 432px */
+  max-width: 26.375rem; /* 422px */
   display: flex;
   flex-direction: column;
   gap: 0.625rem; /* 10px */
-  margin-bottom: 0.5rem; /* 8px */
 }
 
 /* 用户消息 */
@@ -181,7 +180,7 @@
 
 /* 已上传图片预览容器 */
 .uploadedImagesPreview {
-  width: 25.25rem; /* 404px */
+  width: 24.625rem; /* 404px */
   display: flex;
   flex-wrap: wrap;
   gap: 1rem; /* 16px */
@@ -229,7 +228,7 @@
 
 /* 进度指示器 */
 .progressIndicator {
-  width: 27rem; /* 432px */
+  width: 100%; /* 422px */
   height: 2.8125rem; /* 45px */
   display: flex;
   align-items: center;
@@ -238,7 +237,6 @@
   padding: 0.875rem; /* 14px */
   background: linear-gradient(90deg, rgba(31, 41, 55, 0.2) 0%, rgba(63, 79, 103, 0.2) 100%);
   border: 1px solid #3741514D;
-  margin-top: 0.5rem; /* 8px */
 }
 
 .statusIcon {
@@ -261,5 +259,33 @@
 .statusText {
   font-family: 'Jura', sans-serif;
   font-size: 0.875rem; /* 14px */
+  color: #9CA3AF;
+}
+
+/* 模型配置容器 */
+.modelConfigContainer {
+  width: 100%; /* 422px */
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem; /* 10px */
+  padding: 0.875rem; /* 14px */
+  border-radius: 0.5rem; /* 8px */
+  border: 1px solid #3741514D;
+  background: linear-gradient(90deg, rgba(31, 41, 55, 0.2) 0%, rgba(63, 79, 103, 0.2) 100%);
+}
+
+.modelConfigItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* 8px */
+}
+
+.modelConfigLabel, .modelConfigValue {
+  font-family: Jura;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
   color: #9CA3AF;
 } 

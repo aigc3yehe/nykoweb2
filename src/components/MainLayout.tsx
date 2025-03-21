@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Header from './Header';
 import ContentDisplay from './ContentDisplay';
 import ChatWindow from './ChatWindow';
-import { pxToRem, spacing } from '../utils';
+import { useAtom } from 'jotai';
+import { accountAtom } from '../store/accountStore';
 import styles from './MainLayout.module.css';
 
 const MainLayout: React.FC = () => {
@@ -12,33 +13,22 @@ const MainLayout: React.FC = () => {
     return 'user-' + Math.random().toString(36).substring(2, 15);
   }, []);
 
-  // 模拟用户登录状态
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  // 模拟用户信息
-  const userInfo = {
-    walletAddress: '0x1234567890abcdef1234',
-    credits: 1000000
-  };
-
-  // 切换登录状态的函数（用于测试两种UI状态）
-  const toggleLoginStatus = () => {
-    setIsLoggedIn(prev => !prev);
-  };
+  // 从accountStore获取用户信息
+  const [accountState] = useAtom(accountAtom);
+  const { isLoggedIn, walletAddress, twitter } = accountState;
 
   return (
     <div className={styles.mainLayout}>
-      <Header 
-        isLoggedIn={isLoggedIn} 
-        walletAddress={userInfo.walletAddress}
-        credits={userInfo.credits}
-      />
+      <Header />
       <div className={styles.contentContainer}>
         <div className={styles.contentSection}>
           <ContentDisplay />
         </div>
         <div className={styles.chatSection}>
-          <ChatWindow uuid={userUuid} />
+          <ChatWindow 
+            uuid={userUuid} 
+            walletAddress={twitter?.subject} 
+          />
         </div>
       </div>
     </div>

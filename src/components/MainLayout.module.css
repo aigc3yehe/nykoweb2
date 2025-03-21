@@ -18,7 +18,7 @@
 }
 
 .chatSection {
-  width: 29.375rem; /* 470px */
+  width: 29.5rem; /* 472px */
   border-left: 1px solid rgba(55, 65, 81, 0.3);
   overflow: auto;
 }

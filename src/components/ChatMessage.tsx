@@ -14,9 +14,13 @@ interface ImageUploadState {
 export interface ChatMessageProps {
   role: 'user' | 'assistant';
   content: string;
-  type?: 'text' | 'upload_image';
+  type?: 'text' | 'upload_image' | 'model_config';
   imageUploadState?: ImageUploadState;
   uploadedFiles?: Array<{name: string, url: string}>;
+  modelParam?: {
+    modelName?: string;
+    description?: string;
+  };
   onAddImage?: () => void;
   onConfirmImages?: () => void;
   onRemoveImage?: (url: string) => void;
@@ -28,18 +32,22 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   type = 'text',
   imageUploadState = { totalCount: 0, uploadedCount: 0, isUploading: false },
   uploadedFiles = [],
+  modelParam = { modelName: undefined, description: undefined },
   onAddImage,
   onConfirmImages,
   onRemoveImage
 }) => {
+  console.log('modelParam', modelParam);
+  console.log('content', content);
+  console.log('type', type);
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
-    if (name.length <= 15) return name;
+    if (name.length <= 9) return name;
     
     const extension = name.split('.').pop() || '';
     const baseName = name.substring(0, name.length - extension.length - 1);
     
-    return `${baseName.substring(0, 8)}...${baseName.substring(baseName.length - 2)}.${extension}`;
+    return `${baseName.substring(0, 3)}...${baseName.substring(baseName.length - 2)}.${extension}`;
   };
 
   const renderUploadImageComponent = () => {
@@ -110,6 +118,22 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
+  // 添加model_config渲染逻辑
+  const renderModelConfigComponent = () => {
+    return (
+      <div className={styles.modelConfigContainer}>
+        <div className={styles.modelConfigItem}>
+          <span className={styles.modelConfigLabel}>Model name: </span>
+          <span className={styles.modelConfigValue}>{modelParam?.modelName || '?'}</span>
+        </div>
+        <div className={styles.modelConfigItem}>
+          <span className={styles.modelConfigLabel}>Description: </span>
+          <span className={styles.modelConfigValue}>{modelParam?.description || '?'}</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={`${styles.messageContainer} ${styles[role]}`}>
       <div className={styles.messageContent}>
@@ -117,6 +141,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       </div>
       
       {role === 'assistant' && type === 'upload_image' && renderUploadImageComponent()}
+      {role === 'assistant' && type === 'model_config' && renderModelConfigComponent()}
     </div>
   );
 };

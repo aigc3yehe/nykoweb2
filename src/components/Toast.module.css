@@ -1,25 +1,26 @@
 .toast {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  min-width: 250px;
-  padding: 16px;
-  border-radius: 4px;
+  top: 1.25rem; /* 20px */
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 15.625rem; /* 250px */
+  padding: 1rem; /* 16px */
+  border-radius: 0.25rem; /* 4px */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 0.1875rem 0.375rem rgba(0, 0, 0, 0.16); /* 0 3px 6px */
   z-index: 1000;
-  animation: slideIn 0.3s ease-out;
+  animation: slideDown 0.3s ease-out;
 }
 
-@keyframes slideIn {
+@keyframes slideDown {
   from {
-    transform: translateX(100%);
+    transform: translate(-50%, -100%);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: translate(-50%, 0);
     opacity: 1;
   }
 }

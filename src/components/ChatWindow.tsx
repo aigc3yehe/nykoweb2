@@ -12,6 +12,7 @@ import {
   clearChat,
   setUserInfo 
 } from '../store/chatStore';
+import { dialogAtom, showDialogAtom } from '../store/dialogStore';
 
 interface ChatWindowProps {
   uuid: string;
@@ -25,6 +26,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, walletAddress }) => {
   const [, removeImageAction] = useAtom(removeImage);
   const [, clearChatAction] = useAtom(clearChat);
   const [, setUserInfoAction] = useAtom(setUserInfo);
+  const [, showDialog] = useAtom(showDialogAtom);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -38,6 +40,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, walletAddress }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatState.messages]);
 
+  const handleClearChat = () => {
+    showDialog({
+      open: true,
+      message: 'Delete Chat History?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: () => clearChatAction(),
+      onCancel: () => {},
+      confirmButtonColor: '#FF3C3D',
+      cancelButtonColor: '#6366F1'
+    });
+  };
+
   return (
     <div className={styles.chatWindow}>
       {/* 聊天标题栏 */}
@@ -48,7 +63,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, walletAddress }) => {
           </div>
           <span>you are chatting with Niyoko</span>
         </div>
-        <button className={styles.clearButton} onClick={clearChatAction}>
+        <button className={styles.clearButton} onClick={handleClearChat}>
           <img src={clearIcon} alt="Clear chat" />
         </button>
       </div>
@@ -68,6 +83,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, walletAddress }) => {
               type={message.type || 'text'}
               imageUploadState={message.imageUploadState}
               uploadedFiles={message.uploadedFiles}
+              modelParam={message.modelParam}
               onAddImage={() => addImageAction(index)}
               onConfirmImages={() => confirmImagesAction(index)}
               onRemoveImage={(url) => removeImageAction({ messageIndex: index, fileUrl: url })}

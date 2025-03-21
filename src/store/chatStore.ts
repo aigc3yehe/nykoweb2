@@ -4,13 +4,17 @@ import { imageUploadAtom, setImageUploadStateAtom, updateMessageUrlsAtom, showTo
 export interface Message {
   role: string;
   content: string;
-  type?: 'text' | 'upload_image';
+  type?: 'text' | 'upload_image' | 'model_config';
   imageUploadState?: {
     totalCount: number;
     uploadedCount: number;
     isUploading: boolean;
   };
   uploadedFiles?: Array<{name: string, url: string}>;
+  modelParam?: {
+    modelName?: string;
+    description?: string;
+  }
 }
 
 export interface ChatState {
@@ -21,6 +25,10 @@ export interface ChatState {
   walletAddress?: string;
   urls: Array<{name: string, url: string}>;
   task_type?: string;
+  modelParam?: {
+    modelName?: string;
+    description?: string;
+  }
 }
 
 // 初始状态
@@ -31,7 +39,8 @@ const initialState: ChatState = {
   userUuid: '',
   walletAddress: '',
   urls: [],
-  task_type: 'chat'
+  task_type: 'chat',
+  modelParam: undefined
 };
 
 // 创建原子状态
@@ -150,6 +159,7 @@ export const sendMessage = atom(
       const status = response.status;
       const content = response.content;
       const task_type = response.task_type;
+      const model = response.model; // 获取model字段
       
       // 处理API响应
       if (status === 'error') {
@@ -172,11 +182,39 @@ export const sendMessage = atom(
       };
 
       // 更新消息历史
+      const updatedMessages = [...chatState.messages, userMessage, receivedMessage];
+      
+      // 如果返回了model信息，更新model_config消息和chatAtom的modelParam
+      let finalMessages = updatedMessages;
+      let updatedModelParam = chatState.modelParam;
+      
+      if (model && model.name && model.description) {
+        const modelParam = {
+          modelName: model.name,
+          description: model.description
+        };
+        
+        // 更新modelParam
+        updatedModelParam = modelParam;
+        
+        // 查找并更新model_config消息
+        finalMessages = updatedMessages.map(msg => {
+          if (msg.type === 'model_config') {
+            return {
+              ...msg,
+              modelParam
+            };
+          }
+          return msg;
+        });
+      }
+      
       set(chatAtom, {
         ...chatState,
-        messages: [...chatState.messages, userMessage, receivedMessage],
+        messages: finalMessages,
         isLoading: false,
-        task_type: task_type
+        task_type: task_type,
+        modelParam: updatedModelParam
       });
     } catch (error) {
       console.error('发送消息时出错:', error);
@@ -195,7 +233,49 @@ export const sendMessage = atom(
   }
 );
 
-// 添加图片操作
+// 添加检查图片数量并添加model_config消息的功能
+export function checkAndAddModelConfigMessage(messages: Message[]): Message[] {
+  // 找到upload_image类型的消息
+  const uploadImageMsgIndex = messages.findIndex(msg => msg.type === 'upload_image');
+  if (uploadImageMsgIndex === -1) return messages;
+  
+  const uploadImageMsg = messages[uploadImageMsgIndex];
+  const hasEnoughImages = uploadImageMsg.uploadedFiles && uploadImageMsg.uploadedFiles.length >= 10;
+  
+  // 检查是否已有model_config消息
+  const hasModelConfigMsg = messages.some((msg, index) => 
+    msg.type === 'model_config' && index === uploadImageMsgIndex + 1
+  );
+  
+  if (hasEnoughImages && !hasModelConfigMsg) {
+    // 需要添加model_config消息
+    const modelConfigMsg: Message = {
+      role: 'assistant',
+      content: 'Okay, give your model a name and description.',
+      type: 'model_config',
+      modelParam: {
+        modelName: messages[0]?.modelParam?.modelName || undefined,
+        description: messages[0]?.modelParam?.description || undefined
+      }
+    };
+    
+    // 插入model_config消息到upload_image消息后面
+    return [
+      ...messages.slice(0, uploadImageMsgIndex + 1),
+      modelConfigMsg,
+      ...messages.slice(uploadImageMsgIndex + 1)
+    ];
+  } else if (!hasEnoughImages && hasModelConfigMsg) {
+    // 需要移除model_config消息
+    return messages.filter((msg, index) => 
+      !(msg.type === 'model_config' && index === uploadImageMsgIndex + 1)
+    );
+  }
+  
+  return messages;
+}
+
+// 修改addImage函数来处理model_config消息
 export const addImage = atom(
   null,
   async (get, set, messageIndex: number) => {
@@ -273,11 +353,14 @@ export const addImage = atom(
           ];
           
           const finalChatState = get(chatAtom);
+
+          const updatedMessages = updateUploadedFiles(finalChatState.messages, messageIndex, newUploadedFiles);
+          // 检查图片数量并处理model_config消息
+          const finalMessages = checkAndAddModelConfigMessage(updatedMessages);
           
-          // 更新消息的uploadedFiles
           set(chatAtom, {
             ...finalChatState,
-            messages: updateUploadedFiles(finalChatState.messages, messageIndex, newUploadedFiles),
+            messages: finalMessages,
             urls: newUploadedFiles
           });
         }
@@ -369,10 +452,36 @@ export const confirmImages = atom(
         throw new Error(response.content || '处理图片时出错');
       }
       
+      // 检查是否有model信息
+      let updatedModelParam = chatState.modelParam;
+      let updatedMessages = response.conversation.map((msg: Message) => msg);
+      
+      if (response.model && response.model.name && response.model.description) {
+        const modelParam = {
+          modelName: response.model.name,
+          description: response.model.description
+        };
+        
+        // 更新modelParam
+        updatedModelParam = modelParam;
+        
+        // 查找并更新model_config消息
+        updatedMessages = updatedMessages.map(msg => {
+          if (msg.type === 'model_config') {
+            return {
+              ...msg,
+              modelParam
+            };
+          }
+          return msg;
+        });
+      }
+      
       // 更新消息历史
       set(chatAtom, {
         ...chatState,
-        messages: response.conversation.map((msg: Message) => msg)
+        messages: updatedMessages,
+        modelParam: updatedModelParam
       });
       
       // 清空上传状态
@@ -393,7 +502,7 @@ export const confirmImages = atom(
   }
 );
 
-// 移除图片操作
+// 修改removeImage函数来处理model_config消息
 export const removeImage = atom(
   null,
   (get, set, params: { messageIndex: number, fileUrl: string }) => {
@@ -402,9 +511,14 @@ export const removeImage = atom(
     const imageUploadState = get(imageUploadAtom);
     
     // 更新消息中的uploadedFiles
+    const updatedMessages = removeUploadedFile(chatState.messages, messageIndex, fileUrl);
+    
+    // 检查图片数量并处理model_config消息
+    const finalMessages = checkAndAddModelConfigMessage(updatedMessages);
+    
     set(chatAtom, {
       ...chatState,
-      messages: removeUploadedFile(chatState.messages, messageIndex, fileUrl),
+      messages: finalMessages,
       urls: chatState.urls.filter(url => url.url !== fileUrl)
     });
     
@@ -423,7 +537,9 @@ export const clearChat = atom(
     set(chatAtom, {
       ...chatState,
       messages: [],
-      urls: []
+      urls: [],
+      task_type: 'chat',
+      modelParam: undefined
     });
   }
 );
