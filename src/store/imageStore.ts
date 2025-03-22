@@ -230,4 +230,49 @@ export const resetImageList = atom(
   (get, set) => {
     set(imageListAtom, initialState);
   }
-); 
+);
+
+// 定义详细图片信息接口
+export interface ImageDetail {
+  models: {
+    id: number;
+    name: string;
+  };
+  users: {
+    did: string;
+    twitter: Twitter | null;
+  };
+  url: string;
+  task_id: string;
+  created_at: string;
+  height: number;
+  width: number;
+  state: number;
+}
+
+// 获取图片详情
+export const fetchImageDetail = async (imageId: number): Promise<ImageDetail> => {
+  try {
+    
+    const response = await fetch(`/studio-api/aigc/image?image_id=${imageId}`, {
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`获取图片详情失败: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    
+    if (!result.data) {
+      throw new Error('图片详情数据格式无效');
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error('获取图片详情出错:', error);
+    throw error;
+  }
+}; 

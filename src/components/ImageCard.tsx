@@ -2,12 +2,16 @@ import React from 'react';
 import styles from './ImageCard.module.css';
 import { Image } from '../store/imageStore';
 import avatarSvg from '../assets/Avatar.svg';
+import { useSetAtom } from 'jotai';
+import { openImageDetails } from '../store/modalStore';
 
 interface ImageCardProps {
   image: Image;
 }
 
 const ImageCard: React.FC<ImageCardProps> = ({ image }) => {
+  const handleOpenImageDetails = useSetAtom(openImageDetails);
+  
   // 获取图片状态
   const getImageState = (state: number) => {
     switch (state) {
@@ -53,8 +57,15 @@ const ImageCard: React.FC<ImageCardProps> = ({ image }) => {
     }
   };
 
+  // 只有当图片有URL时才能点击查看详情
+  const handleImageClick = () => {
+    if (image.url) {
+      handleOpenImageDetails(image);
+    }
+  };
+
   return (
-    <div className={styles.imageCard}>
+    <div className={styles.imageCard} onClick={handleImageClick}>
       <div className={styles.imageContainer}>
         {image.url ? (
           <img src={image.url} alt={`图片 ${image.id}`} className={styles.image} />
@@ -79,7 +90,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image }) => {
           <div className={styles.creatorInfo}>
             <img 
               src={getAvatarUrl()} 
-              alt="Creator Avatar" 
+              alt="Twitter Avatar" 
               className={styles.creatorAvatar}
               onError={(e) => {
                 (e.target as HTMLImageElement).src = avatarSvg;
