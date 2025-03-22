@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
 import { accountAtom } from './accountStore';
+import { Twitter } from './imageStore'; // 导入Twitter接口
 
 // 定义Model接口
 export interface Model {
@@ -16,7 +17,7 @@ export interface Model {
     train_state: number; // 0: 未开始, 1: 训练中, 2: 训练完成，-1: 训练失败
   }[];
   users: {
-    twitter: string | null;
+    twitter: Twitter | null;
     address: string | null;
   };
 }

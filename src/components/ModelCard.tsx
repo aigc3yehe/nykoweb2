@@ -33,6 +33,30 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
   // 检查是否已完成训练
   const isCompleted = model.model_tran[0]?.train_state === 2;
 
+  // 获取Twitter显示名称
+  const getDisplayName = () => {
+    if (model.users.twitter?.name) {
+      return model.users.twitter.name;
+    } else if (model.users.twitter?.username) {
+      return model.users.twitter.username;
+    } else {
+      // 如果没有Twitter信息，显示缩略的钱包地址
+      return model.creator.substring(0, 6) + '...' + model.creator.substring(model.creator.length - 4);
+    }
+  };
+
+  // 获取头像URL
+  const getAvatarUrl = () => {
+    if (model.users.twitter?.profilePictureUrl) {
+      return model.users.twitter.profilePictureUrl;
+    } else if (model.users.twitter?.username) {
+      // 备用方案：如果有username但没有profilePictureUrl，使用第三方服务
+      return `https://unavatar.io/twitter/${model.users.twitter.username}`;
+    } else {
+      return avatarSvg;
+    }
+  };
+
   return (
     <div className={styles.modelCard}>
       <div className={styles.modelCover}>
@@ -59,20 +83,16 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
         
         <div className={styles.modelMeta}>
           <div className={styles.twitterInfo}>
-            {model.users.twitter ? (
-              <img 
-                src={`https://unavatar.io/twitter/${model.users.twitter}`} 
-                alt="Twitter Avatar" 
-                className={styles.twitterAvatar}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = avatarSvg;
-                }}
-              />
-            ) : (
-              <img src={avatarSvg} alt="Default Avatar" className={styles.twitterAvatar} />
-            )}
+            <img 
+              src={getAvatarUrl()} 
+              alt="Avatar" 
+              className={styles.twitterAvatar}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = avatarSvg;
+              }}
+            />
             <span className={styles.twitterName}>
-              {model.users.twitter || model.creator.substring(0, 6) + '...' + model.creator.substring(model.creator.length - 4)}
+              {getDisplayName()}
             </span>
           </div>
           
