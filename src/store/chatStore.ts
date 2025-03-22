@@ -37,7 +37,7 @@ const initialState: ChatState = {
   isLoading: false,
   error: null,
   userUuid: '',
-  walletAddress: '',
+  walletAddress: '0x4272e3150A81B9735ccc58692f5dd3Cf73fB3B92', // 测试钱包地址
   urls: [],
   task_type: 'chat',
   modelParam: undefined
@@ -164,6 +164,11 @@ export const sendMessage = atom(
       // 处理API响应
       if (status === 'error') {
         throw new Error(content || '发送消息时出错');
+      }
+
+      // 如果status为Completed, 则代表创建训练模型任务完成
+      if (status === 'Completed') {
+        console.log('训练模型任务完成');
       }
 
       // 根据status的类型，更新消息的类型

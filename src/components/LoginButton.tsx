@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLoginWithOAuth, usePrivy } from '@privy-io/react-auth';
 import styles from './LoginButton.module.css';
-import twitterIcon from '../assets/twitter-icon.svg'; // 确保有此资源或替换为合适的图标
 import GoldIcon from '../assets/gold.svg';
 import { useAtom } from 'jotai';
 import { accountAtom } from '../store/accountStore';
@@ -13,7 +12,7 @@ interface LoginButtonProps {
 const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
   const { login, authenticated, logout } = usePrivy();
   const [accountState] = useAtom(accountAtom);
-  const { walletAddress, credits } = accountState;
+  const { walletAddress, credits, twitter } = accountState;
   const { initOAuth, loading } = useLoginWithOAuth({
     onComplete: ({ user, isNewUser }) => {
       console.log('登录成功', user);
@@ -65,6 +64,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
         {/* 账户显示 */}
         <div className={styles.accountContainer}>
           <img src={GoldIcon} alt="Account" width="16" height="16" />
+          <img src={twitter?.profilePictureUrl || ''} alt="Twitter Avatar" className={styles.avatarIcon} />
           <span className={styles.accountAddress}>{formatAddress(walletAddress)}</span>
         </div>
         

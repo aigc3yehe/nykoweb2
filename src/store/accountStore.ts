@@ -1,9 +1,10 @@
 import { atom } from 'jotai';
-import { User, Twitter } from '@privy-io/react-auth';
+import { User, Twitter, Google } from '@privy-io/react-auth';
 
 export interface AccountState {
   user: User | null;
   twitter: Twitter | null;
+  google: Google | null;
   walletAddress: string | null;
   isLoading: boolean;
   isLoggedIn: boolean;
@@ -15,7 +16,8 @@ export interface AccountState {
 const initialState: AccountState = {
   user: null,
   twitter: null,
-  walletAddress: null,
+  google: null,
+  walletAddress: '0x4272e3150A81B9735ccc58692f5dd3Cf73fB3B92', // 测试钱包地址
   isLoading: false,
   isLoggedIn: false,
   error: null,
@@ -35,6 +37,7 @@ export const setUser = atom(
       ...state,
       user,
       twitter: user?.twitter || null,
+      google: user?.google || null,
       isLoggedIn: !!user,
       // 如果用户有嵌入式钱包，更新钱包地址
       walletAddress: user?.wallet?.address || state.walletAddress

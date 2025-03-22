@@ -47,10 +47,8 @@ const PrivyAuthProvider: React.FC<PrivyAuthProviderProps> = ({ children }) => {
       config={{
         // 配置自动创建钱包
         embeddedWallets: {
-          ethereum: { 
-              createOnLogin: 'users-without-wallets',
-          }, 
-      },
+           createOnLogin: 'all-users',
+        },
         // 自定义登录外观
         appearance: {
           theme: 'dark',

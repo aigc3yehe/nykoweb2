@@ -27,7 +27,7 @@ const MainLayout: React.FC = () => {
         <div className={styles.chatSection}>
           <ChatWindow 
             uuid={userUuid} 
-            walletAddress={twitter?.subject} 
+            walletAddress={walletAddress || undefined} 
           />
         </div>
       </div>

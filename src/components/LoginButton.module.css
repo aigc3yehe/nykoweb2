@@ -151,4 +151,12 @@
 
 .logoutButton:hover {
   background: rgba(239, 68, 68, 0.2); /* 加深的透明红色 */
+}
+
+.avatarIcon {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 1rem;
+  background: #374151;
+  border: 1px solid rgba(255, 255, 255, 0.5);
 } 
