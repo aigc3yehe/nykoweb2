@@ -1,26 +1,29 @@
 .mainLayout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh; /* 使用固定视口高度而不是最小高度 */
   width: 100%;
+  overflow: hidden; /* 防止整个布局滚动 */
 }
 
 .contentContainer {
   display: flex;
   flex: 1;
   width: 100%;
+  overflow: hidden; /* 防止容器滚动 */
 }
 
 .contentSection {
   flex: 1;
-  overflow: auto;
   width: 100%;
+  height: 100%;
+  overflow: hidden; /* 修改为hidden，防止内容溢出 */
 }
 
 .chatSection {
   width: 29.5rem; /* 472px */
   border-left: 1px solid rgba(55, 65, 81, 0.3);
-  overflow: auto;
+  overflow: auto; /* 保持聊天部分可滚动 */
 }
 
 @media (max-width: 768px) {

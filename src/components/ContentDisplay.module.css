@@ -6,7 +6,7 @@
   padding: 0.75rem 0 0.75rem 0; /* 12px 0px 12px 0px */
   position: relative;
   height: 100%;
-  overflow: hidden;
+  overflow: hidden; /* 防止内容溢出导致页面滚动 */
   background-image: url('/image_grid_bg.png');
   background-position: top left;
   background-repeat: repeat-y;
@@ -18,6 +18,8 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem; /* 24px */
+  height: 100%; /* 确保容器填充整个高度 */
+  overflow: hidden; /* 添加overflow:hidden */
 }
 
 .contentHeader {
@@ -99,6 +101,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: calc(100% - 2.5rem); /* 减去header的高度 */
+  min-height: 20rem; /* 设置最小高度 */
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 .placeholder {
