@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './ContentHeader.module.css';
 import dropdownIcon from '../assets/dropdown.svg';
+import backIcon from '../assets/back.svg';
 
 interface ContentHeaderProps {
   activeTab: 'models' | 'images';
@@ -9,6 +10,9 @@ interface ContentHeaderProps {
   setOwnedOnly: (owned: boolean) => void;
   sortOption: 'New Model' | 'MKT CAP' | 'Popular';
   setSortOption: (option: 'New Model' | 'MKT CAP' | 'Popular') => void;
+  isDetailMode?: boolean;
+  modelName?: string;
+  onBackClick?: () => void;
 }
 
 const ContentHeader: React.FC<ContentHeaderProps> = ({
@@ -17,7 +21,10 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   ownedOnly,
   setOwnedOnly,
   sortOption,
-  setSortOption
+  setSortOption,
+  isDetailMode = false,
+  modelName = '',
+  onBackClick
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -35,6 +42,21 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
     };
   }, []);
 
+  // 如果是详情模式，显示返回导航
+  if (isDetailMode) {
+    return (
+      <div className={styles.contentHeader}>
+        <div className={styles.detailNavigation} onClick={onBackClick}>
+          <img src={backIcon} alt="Back" className={styles.backIcon} />
+          <span className={styles.modelsLabel}>Models</span>
+          <div className={styles.divider}></div>
+          <span className={styles.modelName}>{modelName}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // 正常模式显示标签和控制
   return (
     <div className={styles.contentHeader}>
       <div className={styles.tabGroup}>

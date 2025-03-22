@@ -32,6 +32,12 @@
 .modelCardContainer {
   width: 13.9375rem; /* 223px */
   height: 18.5625rem; /* 297px */
+  cursor: pointer;
+}
+
+.modelCardContainer:hover {
+  transform: translateY(-4px);
+  transition: transform 0.2s ease;
 }
 
 .noModels {

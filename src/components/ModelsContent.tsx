@@ -8,9 +8,10 @@ import ModelCard from './ModelCard';
 interface ModelsContentProps {
   ownedOnly: boolean;
   sortOption: 'New Model' | 'MKT CAP' | 'Popular';
+  onModelClick: (modelId: number) => void;
 }
 
-const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption }) => {
+const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, onModelClick }) => {
   const [modelListState] = useAtom(modelListAtom);
   const fetchModelsList = useSetAtom(fetchModels);
   const [accountState] = useAtom(accountAtom);
@@ -66,13 +67,22 @@ const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption }) 
           {filteredModels.map((model, index) => {
             if (index === filteredModels.length - 1) {
               return (
-                <div ref={lastModelElementRef} key={model.id} className={styles.modelCardContainer}>
+                <div 
+                  ref={lastModelElementRef} 
+                  key={model.id} 
+                  className={styles.modelCardContainer}
+                  onClick={() => onModelClick(model.id)}
+                >
                   <ModelCard model={model} />
                 </div>
               );
             } else {
               return (
-                <div key={model.id} className={styles.modelCardContainer}>
+                <div 
+                  key={model.id} 
+                  className={styles.modelCardContainer}
+                  onClick={() => onModelClick(model.id)}
+                >
                   <ModelCard model={model} />
                 </div>
               );

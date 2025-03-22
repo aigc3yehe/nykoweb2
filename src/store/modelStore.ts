@@ -15,6 +15,10 @@ export interface Model {
   model_tran: {
     version: number;
     train_state: number; // 0: 未开始, 1: 训练中, 2: 训练完成，-1: 训练失败
+    task_id: string | null; // 任务ID
+    lora_name: string | null; // Lora名称
+    base_model: string | null; // 基础模型
+    base_model_hash: string | null; // 基础模型哈希
   }[];
   users: {
     twitter: Twitter | null;
@@ -168,5 +172,81 @@ export const resetModelList = atom(
   null,
   (get, set) => {
     set(modelListAtom, initialState);
+  }
+);
+
+// 定义模型详情接口
+export interface ModelDetail extends Model {
+  carousel: string[];
+  created_at: string;
+  model_vote: {
+    like: number;
+    dislike: number;
+    state: number;
+  };
+}
+
+// 创建模型详情状态原子
+interface ModelDetailState {
+  currentModel: ModelDetail | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+const initialDetailState: ModelDetailState = {
+  currentModel: null,
+  isLoading: false,
+  error: null
+};
+
+export const modelDetailAtom = atom<ModelDetailState>(initialDetailState);
+
+// 获取模型详情
+export const fetchModelDetail = atom(
+  null,
+  async (get, set, modelId: number) => {
+    set(modelDetailAtom, {
+      ...get(modelDetailAtom),
+      isLoading: true,
+      error: null
+    });
+    
+    try {
+      const response = await fetch(`/studio-api/model/detail?id=${modelId}`, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('获取模型详情失败');
+      }
+      
+      const result = await response.json();
+      
+      set(modelDetailAtom, {
+        currentModel: result.data,
+        isLoading: false,
+        error: null
+      });
+      
+      return result.data;
+    } catch (error) {
+      set(modelDetailAtom, {
+        ...get(modelDetailAtom),
+        isLoading: false,
+        error: (error as Error).message
+      });
+      
+      throw error;
+    }
+  }
+);
+
+// 清除模型详情
+export const clearModelDetail = atom(
+  null,
+  (get, set) => {
+    set(modelDetailAtom, initialDetailState);
   }
 ); 
