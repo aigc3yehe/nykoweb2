@@ -1,4 +1,6 @@
 import React from 'react';
+import { useAtom } from 'jotai';
+import { accountAtom } from '../store/accountStore';
 import styles from './ModelInfoPanel.module.css';
 import avatarSvg from '../assets/Avatar.svg';
 import twitterSvg from '../assets/twitter.svg';
@@ -13,6 +15,11 @@ interface ModelInfoPanelProps {
 }
 
 const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
+  const [accountState] = useAtom(accountAtom);
+  
+  // 检查当前用户是否是模型创建者
+  const isModelOwner = accountState.did === model.creator;
+  
   // 获取Twitter显示名称
   const getDisplayName = () => {
     if (model.users.twitter?.name) {
@@ -66,17 +73,17 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   
   const handleGenerate = () => {
     console.log('Generate with model:', model.id);
-    // 这里实现生成功能
+    // 实现生成功能
   };
   
   const handleShare = () => {
     console.log('Share model:', model.id);
-    // 这里实现分享功能
+    // 实现分享功能
   };
   
   const handleMintCoin = () => {
     console.log('Mint coin for model:', model.id);
-    // 这里实现发币功能
+    // 实现发币功能
   };
   
   return (
@@ -154,13 +161,15 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
             
-            {/* 发币按钮 */}
-            <button 
-              className={styles.mintButton} 
-              onClick={handleMintCoin}
-            >
-              <img src={coinsSvg} alt="Mint" className={styles.buttonIcon} />
-            </button>
+            {/* 发币按钮 - 仅当用户是模型创建者时显示 */}
+            {isModelOwner && (
+              <button 
+                className={styles.mintButton} 
+                onClick={handleMintCoin}
+              >
+                <img src={coinsSvg} alt="Mint" className={styles.buttonIcon} />
+              </button>
+            )}
           </>
         ) : (
           <>

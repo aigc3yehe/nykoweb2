@@ -32,6 +32,7 @@ const PrivyAuthManager: React.FC<React.PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     // 当钱包信息发生变化时，更新钱包地址
     if (wallet?.address) {
+      console.log('wallet.address', wallet.address);
       setWalletAddressAction(wallet.address);
     }
   }, [wallet, setWalletAddressAction]);
