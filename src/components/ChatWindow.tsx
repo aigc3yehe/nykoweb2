@@ -15,10 +15,10 @@ import { dialogAtom, showDialogAtom } from '../store/dialogStore';
 
 interface ChatWindowProps {
   uuid: string;
-  walletAddress?: string;
+  did?: string;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, walletAddress }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
   const [chatState] = useAtom(chatAtom);
   const [, addImageAction] = useAtom(addImage);
   const [, removeImageAction] = useAtom(removeImage);
@@ -30,8 +30,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, walletAddress }) => {
 
   // 设置用户ID
   useEffect(() => {
-    setUserInfoAction({ uuid, walletAddress });
-  }, [uuid, walletAddress, setUserInfoAction]);
+    setUserInfoAction({ uuid, did });
+  }, [uuid, did, setUserInfoAction]);
 
   useEffect(() => {
     // 滚动到最新消息

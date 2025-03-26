@@ -1,20 +1,23 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useLoginWithOAuth, usePrivy } from '@privy-io/react-auth';
 import styles from './LoginButton.module.css';
 import GoldIcon from '../assets/gold.svg';
 import { useAtom, useSetAtom } from 'jotai';
 import { accountAtom, setUser } from '../store/accountStore';
 import { createUser } from '../services/userService';
+import { showAccountPopupAtom } from '../store/accountPopupStore';
 
 interface LoginButtonProps {
   className?: string;
 }
 
 const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
-  const { login, authenticated, logout } = usePrivy();
+  const { authenticated } = usePrivy();
   const [accountState] = useAtom(accountAtom);
   const { walletAddress, credits, twitter } = accountState;
   const setUserData = useSetAtom(setUser);
+  const showAccountPopup = useSetAtom(showAccountPopupAtom);
+  const accountRef = useRef<HTMLDivElement>(null);
   
   const { initOAuth, loading } = useLoginWithOAuth({
     onComplete: async ({ user, isNewUser }) => {
@@ -34,6 +37,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
           };
           
           // 调用创建用户API
+          // @ts-ignore
           await createUser(userData);
           console.log('用户创建/更新成功');
           
@@ -66,6 +70,10 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
     return new Intl.NumberFormat().format(num);
   };
 
+  const logout = () => {
+    console.log("logout success")
+  }
+
   const handleLogin = async () => {
     try {
       // 使用Twitter作为OAuth提供者
@@ -73,6 +81,24 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
     } catch (error) {
       console.error('启动Twitter登录时出错:', error);
     }
+  };
+
+  // 处理账户点击
+  const handleAccountClick = () => {
+    // 获取当前元素位置
+    const position = accountRef.current?.getBoundingClientRect() || null;
+    
+    // 显示弹窗
+    showAccountPopup({
+      userData: {
+        name: twitter?.name || undefined,
+        username: twitter?.username || undefined,
+        profilePictureUrl: twitter?.profilePictureUrl || undefined,
+        walletAddress: walletAddress || undefined
+      },
+      anchorPosition: position,
+      onLogout: logout
+    });
   };
 
   // 用户已登录，显示账户信息
@@ -86,18 +112,15 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
         </div>
         
         {/* 账户显示 */}
-        <div className={styles.accountContainer}>
+        <div 
+          ref={accountRef}
+          className={styles.accountContainer} 
+          onClick={handleAccountClick}
+        >
           <img src={GoldIcon} alt="Account" width="16" height="16" />
           <img src={twitter?.profilePictureUrl || ''} alt="Twitter Avatar" className={styles.avatarIcon} />
           <span className={styles.accountAddress}>{formatAddress(walletAddress)}</span>
         </div>
-        
-        <button 
-          className={`${styles.logoutButton} ${className}`} 
-          onClick={logout}
-        >
-          Logout
-        </button>
       </div>
     );
   }

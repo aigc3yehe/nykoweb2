@@ -1,0 +1,270 @@
+/* 全屏遮罩层 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75); /* #000000BF */
+  display: flex;
+  z-index: 1000;
+}
+
+/* 账户弹窗样式 */
+.accountPopup {
+  width: 24.625rem; /* 394px */
+  height: 22.9375rem; /* 367px */
+  border-radius: 0.75rem; /* 12px */
+  background: linear-gradient(360deg, #181E31 0%, #0E111B 35.75%);
+  border: 1px solid rgba(55, 65, 81, 0.3);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* 用户信息容器 */
+.userInfoContainer {
+  width: 100%;
+  height: 5.125rem; /* 82px */
+  padding: 1rem 0.875rem; /* 16px 14px */
+  border-top-left-radius: 0.75rem; /* 12px */
+  border-top-right-radius: 0.75rem; /* 12px */
+  background: linear-gradient(90deg, rgba(31, 41, 55, 0.2) 0%, rgba(63, 79, 103, 0.2) 100%);
+  border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+}
+
+.userInfoContent {
+  width: 22.875rem; /* 366px */
+  height: 3.125rem; /* 50px */
+  display: flex;
+  gap: 0.75rem; /* 12px */
+  align-items: center;
+}
+
+.popupAvatar {
+  width: 3rem; /* 48px */
+  height: 3rem; /* 48px */
+  border-radius: 6.25rem; /* 100px */
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.userDetails {
+  width: 19.125rem; /* 306px */
+  height: 3.125rem; /* 50px */
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem; /* 2px */
+  justify-content: center;
+}
+
+.userNameRow {
+  width: 100%;
+  height: 1.5rem; /* 24px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.userNameContainer {
+  width: 12.875rem; /* 206px */
+  height: 1.5rem; /* 24px */
+  display: flex;
+  gap: 0.5rem; /* 8px */
+  align-items: center;
+}
+
+.userName {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 5%;
+  color: #FFFFFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.premiumBadge {
+  width: 5.5625rem; /* 89px */
+  height: 1.375rem; /* 22px */
+  border-radius: 6.25rem; /* 100px */
+  gap: 0.5rem; /* 8px */
+  padding: 0.25rem 0.5rem; /* 4px 8px */
+  background: rgba(250, 204, 21, 0.1);
+  display: flex;
+  align-items: center;
+}
+
+.premiumText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem; /* 12px */
+  line-height: 100%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  color: #FACC15;
+}
+
+.closeButton {
+  width: 1.5rem; /* 24px */
+  height: 1.5rem; /* 24px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.walletAddressRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.walletAddress {
+  font-family: 'Jura', sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0;
+  text-transform: capitalize;
+  color: #88A4C2;
+}
+
+.copyButton {
+  width: 1.25rem; /* 20px */
+  height: 1.25rem; /* 20px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* 标签页容器 */
+.tabsContainer {
+  width: 100%;
+  height: 2.9375rem; /* 47px */
+  display: flex;
+  gap: 1.25rem; /* 20px */
+  padding: 0.75rem 1.25rem 0; /* 12px 20px 0 */
+  border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+}
+
+.tabButton {
+  height: 2.1875rem; /* 35px */
+  padding: 0.5rem 0; /* 8px 0 */
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  text-transform: capitalize;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #FFFFFF; /* 未选中为白色 */
+}
+
+.activeTab {
+  border-bottom: 2px solid #6366F1;
+  color: #6366F1; /* 选中的颜色为#6366F1 */
+}
+
+/* 内容区域 */
+.contentContainer {
+  width: 100%;
+  height: 9rem; /* 144px */
+  padding: 1.25rem; /* 20px */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.assetsContent, .activityContent {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 导出按钮区域 */
+.exportContainer {
+  width: 100%;
+  height: 2.9375rem; /* 47px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.25rem; /* 0 20px */
+  border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+  cursor: pointer;
+}
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* 4px */
+  padding: 0.875rem 0; /* 14px 0 */
+  height: 2.9375rem; /* 47px */
+}
+
+.exportText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #6366F1; /* 导出按钮文字颜色 */
+}
+
+/* 添加禁用状态样式 */
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* 登出按钮区域 */
+.logoutContainer {
+  width: 100%;
+  height: 2.9375rem; /* 47px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.25rem; /* 0 20px */
+  cursor: pointer;
+}
+
+.logoutText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #FF3C3D; /* 登出按钮文字颜色 */
+}
+
+.sectionText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #FFFFFF;
+}

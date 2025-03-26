@@ -15,7 +15,7 @@ const MainLayout: React.FC = () => {
 
   // 从accountStore获取用户信息
   const [accountState] = useAtom(accountAtom);
-  const { isLoggedIn, walletAddress, twitter } = accountState;
+  const { did } = accountState;
 
   return (
     <div className={styles.mainLayout}>
@@ -27,7 +27,7 @@ const MainLayout: React.FC = () => {
         <div className={styles.chatSection}>
           <ChatWindow 
             uuid={userUuid} 
-            walletAddress={walletAddress || undefined} 
+            did={did || undefined} 
           />
         </div>
       </div>

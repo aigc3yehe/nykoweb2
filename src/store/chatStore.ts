@@ -18,10 +18,22 @@ export const aspectRatios: AspectRatio[] = [
   { label: '16:9', value: '16:9', width: 1920, height: 1080 },
 ];
 
+// 任务状态类型
+export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
+
+// 任务信息类型
+export interface TaskInfo {
+  taskId: string;
+  status: TaskStatus;
+  checkCount: number;
+  lastCheck: number;
+  generatedImages?: string[];
+}
+
 export interface Message {
   role: string;
   content: string;
-  type?: 'text' | 'upload_image' | 'model_config';
+  type?: 'text' | 'upload_image' | 'model_config' | 'generate_result';
   imageUploadState?: {
     totalCount: number;
     uploadedCount: number;
@@ -32,6 +44,8 @@ export interface Message {
     modelName?: string;
     description?: string;
   }
+  request_id?: string;
+  images?: string[];
 }
 
 export interface ChatState {
@@ -39,7 +53,7 @@ export interface ChatState {
   isLoading: boolean;
   error: string | null;
   userUuid: string;
-  walletAddress?: string;
+  did?: string;
   urls: Array<{name: string, url: string}>;
   task_type?: string;
   modelParam?: {
@@ -48,6 +62,7 @@ export interface ChatState {
   };
   currentModel?: ModelDetail | null;
   selectedAspectRatio?: AspectRatio; // 添加选中的宽高比
+  activeTasks: Record<string, TaskInfo>; // 跟踪活动任务
 }
 
 // 初始状态
@@ -56,16 +71,375 @@ const initialState: ChatState = {
   isLoading: false,
   error: null,
   userUuid: '',
-  walletAddress: '0x4272e3150A81B9735ccc58692f5dd3Cf73fB3B92', // 测试钱包地址
+  did: '0x4272e3150A81B9735ccc58692f5dd3Cf73fB3B92', // 测试privy did
   urls: [],
   task_type: 'chat',
   modelParam: undefined,
   currentModel: null,
-  selectedAspectRatio: aspectRatios[0] // 默认选择1:1
+  selectedAspectRatio: aspectRatios[0], // 默认选择1:1
+  activeTasks: {} // 初始化活动任务记录
 };
 
 // 创建原子状态
 export const chatAtom = atom<ChatState>(initialState);
+
+// 图片生成状态检查接口响应类型
+export type CheckStatsResponse = {
+  data?: {
+    id?: string;
+    status?: string;  // completed 时为完成
+    date_created?: string;
+    upscaled_urls?: string[];
+  };
+};
+
+// 查询图片生成状态的API
+export async function checkImageGenerationStatus(request_id: string): Promise<CheckStatsResponse> {
+  try {
+    const response = await fetch(`/studio-api/model/aigc/state?task_id=${request_id}&refreshState=true`, {
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Status check failed with status code ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('查询图片生成状态出错:', error);
+    throw error;
+  }
+}
+
+// 添加图片生成任务
+export const addImageGenerationTask = atom(
+  null,
+  (get, set, taskId: string) => {
+    console.log('===== addImageGenerationTask 被调用，taskId:', taskId); // 添加日志
+    const chatState = get(chatAtom);
+    
+    // 如果任务已存在，不重复添加
+    if (chatState.activeTasks[taskId]) {
+      console.log('===== 任务已存在，不重复添加:', taskId);
+      return;
+    }
+    
+    // 创建新的任务记录
+    const newTask: TaskInfo = {
+      taskId,
+      status: 'pending',
+      checkCount: 0,
+      lastCheck: Date.now(),
+      generatedImages: []
+    };
+    
+    console.log('===== 创建新任务:', newTask); // 添加日志
+    
+    // 更新状态
+    set(chatAtom, {
+      ...chatState,
+      activeTasks: {
+        ...chatState.activeTasks,
+        [taskId]: newTask
+      }
+    });
+
+    console.log('===== 设置定时器准备轮询任务状态'); // 添加日志
+    setTimeout(() => {
+      // 每隔5秒检查一次任务状态
+      console.log('===== 定时器触发，开始轮询任务状态:', taskId); // 添加日志
+      set(pollTaskStatus, taskId);
+    }, 4000);
+  }
+);
+
+// 轮询任务状态
+export const pollTaskStatus = atom(
+  null,
+  async (get, set, taskId: string) => {
+    console.log('===== pollTaskStatus 被调用，taskId:', taskId); // 添加日志
+    const chatState = get(chatAtom);
+    const taskInfo = chatState.activeTasks[taskId];
+    
+    // 如果任务不存在或已完成，停止轮询
+    if (!taskInfo) {
+      console.log('===== 任务不存在，停止轮询:', taskId); // 添加日志
+      return;
+    }
+    
+    if (taskInfo.status === 'completed' || taskInfo.status === 'failed') {
+      console.log(`===== 任务状态为 ${taskInfo.status}，停止轮询:`, taskId); // 添加日志
+      return;
+    }
+    
+    try {
+      console.log('===== 更新任务信息，准备查询状态:', taskId, '当前检查次数:', taskInfo.checkCount); // 添加日志
+      
+      // 更新任务信息
+      set(chatAtom, {
+        ...chatState,
+        activeTasks: {
+          ...chatState.activeTasks,
+          [taskId]: {
+            ...taskInfo,
+            checkCount: taskInfo.checkCount + 1,
+            lastCheck: Date.now()
+          }
+        }
+      });
+      
+      // 查询任务状态
+      console.log('===== 开始查询任务状态:', taskId); // 添加日志
+      const statusResponse = await checkImageGenerationStatus(taskId);
+      console.log('===== 查询任务状态响应:', statusResponse); // 添加日志
+      
+      const updatedChatState = get(chatAtom);
+      const currentTaskInfo = updatedChatState.activeTasks[taskId];
+      
+      // 如果任务已被移除，停止处理
+      if (!currentTaskInfo) {
+        console.log('===== 任务已被移除，停止处理:', taskId); // 添加日志
+        return;
+      }
+      
+      let newStatus: TaskStatus = currentTaskInfo.status;
+      let generatedImages = currentTaskInfo.generatedImages || [];
+      
+      // 解析响应状态
+      if (statusResponse?.data?.status) {
+        console.log('===== 解析响应状态:', statusResponse.data.status); // 添加日志
+        
+        switch (statusResponse.data.status.toLowerCase()) {
+          case 'completed':
+            newStatus = 'completed';
+            console.log('===== 任务完成'); // 添加日志
+            // 更新生成的图片列表
+            if (statusResponse.data.upscaled_urls && statusResponse.data.upscaled_urls.length > 0) {
+              generatedImages = statusResponse.data.upscaled_urls;
+              console.log('===== 获取到生成的图片:', generatedImages); // 添加日志
+            }
+            break;
+          case 'processing':
+          case 'in_progress':
+            newStatus = 'in_progress';
+            console.log('===== 任务进行中'); // 添加日志
+            break;
+          case 'failed':
+          case 'error':
+            newStatus = 'failed';
+            console.log('===== 任务失败'); // 添加日志
+            break;
+          default:
+            newStatus = 'pending';
+            console.log('===== 任务等待中'); // 添加日志
+        }
+      } else {
+        console.log('===== 响应中没有状态信息'); // 添加日志
+      }
+      
+      // 更新任务状态
+      console.log('===== 更新任务状态:', newStatus); // 添加日志
+      set(chatAtom, {
+        ...updatedChatState,
+        activeTasks: {
+          ...updatedChatState.activeTasks,
+          [taskId]: {
+            ...currentTaskInfo,
+            status: newStatus,
+            generatedImages
+          }
+        }
+      });
+      
+      // 如果任务完成且有图片，添加图片结果消息
+      if (newStatus === 'completed' && generatedImages.length > 0) {
+        console.log('===== 任务完成且有图片，添加结果消息'); // 添加日志
+        const finalChatState = get(chatAtom);
+        
+        // 创建结果消息
+        const resultMessage: Message = {
+          role: 'assistant',
+          content: '图片生成完成',
+          type: 'generate_result',
+          images: generatedImages,
+          request_id: taskId
+        };
+        
+        // 添加消息到列表
+        set(chatAtom, {
+          ...finalChatState,
+          messages: [...finalChatState.messages, resultMessage]
+        });
+        
+        // 显示成功通知
+        set(showToastAtom, {
+          message: '图片生成完成',
+          severity: 'success'
+        });
+      } else if (newStatus === 'failed') {
+        // 如果任务失败，添加失败消息
+        console.log('===== 任务失败，添加失败消息'); // 添加日志
+        const finalChatState = get(chatAtom);
+        set(chatAtom, {
+          ...finalChatState,
+          messages: [...finalChatState.messages, {
+            role: 'system',
+            content: '图片生成失败，请重试',
+            request_id: taskId
+          }]
+        });
+        
+        // 显示失败通知
+        set(showToastAtom, {
+          message: '图片生成失败',
+          severity: 'error'
+        });
+      } else if (newStatus !== 'completed') {
+        // 如果任务仍在进行中，继续轮询
+        console.log('===== 任务仍在进行中，继续轮询'); // 添加日志
+        setTimeout(() => {
+          console.log('===== 设置下一次轮询:', taskId); // 添加日志
+          set(pollTaskStatus, taskId);
+        }, 5000);
+      }
+    } catch (error) {
+      console.error('===== 轮询任务状态出错:', error); // 添加日志
+      
+      // 发生错误时，增加轮询间隔时间，避免过多请求
+      const intervalMultiplier = Math.min(5, Math.floor(taskInfo.checkCount / 5) + 1);
+      console.log('===== 发生错误，增加轮询间隔时间，乘数:', intervalMultiplier); // 添加日志
+      setTimeout(() => {
+        console.log('===== 错误后重试轮询:', taskId); // 添加日志
+        set(pollTaskStatus, taskId);
+      }, 5000 * intervalMultiplier);
+    }
+  }
+);
+
+// 简化的轮询函数 - 使用 for 循环
+export async function pollImageGenerationTask(taskId: string, set: any, get: any): Promise<void> {
+  console.log('===== 开始轮询任务:', taskId);
+  
+  // 最大轮询次数和间隔时间
+  const MAX_POLL_COUNT = 60; // 最多轮询60次
+  const POLL_INTERVAL = 5000; // 每次间隔5秒
+  
+  for (let pollCount = 0; pollCount < MAX_POLL_COUNT; pollCount++) {
+    try {
+      console.log(`===== 轮询任务 ${taskId} 第 ${pollCount + 1} 次`);
+      
+      // 等待一段时间再查询
+      if (pollCount > 0) {
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+      }
+      
+      // 查询任务状态
+      const statusResponse = await checkImageGenerationStatus(taskId);
+      console.log('===== 查询任务状态响应:', statusResponse);
+      
+      // 获取当前状态
+      const chatState = get(chatAtom);
+      
+      // 如果没有状态信息，继续轮询
+      if (!statusResponse?.data?.status) {
+        console.log('===== 响应中没有状态信息，继续轮询');
+        continue;
+      }
+      
+      const status = statusResponse.data.status.toLowerCase();
+      console.log('===== 任务状态:', status);
+      
+      // 处理不同状态
+      if (status === 'completed') {
+        console.log('===== 任务完成');
+        
+        // 获取生成的图片
+        const generatedImages = statusResponse.data.upscaled_urls || [];
+        console.log('===== 获取到生成的图片:', generatedImages);
+        
+        if (generatedImages.length > 0) {
+          // 创建结果消息
+          const resultMessage: Message = {
+            role: 'assistant',
+            content: '图片生成完成',
+            type: 'generate_result',
+            images: generatedImages,
+            request_id: taskId
+          };
+          
+          // 添加消息到列表
+          set(chatAtom, {
+            ...chatState,
+            messages: [...chatState.messages, resultMessage]
+          });
+          
+          // 显示成功通知
+          set(showToastAtom, {
+            message: '图片生成完成',
+            severity: 'success'
+          });
+        }
+        
+        // 任务完成，退出轮询
+        console.log('===== 任务完成，退出轮询');
+        return;
+      } else if (status === 'failed' || status === 'error') {
+        console.log('===== 任务失败');
+        
+        // 添加失败消息
+        set(chatAtom, {
+          ...chatState,
+          messages: [...chatState.messages, {
+            role: 'system',
+            content: '图片生成失败，请重试',
+            request_id: taskId
+          }]
+        });
+        
+        // 显示失败通知
+        set(showToastAtom, {
+          message: '图片生成失败',
+          severity: 'error'
+        });
+        
+        // 任务失败，退出轮询
+        console.log('===== 任务失败，退出轮询');
+        return;
+      }
+      
+      // 如果是其他状态（处理中、等待中），继续轮询
+      console.log('===== 任务仍在进行中，继续轮询');
+      
+    } catch (error) {
+      console.error('===== 轮询任务状态出错:', error);
+      
+      // 发生错误时，增加轮询间隔时间，但继续轮询
+      const waitTime = Math.min(30000, POLL_INTERVAL * Math.min(5, Math.floor(pollCount / 5) + 1));
+      console.log(`===== 发生错误，等待 ${waitTime}ms 后继续轮询`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+  
+  // 达到最大轮询次数，添加超时消息
+  console.log('===== 达到最大轮询次数，任务可能超时');
+  const finalChatState = get(chatAtom);
+  set(chatAtom, {
+    ...finalChatState,
+    messages: [...finalChatState.messages, {
+      role: 'system',
+      content: '图片生成超时，请稍后查看或重试',
+      request_id: taskId
+    }]
+  });
+  
+  // 显示超时通知
+  set(showToastAtom, {
+    message: '图片生成超时',
+    severity: 'warning'
+  });
+}
 
 // 与后端通信的API
 export async function sendChatRequest(message: string, history: Message[], userUuid: string, creator?: string, urls?: string[],
@@ -189,7 +563,7 @@ export const sendMessage = atom(
         userMessage.content,
         chatState.messages,
         chatState.userUuid,
-        chatState.walletAddress,
+        chatState.did,
         chatState.urls.map(url => url.url),
         model_id,
         width,
@@ -264,6 +638,14 @@ export const sendMessage = atom(
         task_type: task_type,
         modelParam: updatedModelParam
       });
+
+      // 如果 request_id 不为空，则代表创建生成图片任务完成
+      console.log('===== 收到 request_id:', request_id); // 添加日志
+      if (request_id) {
+        pollImageGenerationTask(request_id, set, get).catch(err => {
+          console.error('轮询任务状态出错:', err);
+        });
+      }
     } catch (error) {
       console.error('发送消息时出错:', error);
       
@@ -492,13 +874,13 @@ export const clearChat = atom(
 // 更新用户信息
 export const setUserInfo = atom(
   null,
-  (get, set, params: { uuid: string, walletAddress?: string }) => {
-    const { uuid, walletAddress } = params;
+  (get, set, params: { uuid: string, did?: string }) => {
+    const { uuid, did } = params;
     const chatState = get(chatAtom);
     set(chatAtom, {
       ...chatState,
       userUuid: uuid,
-      walletAddress: walletAddress
+      did: did
     });
   }
 );

@@ -1,0 +1,130 @@
+/* 全屏遮罩层 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75); /* #000000BF */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+/* 弹窗内容 */
+.modalContent {
+  width: 33.125rem; /* 530px */
+  height: 12.9375rem; /* 207px */
+  border-radius: 0.5rem; /* 8px */
+  background: linear-gradient(360deg, #181E31 0%, #0E111B 35.75%);
+  border: 1px solid rgba(55, 65, 81, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 标题栏 */
+.modalHeader {
+  width: 100%;
+  height: 3rem; /* 48px */
+  padding: 0.75rem 1.25rem; /* 12px 20px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+}
+
+.warningTitle {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0;
+  text-transform: capitalize;
+  color: #FFFFFF;
+}
+
+.closeButton {
+  width: 1.5rem; /* 24px */
+  height: 1.5rem; /* 24px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* 内容区域 */
+.modalBody {
+  width: 100%;
+  height: 9.9375rem; /* 159px */
+  padding: 1.25rem; /* 20px */
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; /* 20px */
+}
+
+.warningText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem; /* 14px */
+  line-height: 140%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  color: #88A4C2;
+}
+
+/* 按钮组 */
+.buttonGroup {
+  width: 30.625rem; /* 490px */
+  height: 1.9375rem; /* 31px */
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem; /* 8px */
+}
+
+.cancelButton, .exportButton {
+  min-width: 5.625rem; /* 90px */
+  height: 1.9375rem; /* 31px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.375rem 1rem; /* 6px 16px */
+  border: none;
+  cursor: pointer;
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.cancelButton {
+  background-color: #6366F1;
+  color: #000000;
+}
+
+.exportButton {
+  background-color: #FF3C3D;
+  color: #000000;
+}
+
+/* 导出错误信息 */
+.errorText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  color: #FF3C3D;
+  margin-top: 0.5rem;
+}
+
+/* 禁用状态的按钮 */
+.cancelButton:disabled,
+.exportButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+} 

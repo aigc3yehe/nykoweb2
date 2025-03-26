@@ -4,10 +4,19 @@ import Toast from './components/Toast'
 import ConfirmDialog from './components/ConfirmDialog'
 import { useAtom, useSetAtom } from 'jotai'
 import { modalAtom, closeImageDetails } from './store/modalStore'
+import { accountPopupAtom, hideAccountPopupAtom } from './store/accountPopupStore'
+import { exportKeyAtom, hideExportKeyAtom, showExportKeyAtom } from './store/exportKeyStore'
 import ImageDetailsModal from './components/ImageDetailsModal'
+import AccountPopup from './components/AccountPopup'
+import ExportKeyModal from './components/ExportKeyModal'
 
 function App() {
   const [modalState] = useAtom(modalAtom)
+  const [accountPopupState] = useAtom(accountPopupAtom)
+  const [exportKeyState] = useAtom(exportKeyAtom)
+  const hideAccountPopup = useSetAtom(hideAccountPopupAtom)
+  const hideExportKey = useSetAtom(hideExportKeyAtom)
+  const showExportKey = useSetAtom(showExportKeyAtom)
   const handleCloseImageDetails = useSetAtom(closeImageDetails)
 
   return (
@@ -25,6 +34,27 @@ function App() {
           isLoading={modalState.isLoading}
           error={modalState.error}
           onClose={handleCloseImageDetails} 
+        />
+      )}
+      
+      {/* 账户弹窗 */}
+      {accountPopupState.open && (
+        <AccountPopup
+          isOpen={true}
+          onClose={hideAccountPopup}
+          onExport={showExportKey} // 点击导出按钮时显示导出私钥弹窗
+          onLogout={accountPopupState.onLogout}
+          userData={accountPopupState.userData}
+          anchorPosition={accountPopupState.anchorPosition}
+        />
+      )}
+      
+      {/* 导出私钥弹窗 */}
+      {exportKeyState.open && (
+        <ExportKeyModal
+          isOpen={true}
+          onClose={hideExportKey}
+          onCancel={hideExportKey}
         />
       )}
     </div>

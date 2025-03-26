@@ -1,10 +1,17 @@
 import React, { useEffect } from 'react';
 import { PrivyProvider, usePrivy } from '@privy-io/react-auth';
 import { useAtom } from 'jotai';
-import { setUser, setWalletAddress, setLoading } from '../store/accountStore';
+import { setUser, setLoading } from '../store/accountStore';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {WagmiProvider} from '@privy-io/wagmi';
+
+import {privyConfig} from './privyConfig';
+import {wagmiConfig} from './wagmiConfig';
 
 // Privy应用ID - 应该在环境变量中配置
 const PRIVY_APP_ID = import.meta.env.VITE_PRIVY_APP_ID || "your-privy-app-id";
+
+const queryClient = new QueryClient();
 
 interface PrivyAuthProviderProps {
   children: React.ReactNode;
@@ -12,9 +19,8 @@ interface PrivyAuthProviderProps {
 
 // Privy认证管理组件
 const PrivyAuthManager: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const { user, authenticated, ready, wallet } = usePrivy();
+  const { user, authenticated, ready } = usePrivy();
   const [, setUserAction] = useAtom(setUser);
-  const [, setWalletAddressAction] = useAtom(setWalletAddress);
   const [, setLoadingAction] = useAtom(setLoading);
 
   useEffect(() => {
@@ -29,14 +35,6 @@ const PrivyAuthManager: React.FC<React.PropsWithChildren> = ({ children }) => {
     }
   }, [authenticated, user, ready, setUserAction]);
 
-  useEffect(() => {
-    // 当钱包信息发生变化时，更新钱包地址
-    if (wallet?.address) {
-      console.log('wallet.address', wallet.address);
-      setWalletAddressAction(wallet.address);
-    }
-  }, [wallet, setWalletAddressAction]);
-
   return <>{children}</>;
 };
 
@@ -45,20 +43,13 @@ const PrivyAuthProvider: React.FC<PrivyAuthProviderProps> = ({ children }) => {
   return (
     <PrivyProvider
       appId={PRIVY_APP_ID}
-      config={{
-        // 配置自动创建钱包
-        embeddedWallets: {
-           createOnLogin: 'all-users',
-        },
-        // 自定义登录外观
-        appearance: {
-          theme: 'dark',
-          accentColor: '#6366F1', // 使用项目主题色
-          logo: '/nyko.png', // 使用项目logo
-        },
-      }}
+      config={privyConfig}
     >
-      <PrivyAuthManager>{children}</PrivyAuthManager>
+      <QueryClientProvider client={queryClient}>
+        <WagmiProvider config={wagmiConfig}>
+          <PrivyAuthManager>{children}</PrivyAuthManager>
+        </WagmiProvider>
+      </QueryClientProvider>
     </PrivyProvider>
   );
 };
