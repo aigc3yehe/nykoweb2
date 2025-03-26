@@ -3,6 +3,7 @@ import styles from './ModelDetail.module.css';
 import { useAtom, useSetAtom } from 'jotai';
 import { fetchModelDetail, modelDetailAtom, clearModelDetail } from '../store/modelStore';
 import { fetchImages, imageListAtom } from '../store/imageStore';
+import { setCurrentModel, clearCurrentModel } from '../store/chatStore';
 import avatarSvg from '../assets/Avatar.svg';
 import ImageCard from './ImageCard';
 import ModelCarousel from './ModelCarousel';
@@ -18,6 +19,9 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   const fetchDetail = useSetAtom(fetchModelDetail);
   const fetchImagesList = useSetAtom(fetchImages);
   const clearDetail = useSetAtom(clearModelDetail);
+  
+  const setCurrentModelInChat = useSetAtom(setCurrentModel);
+  const clearCurrentModelInChat = useSetAtom(clearCurrentModel);
   
   const [activeTab, setActiveTab] = useState<'description' | 'tokenization'>('description');
   
@@ -43,8 +47,16 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     // 组件卸载时清除详情
     return () => {
       clearDetail();
+      clearCurrentModelInChat();
     };
-  }, [modelId, fetchDetail, fetchImagesList, clearDetail]);
+  }, [modelId, fetchDetail, fetchImagesList, clearDetail, clearCurrentModelInChat]);
+  
+  // 监听当前模型变化，更新聊天存储中的当前模型(模型Ready的时候才更新)
+  useEffect(() => {
+    if (currentModel && currentModel.model_tran?.[0]?.train_state === 2) {
+      setCurrentModelInChat(currentModel);
+    }
+  }, [currentModel, setCurrentModelInChat]);
   
   // 计算瀑布流布局
   useEffect(() => {

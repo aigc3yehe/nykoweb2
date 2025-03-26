@@ -1,5 +1,22 @@
 import { atom } from 'jotai';
 import { imageUploadAtom, setImageUploadStateAtom, updateMessageUrlsAtom, showToastAtom, uploadImages } from './imagesStore';
+import { ModelDetail } from './modelStore';
+
+// 添加宽高比相关接口
+export interface AspectRatio {
+  label: string;
+  value: string;
+  width: number;
+  height: number;
+}
+
+export const aspectRatios: AspectRatio[] = [
+  { label: '1:1', value: '1:1', width: 1024, height: 1024 },
+  { label: '3:4', value: '3:4', width: 768, height: 1024 },
+  { label: '9:16', value: '9:16', width: 1080, height: 1920 },
+  { label: '4:3', value: '4:3', width: 1024, height: 768 },
+  { label: '16:9', value: '16:9', width: 1920, height: 1080 },
+];
 
 export interface Message {
   role: string;
@@ -28,7 +45,9 @@ export interface ChatState {
   modelParam?: {
     modelName?: string;
     description?: string;
-  }
+  };
+  currentModel?: ModelDetail | null;
+  selectedAspectRatio?: AspectRatio; // 添加选中的宽高比
 }
 
 // 初始状态
@@ -40,14 +59,18 @@ const initialState: ChatState = {
   walletAddress: '0x4272e3150A81B9735ccc58692f5dd3Cf73fB3B92', // 测试钱包地址
   urls: [],
   task_type: 'chat',
-  modelParam: undefined
+  modelParam: undefined,
+  currentModel: null,
+  selectedAspectRatio: aspectRatios[0] // 默认选择1:1
 };
 
 // 创建原子状态
 export const chatAtom = atom<ChatState>(initialState);
 
 // 与后端通信的API
-export async function sendChatRequest(message: string, history: Message[], userUuid: string, walletAddress?: string, urls?: string[]) {
+export async function sendChatRequest(message: string, history: Message[], userUuid: string, creator?: string, urls?: string[],
+  model_id?: number, width?: number, height?: number, lora_name?: string, lora_weight?: number
+) {
   const API_URL = '/api/chat';
   
   try {
@@ -64,8 +87,13 @@ export async function sendChatRequest(message: string, history: Message[], userU
         message,
         conversation_history: conversation_history,
         user_uuid: userUuid,
-        wallet_address: walletAddress,
-        urls: urls || []
+        creator: creator,
+        urls: urls || [],
+        model_id: model_id,
+        width: width,
+        height: height,
+        lora_name: lora_name,
+        lora_weight: lora_weight
       }),
     });
 
@@ -147,19 +175,34 @@ export const sendMessage = atom(
     });
     
     try {
+      // 获取当前选择的宽高比
+      const { width, height } = chatState.selectedAspectRatio || { width: 1024, height: 1024 };
+      
+      // 获取当前模型的lora_name
+      const lora_name = chatState.currentModel?.model_tran?.[0]?.lora_name || undefined;
+
+      // 获取当前模型的model_id
+      const model_id = chatState.currentModel?.id;
+      
       // 发送请求到API
       const response = await sendChatRequest(
         userMessage.content,
         chatState.messages,
         chatState.userUuid,
         chatState.walletAddress,
-        chatState.urls.map(url => url.url)
+        chatState.urls.map(url => url.url),
+        model_id,
+        width,
+        height,
+        lora_name,
+        0.85 // 默认lora权重
       );
 
       const status = response.status;
       const content = response.content;
       const task_type = response.task_type;
       const model = response.model; // 获取model字段
+      const request_id = response.request_id; // 获取生成图片任务的request_id
       
       // 处理API响应
       if (status === 'error') {
@@ -403,109 +446,6 @@ export const addImage = atom(
   }
 );
 
-// 确认图片操作
-export const confirmImages = atom(
-  null,
-  async (get, set, messageIndex: number) => {
-    const chatState = get(chatAtom);
-    
-    // 获取对应消息
-    const message = chatState.messages[messageIndex];
-    if (!message || message.type !== 'upload_image' || !message.uploadedFiles || message.uploadedFiles.length === 0) {
-      set(showToastAtom, { 
-        message: '请先上传图片',
-        severity: 'warning'
-      });
-      return;
-    }
-
-    try {
-      // 获取已上传的图片URL
-      const uploadedUrls = message.uploadedFiles.map(file => file.url);
-      
-      // 显示确认中状态
-      set(chatAtom, {
-        ...chatState,
-        messages: chatState.messages.map((msg, idx) => {
-          if (idx === messageIndex) {
-            return {
-              ...msg,
-              content: msg.content + "\n[图片已确认]"
-            };
-          }
-          return msg;
-        })
-      });
-      
-      // 显示成功通知
-      set(showToastAtom, { 
-        message: '图片已确认',
-        severity: 'success'
-      });
-      
-      // 发送新的请求给后端，带上图片URL
-      const response = await sendChatRequest(
-        '处理已上传的图片',
-        chatState.messages,
-        chatState.userUuid,
-        chatState.walletAddress,
-        uploadedUrls
-      );
-      
-      // 处理响应
-      if (response.status === 'error') {
-        throw new Error(response.content || '处理图片时出错');
-      }
-      
-      // 检查是否有model信息
-      let updatedModelParam = chatState.modelParam;
-      let updatedMessages = response.conversation.map((msg: Message) => msg);
-      
-      if (response.model && response.model.name && response.model.description) {
-        const modelParam = {
-          modelName: response.model.name,
-          description: response.model.description
-        };
-        
-        // 更新modelParam
-        updatedModelParam = modelParam;
-        
-        // 查找并更新model_config消息
-        updatedMessages = updatedMessages.map(msg => {
-          if (msg.type === 'model_config') {
-            return {
-              ...msg,
-              modelParam
-            };
-          }
-          return msg;
-        });
-      }
-      
-      // 更新消息历史
-      set(chatAtom, {
-        ...chatState,
-        messages: updatedMessages,
-        modelParam: updatedModelParam
-      });
-      
-      // 清空上传状态
-      set(setImageUploadStateAtom, {
-        isUploading: false,
-        progress: 0,
-        uploadedUrls: []
-      });
-    } catch (error) {
-      console.error('处理图片时出错:', error);
-      
-      // 显示错误通知
-      set(showToastAtom, { 
-        message: '处理图片失败',
-        severity: 'error'
-      });
-    }
-  }
-);
 
 // 修改removeImage函数来处理model_config消息
 export const removeImage = atom(
@@ -544,7 +484,7 @@ export const clearChat = atom(
       messages: [],
       urls: [],
       task_type: 'chat',
-      modelParam: undefined
+      modelParam: undefined,
     });
   }
 );
@@ -559,6 +499,45 @@ export const setUserInfo = atom(
       ...chatState,
       userUuid: uuid,
       walletAddress: walletAddress
+    });
+  }
+);
+
+// 设置当前正在查看的模型详情
+export const setCurrentModel = atom(
+  null,
+  (get, set, model: ModelDetail | null) => {
+    const chatState = get(chatAtom);
+    
+    set(chatAtom, {
+      ...chatState,
+      currentModel: model
+    });
+  }
+);
+
+// 清除当前模型详情（退出模型详情页时调用）
+export const clearCurrentModel = atom(
+  null,
+  (get, set) => {
+    const chatState = get(chatAtom);
+    
+    set(chatAtom, {
+      ...chatState,
+      currentModel: null
+    });
+  }
+);
+
+// 添加设置宽高比的操作
+export const setAspectRatio = atom(
+  null,
+  (get, set, aspectRatio: AspectRatio) => {
+    const chatState = get(chatAtom);
+    
+    set(chatAtom, {
+      ...chatState,
+      selectedAspectRatio: aspectRatio
     });
   }
 );

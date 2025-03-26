@@ -66,18 +66,13 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
     return new Intl.NumberFormat().format(num);
   };
 
-  const handleTwitterLogin = async () => {
+  const handleLogin = async () => {
     try {
       // 使用Twitter作为OAuth提供者
       await initOAuth({ provider: 'twitter' });
     } catch (error) {
       console.error('启动Twitter登录时出错:', error);
     }
-  };
-
-  // 处理通用登录
-  const handleLogin = () => {
-    initOAuth();
   };
 
   // 用户已登录，显示账户信息
@@ -101,7 +96,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
           className={`${styles.logoutButton} ${className}`} 
           onClick={logout}
         >
-          登出
+          Logout
         </button>
       </div>
     );
@@ -116,7 +111,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
         onClick={handleLogin}
         disabled={loading}
       >
-        {loading ? '登录中...' : '登录/注册'}
+        {loading ? 'Logining...' : 'Login'}
       </button>
     </div>
   );

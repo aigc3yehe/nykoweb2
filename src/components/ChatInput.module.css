@@ -77,6 +77,8 @@
   line-height: 100%;
   letter-spacing: 0%;
   vertical-align: middle;
+  cursor: pointer;
+  position: relative;
 }
 
 .imageRatioTag .leftIcon {
@@ -232,4 +234,60 @@
   background: #37415199;
   cursor: pointer;
   right: 0;
-} 
+}
+
+.leftIcon, .rightIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.ratioText {
+  font-family: 'Jura', sans-serif;
+  font-size: 14px;
+  color: #F3F4F6;
+}
+
+.ratioDropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  border-width: 1px;
+  padding: 8px;
+  background: #0E111B;
+  border: 1px solid rgba(55, 65, 81, 0.3);
+  z-index: 10;
+  min-width: 120px;
+}
+
+.ratioItem {
+  width: 119px;
+  height: 34px;
+  border-radius: 4px;
+  gap: 5px;
+  padding: 5px 20px;
+  font-family: 'Tektur', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 140%;
+  letter-spacing: 0%;
+  text-transform: capitalize;
+  color: white;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.ratioItem:hover {
+  background: rgba(55, 65, 81, 0.3);
+}
+
+.ratioItemSelected {
+  background: #6366F1;
+  color: black;
+}
+
+.ratioItemSelected:hover {
+  background: #6366F1;
+}

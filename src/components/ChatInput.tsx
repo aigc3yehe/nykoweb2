@@ -6,7 +6,7 @@ import sendActiveIcon from '../assets/send_activating.svg';
 import closeIcon from '../assets/close.svg';
 import imageIcon from '../assets/image.svg';
 import downIcon from '../assets/down.svg';
-import { chatAtom, sendMessage } from '../store/chatStore';
+import { chatAtom, sendMessage, aspectRatios, AspectRatio, setAspectRatio } from '../store/chatStore';
 
 interface Tag {
   id: string;
@@ -24,13 +24,16 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading }) => {
   const [input, setInput] = useState('');
   const [chatState] = useAtom(chatAtom);
   const [, sendMessageAction] = useAtom(sendMessage);
+  const [, setAspectRatioAction] = useAtom(setAspectRatio);
   
   const [activeTags, setActiveTags] = useState<Tag[]>([]);
   const [scrollHeight, setScrollHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
   const [clientHeight, setClientHeight] = useState(0);
+  const [showRatioDropdown, setShowRatioDropdown] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const customScrollbarRef = useRef<HTMLDivElement>(null);
+  const ratioDropdownRef = useRef<HTMLDivElement>(null);
 
   // 自动调整文本框高度
   useEffect(() => {
@@ -45,6 +48,20 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading }) => {
     }
   }, [input]);
 
+  // 点击外部关闭下拉菜单
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ratioDropdownRef.current && !ratioDropdownRef.current.contains(event.target as Node)) {
+        setShowRatioDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // 根据task_type设置标签
   useEffect(() => {
     const baseTags: Tag[] = [];
@@ -58,17 +75,38 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading }) => {
         value: chatState.task_type 
       });
     }
-    
-    // 添加其他固定标签
-    baseTags.push(
-      { id: '2', text: 'Lora', type: 'closeable', value: 'Artistic Style' },
-      { id: '3', text: 'image', type: 'imageRatio', ratio: '16:9' },
-      { id: '4', text: 'Base Model', type: 'normal', value: '1sereera34' },
-      { id: '5', text: 'Technology', type: 'closeable', value: 'inactive' },
-    );
+
+    // 如果当前进入到模型详情，则添加Base Model 和 LoraName标签
+    if (chatState.currentModel) {
+      const models = chatState.currentModel?.model_tran || []
+      if (models.length > 0 && models[0].base_model_hash){
+        baseTags.push({
+          id: 'base_model',
+          text: 'Base Model',
+          type: 'normal',
+          value: models[0].base_model_hash || undefined
+        })
+      }
+      if (models.length > 0 && models[0].lora_name){
+        baseTags.push({
+          id: 'lora_name',
+          text: 'Lora',
+          type: 'normal',
+          value: models[0].lora_name || undefined 
+        }) 
+      }
+      if (models.length > 0 && models[0].base_model_hash && models[0].lora_name){
+        baseTags.push({
+          id: 'image_ratio',
+          text: 'image',
+          type: 'imageRatio',
+          ratio: chatState.selectedAspectRatio?.value || '1:1'
+        })
+      }
+    }
     
     setActiveTags(baseTags);
-  }, [chatState.task_type]);
+  }, [chatState.task_type, chatState.currentModel, chatState.selectedAspectRatio]);
 
   // 监听textarea的滚动事件
   const handleTextareaScroll = () => {
@@ -99,6 +137,17 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading }) => {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  // 处理宽高比选择
+  const handleAspectRatioSelect = (ratio: AspectRatio) => {
+    setAspectRatioAction(ratio);
+    setShowRatioDropdown(false);
+  };
+
+  // 处理宽高比标签点击
+  const handleRatioTagClick = () => {
+    setShowRatioDropdown(prev => !prev);
   };
 
   // 处理自定义滚动条拖动
@@ -163,10 +212,33 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading }) => {
               );
             } else if (tag.type === 'imageRatio') {
               return (
-                <div key={tag.id} className={styles.imageRatioTag}>
+                <div 
+                  key={tag.id} 
+                  className={styles.imageRatioTag}
+                  onClick={handleRatioTagClick}
+                  ref={ratioDropdownRef}
+                >
                   <img src={imageIcon} alt="Image" className={styles.leftIcon} />
                   <span className={styles.ratioText}>{tag.ratio}</span>
                   <img src={downIcon} alt="Down" className={styles.rightIcon} />
+                  
+                  {/* 宽高比下拉菜单 */}
+                  {showRatioDropdown && (
+                    <div className={styles.ratioDropdown}>
+                      {aspectRatios.map((ratio) => (
+                        <div 
+                          key={ratio.value}
+                          className={`${styles.ratioItem} ${chatState.selectedAspectRatio?.value === ratio.value ? styles.ratioItemSelected : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAspectRatioSelect(ratio);
+                          }}
+                        >
+                          {ratio.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             } else {
@@ -224,4 +296,4 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading }) => {
   );
 };
 
-export default ChatInput; 
+export default ChatInput;

@@ -7,7 +7,6 @@ import ChatInput from './ChatInput';
 import { 
   chatAtom, 
   addImage, 
-  confirmImages, 
   removeImage, 
   clearChat,
   setUserInfo 
@@ -22,7 +21,6 @@ interface ChatWindowProps {
 const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, walletAddress }) => {
   const [chatState] = useAtom(chatAtom);
   const [, addImageAction] = useAtom(addImage);
-  const [, confirmImagesAction] = useAtom(confirmImages);
   const [, removeImageAction] = useAtom(removeImage);
   const [, clearChatAction] = useAtom(clearChat);
   const [, setUserInfoAction] = useAtom(setUserInfo);
@@ -85,7 +83,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, walletAddress }) => {
               uploadedFiles={message.uploadedFiles}
               modelParam={message.modelParam}
               onAddImage={() => addImageAction(index)}
-              onConfirmImages={() => confirmImagesAction(index)}
+              onConfirmImages={() => {}}
               onRemoveImage={(url) => removeImageAction({ messageIndex: index, fileUrl: url })}
             />
           ))
