@@ -14,7 +14,7 @@ interface ImageUploadState {
 export interface ChatMessageProps {
   role: 'user' | 'assistant';
   content: string;
-  type?: 'text' | 'upload_image' | 'model_config' | 'generate_result';
+  type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image';
   imageUploadState?: ImageUploadState;
   uploadedFiles?: Array<{name: string, url: string}>;
   modelParam?: {
@@ -22,6 +22,8 @@ export interface ChatMessageProps {
     description?: string;
   };
   images?: string[];
+  imageWidth?: number;
+  imageHeight?: number;
   request_id?: string;
   onAddImage?: () => void;
   onConfirmImages?: () => void;
@@ -36,6 +38,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   uploadedFiles = [],
   modelParam = { modelName: undefined, description: undefined },
   images = [],
+  imageWidth = 256,
+  imageHeight = 256,
   request_id = '',
   onAddImage,
   onConfirmImages,
@@ -51,26 +55,64 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     return `${baseName.substring(0, 3)}...${baseName.substring(baseName.length - 2)}.${extension}`;
   };
 
+  // 添加图片生成中组件
+  const renderGeneratingImageComponent = () => {
+    return (
+      <div className={styles.generatingIndicator} key={request_id}>
+        <img 
+          src={uploadingIcon} 
+          alt="Generating" 
+          className={styles.uploadingIcon} 
+        />
+        <span className={styles.generatingText}>
+          Generating image, please wait...
+        </span>
+      </div>
+    );
+  };
+
   const renderGenerateResultComponent = () => {
+    // 计算图片展示尺寸，保持原始宽高比，短边固定为 12.5rem (200px)
+    let displayWidth = 12.5; // 默认宽度 12.5rem (200px)
+    let displayHeight = 12.5; // 默认高度 12.5rem (200px)
+    
+    if (images.length > 0 && imageWidth && imageHeight) {
+      const aspectRatio = imageWidth / imageHeight;
+      
+      if (aspectRatio >= 1) {
+        // 宽图：宽度大于高度，高度固定为 12.5rem
+        displayHeight = 12.5;
+        displayWidth = 12.5 * aspectRatio;
+      } else {
+        // 长图：高度大于宽度，宽度固定为 12.5rem
+        displayWidth = 12.5;
+        displayHeight = 12.5 / aspectRatio;
+      }
+    }
+    
     return (
       <div className={styles.imageResultContainer}>
-        <div className={styles.imageResultHeader}>
-          <span className={styles.imageResultTitle}>{content}</span>
-        </div>
         <div className={styles.generatedImagesGrid}>
-          {images.map((imageUrl, index) => (
-            <div key={index} className={styles.generatedImageWrapper}>
+          {/* 只显示第一张图片 */}
+          {images.length > 0 && (
+            <div 
+              className={styles.generatedImageWrapper}
+              style={{
+                width: `${displayWidth}rem`,
+                height: `${displayHeight}rem`
+              }}
+            >
               <img 
-                src={imageUrl} 
-                alt={`Generated Image ${index + 1}`} 
+                src={images[0]} 
+                alt="Generated Image" 
                 className={styles.generatedImage}
                 onClick={() => {
-                  // 可以实现点击查看大图的功能
-                  window.open(imageUrl, '_blank');
+                  // 点击查看大图
+                  window.open(images[0], '_blank');
                 }}
               />
             </div>
-          ))}
+          )}
         </div>
       </div>
     );
@@ -169,8 +211,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       {role === 'assistant' && type === 'upload_image' && renderUploadImageComponent()}
       {role === 'assistant' && type === 'model_config' && renderModelConfigComponent()}
       {role === 'assistant' && type === 'generate_result' && renderGenerateResultComponent()}
+      {role === 'assistant' && type === 'generating_image' && renderGeneratingImageComponent()}
     </div>
   );
 };
 
-export default ChatMessage; 
+export default ChatMessage;

@@ -21,7 +21,7 @@ export const modalAtom = atom<ModalState>(initialState);
 
 export const openImageDetails = atom(
   null,
-  async (get, set, image: Image) => {
+  async (_, set, image: Image) => {
     
     // 立即打开模态框，展示已有数据
     set(modalAtom, {
@@ -57,7 +57,7 @@ export const openImageDetails = atom(
 
 export const closeImageDetails = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(modalAtom, initialState);
   }
 ); 

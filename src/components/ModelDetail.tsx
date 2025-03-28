@@ -4,7 +4,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { fetchModelDetail, modelDetailAtom, clearModelDetail } from '../store/modelStore';
 import { fetchImages, imageListAtom } from '../store/imageStore';
 import { setCurrentModel, clearCurrentModel } from '../store/chatStore';
-import avatarSvg from '../assets/Avatar.svg';
+
 import ImageCard from './ImageCard';
 import ModelCarousel from './ModelCarousel';
 import ModelInfoPanel from './ModelInfoPanel';
@@ -62,7 +62,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   useEffect(() => {
     if (images.length === 0) return;
     
-    const containerWidth = 57.625; // 922px 转换为 rem (假设 16px 基准)
+    // const containerWidth = 57.625; // 922px 转换为 rem (假设 16px 基准)
     const cardWidth = 13.9375; // 223px 转换为 rem
     const columnGap = 0.625; // 10px 转换为 rem
     
@@ -101,8 +101,8 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     const resizeObserver = new ResizeObserver(() => {
       // 当容器大小变化时重新计算布局
       if (galleryContainerRef.current) {
-        const containerWidth = galleryContainerRef.current.clientWidth;
-        const containerWidthRem = containerWidth / 16;
+        // const containerWidth = galleryContainerRef.current.clientWidth;
+        // const containerWidthRem = containerWidth / 16;
         
         // 这里可以添加重新计算布局的逻辑，或者直接调用一个函数
         // 为了简化，我们可以依赖于 images 依赖项更改，触发上面的 useEffect

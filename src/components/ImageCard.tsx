@@ -12,24 +12,8 @@ interface ImageCardProps {
 const ImageCard: React.FC<ImageCardProps> = ({ image }) => {
   const handleOpenImageDetails = useSetAtom(openImageDetails);
   
-  // 获取图片状态
-  const getImageState = (state: number) => {
-    switch (state) {
-      case -1:
-        return '生成失败';
-      case 0:
-        return '处理中';
-      case 1:
-        return '已完成';
-      default:
-        return '未知状态';
-    }
-  };
-  
   // 检查是否处理中
   const isPending = image.state === 0;
-  // 检查是否已完成
-  const isSuccess = image.state === 1;
   // 检查是否失败
   const isFailed = image.state === -1;
 

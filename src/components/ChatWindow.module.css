@@ -384,7 +384,23 @@
   opacity: 0.5;
 }
 
-/* 滚动条样式 */
+/* 消息列表容器包装器 */
+.messagesContainerWrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 消息列表容器 */
+.messagesContainer {
+  height: 100%;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
 /* 隐藏原生滚动条 */
 .hideScrollbar::-webkit-scrollbar {
   display: none;
@@ -395,8 +411,8 @@
   scrollbar-width: none;  /* Firefox */
 }
 
-/* 自定义滚动条轨道 */
-.customScrollbarTrack {
+/* 自定义滚动条轨道 - 消息列表 */
+.messagesScrollbarTrack {
   position: absolute;
   right: 6px;
   top: 12px;
@@ -407,12 +423,18 @@
   z-index: 10;
 }
 
-/* 自定义滚动条滑块 */
-.customScrollbarThumb {
+/* 自定义滚动条滑块 - 消息列表 */
+.messagesScrollbarThumb {
   position: absolute;
   width: 4px;
   border-radius: 100px;
   background: #37415199;
   cursor: pointer;
   right: 0;
+}
+
+/* 当鼠标悬停在滚动条上时的样式 */
+.messagesScrollbarThumb:hover {
+  background: #6366F1;
+  width: 6px;
 }

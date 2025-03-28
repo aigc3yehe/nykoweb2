@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import styles from './ImagesContent.module.css';
-import { imageListAtom, fetchImages, Image } from '../store/imageStore';
-import { accountAtom } from '../store/accountStore';
+import { imageListAtom, fetchImages } from '../store/imageStore';
 import ImageCard from './ImageCard';
 
 interface ImagesContentProps {
@@ -23,7 +22,6 @@ const COLUMN_GAP_PX = 10;  // 列间距（像素值）
 const ImagesContent: React.FC<ImagesContentProps> = ({ ownedOnly }) => {
   const [imageListState] = useAtom(imageListAtom);
   const fetchImagesList = useSetAtom(fetchImages);
-  const [accountState] = useAtom(accountAtom);
   
   const { images = [], isLoading, error, hasMore } = imageListState;
   const observer = useRef<IntersectionObserver | null>(null);
@@ -37,7 +35,7 @@ const ImagesContent: React.FC<ImagesContentProps> = ({ ownedOnly }) => {
   // 卡片宽度
   const [card_width_px, setCardWidth] = useState(0);
   // 列间距
-  const [column_gap_px, setColumnGap] = useState(0);
+  const [_, setColumnGap] = useState(0);
   
   // 计算瀑布流布局
   const calculateLayout = useCallback(() => {

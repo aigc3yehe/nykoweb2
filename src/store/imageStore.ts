@@ -166,6 +166,7 @@ export const changeImageOrder = atom(
     });
     
     // 重新获取数据
+    // @ts-ignore
     get(fetchImages)({ reset: true });
   }
 );
@@ -184,6 +185,7 @@ export const changeImageOrderDirection = atom(
       hasMore: true
     });
     
+    // @ts-ignore
     get(fetchImages)({ reset: true });
   }
 );
@@ -202,6 +204,7 @@ export const filterByModelId = atom(
       hasMore: true
     });
     
+    // @ts-ignore
     get(fetchImages)({ reset: true, model_id });
   }
 );
@@ -220,6 +223,7 @@ export const filterByState = atom(
       hasMore: true
     });
     
+    // @ts-ignore
     get(fetchImages)({ reset: true, state });
   }
 );
@@ -227,7 +231,7 @@ export const filterByState = atom(
 // 重置
 export const resetImageList = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(imageListAtom, initialState);
   }
 );

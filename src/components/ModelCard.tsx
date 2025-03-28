@@ -14,20 +14,6 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
   
-  // 获取模型训练状态
-  const getTrainState = (state: number) => {
-    switch (state) {
-      case 0:
-        return '待训练';
-      case 1:
-        return '训练中';
-      case 2:
-        return '已完成';
-      default:
-        return '未知状态';
-    }
-  };
-  
   // 检查是否在训练中
   const isTraining = model.model_tran[0]?.train_state === 0 || model.model_tran[0]?.train_state === 1;
   // 检查是否已完成训练

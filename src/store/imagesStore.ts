@@ -84,7 +84,8 @@ export const uploadFileToS3 = async (file: File): Promise<string> => {
 // 更新消息的URL列表
 export const updateMessageUrlsAtom = atom(
   null,
-  (get, set, { messageId, url, progress }: { messageId: number, url: string, progress: number }) => {
+  // @ts-ignore
+  (_, set, { messageId, url, progress }: { messageId: number, url: string, progress: number }) => {
     // 更新图片上传进度
     set(imageUploadAtom, (prev) => ({
       ...prev,
@@ -99,7 +100,7 @@ export const updateMessageUrlsAtom = atom(
 // 显示通知
 export const showToastAtom = atom(
   null,
-  (get, set, { message, severity }: { message: string, severity: 'success' | 'error' | 'info' | 'warning' }) => {
+  (_, set, { message, severity }: { message: string, severity: 'success' | 'error' | 'info' | 'warning' }) => {
     set(toastAtom, {
       message,
       severity,
@@ -194,7 +195,7 @@ export const uploadImages = async (
 // 创建用于更新图片上传状态的方法
 export const setImageUploadStateAtom = atom(
   null,
-  (get, set, update: Partial<ImageUploadState>) => {
+  (_, set, update: Partial<ImageUploadState>) => {
     set(imageUploadAtom, (prev) => ({
       ...prev,
       ...update

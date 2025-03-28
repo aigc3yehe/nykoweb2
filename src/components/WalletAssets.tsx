@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAtom, useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { getTokensForOwner } from '../store/alchemyStore';
 import styles from './WalletAssets.module.css';
 import defaultTokenIcon from '../assets/token_default.svg';

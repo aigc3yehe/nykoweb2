@@ -29,7 +29,7 @@ export const hideDialogAtom = atom(
 
 export const showDialogAtom = atom(
   null,
-  (get, set, update: DialogState) => {
+  (_, set, update: DialogState) => {
     set(dialogAtom, update);
   }
 ); 

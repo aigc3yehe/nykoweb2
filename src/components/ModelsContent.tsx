@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import styles from './ModelsContent.module.css';
 import { modelListAtom, fetchModels } from '../store/modelStore';
-import { accountAtom } from '../store/accountStore';
 import ModelCard from './ModelCard';
 
 interface ModelsContentProps {
@@ -14,22 +13,10 @@ interface ModelsContentProps {
 const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, onModelClick }) => {
   const [modelListState] = useAtom(modelListAtom);
   const fetchModelsList = useSetAtom(fetchModels);
-  const [accountState] = useAtom(accountAtom);
   
   const { models = [], isLoading, error, hasMore } = modelListState;
   const observer = useRef<IntersectionObserver | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  const getOrderFromSortOption = (option: string): 'created_at' | 'usage' => {
-    switch (option) {
-      case 'Popular':
-        return 'usage';
-      case 'New Model':
-      case 'MKT CAP':
-      default:
-        return 'created_at';
-    }
-  };
   
   useEffect(() => {
     fetchModelsList({ reset: true, ownedOnly });
@@ -59,8 +46,8 @@ const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, on
     <div className={styles.modelsContent} ref={scrollContainerRef}>
       {filteredModels.length === 0 && !isLoading ? (
         <div className={styles.noModels}>
-          <p>未找到模型</p>
-          {ownedOnly && <p>您当前未拥有任何模型</p>}
+          <p>Model not found</p>
+          {ownedOnly && <p>You currently do not own any models</p>}
         </div>
       ) : (
         <div className={styles.modelsGrid}>

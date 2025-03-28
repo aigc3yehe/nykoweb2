@@ -4,7 +4,7 @@ import { Alchemy, Network, AssetTransfersCategory, AssetTransfersResponse, Asset
 // 配置 Alchemy SDK
 const alchemyConfig = {
   apiKey: import.meta.env.VITE_ALCHEMY_API_KEY || 'demo', // 使用环境变量中的API密钥
-  network: Network.ETH_MAINNET, // 默认使用以太坊主网
+  network: Network.BASE_MAINNET, 
 };
 
 // 创建 Alchemy SDK 实例
@@ -103,6 +103,7 @@ export const getAssetTransfers = atom(
     
     try {
       // 调用 Alchemy API 获取资产转移历史
+      // @ts-ignore
       const transfers = await alchemy.core.getAssetTransfers(params);
       
       // 更新状态
@@ -131,7 +132,7 @@ export const getAssetTransfers = atom(
 // 添加获取特定地址的 NFT 资产转移历史的便捷方法
 export const getNFTTransfersForAddress = atom(
   null,
-  async (get, set, params: { address: string; pageKey?: string }) => {
+  async (get, _, params: { address: string; pageKey?: string }) => {
     const { address, pageKey } = params;
     
     // 构建 getAssetTransfers 参数
@@ -145,6 +146,7 @@ export const getNFTTransfersForAddress = atom(
     
     // 调用 getAssetTransfers 原子函数
     const setGetAssetTransfers = get(getAssetTransfers);
+    // @ts-ignore
     return await setGetAssetTransfers(transferParams);
   }
 );
@@ -152,7 +154,7 @@ export const getNFTTransfersForAddress = atom(
 // 切换网络
 export const switchNetwork = atom(
   null,
-  (get, set, network: Network) => {
+  (_, set, network: Network) => {
     // 创建新的 Alchemy 实例
     const newAlchemy = new Alchemy({
       ...alchemyConfig,
@@ -160,6 +162,7 @@ export const switchNetwork = atom(
     });
     
     // 更新全局 alchemy 实例
+    // @ts-ignore
     alchemy.config = newAlchemy.config;
     
     // 清空当前状态

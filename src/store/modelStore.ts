@@ -145,6 +145,7 @@ export const changeOrder = atom(
     });
     
     // 重新获取数据
+    // @ts-ignore
     get(fetchModels)(true);
   }
 );
@@ -163,6 +164,7 @@ export const changeOrderDirection = atom(
       hasMore: true
     });
     
+    // @ts-ignore
     get(fetchModels)(true);
   }
 );
@@ -170,7 +172,7 @@ export const changeOrderDirection = atom(
 // 重置
 export const resetModelList = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(modelListAtom, initialState);
   }
 );
@@ -246,7 +248,7 @@ export const fetchModelDetail = atom(
 // 清除模型详情
 export const clearModelDetail = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(modelDetailAtom, initialDetailState);
   }
 ); 

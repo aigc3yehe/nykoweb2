@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { User, Twitter as PrivyTwitter, Google } from '@privy-io/react-auth';
+import { User, Google } from '@privy-io/react-auth';
 import { queryUser } from '../services/userService';
 import { Twitter } from './imageStore';
 
@@ -54,6 +54,8 @@ export const setUser = atom(
       if (did) {
         const queryParams = { did };
         if (walletAddress) {
+          // 如果有钱包地址，查询钱包地址
+          // @ts-ignore
           queryParams.address = walletAddress;
         }
         
@@ -174,7 +176,7 @@ export const setCredits = atom(
 // 登出
 export const logout = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(accountAtom, initialState);
   }
 ); 

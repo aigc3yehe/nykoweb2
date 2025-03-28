@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import { useLoginWithOAuth, usePrivy } from '@privy-io/react-auth';
 import styles from './LoginButton.module.css';
 import GoldIcon from '../assets/gold.svg';
