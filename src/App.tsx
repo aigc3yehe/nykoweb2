@@ -9,13 +9,17 @@ import { exportKeyAtom, hideExportKeyAtom, showExportKeyAtom } from './store/exp
 import ImageDetailsModal from './components/ImageDetailsModal'
 import AccountPopup from './components/AccountPopup'
 import ExportKeyModal from './components/ExportKeyModal'
+import GeneratePopup from './components/GeneratePopup'
+import { generatePopupAtom, hideGeneratePopupAtom } from './store/generatePopupStore'
 
 function App() {
   const [modalState] = useAtom(modalAtom)
   const [accountPopupState] = useAtom(accountPopupAtom)
   const [exportKeyState] = useAtom(exportKeyAtom)
+  const [generatePopupState] = useAtom(generatePopupAtom)
   const hideAccountPopup = useSetAtom(hideAccountPopupAtom)
   const hideExportKey = useSetAtom(hideExportKeyAtom)
+  const hideGeneratePopup = useSetAtom(hideGeneratePopupAtom)
   const showExportKey = useSetAtom(showExportKeyAtom)
   const handleCloseImageDetails = useSetAtom(closeImageDetails)
 
@@ -55,6 +59,15 @@ function App() {
           isOpen={true}
           onClose={hideExportKey}
           onCancel={hideExportKey}
+        />
+      )}
+      
+      {/* 生成弹出框 */}
+      {generatePopupState.open && (
+        <GeneratePopup
+          isOpen={true}
+          onClose={hideGeneratePopup}
+          model={generatePopupState.model}
         />
       )}
     </div>

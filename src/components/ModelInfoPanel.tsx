@@ -1,6 +1,7 @@
 import React from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { accountAtom } from '../store/accountStore';
+import { showGeneratePopupAtom } from '../store/generatePopupStore';
 import styles from './ModelInfoPanel.module.css';
 import avatarSvg from '../assets/Avatar.svg';
 import twitterSvg from '../assets/twitter.svg';
@@ -16,6 +17,7 @@ interface ModelInfoPanelProps {
 
 const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   const [accountState] = useAtom(accountAtom);
+  const showGeneratePopup = useSetAtom(showGeneratePopupAtom);
   
   // 检查当前用户是否是模型创建者
   const isModelOwner = accountState.did === model.creator;
@@ -72,8 +74,8 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   const status = getTrainingStatus();
   
   const handleGenerate = () => {
-    console.log('Generate with model:', model.id);
-    // 实现生成功能
+    // 打开生成弹窗，传入模型信息
+    showGeneratePopup(accountState.did, model);
   };
   
   const handleShare = () => {
@@ -196,4 +198,4 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   );
 };
 
-export default ModelInfoPanel; 
+export default ModelInfoPanel;

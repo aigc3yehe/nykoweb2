@@ -142,7 +142,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     return (
       <div className={styles.modelDetail} ref={scrollContainerRef}>
         <div className={styles.loadingContainer}>
-          <p>加载中...</p>
+          <p>Loading...</p>
         </div>
       </div>
     );

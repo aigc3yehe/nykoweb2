@@ -11,7 +11,7 @@ import { chatAtom, sendMessage, aspectRatios, AspectRatio, setAspectRatio } from
 interface Tag {
   id: string;
   text: string;
-  type: 'normal' | 'closeable' | 'imageRatio';
+  type: 'normal' | 'closeable' | 'imageRatio' | 'lora';
   value?: string;
   ratio?: string;
 }
@@ -91,7 +91,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading }) => {
         baseTags.push({
           id: 'lora_name',
           text: 'Lora',
-          type: 'normal',
+          type: 'lora',
           value: models[0].lora_name || undefined 
         }) 
       }
@@ -239,6 +239,13 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading }) => {
                       ))}
                     </div>
                   )}
+                </div>
+              );
+            } else if (tag.type === 'lora') {
+              return (
+                <div key={tag.id} className={styles.tag}>
+                  <span className={styles.text}>{tag.text}</span>
+                  <span className={styles.value}>{tag.value}</span>
                 </div>
               );
             } else {
