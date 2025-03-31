@@ -1,24 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './ContentDisplay.module.css';
 import ContentHeader from './ContentHeader';
 import ModelsContent from './ModelsContent';
 import ImagesContent from './ImagesContent';
 import ModelDetail from './ModelDetail';
 import { useAtom, useSetAtom } from 'jotai';
-import { clearModelDetail, modelDetailAtom } from '../store/modelStore';
+import { clearModelDetail, modelDetailAtom, modelIdAndNameAtom } from '../store/modelStore';
 
 const ContentDisplay: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'models' | 'images'>('models');
   const [ownedOnly, setOwnedOnly] = useState(false);
   const [sortOption, setSortOption] = useState<'New Model' | 'MKT CAP' | 'Popular'>('New Model');
   const [viewingModelId, setViewingModelId] = useState<number | null>(null);
-  
+  const [viewingModelName, setViewingModelName] = useState<string | null>(null);
   const [modelDetailState] = useAtom(modelDetailAtom);
   const clearDetail = useSetAtom(clearModelDetail);
-  
+  const [modelIdAndName] = useAtom(modelIdAndNameAtom);
+
   // 处理查看模型详情
-  const handleViewModelDetail = (modelId: number) => {
+  const handleViewModelDetail = (modelId: number, modelName: string) => {
     setViewingModelId(modelId);
+    setViewingModelName(modelName);
   };
   
   // 处理返回到模型列表
@@ -26,6 +28,12 @@ const ContentDisplay: React.FC = () => {
     setViewingModelId(null);
     clearDetail();
   };
+
+  useEffect(() => {
+    if (modelIdAndName.modelId && modelIdAndName.modelName) {
+      handleViewModelDetail(modelIdAndName.modelId, modelIdAndName.modelName);
+    }
+  }, [modelIdAndName]);
   
   return (
     <div className={styles.contentDisplay}>
@@ -40,7 +48,7 @@ const ContentDisplay: React.FC = () => {
               sortOption={sortOption}
               setSortOption={setSortOption}
               isDetailMode={true}
-              modelName={modelDetailState.currentModel?.name || '加载中...'}
+              modelName={modelDetailState.currentModel?.name || viewingModelName || 'Loading...'}
               onBackClick={handleBackToList}
             />
             

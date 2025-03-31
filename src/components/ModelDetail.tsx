@@ -8,6 +8,7 @@ import { setCurrentModel, clearCurrentModel } from '../store/chatStore';
 import ImageCard from './ImageCard';
 import ModelCarousel from './ModelCarousel';
 import ModelInfoPanel from './ModelInfoPanel';
+import StatePrompt from './StatePrompt';
 
 interface ModelDetailProps {
   modelId: number;
@@ -141,9 +142,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   if (isLoading) {
     return (
       <div className={styles.modelDetail} ref={scrollContainerRef}>
-        <div className={styles.loadingContainer}>
-          <p>Loading...</p>
-        </div>
+        <StatePrompt message="Loading Model Details..." />
       </div>
     );
   }
@@ -151,10 +150,13 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   if (error) {
     return (
       <div className={styles.modelDetail} ref={scrollContainerRef}>
-        <div className={styles.errorContainer}>
-          <p>加载失败: {error}</p>
-          <button onClick={() => fetchDetail(modelId)}>重试</button>
-        </div>
+        <StatePrompt 
+          message="Failed to Load Model"
+          action={{
+            text: 'Retry',
+            onClick: () => fetchDetail(modelId)
+          }}
+        />
       </div>
     );
   }
@@ -162,9 +164,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   if (!currentModel) {
     return (
       <div className={styles.modelDetail} ref={scrollContainerRef}>
-        <div className={styles.errorContainer}>
-          <p>未找到模型信息</p>
-        </div>
+        <StatePrompt message="Model Not Found" />
       </div>
     );
   }
@@ -203,11 +203,11 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
         <div className={styles.tabContent}>
           {activeTab === 'description' ? (
             <div className={styles.descriptionContent}>
-              <p>{currentModel.description || '暂无描述'}</p>
+              <p>{currentModel.description || 'empty description'}</p>
             </div>
           ) : (
             <div className={styles.tokenizationContent}>
-              <p>Tokenization 信息占位，待实现...</p>
+              <p>Tokenization information placeholder, to be implemented...</p>
             </div>
           )}
         </div>
@@ -218,9 +218,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
         <h2 className={styles.galleryTitle}>Gallery</h2>
         
         {images.length === 0 && !imagesLoading ? (
-          <div className={styles.noImages}>
-            <p>未找到相关图片</p>
-          </div>
+          <StatePrompt message="No Images Found" />
         ) : (
           <div 
             className={styles.waterfallContainer} 
@@ -254,16 +252,17 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
         <div ref={loadMoreTriggerRef} className={styles.loadMoreTrigger}></div>
         
         {imagesLoading && (
-          <div className={styles.loadingContainer}>
-            <p>加载图片中...</p>
-          </div>
+          <StatePrompt message="Loading Images..." />
         )}
         
         {imagesError && (
-          <div className={styles.errorContainer}>
-            <p>图片加载失败: {imagesError}</p>
-            <button onClick={() => fetchImagesList({ reset: false, model_id: modelId })}>重试</button>
-          </div>
+          <StatePrompt 
+            message="Failed to Load Images"
+            action={{
+              text: 'Retry',
+              onClick: () => fetchImagesList({ reset: false, model_id: modelId })
+            }}
+          />
         )}
       </div>
     </div>

@@ -3,9 +3,11 @@ import { useAtom, useSetAtom } from 'jotai';
 import styles from './ImagesContent.module.css';
 import { imageListAtom, fetchImages } from '../store/imageStore';
 import ImageCard from './ImageCard';
+import StatePrompt from './StatePrompt';
 
 interface ImagesContentProps {
   ownedOnly: boolean;
+  onNavigateToModel?: (modelId: number, modelName: string) => void;
 }
 
 interface ImagePosition {
@@ -128,10 +130,9 @@ const ImagesContent: React.FC<ImagesContentProps> = ({ ownedOnly }) => {
   return (
     <div className={styles.imagesContent} ref={scrollContainerRef}>
       {images.length === 0 && !isLoading ? (
-        <div className={styles.noImages}>
-          <p>未找到图片</p>
-          {ownedOnly && <p>您当前未拥有任何图片</p>}
-        </div>
+        <StatePrompt 
+          message={ownedOnly ? "You Don't Own Any Images" : "No Images Found"} 
+        />
       ) : (
         <div 
           className={styles.waterfallContainer} 
@@ -165,16 +166,17 @@ const ImagesContent: React.FC<ImagesContentProps> = ({ ownedOnly }) => {
       <div ref={loadMoreTriggerRef} className={styles.loadMoreTrigger}></div>
       
       {isLoading && (
-        <div className={styles.loadingContainer}>
-          <p>加载中...</p>
-        </div>
+        <StatePrompt message="Loading Images..." />
       )}
       
       {error && (
-        <div className={styles.errorContainer}>
-          <p>加载失败: {error}</p>
-          <button onClick={() => fetchImagesList({ reset: false, ownedOnly })}>重试</button>
-        </div>
+        <StatePrompt 
+          message="Failed to Load Images"
+          action={{
+            text: 'Retry',
+            onClick: () => fetchImagesList({ reset: false, ownedOnly })
+          }}
+        />
       )}
     </div>
   );

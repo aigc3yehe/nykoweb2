@@ -2,7 +2,7 @@ import { atom } from 'jotai';
 import { User, Google } from '@privy-io/react-auth';
 import { queryUser } from '../services/userService';
 import { Twitter } from './imageStore';
-import { chatAtom, stopHeartbeat } from './chatStore'; // 导入聊天状态
+import { chatAtom } from './chatStore'; // 导入聊天状态
 
 export interface AccountState {
   user: User | null;

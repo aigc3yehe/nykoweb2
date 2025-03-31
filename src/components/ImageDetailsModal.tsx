@@ -5,6 +5,8 @@ import avatarSvg from '../assets/Avatar.svg';
 import twitterSvg from '../assets/twitter.svg';
 import goSvg from '../assets/go.svg';
 import closeImgSvg from '../assets/close_img.svg';
+import { useSetAtom } from 'jotai';
+import { setModelIdAndName } from '../store/modelStore';
 
 interface ImageDetailsModalProps {
   image: Image;
@@ -23,7 +25,7 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
 }) => {
   // 使用内部状态来确保组件重新渲染
   const [localImageDetail, setLocalImageDetail] = useState<ImageDetail | null>(imageDetail);
-  
+  const setModelIdAndNameAction = useSetAtom(setModelIdAndName);
   // 当外部imageDetail变化时更新内部状态
   useEffect(() => {
     if (imageDetail) {
@@ -102,15 +104,36 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
     // 优先使用详细信息中的宽高
     if (localImageDetail?.width && localImageDetail?.height) {
       const aspectRatio = localImageDetail.height / localImageDetail.width;
-      return 410 * aspectRatio;
+      return 25.625 * aspectRatio;
     } 
     
     if (image.width && image.height) {
       const aspectRatio = image.height / image.width;
-      return 410 * aspectRatio;
+      return 25.625 * aspectRatio;
     }
     
-    return 410; // 默认高度
+    return 25.625; // 默认高度
+  };
+
+  const handleGoClick = () => {
+    // 获取模型ID，优先使用imageDetail中的数据
+    const modelId = localImageDetail?.models?.id || image.model_id;
+    // 获取模型名称
+    const modelName = getModelName();
+    
+    // 首先关闭当前模态框
+    onClose();
+    
+    // 如果提供了导航函数且有有效的模型ID，则导航到模型详情
+    if (modelId) {
+      setModelIdAndNameAction({ modelId, modelName });
+    }
+  };
+
+  const handleTwitterClick = () => {
+    if (localImageDetail?.users?.twitter?.username || image.users.twitter?.username) {
+      window.open(`https://twitter.com/${localImageDetail?.users?.twitter?.username || image.users.twitter?.username}`, '_blank');
+    }
   };
 
   // 获取图片URL
@@ -137,12 +160,12 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
       </button>
       
       <div className={styles.modalContent} onClick={handleContentClick}>
-        <div className={styles.imageContainer} style={{ height: `${calculateImageHeight()}px` }}>
+        <div className={styles.imageContainer} style={{ height: `${calculateImageHeight()}rem` }}>
           {getImageUrl() ? (
             <img src={getImageUrl()} alt={`图片 ${image.id}`} className={styles.image} />
           ) : (
             <div className={styles.placeholderImage}>
-              {image.state === -1 ? '生成失败' : '正在生成...'}
+              {image.state === -1 ? 'Failed to generate' : 'Generating...'}
             </div>
           )}
           {isLoading && (
@@ -165,7 +188,7 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
               />
               <span className={styles.authorName}>{getDisplayName()}</span>
               {(localImageDetail?.users?.twitter?.username || image.users.twitter?.username) && (
-                <img src={twitterSvg} alt="Twitter" className={styles.twitterIcon} />
+                <img src={twitterSvg} alt="Twitter" className={styles.twitterIcon} onClick={handleTwitterClick}/>
               )}
             </div>
             
@@ -178,7 +201,7 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
             <div className={styles.modelInfoHeader}>Using Model</div>
             <div className={styles.modelInfoContent}>
               <span className={styles.modelName}>{getModelName()}</span>
-              <img src={goSvg} alt="Go" className={styles.goIcon} />
+              <img src={goSvg} alt="Go" className={styles.goIcon} onClick={handleGoClick}/>
               {error && <div className={styles.errorIndicator} title={`加载失败: ${error}`}>!</div>}
             </div>
           </div>

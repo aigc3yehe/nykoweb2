@@ -56,6 +56,11 @@
   background: rgba(55, 65, 81, 0.3); /* #3741514D */
 }
 
+.twitterIcon {
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+}
+
 /* Doc按钮样式 */
 .docButton {
   display: flex;
@@ -68,6 +73,12 @@
   border: none;
   cursor: pointer;
   transition: background-color 0.2s;
+}
+
+
+.docIcon {
+  width: 1.0625rem; /* 17px */
+  height: 1rem; /* 16px */
 }
 
 .docButton span {

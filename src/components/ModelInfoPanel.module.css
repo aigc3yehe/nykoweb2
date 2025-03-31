@@ -13,7 +13,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.625rem 0.875rem; /* 10px 14px */
+  padding: 0.625rem 0.625rem; /* 10px 10px */
   border-radius: 0.25rem; /* 4px */
   border: 1px solid rgba(55, 65, 81, 0.3); /* #3741514D */
   background: linear-gradient(90deg, rgba(31, 41, 55, 0.2) 0%, rgba(63, 79, 103, 0.2) 100%);
@@ -43,6 +43,24 @@
   vertical-align: middle;
   text-transform: capitalize;
   color: #FFFFFF;
+}
+
+/* 图标按钮样式 */
+.twitterButton {
+  width: 1.75rem; /* 28px */
+  height: 1.75rem; /* 28px */
+  border-radius: 0.25rem; /* 4px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.twitterButton:hover {
+  background: rgba(55, 65, 81, 0.3); /* #3741514D */
 }
 
 .twitterIcon {

@@ -87,6 +87,16 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
     console.log('Mint coin for model:', model.id);
     // 实现发币功能
   };
+
+  const handleTwitterClick = () => {
+    console.log('Twitter clicked');
+    // 实现Twitter点击功能
+    if (model.users.twitter?.username) {  
+      window.open(`https://twitter.com/${model.users.twitter?.username}`, '_blank');
+    } else {
+      console.log('No Twitter username found');
+    }
+  };
   
   return (
     <div className={styles.infoPanel}>
@@ -105,7 +115,9 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
         </div>
         
         {model.users.twitter && (
-          <img src={twitterSvg} alt="Twitter" className={styles.twitterIcon} />
+          <button className={styles.twitterButton} onClick={handleTwitterClick}>
+            <img src={twitterSvg} alt="Twitter" className={styles.twitterIcon} />
+          </button>
         )}
       </div>
       

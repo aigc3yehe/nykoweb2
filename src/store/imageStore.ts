@@ -103,8 +103,8 @@ export const fetchImages = atom(
         });
         
         // 如果是owned模式，添加user参数
-        if (ownedOnly && accountState.walletAddress) {
-          params.append('user', accountState.walletAddress);
+        if (ownedOnly && accountState.did) {
+          params.append('user', accountState.did);
         }
         
         // 添加可选的model_id参数

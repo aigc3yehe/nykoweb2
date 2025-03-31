@@ -13,12 +13,12 @@ const Header: React.FC = () => {
       <div className={styles.actionSection}>
         {/* X按钮 */}
         <button className={styles.iconButton}>
-          <img src={XIcon} alt="Close" width="16" height="16" />
+          <img src={XIcon} alt="Close" className={styles.twitterIcon}/>
         </button>
         
         {/* Doc按钮 */}
         <button className={styles.docButton}>
-          <img src={DocIcon} alt="Documentation" width="17" height="16" />
+          <img src={DocIcon} alt="Documentation" className={styles.docIcon}/>
           <span>Doc</span>
         </button>
         

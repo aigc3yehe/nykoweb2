@@ -3,11 +3,12 @@ import { useAtom, useSetAtom } from 'jotai';
 import styles from './ModelsContent.module.css';
 import { modelListAtom, fetchModels } from '../store/modelStore';
 import ModelCard from './ModelCard';
+import StatePrompt from './StatePrompt';
 
 interface ModelsContentProps {
   ownedOnly: boolean;
   sortOption: 'New Model' | 'MKT CAP' | 'Popular';
-  onModelClick: (modelId: number) => void;
+  onModelClick: (modelId: number, modelName: string) => void;
 }
 
 const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, onModelClick }) => {
@@ -45,10 +46,9 @@ const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, on
   return (
     <div className={styles.modelsContent} ref={scrollContainerRef}>
       {filteredModels.length === 0 && !isLoading ? (
-        <div className={styles.noModels}>
-          <p>Model not found</p>
-          {ownedOnly && <p>You currently do not own any models</p>}
-        </div>
+        <StatePrompt 
+          message={ownedOnly ? "You Don't Own Any Models" : "No Models Found"} 
+        />
       ) : (
         <div className={styles.modelsGrid}>
           {filteredModels.map((model, index) => {
@@ -58,7 +58,7 @@ const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, on
                   ref={lastModelElementRef} 
                   key={model.id} 
                   className={styles.modelCardContainer}
-                  onClick={() => onModelClick(model.id)}
+                  onClick={() => onModelClick(model.id, model.name)}
                 >
                   <ModelCard model={model} />
                 </div>
@@ -68,7 +68,7 @@ const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, on
                 <div 
                   key={model.id} 
                   className={styles.modelCardContainer}
-                  onClick={() => onModelClick(model.id)}
+                  onClick={() => onModelClick(model.id, model.name)}
                 >
                   <ModelCard model={model} />
                 </div>
@@ -79,16 +79,17 @@ const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, on
       )}
       
       {isLoading && (
-        <div className={styles.loadingContainer}>
-          <p>加载中...</p>
-        </div>
+        <StatePrompt message="Loading Models..." />
       )}
       
       {error && (
-        <div className={styles.errorContainer}>
-          <p>加载失败: {error}</p>
-          <button onClick={() => fetchModelsList({ reset: false, ownedOnly })}>重试</button>
-        </div>
+        <StatePrompt 
+          message="Failed to Load Models"
+          action={{
+            text: 'Retry',
+            onClick: () => fetchModelsList({ reset: false, ownedOnly })
+          }}
+        />
       )}
     </div>
   );

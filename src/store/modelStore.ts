@@ -87,8 +87,8 @@ export const fetchModels = atom(
         });
         
         // 如果是owned模式，添加user参数
-        if (ownedOnly && accountState.walletAddress) {
-          params.append('user', accountState.walletAddress);
+        if (ownedOnly && accountState.did) {
+          params.append('user', accountState.did);
         }
         
         // 根据owned状态选择不同的API端点
@@ -251,4 +251,31 @@ export const clearModelDetail = atom(
   (_, set) => {
     set(modelDetailAtom, initialDetailState);
   }
-); 
+);
+
+// 创建模型详情状态原子
+interface ModelIdAndNameState {
+  modelId: number | null;
+  modelName: string | null;
+}
+
+const initialModelIdAndNameState: ModelIdAndNameState = {
+  modelId: null,    
+  modelName: null
+};
+
+export const modelIdAndNameAtom = atom<ModelIdAndNameState>(initialModelIdAndNameState);
+
+export const setModelIdAndName = atom(
+  null,
+  (_, set, { modelId, modelName }: { modelId: number, modelName: string }) => {
+    set(modelIdAndNameAtom, {
+      modelId,
+      modelName
+    });
+  }
+);
+
+export const getModelIdAndName = atom(
+  (get) => get(modelIdAndNameAtom)
+);

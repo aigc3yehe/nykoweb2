@@ -119,7 +119,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
           className={styles.accountContainer} 
           onClick={handleAccountClick}
         >
-          <img src={GoldIcon} alt="Account" width="16" height="16" />
+          <img src={GoldIcon} alt="Account" className={styles.goldIcon}/>
           <img src={twitter?.profilePictureUrl || ''} alt="Twitter Avatar" className={styles.avatarIcon} />
           <span className={styles.accountAddress}>{formatAddress(walletAddress)}</span>
         </div>

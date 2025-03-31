@@ -13,19 +13,19 @@
 }
 
 .modalContent {
-  width: 410px;
+  width: 25.625rem;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 1.875rem;
   position: relative;
 }
 
 .closeButton {
   position: absolute;
-  top: 42px;
-  right: 66px;
-  width: 38px;
-  height: 38px;
+  top: 2.625rem;
+  right: 4.125rem;
+  width: 2.375rem;
+  height: 2.375rem;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -39,7 +39,7 @@
 }
 
 .imageContainer {
-  width: 410px;
+  width: 25.625rem;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -66,34 +66,34 @@
 }
 
 .imageInfo {
-  width: 410px;
-  height: 116px;
+  width: 25.625rem;
+  height: 7.25rem;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 0.9375rem;
 }
 
 .infoHeader {
-  width: 410px;
-  height: 24px;
+  width: 25.625rem;
+  height: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-right: 4px;
-  padding-left: 4px;
+  padding-right: 0.25rem;
+  padding-left: 0.25rem;
 }
 
 .authorInfo {
-  height: 24px;
+  height: 1.5rem; /* 24px */
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .authorAvatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 100px;
+  width: 1.5rem; /* 24px */
+  height: 1.5rem; /* 24px */
+  border-radius: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.5); /* #FFFFFF80 */
   object-fit: cover;
 }
@@ -101,7 +101,7 @@
 .authorName {
   font-family: 'Jura', sans-serif;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 100%;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -109,14 +109,23 @@
 }
 
 .twitterIcon {
-  width: 24px;
-  height: 24px;
+  width: 1.5rem; /* 24px */
+  height: 1.5rem; /* 24px */
+  border-radius: 0.25rem; /* 4px */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.twitterIcon:hover {
+  background: rgba(55, 65, 81, 0.3); /* #3741514D */
 }
 
 .creationTime {
   font-family: 'Jura', sans-serif;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 100%;
   letter-spacing: 0%;
   text-align: right;
@@ -125,20 +134,20 @@
 }
 
 .modelInfo {
-  width: 410px;
-  height: 77px;
+  width: 25.625rem;
+  height: 4.8125rem;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 14px 20px;
-  border-radius: 4px;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.25rem;
   border: 1px solid rgba(55, 65, 81, 0.3); /* #3741514D */
 }
 
 .modelInfoHeader {
   font-family: 'Jura', sans-serif;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 100%;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -146,8 +155,8 @@
 }
 
 .modelInfoContent {
-  width: 370px;
-  height: 24px;
+  width: 23.125rem;
+  height: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -156,7 +165,7 @@
 .modelName {
   font-family: 'Jura', sans-serif;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 100%;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -164,9 +173,17 @@
 }
 
 .goIcon {
-  width: 24px;
-  height: 24px;
+  width: 1.5rem; /* 24px */
+  height: 1.5rem; /* 24px */
+  border-radius: 0.25rem; /* 4px */
+  background: transparent;
+  border: none;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.goIcon:hover {
+  background: rgba(55, 65, 81, 0.3); /* #3741514D */
 }
 
 /* 添加加载和错误状态的样式 */

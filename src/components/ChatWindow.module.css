@@ -162,16 +162,22 @@
   display: inline-block;
   width: 0.5rem;
   height: 0.5rem;
-  background-color: #6E788A;
   border-radius: 50%;
   animation: bounce 1.3s linear infinite;
 }
 
+/* 为三个小圆点设置不同的颜色 */
+.typingIndicator span:nth-child(1) {
+  background-color: #C7FF8C; /* 绿色 */
+}
+
 .typingIndicator span:nth-child(2) {
+  background-color: #E8C4EA; /* 粉色 */
   animation-delay: 0.15s;
 }
 
 .typingIndicator span:nth-child(3) {
+  background-color: #39EDFF; /* 蓝色 */
   animation-delay: 0.3s;
 }
 

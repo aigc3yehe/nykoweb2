@@ -1,0 +1,44 @@
+.statePrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 0.625rem; /* 10px */
+}
+
+.message {
+  font-family: 'Tektur', sans-serif;
+  font-weight: 400;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0;
+  text-transform: capitalize;
+  color: #6E788A4D;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+
+.actionButton {
+  font-family: 'Tektur', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 100%;
+  color: #FFFFFF;
+  background: #6366F1;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 0.5rem;
+}
+
+.actionButton:hover {
+  background: #4F46E5;
+}
+
+.actionButton:disabled {
+  background: #6E788A;
+  cursor: not-allowed;
+} 

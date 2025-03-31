@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import styles from './ContentHeader.module.css';
 import dropdownIcon from '../assets/dropdown.svg';
 import backIcon from '../assets/back.svg';
+import checkboxNormal from '../assets/checkbox_normal.svg';
+import checkboxSelected from '../assets/checkbox_selected.svg';
 
 interface ContentHeaderProps {
   activeTab: 'models' | 'images';
@@ -46,8 +48,8 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   if (isDetailMode) {
     return (
       <div className={styles.contentHeader}>
-        <div className={styles.detailNavigation} onClick={onBackClick}>
-          <img src={backIcon} alt="Back" className={styles.backIcon} />
+        <div className={styles.detailNavigation} >
+          <img src={backIcon} alt="Back" className={styles.backIcon} onClick={onBackClick}/>
           <span className={styles.modelsLabel}>Models</span>
           <div className={styles.divider}></div>
           <span className={styles.modelName}>{modelName}</span>
@@ -75,14 +77,17 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
       </div>
       
       <div className={styles.controlsGroup}>
-        <div className={styles.checkboxContainer}>
-          <input 
-            type="checkbox" 
-            id="owned-check" 
-            checked={ownedOnly}
-            onChange={() => setOwnedOnly(!ownedOnly)}
-          />
-          <label htmlFor="owned-check" className={styles.checkboxLabel}>Owned</label>
+        <div 
+          className={styles.checkboxContainer} 
+          onClick={() => setOwnedOnly(!ownedOnly)}
+        >
+          <div className={styles.checkboxIcon}>
+            <img 
+              src={ownedOnly ? checkboxSelected : checkboxNormal} 
+              alt="checkbox" 
+            />
+          </div>
+          <span className={styles.checkboxLabel}>Owned</span>
         </div>
         
         {activeTab === 'models' && (

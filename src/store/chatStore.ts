@@ -862,12 +862,12 @@ export async function sendHeartbeat(userUuid: string): Promise<ConnectionStatus>
     });
 
     if (!response.ok) {
-      throw new Error(`心跳请求失败，状态码 ${response.status}`);
+      throw new Error(`Heartbeat request failed, status code ${response.status}`);
     }
 
     return await response.json();
   } catch (error) {
-    console.error('发送心跳请求出错:', error);
+    console.error('Heartbeat request failed:', error);
     throw error;
   }
 }
@@ -931,7 +931,7 @@ export const startHeartbeat = atom(
           });
         }
       } catch (error) {
-        console.error('心跳请求失败:', error);
+        console.error('Heartbeat request failed:', error);
         // 错误处理可以根据需要添加，例如在多次失败后停止心跳
       }
     }, HEARTBEAT_INTERVAL);

@@ -67,7 +67,6 @@ function App() {
         <GeneratePopup
           isOpen={true}
           onClose={hideGeneratePopup}
-          model={generatePopupState.model}
         />
       )}
     </div>
