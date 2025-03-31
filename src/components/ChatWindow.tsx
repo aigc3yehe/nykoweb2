@@ -15,6 +15,8 @@ import {
   stopHeartbeat
 } from '../store/chatStore';
 import { showDialogAtom } from '../store/dialogStore';
+import { usePrivy } from '@privy-io/react-auth';
+import { useLoginWithOAuth } from '@privy-io/react-auth';
 
 interface ChatWindowProps {
   uuid: string;
@@ -40,6 +42,30 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const customScrollbarRef = useRef<HTMLDivElement>(null);
+
+  const { authenticated } = usePrivy();
+  const { initOAuth, loading: loginLoading } = useLoginWithOAuth({
+    onComplete: async ({ user }) => {
+      console.log('登录成功', user);
+      if (user) {
+        setUserInfoAction({ 
+          uuid, 
+          did: user.id 
+        });
+      }
+    },
+    onError: (error) => {
+      console.error('登录失败', error);
+    }
+  });
+
+  const handleLogin = async () => {
+    try {
+      await initOAuth({ provider: 'twitter' });
+    } catch (error) {
+      console.error('启动登录时出错:', error);
+    }
+  };
 
   // 设置用户ID
   useEffect(() => {
@@ -196,7 +222,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
           ref={messagesContainerRef}
           className={`${styles.messagesContainer} ${styles.hideScrollbar}`}
         >
-          {chatState.messages.length === 0 ? (
+          {!authenticated || !did ? (
+            <div className={styles.emptyMessages}>
+              <div className={styles.loginRequired}>
+                <p>Please login to start chatting with Niyoko</p>
+                <button 
+                  className={styles.loginButton}
+                  onClick={handleLogin}
+                  disabled={loginLoading}
+                >
+                  {loginLoading ? 'Logining...' : 'Login'}
+                </button>
+              </div>
+            </div>
+          ) : chatState.messages.length === 0 ? (
             <div className={styles.emptyMessages}>
               {isActive ? (
                 <p>Start chatting with Niyoko</p>
@@ -274,7 +313,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
       </div>
 
       {/* 底部输入区域组件 */}
-      <ChatInput isLoading={chatState.isLoading || chatState.isGenerating} disabled={!isActive} />
+      <ChatInput isLoading={chatState.isLoading || chatState.isGenerating} disabled={!authenticated || !did || !isActive} />
     </div>
   );
 };

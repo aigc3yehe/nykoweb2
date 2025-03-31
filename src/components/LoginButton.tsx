@@ -3,7 +3,7 @@ import { useLoginWithOAuth, usePrivy } from '@privy-io/react-auth';
 import styles from './LoginButton.module.css';
 import GoldIcon from '../assets/gold.svg';
 import { useAtom, useSetAtom } from 'jotai';
-import { accountAtom, setUser } from '../store/accountStore';
+import { accountAtom, setUser, logout as logoutAction } from '../store/accountStore';
 import { createUser } from '../services/userService';
 import { showAccountPopupAtom } from '../store/accountPopupStore';
 
@@ -18,6 +18,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
   const setUserData = useSetAtom(setUser);
   const showAccountPopup = useSetAtom(showAccountPopupAtom);
   const accountRef = useRef<HTMLDivElement>(null);
+  const logoutStore = useSetAtom(logoutAction);
   
   const { initOAuth, loading } = useLoginWithOAuth({
     onComplete: async ({ user, isNewUser }) => {
@@ -72,6 +73,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
 
   const logout = () => {
     console.log("logout success")
+    logoutStore();
   }
 
   const handleLogin = async () => {

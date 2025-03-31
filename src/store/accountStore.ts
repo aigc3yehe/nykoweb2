@@ -2,6 +2,7 @@ import { atom } from 'jotai';
 import { User, Google } from '@privy-io/react-auth';
 import { queryUser } from '../services/userService';
 import { Twitter } from './imageStore';
+import { chatAtom, stopHeartbeat } from './chatStore'; // 导入聊天状态
 
 export interface AccountState {
   user: User | null;
@@ -176,7 +177,27 @@ export const setCredits = atom(
 // 登出
 export const logout = atom(
   null,
-  (_, set) => {
+  (get, set) => {
+    // 重置账户状态
     set(accountAtom, initialState);
+    
+    // 获取当前聊天状态
+    const chatState = get(chatAtom);
+    
+    // 如果有心跳，停止心跳
+    if (chatState.heartbeatId) {
+      clearInterval(chatState.heartbeatId);
+    }
+    
+    // 重置聊天连接状态
+    set(chatAtom, {
+      ...chatState,
+      connection: {
+        isActive: false,
+        inQueue: false
+      },
+      heartbeatId: undefined,
+      did: undefined // 确保did被清除
+    });
   }
 ); 
