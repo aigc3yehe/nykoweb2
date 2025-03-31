@@ -166,7 +166,7 @@ const ImagesContent: React.FC<ImagesContentProps> = ({ ownedOnly }) => {
       <div ref={loadMoreTriggerRef} className={styles.loadMoreTrigger}></div>
       
       {isLoading && (
-        <StatePrompt message="Loading Images..." />
+        <StatePrompt message="Loading Images..." showIcon={false} />
       )}
       
       {error && (

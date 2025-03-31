@@ -252,7 +252,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
         <div ref={loadMoreTriggerRef} className={styles.loadMoreTrigger}></div>
         
         {imagesLoading && (
-          <StatePrompt message="Loading Images..." />
+          <StatePrompt message="Loading Images..." showIcon={false} />
         )}
         
         {imagesError && (

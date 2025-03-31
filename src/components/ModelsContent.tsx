@@ -79,7 +79,7 @@ const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, on
       )}
       
       {isLoading && (
-        <StatePrompt message="Loading Models..." />
+        <StatePrompt message="Loading Models..." showIcon={false} />
       )}
       
       {error && (

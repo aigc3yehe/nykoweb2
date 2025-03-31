@@ -9,12 +9,13 @@ interface StatePromptProps {
     onClick: () => void;
     loading?: boolean;
   };
+  showIcon?: boolean;
 }
 
-const StatePrompt: React.FC<StatePromptProps> = ({ message, action }) => {
+const StatePrompt: React.FC<StatePromptProps> = ({ message, action, showIcon = true }) => {
   return (
     <div className={styles.statePrompt}>
-      <img src={emptyDataIcon} alt="State icon" width={80} height={80} />
+      {showIcon && <img src={emptyDataIcon} alt="State icon" width={80} height={80} />}
       <span className={styles.message}>{message}</span>
       {action && (
         <button 
