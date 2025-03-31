@@ -9,7 +9,10 @@ import {
   addImage, 
   removeImage, 
   clearChat,
-  setUserInfo 
+  setUserInfo,
+  checkConnectionStatus,
+  startHeartbeat,
+  stopHeartbeat
 } from '../store/chatStore';
 import { showDialogAtom } from '../store/dialogStore';
 
@@ -25,6 +28,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
   const [, clearChatAction] = useAtom(clearChat);
   const [, setUserInfoAction] = useAtom(setUserInfo);
   const [, showDialog] = useAtom(showDialogAtom);
+  const [, checkConnection] = useAtom(checkConnectionStatus);
+  const [, startHeartbeatAction] = useAtom(startHeartbeat);
+  const [, stopHeartbeatAction] = useAtom(stopHeartbeat);
   
   // 添加滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -132,6 +138,43 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
   // 显示自定义滚动条的条件
   const showCustomScrollbar = scrollHeight > clientHeight;
 
+  // 处理检查连接状态按钮点击
+  const handleCheckConnection = () => {
+    checkConnection();
+  };
+
+  // 获取连接状态信息
+  const { connection } = chatState;
+  const isActive = connection?.isActive;
+  const inQueue = connection?.inQueue;
+  const position = connection?.position;
+  const estimateWaitTime = connection?.estimateWaitTime;
+
+  // 管理心跳
+  useEffect(() => {
+    const isActive = chatState.connection?.isActive;
+    
+    // 当连接状态变为活跃时启动心跳
+    if (isActive && !chatState.heartbeatId) {
+      console.log('启动心跳机制');
+      startHeartbeatAction();
+    }
+    
+    // 当连接状态变为非活跃时停止心跳
+    if (!isActive && chatState.heartbeatId) {
+      console.log('停止心跳机制');
+      stopHeartbeatAction();
+    }
+    
+    // 组件卸载时清理心跳
+    return () => {
+      if (chatState.heartbeatId) {
+        console.log('组件卸载，停止心跳');
+        stopHeartbeatAction();
+      }
+    };
+  }, [chatState.connection?.isActive, chatState.heartbeatId, startHeartbeatAction, stopHeartbeatAction]);
+
   return (
     <div className={styles.chatWindow}>
       {/* 聊天标题栏 */}
@@ -155,7 +198,34 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
         >
           {chatState.messages.length === 0 ? (
             <div className={styles.emptyMessages}>
-              <p>开始与Niyoko对话吧</p>
+              {isActive ? (
+                <p>Start chatting with Niyoko</p>
+              ) : inQueue ? (
+                <div className={styles.queueStatus}>
+                  <p>You are currently in queue. Position: {position}</p>
+                  {estimateWaitTime && (
+                    <p>Estimated waiting time: {Math.ceil(estimateWaitTime)} minutes</p>
+                  )}
+                  <button 
+                    className={styles.checkStatusButton}
+                    onClick={handleCheckConnection}
+                    disabled={chatState.isLoading}
+                  >
+                    {chatState.isLoading ? 'Checking...' : 'Check status'}
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.queueStatus}>
+                  <p>Waiting to connect to Niyoko...</p>
+                  <button 
+                    className={styles.checkStatusButton}
+                    onClick={handleCheckConnection}
+                    disabled={chatState.isLoading}
+                  >
+                    {chatState.isLoading ? 'Checking...' : 'Check status'}
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             chatState.messages.map((message, index) => (
@@ -204,7 +274,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
       </div>
 
       {/* 底部输入区域组件 */}
-      <ChatInput isLoading={chatState.isLoading || chatState.isGenerating} />
+      <ChatInput isLoading={chatState.isLoading || chatState.isGenerating} disabled={!isActive} />
     </div>
   );
 };

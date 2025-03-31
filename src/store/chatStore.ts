@@ -53,6 +53,18 @@ export interface Message {
   }
 }
 
+// 1. 添加连接状态接口
+export interface ConnectionStatus {
+  isActive: boolean;
+  inQueue: boolean;
+  position?: number;
+  status?: string;
+  message?: string;
+  queueLength?: number;
+  estimateWaitTime?: number;
+}
+
+// 2. 扩展ChatState包含连接状态
 export interface ChatState {
   messages: Message[];
   isLoading: boolean;
@@ -67,11 +79,13 @@ export interface ChatState {
     description?: string;
   };
   currentModel?: ModelDetail | null;
-  selectedAspectRatio?: AspectRatio; // 添加选中的宽高比
-  activeTasks: Record<string, TaskInfo>; // 跟踪活动任务
+  selectedAspectRatio?: AspectRatio;
+  activeTasks: Record<string, TaskInfo>;
+  connection: ConnectionStatus; // 添加连接状态
+  heartbeatId?: number; // 存储心跳计时器ID
 }
 
-// 初始状态
+// 3. 更新初始状态
 const initialState: ChatState = {
   messages: [],
   isLoading: false,
@@ -84,7 +98,12 @@ const initialState: ChatState = {
   modelParam: undefined,
   currentModel: null,
   selectedAspectRatio: aspectRatios[0], // 默认选择1:1
-  activeTasks: {} // 初始化活动任务记录
+  activeTasks: {},
+  connection: {
+    isActive: false,
+    inQueue: false
+  },
+  heartbeatId: undefined
 };
 
 // 创建原子状态
@@ -455,16 +474,55 @@ export const sendMessage = atom(
         width,
         height,
         lora_name,
-        0.85 // 默认lora权重
+        0.85
       );
 
+      // 获取最新状态（可能在API请求期间已被心跳更新）
+      const latestState = get(chatAtom);
+      
       const status = response.status;
       const content = response.content;
       const task_type = response.task_type;
-      const model = response.model; // 获取model字段
-      const request_id = response.request_id; // 获取生成图片任务的request_id
+      const model = response.model;
+      const request_id = response.request_id;
       
-      // 处理API响应
+      // 处理特殊状态：full 和 queue
+      if (status === 'full' || status === 'queue') {
+        // 更新连接状态
+        const newConnectionStatus: ConnectionStatus = {
+          isActive: false,
+          inQueue: status === 'queue',
+          position: status === 'queue' ? 99 : undefined,
+          message: content // 使用返回的提示消息
+        };
+        
+        // 停止心跳
+        if (latestState.heartbeatId) {
+          set(stopHeartbeat);
+        }
+        
+        // 更新状态 - 使用最新状态作为基础
+        set(chatAtom, {
+          ...latestState,
+          messages: [...latestState.messages, {
+            role: 'system',
+            content: content // 使用返回的提示消息
+          }],
+          isLoading: false,
+          isGenerating: false,
+          connection: newConnectionStatus
+        });
+        
+        // 显示通知
+        set(showToastAtom, {
+          message: status === 'full' ? 'Chat time has ended' : 'You have entered the queue',
+          severity: 'warning'
+        });
+        
+        return;
+      }
+      
+      // 处理错误状态
       if (status === 'error') {
         throw new Error(content || '发送消息时出错');
       }
@@ -475,7 +533,6 @@ export const sendMessage = atom(
       }
 
       let isGenerating = false;
-      // 根据status的类型，更新消息的类型
       let messageType = 'text';
       if (status === 'upload_image') {
         messageType = 'upload_image';
@@ -494,12 +551,12 @@ export const sendMessage = atom(
         request_id: request_id || undefined
       };
 
-      // 更新消息历史
-      const updatedMessages = [...chatState.messages, userMessage, receivedMessage];
+      // 更新消息历史 - 使用最新状态的消息列表
+      const updatedMessages = [...latestState.messages, receivedMessage];
       
       // 如果返回了model信息，更新model_config消息和chatAtom的modelParam
       let finalMessages = updatedMessages;
-      let updatedModelParam = chatState.modelParam;
+      let updatedModelParam = latestState.modelParam;
       
       if (model && model.name && model.description) {
         const modelParam = {
@@ -522,8 +579,9 @@ export const sendMessage = atom(
         });
       }
       
+      // 更新状态 - 使用最新状态作为基础
       set(chatAtom, {
-        ...chatState,
+        ...latestState,
         messages: finalMessages,
         isLoading: false,
         isGenerating: isGenerating,
@@ -532,7 +590,7 @@ export const sendMessage = atom(
       });
 
       // 如果 request_id 不为空，则代表创建生成图片任务完成
-      console.log('===== 收到 request_id:', request_id); // 添加日志
+      console.log('===== 收到 request_id:', request_id);
       if (request_id) {
         pollImageGenerationTask(request_id, set, get).catch(err => {
           console.error('轮询任务状态出错:', err);
@@ -541,16 +599,19 @@ export const sendMessage = atom(
     } catch (error) {
       console.error('发送消息时出错:', error);
       
-      // 更新错误状态
+      // 获取最新状态
+      const latestState = get(chatAtom);
+      
+      // 更新错误状态 - 使用最新状态作为基础
       set(chatAtom, {
-        ...chatState,
-        messages: [...chatState.messages, { 
+        ...latestState,
+        messages: [...latestState.messages, { 
           role: 'system', 
-          content: error instanceof Error ? error.message : '发送消息时出错，请重试。'
+          content: error instanceof Error ? error.message : 'Send Message error, Please retry later'
         }],
         isLoading: false,
         isGenerating: false,
-        error: error instanceof Error ? error.message : '发送消息时出错',
+        error: error instanceof Error ? error.message : 'Send Message error',
       });
     }
   }
@@ -763,17 +824,210 @@ export const clearChat = atom(
   }
 );
 
-// 更新用户信息
+// 4. 添加获取连接状态的API函数
+export async function fetchConnectionStatus(userUuid: string): Promise<ConnectionStatus> {
+  try {
+    const response = await fetch(`/api/initial-connection/${userUuid}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`获取连接状态失败，状态码 ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('获取连接状态出错:', error);
+    throw error;
+  }
+}
+
+// 心跳相关常量
+const HEARTBEAT_INTERVAL = 15000; // 15秒发送一次心跳
+
+// 心跳检测API函数
+export async function sendHeartbeat(userUuid: string): Promise<ConnectionStatus> {
+  try {
+    const response = await fetch(`/api/heartbeat`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        'Content-Type': 'application/json',
+        'X-User-Id': userUuid
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`心跳请求失败，状态码 ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('发送心跳请求出错:', error);
+    throw error;
+  }
+}
+
+// 启动心跳的操作
+export const startHeartbeat = atom(
+  null,
+  (get, set) => {
+    const chatState = get(chatAtom);
+    
+    // 如果已经有心跳计时器，先清除
+    if (chatState.heartbeatId) {
+      clearInterval(chatState.heartbeatId);
+    }
+    
+    // 创建新的心跳计时器
+    const heartbeatId = window.setInterval(async () => {
+      try {
+        const currentState = get(chatAtom);
+        
+        // 检查用户是否仍然活跃
+        if (!currentState.connection.isActive || !currentState.userUuid) {
+          // 如果用户不再活跃，停止心跳
+          set(stopHeartbeat);
+          return;
+        }
+        
+        // 如果当前正在加载聊天回复，暂时跳过这次心跳
+        // 这防止心跳更新覆盖聊天请求的状态
+        if (currentState.isLoading) {
+          console.log('聊天正在加载中，跳过本次心跳更新');
+          return;
+        }
+        
+        // 发送心跳并获取新的连接状态
+        const newConnectionStatus = await sendHeartbeat(currentState.userUuid);
+        
+        // 重新获取最新状态（可能在心跳请求期间已经被其他操作更新了）
+        const latestState = get(chatAtom);
+        
+        // 如果这段时间内已经开始加载聊天，不要覆盖状态
+        if (latestState.isLoading) {
+          console.log('心跳期间聊天状态变为加载中，跳过心跳更新');
+          return;
+        }
+        
+        // 仅更新连接状态，而不影响其他状态
+        set(chatAtom, {
+          ...latestState, // 使用最新状态作为基础
+          connection: newConnectionStatus
+        });
+        
+        // 如果用户不再活跃，停止心跳
+        if (!newConnectionStatus.isActive) {
+          set(stopHeartbeat);
+          
+          // 可以显示通知用户已断开连接
+          set(showToastAtom, {
+            message: 'Your session has ended or been replaced',
+            severity: 'warning'
+          });
+        }
+      } catch (error) {
+        console.error('心跳请求失败:', error);
+        // 错误处理可以根据需要添加，例如在多次失败后停止心跳
+      }
+    }, HEARTBEAT_INTERVAL);
+    
+    // 更新心跳ID到状态
+    set(chatAtom, {
+      ...chatState,
+      heartbeatId
+    });
+  }
+);
+
+// 停止心跳的操作
+export const stopHeartbeat = atom(
+  null,
+  (get, set) => {
+    const chatState = get(chatAtom);
+    
+    if (chatState.heartbeatId) {
+      clearInterval(chatState.heartbeatId);
+      
+      set(chatAtom, {
+        ...chatState,
+        heartbeatId: undefined
+      });
+    }
+  }
+);
+
+// 修改检查连接状态的操作，在成为活跃状态时启动心跳
+export const checkConnectionStatus = atom(
+  null,
+  async (get, set) => {
+    const chatState = get(chatAtom);
+    const { userUuid } = chatState;
+    
+    if (!userUuid) {
+      console.warn('无法检查连接状态: userUuid为空');
+      return;
+    }
+    
+    try {
+      set(chatAtom, {
+        ...chatState,
+        isLoading: true
+      });
+      
+      const connectionStatus = await fetchConnectionStatus(userUuid);
+      
+      set(chatAtom, {
+        ...chatState,
+        connection: connectionStatus,
+        isLoading: false
+      });
+      
+      // 如果用户变为活跃状态，启动心跳
+      if (connectionStatus.isActive) {
+        set(startHeartbeat);
+      } else if (chatState.heartbeatId) {
+        // 如果用户不再活跃但心跳仍在运行，停止心跳
+        set(stopHeartbeat);
+      }
+      
+      return connectionStatus;
+    } catch (error) {
+      console.error('检查连接状态出错:', error);
+      
+      set(chatAtom, {
+        ...chatState,
+        error: error instanceof Error ? error.message : '检查连接状态出错',
+        isLoading: false
+      });
+    }
+  }
+);
+
+// 6. 修改setUserInfo操作，在did更新时检查连接状态
 export const setUserInfo = atom(
   null,
-  (get, set, params: { uuid: string, did?: string }) => {
+  async (get, set, params: { uuid: string, did?: string }) => {
     const { uuid, did } = params;
     const chatState = get(chatAtom);
+    const prevDid = chatState.did;
+    
+    // 更新用户信息
     set(chatAtom, {
       ...chatState,
       userUuid: uuid,
       did: did
     });
+    
+    // 如果did从null/undefined变成有值，则检查连接状态
+    if ((!prevDid || prevDid === '') && did) {
+      console.log('用户已登录，检查连接状态');
+      set(checkConnectionStatus);
+    }
   }
 );
 

@@ -438,3 +438,33 @@
   background: #6366F1;
   width: 6px;
 }
+
+.queueStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.checkStatusButton {
+  padding: 0.5rem 1.5rem;
+  background: #6366F1;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  font-family: 'Jura', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.checkStatusButton:hover {
+  background: #4F46E5;
+}
+
+.checkStatusButton:disabled {
+  background: #9CA3AF;
+  cursor: not-allowed;
+}

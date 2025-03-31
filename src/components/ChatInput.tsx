@@ -18,9 +18,10 @@ interface Tag {
 
 interface ChatInputProps {
   isLoading: boolean;
+  disabled: boolean;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ isLoading }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   const [input, setInput] = useState('');
   const [chatState] = useAtom(chatAtom);
   const [, sendMessageAction] = useAtom(sendMessage);
@@ -277,7 +278,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading }) => {
             <button
               className={styles.sendButton}
               onClick={handleSendMessage}
-              disabled={!input.trim() || isLoading}
+              disabled={!input.trim() || isLoading || disabled}
             >
               <img src={input.trim() ? sendActiveIcon : sendIcon} alt="Send" />
             </button>

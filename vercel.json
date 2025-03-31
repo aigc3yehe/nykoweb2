@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "http://127.0.0.1:8085/:path*"
+      "destination": "http://45.32.110.109:8085/:path*"
     },
     {
       "source": "/studio-api/:path*",
