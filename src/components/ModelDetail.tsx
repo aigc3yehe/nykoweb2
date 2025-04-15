@@ -9,6 +9,7 @@ import ImageCard from './ImageCard';
 import ModelCarousel from './ModelCarousel';
 import ModelInfoPanel from './ModelInfoPanel';
 import StatePrompt from './StatePrompt';
+import TokenizationPanel from './TokenizationPanel';
 
 interface ModelDetailProps {
   modelId: number;
@@ -201,15 +202,19 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
         </div>
         
         <div className={styles.tabContent}>
-          {activeTab === 'description' ? (
-            <div className={styles.descriptionContent}>
-              <p>{currentModel.description || 'empty description'}</p>
-            </div>
-          ) : (
-            <div className={styles.tokenizationContent}>
-              <p>Tokenization information placeholder, to be implemented...</p>
-            </div>
-          )}
+          <div 
+            className={styles.descriptionContent} 
+            style={{ display: activeTab === 'description' ? 'block' : 'none' }}
+          >
+            <p>{currentModel.description || 'empty description'}</p>
+          </div>
+          
+          <div 
+            className={styles.tokenizationContent}
+            style={{ display: activeTab === 'tokenization' ? 'block' : 'none' }}
+          >
+            <TokenizationPanel model={currentModel}/>
+          </div>
         </div>
       </div>
       

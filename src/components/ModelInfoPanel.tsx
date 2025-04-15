@@ -10,6 +10,10 @@ import shareSvg from '../assets/share.svg';
 import coinsSvg from '../assets/coins.svg';
 import codeSvg from '../assets/code.svg';
 import { ModelDetail } from '../store/modelStore';
+import {
+  fetchTokenizationState,
+  setModelFlag
+} from '../store/tokenStore';
 
 interface ModelInfoPanelProps {
   model: ModelDetail;
@@ -18,9 +22,12 @@ interface ModelInfoPanelProps {
 const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   const [accountState] = useAtom(accountAtom);
   const showGeneratePopup = useSetAtom(showGeneratePopupAtom);
+  const setTokenizationFlag = useSetAtom(setModelFlag);
+  const fetchState = useSetAtom(fetchTokenizationState);
   
   // 检查当前用户是否是模型创建者
-  const isModelOwner = accountState.did === model.creator;
+  const isFlag = model.flag !== null && model.flag !== ""
+  const isShowToken = accountState.did === model.creator && !isFlag;
   
   // 获取Twitter显示名称
   const getDisplayName = () => {
@@ -83,9 +90,14 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
     // 实现分享功能
   };
   
-  const handleMintCoin = () => {
-    console.log('Mint coin for model:', model.id);
-    // 实现发币功能
+  const handleToken = async () => {
+    // 发起 token 化请求
+    const flag = 'tokenization'
+    const modelId = model.id;
+    await setTokenizationFlag({ modelId, flag});
+
+    // 立即获取最新状态
+    await fetchState({modelId, refreshState: true});
   };
 
   const handleTwitterClick = () => {
@@ -175,13 +187,13 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
             
-            {/* 发币按钮 - 仅当用户是模型创建者时显示 */}
-            {isModelOwner && (
+            {/* Token按钮 - 仅当用户是模型创建者时显示 */}
+            {isShowToken && (
               <button 
                 className={styles.mintButton} 
-                onClick={handleMintCoin}
+                onClick={handleToken}
               >
-                <img src={coinsSvg} alt="Mint" className={styles.buttonIcon} />
+                <img src={coinsSvg} alt="Token" className={styles.buttonIcon} />
               </button>
             )}
           </>
@@ -200,6 +212,14 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
             <button 
               className={styles.shareButton} 
               onClick={handleShare}
+            >
+              <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
+            </button>
+
+            {/* 分享按钮 */}
+            <button
+                className={styles.shareButton}
+                onClick={handleShare}
             >
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>

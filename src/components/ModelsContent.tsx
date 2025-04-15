@@ -7,7 +7,7 @@ import StatePrompt from './StatePrompt';
 
 interface ModelsContentProps {
   ownedOnly: boolean;
-  sortOption: 'New Model' | 'MKT CAP' | 'Popular';
+  sortOption: 'New Model' | 'Popular';
   onModelClick: (modelId: number, modelName: string) => void;
 }
 
@@ -18,10 +18,11 @@ const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, on
   const { models = [], isLoading, error, hasMore } = modelListState;
   const observer = useRef<IntersectionObserver | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const order = sortOption == 'Popular' ? "usage" : "created_at"
   
   useEffect(() => {
-    fetchModelsList({ reset: true, ownedOnly });
-  }, [sortOption, ownedOnly, fetchModelsList]);
+    fetchModelsList({ reset: true, ownedOnly, order });
+  }, [order, sortOption, ownedOnly, fetchModelsList]);
   
   const filteredModels = models || [];
 
@@ -87,7 +88,7 @@ const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, on
           message="Failed to Load Models"
           action={{
             text: 'Retry',
-            onClick: () => fetchModelsList({ reset: false, ownedOnly })
+            onClick: () => fetchModelsList({ reset: false, ownedOnly, order })
           }}
         />
       )}

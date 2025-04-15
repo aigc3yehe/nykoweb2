@@ -16,8 +16,8 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
   
   // 检查是否在训练中
   const isTraining = model.model_tran[0]?.train_state === 0 || model.model_tran[0]?.train_state === 1;
-  // 检查是否已完成训练
-  const isCompleted = model.model_tran[0]?.train_state === 2;
+  // isTokenization
+  const isTokenization = model.model_tran[0]?.train_state === 2 && model.model_tokenization;
 
   // 获取Twitter显示名称
   const getDisplayName = () => {
@@ -55,10 +55,9 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
             </div>
           )}
           
-          {isCompleted && (
+          {isTokenization && (
             <>
-              <div className={styles.completedTag}>$Token</div>
-              <div className={styles.completedTag}>$234K</div>
+              <div className={styles.completedTag}>${model.model_tokenization?.metadata?.name ?? 'Token'}</div>
             </>
           )}
         </div>

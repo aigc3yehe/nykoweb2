@@ -1,19 +1,20 @@
-import { useState, useEffect, useRef, ChangeEvent } from 'react';
-import { useAtom } from 'jotai';
+import {ChangeEvent, useEffect, useRef, useState, useCallback} from 'react';
+import {useAtom} from 'jotai';
 import styles from './ChatInput.module.css';
 import sendIcon from '../assets/send.svg';
 import sendActiveIcon from '../assets/send_activating.svg';
 import closeIcon from '../assets/close.svg';
 import imageIcon from '../assets/image.svg';
 import downIcon from '../assets/down.svg';
-import { chatAtom, sendMessage, aspectRatios, AspectRatio, setAspectRatio } from '../store/chatStore';
+import {AspectRatio, aspectRatios, chatAtom, sendMessage, setAspectRatio, setLoraWeight} from '../store/chatStore';
 
 interface Tag {
   id: string;
   text: string;
-  type: 'normal' | 'closeable' | 'imageRatio' | 'lora';
+  type: 'normal' | 'closeable' | 'imageRatio' | 'lora' | 'lora_weight';
   value?: string;
   ratio?: string;
+  weight?: number;
 }
 
 interface ChatInputProps {
@@ -26,15 +27,19 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   const [chatState] = useAtom(chatAtom);
   const [, sendMessageAction] = useAtom(sendMessage);
   const [, setAspectRatioAction] = useAtom(setAspectRatio);
+  const [, setLoraWeightAction] = useAtom(setLoraWeight);
   
   const [activeTags, setActiveTags] = useState<Tag[]>([]);
   const [scrollHeight, setScrollHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
   const [clientHeight, setClientHeight] = useState(0);
   const [showRatioDropdown, setShowRatioDropdown] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const customScrollbarRef = useRef<HTMLDivElement>(null);
   const ratioDropdownRef = useRef<HTMLDivElement>(null);
+  const loraSliderRefs = useRef<HTMLDivElement>(null);
 
   // 自动调整文本框高度
   useEffect(() => {
@@ -63,6 +68,46 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
     };
   }, []);
 
+  // 处理滑块点击和拖动的统一逻辑
+  const handleSliderInteraction = useCallback((e: React.MouseEvent | MouseEvent) => {
+    const sliderRef = loraSliderRefs;
+    if (!sliderRef.current) return;
+    
+    const rect = sliderRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const width = rect.width;
+    
+    let newStrength = Math.max(0, Math.min(1, x / width));
+    // 四舍五入到两位小数
+    newStrength = Math.round(newStrength * 100) / 100;
+    
+    // 更新全局状态
+    setLoraWeightAction(newStrength);
+  }, [setLoraWeightAction]);
+  
+  // 处理滑块拖动
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        handleSliderInteraction(e);
+      }
+    };
+    
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+    
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, handleSliderInteraction]);
+
   // 根据task_type设置标签
   useEffect(() => {
     const baseTags: Tag[] = [];
@@ -78,7 +123,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
     }
 
     // 如果当前进入到模型详情，则添加Base Model 和 LoraName标签
-    if (chatState.currentModel) {
+    if (chatState.currentModel && chatState.task_type === 'generation') {
       const models = chatState.currentModel?.model_tran || []
       if (models.length > 0 && models[0].base_model_hash){
         baseTags.push({
@@ -88,15 +133,21 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
           value: models[0].base_model_hash || undefined
         })
       }
-      if (models.length > 0 && models[0].lora_name){
+      if (models.length > 0 && models[0].lora_name && chatState.task_type === 'generation'){
         baseTags.push({
           id: 'lora_name',
           text: 'Lora',
           type: 'lora',
-          value: models[0].lora_name || undefined 
-        }) 
+          value: models[0].lora_name || undefined
+        })
+        baseTags.push({
+          id: 'lora_weight',
+          text: 'Strength',
+          type: 'lora_weight',
+          weight: chatState.loraWeight
+        })
       }
-      if (models.length > 0 && models[0].base_model_hash && models[0].lora_name){
+      if (models.length > 0 && models[0].base_model_hash && models[0].lora_name && chatState.task_type === 'generation'){
         baseTags.push({
           id: 'image_ratio',
           text: 'image',
@@ -107,7 +158,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
     }
     
     setActiveTags(baseTags);
-  }, [chatState.task_type, chatState.currentModel, chatState.selectedAspectRatio]);
+  }, [chatState.task_type, chatState.currentModel, chatState.selectedAspectRatio, chatState.loraWeight]);
 
   // 监听textarea的滚动事件
   const handleTextareaScroll = () => {
@@ -162,9 +213,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
       if (textareaRef.current) {
         const deltaY = moveEvent.clientY - startY;
         const scrollRatio = deltaY / clientHeight;
-        const newScrollTop = startScrollTop + scrollRatio * scrollHeight;
-        
-        textareaRef.current.scrollTop = newScrollTop;
+        textareaRef.current.scrollTop = startScrollTop + scrollRatio * scrollHeight;
         setScrollTop(textareaRef.current.scrollTop);
       }
     };
@@ -242,7 +291,33 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
                   )}
                 </div>
               );
-            } else if (tag.type === 'lora') {
+            } else if (tag.type === 'lora_weight') {
+              return (
+                  <div
+                      key={tag.id}
+                      className={styles.loraTag}
+                      ref={loraSliderRefs}
+                      onClick={(e) => !disabled && handleSliderInteraction(e)}
+                      onMouseDown={(e) => {
+                        if (disabled) return;
+                        e.preventDefault();
+                        setIsDragging(true);
+                        handleSliderInteraction(e);
+                      }}
+                  >
+                    <span className={styles.loraText}>{tag.text}</span>
+                    <div
+                        className={styles.strengthBackground}
+                        style={{
+                          width: `${(tag.weight || 0.0) * 95}%`,
+                          transition: isDragging ? 'none' : 'width 0.1s ease-out',
+                          borderRadius: (tag.weight || 0.0) >= 0.93 ? '6.25rem' : '6.25rem 0 0 6.25rem'
+                        }}
+                    ></div>
+                    <span className={styles.strengthValue}>{(tag.weight || 0.0).toFixed(2)}</span>
+                  </div>
+              );
+            }else if (tag.type === 'lora') {
               return (
                 <div key={tag.id} className={styles.tag}>
                   <span className={styles.text}>{tag.text}</span>

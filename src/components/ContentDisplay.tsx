@@ -10,7 +10,7 @@ import { clearModelDetail, modelDetailAtom, modelIdAndNameAtom } from '../store/
 const ContentDisplay: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'models' | 'images'>('models');
   const [ownedOnly, setOwnedOnly] = useState(false);
-  const [sortOption, setSortOption] = useState<'New Model' | 'MKT CAP' | 'Popular'>('New Model');
+  const [sortOption, setSortOption] = useState<'New Model' | 'Popular'>('New Model');
   const [viewingModelId, setViewingModelId] = useState<number | null>(null);
   const [viewingModelName, setViewingModelName] = useState<string | null>(null);
   const [modelDetailState] = useAtom(modelDetailAtom);

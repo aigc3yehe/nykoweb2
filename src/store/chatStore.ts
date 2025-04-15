@@ -83,6 +83,7 @@ export interface ChatState {
   activeTasks: Record<string, TaskInfo>;
   connection: ConnectionStatus; // 添加连接状态
   heartbeatId?: number; // 存储心跳计时器ID
+  loraWeight?: number;
 }
 
 // 3. 更新初始状态
@@ -103,7 +104,8 @@ const initialState: ChatState = {
     isActive: false,
     inQueue: false
   },
-  heartbeatId: undefined
+  heartbeatId: undefined,
+  loraWeight: 0.8
 };
 
 // 创建原子状态
@@ -1066,6 +1068,18 @@ export const setAspectRatio = atom(
     set(chatAtom, {
       ...chatState,
       selectedAspectRatio: aspectRatio
+    });
+  }
+);
+
+// 添加到导出列表中
+export const setLoraWeight = atom(
+  null,
+  (get, set, weight: number) => {
+    const chatState = get(chatAtom);
+    set(chatAtom, {
+      ...chatState,
+      loraWeight: weight
     });
   }
 );

@@ -10,8 +10,8 @@ interface ContentHeaderProps {
   setActiveTab: (tab: 'models' | 'images') => void;
   ownedOnly: boolean;
   setOwnedOnly: (owned: boolean) => void;
-  sortOption: 'New Model' | 'MKT CAP' | 'Popular';
-  setSortOption: (option: 'New Model' | 'MKT CAP' | 'Popular') => void;
+  sortOption: 'New Model' | 'Popular';
+  setSortOption: (option: 'New Model' | 'Popular') => void;
   isDetailMode?: boolean;
   modelName?: string;
   onBackClick?: () => void;
@@ -101,12 +101,12 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
             
             {dropdownOpen && (
               <div className={styles.dropdownMenu}>
-                {['New Model', 'MKT CAP', 'Popular'].map((option) => (
+                {['New Model', 'Popular'].map((option) => (
                   <div 
                     key={option} 
                     className={styles.dropdownItem}
                     onClick={() => {
-                      setSortOption(option as 'New Model' | 'MKT CAP' | 'Popular');
+                      setSortOption(option as 'New Model' | 'Popular');
                       setDropdownOpen(false);
                     }}
                   >

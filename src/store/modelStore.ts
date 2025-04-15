@@ -2,6 +2,19 @@ import { atom } from 'jotai';
 import { accountAtom } from './accountStore';
 import { Twitter } from './imageStore'; // 导入Twitter接口
 
+export interface TokenMetadata {
+  description?: string;
+  image?: string;
+  name?: string;
+  symbol?: string;
+}
+
+export interface ModelToken {
+  meme_token?: string;
+  metadata?: TokenMetadata;
+  network?: number;
+}
+
 // 定义Model接口
 export interface Model {
   name: string;
@@ -12,6 +25,8 @@ export interface Model {
   batch: number;
   cover: string;
   usage: number;
+  flag: string | null;
+  model_tokenization: ModelToken | null;
   model_tran: {
     version: number;
     train_state: number; // 0: 未开始, 1: 训练中, 2: 训练完成，-1: 训练失败
@@ -62,15 +77,16 @@ export const modelListAtom = atom<ModelListState>(initialState);
 // 获取模型列表
 export const fetchModels = atom(
   null,
-  async (get, set, { reset = false, ownedOnly = false }: { reset?: boolean, ownedOnly?: boolean } = {}) => {
+  async (get, set, { reset = false, ownedOnly = false, order = "created_at" }: { reset?: boolean, ownedOnly?: boolean, order?: string } = {}) => {
     const state = get(modelListAtom);
     const accountState = get(accountAtom);
-    
+
     // 如果重置或者还有更多数据可加载
     if (reset || state.hasMore) {
       // 设置为加载中
       set(modelListAtom, {
         ...state,
+        order: order as 'created_at' | 'usage',
         isLoading: true,
         error: null,
         // 如果是重置，则页码为1，否则保持当前页
@@ -82,7 +98,7 @@ export const fetchModels = atom(
         const params = new URLSearchParams({
           page: reset ? '1' : state.page.toString(),
           pageSize: state.pageSize.toString(),
-          order: state.order,
+          order: order as 'created_at' | 'usage',
           desc: state.desc
         });
         
@@ -116,6 +132,7 @@ export const fetchModels = atom(
           totalCount: result.data.totalCount,
           page: reset ? 2 : state.page + 1, // 更新页码为下一页
           isLoading: false,
+          error: null,
           hasMore: (reset ? 1 : state.page) * state.pageSize < result.data.totalCount // 判断是否还有更多数据
         });
       } catch (error) {
@@ -127,45 +144,6 @@ export const fetchModels = atom(
         });
       }
     }
-  }
-);
-
-// 更改排序方式
-export const changeOrder = atom(
-  null,
-  (get, set, newOrder: OrderType) => {
-    const state = get(modelListAtom);
-    
-    set(modelListAtom, {
-      ...state,
-      order: newOrder,
-      page: 1, // 重置页码
-      models: [], // 清空当前模型列表
-      hasMore: true // 重置是否有更多数据
-    });
-    
-    // 重新获取数据
-    // @ts-ignore
-    get(fetchModels)(true);
-  }
-);
-
-// 更改排序方向
-export const changeOrderDirection = atom(
-  null,
-  (get, set, newDirection: OrderDirection) => {
-    const state = get(modelListAtom);
-    
-    set(modelListAtom, {
-      ...state,
-      desc: newDirection,
-      page: 1,
-      models: [],
-      hasMore: true
-    });
-    
-    // @ts-ignore
-    get(fetchModels)(true);
   }
 );
 
