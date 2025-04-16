@@ -233,19 +233,6 @@
   opacity: 1;
 }
 
-.tooltip {
-  position: absolute;
-  bottom: -1.5625rem; /* -25px -> -1.5625rem */
-  left: 0;
-  background-color: rgba(31, 41, 55, 0.9);
-  color: white;
-  padding: 0.25rem 0.5rem; /* 4px 8px -> 0.25rem 0.5rem */
-  border-radius: 0.25rem; /* 4px -> 0.25rem */
-  font-size: 0.75rem; /* 12px -> 0.75rem */
-  z-index: 10;
-  white-space: nowrap;
-}
-
 .tokenDetail {
   display: flex;
   justify-content: space-between;

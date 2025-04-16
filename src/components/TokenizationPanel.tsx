@@ -15,38 +15,11 @@ import {accountAtom} from "../store/accountStore.ts";
 import {ModelDetail} from '../store/modelStore';
 import {darkTheme, SwapWidget, Theme} from '@uniswap/widgets'
 import {uniswapJsonRpcUrlMap} from '../store/alchemyStore.ts';
+import {showToastAtom} from "../store/imagesStore.ts";
 
 interface TokenizationPanelProps {
   model: ModelDetail;
 }
-
-// Default token list, for example
-const TOKEN_LIST = [
-  {
-  "name": "Dai Stablecoin",
-  "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-  "symbol": "DAI",
-  "decimals": 18,
-  "chainId": 1,
-  "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png"
-},
-  {
-  "name": "Tether USD",
-  "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-  "symbol": "USDT",
-  "decimals": 6,
-  "chainId": 1,
-  "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png"
-},
-{
-  "name": "USD Coin",
-  "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-  "symbol": "USDC",
-  "decimals": 6,
-  "chainId": 1,
-  "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"
-},
-]
 
 const theme: Theme = {
     ...darkTheme,
@@ -64,6 +37,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
    model
 }) => {
   const [accountState] = useAtom(accountAtom);
+  const showToast = useSetAtom(showToastAtom);
   const [tokenizationState] = useAtom(tokenizationStateAtom);
   const fetchState = useSetAtom(fetchTokenizationState);
   const setTokenizationFlag = useSetAtom(setModelFlag);
@@ -71,10 +45,6 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
   const [isInitiating, setIsInitiating] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
-  const [copyTooltip, setCopyTooltip] = useState<{visible: boolean, text: string}>({
-    visible: false,
-    text: ''
-  });
 
   const isFlag = model.flag !== null && model.flag !== ""
   const isShowToken = accountState.did === model.creator && !isFlag;
@@ -105,10 +75,10 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text).then(() => {
-      setCopyTooltip({visible: true, text: `${label} copy successfully.`});
-      setTimeout(() => {
-        setCopyTooltip({visible: false, text: ''});
-      }, 2000);
+        showToast({
+            message: `${label} copy successfully.`,
+            severity: 'success'
+        });
     });
   };
 
@@ -272,6 +242,17 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
       // 修改 renderTokenizationStatus 函数中的完成状态部分
       if (statusData.state === 'completed' && statusData.collectionToken) {
+        const tokenList = [
+            {
+                "name": statusData.collectionToken.name,
+                "address": statusData.collectionToken.address,
+                "symbol": statusData.collectionToken.symbol,
+                "decimals": 18,
+                "chainId": 8453,
+                "logoURI": statusData.collectionToken.imageIpfs
+            }
+        ]
+        console.log(tokenList[0]);
         return (
           <div className={styles.completedState}>
             <div className={styles.tokenInfo}>
@@ -316,7 +297,6 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
                       onClick={() => copyToClipboard(statusData?.collectionToken?.address ?? "", "Token address")}
                     />
                   </div>
-                  {copyTooltip.visible && <div className={styles.tooltip}>{copyTooltip.text}</div>}
                 </div>
               </div>
             </div>
@@ -339,7 +319,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
                         width="100%"
                         theme={theme}
                         jsonRpcUrlMap={uniswapJsonRpcUrlMap}
-                        tokenList={TOKEN_LIST}
+                        tokenList={tokenList}
                     />
                 </div>
             </div>
