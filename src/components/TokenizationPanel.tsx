@@ -79,6 +79,18 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
   const isFlag = model.flag !== null && model.flag !== ""
   const isShowToken = accountState.did === model.creator && !isFlag;
 
+  // 获取训练状态
+  const getTrainingStatus = () => {
+      const trainState = model.model_tran?.[0]?.train_state;
+      if (trainState === 2) {
+          return { text: 'Ready', className: styles.statusReady, isReady: true };
+      } else {
+          return { text: 'Train', className: styles.statusTrain, isReady: false };
+      }
+  };
+
+  const status = getTrainingStatus();
+
   // 定期检查 token 化状态
   useEffect(() => {
     // 首次加载时获取状态
@@ -161,6 +173,13 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
     // 如果没有数据，显示开始 token 化按钮
     if (!data) {
+      if (!status.isReady) {
+          return (
+              <div className={styles.emptyState}>
+                  <p>The model has not yet been trained.</p>
+              </div>
+          );
+      }
       if (isFlag) {
         return (
             <div className={styles.emptyState}>

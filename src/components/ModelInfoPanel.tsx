@@ -74,7 +74,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
     if (trainState === 2) {
       return { text: 'Ready', className: styles.statusReady, isReady: true };
     } else {
-      return { text: 'Train', className: styles.statusTrain, isReady: false };
+      return { text: 'Training', className: styles.statusTrain, isReady: false };
     }
   };
   
@@ -212,14 +212,6 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
             <button 
               className={styles.shareButton} 
               onClick={handleShare}
-            >
-              <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
-            </button>
-
-            {/* 分享按钮 */}
-            <button
-                className={styles.shareButton}
-                onClick={handleShare}
             >
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
