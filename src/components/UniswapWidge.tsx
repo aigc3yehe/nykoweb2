@@ -52,7 +52,7 @@ const UniswapWidget = ({ token }: { token: TokenInfo }) => {
       theme={theme}
       onConnectWalletClick={login}
       jsonRpcUrlMap={uniswapJsonRpcUrlMap}
-      tokenList={[token]}
+      tokenList={[token] as TokenInfo[]}
       defaultOutputTokenAddress={{ [SupportedChainId.BASE]: token.address }}
       defaultInputTokenAddress={"NATIVE"}
     />
