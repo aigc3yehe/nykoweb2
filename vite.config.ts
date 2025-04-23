@@ -12,7 +12,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, '')
       },
       '/studio-api': {
-        target: 'http://43.153.40.155:5576',
+        target: 'https://api.misato.ai',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/studio-api/, '')
       }

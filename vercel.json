@@ -6,7 +6,7 @@
     },
     {
       "source": "/studio-api/:path*",
-      "destination": "http://43.153.40.155:5576/:path*"
+      "destination": "https://api.misato.ai/:path*"
     },
     {
       "source": "/:path*",
@@ -33,4 +33,4 @@
       ]
     }
   ]
-} 
+}
