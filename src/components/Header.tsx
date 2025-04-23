@@ -5,6 +5,10 @@ import DocIcon from '../assets/doc.svg';
 import LoginButton from './LoginButton';
 
 const Header: React.FC = () => {
+
+  const handleTwitterClick = () => {
+      window.open('https://x.com/niyoko_agent', '_blank');
+  }
   return (
     <header className={styles.header}>
       <div className={styles.logoSection}>
@@ -12,16 +16,16 @@ const Header: React.FC = () => {
       </div>
       <div className={styles.actionSection}>
         {/* X按钮 */}
-        <button className={styles.iconButton}>
+        <button className={styles.iconButton} onClick={handleTwitterClick}>
           <img src={XIcon} alt="Close" className={styles.twitterIcon}/>
         </button>
-        
+
         {/* Doc按钮 */}
         <button className={styles.docButton}>
           <img src={DocIcon} alt="Documentation" className={styles.docIcon}/>
           <span>Doc</span>
         </button>
-        
+
         {/* 登录按钮组件 */}
         <LoginButton />
       </div>
@@ -29,4 +33,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header; 
+export default Header;
