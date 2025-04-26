@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useSetAtom } from 'jotai';
-import { getTokensForOwner } from '../store/alchemyStore';
+import { useAtom } from 'jotai';
+import { getTokensForOwner, getEthBalance, getTokenBalance } from '../store/alchemyStore';
 import styles from './WalletAssets.module.css';
 import defaultTokenIcon from '../assets/token_default.svg';
+import EthIcon from '../assets/eth.svg';
+import TokenIcon from './TokenIcon';
+import { parseEther } from 'viem';
+import {formattedBalance} from "../utils/format.ts";
 
 interface WalletAssetsProps {
   walletAddress: string | undefined;
@@ -12,34 +16,68 @@ const WalletAssets: React.FC<WalletAssetsProps> = ({ walletAddress }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [tokens, setTokens] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const fetchTokens = useSetAtom(getTokensForOwner);
-  
+  const [ethBalance, setEthBalance] = useState<bigint>(0n);
+  const [, fetchTokens] = useAtom(getTokensForOwner);
+  const [, fetchEthBalance] = useAtom(getEthBalance);
+  const [, fetchTokenBalance] = useAtom(getTokenBalance);
+
   useEffect(() => {
     const loadAssets = async () => {
       if (!walletAddress) return;
-      
+
       setIsLoading(true);
       setError(null);
-      
+
       try {
-        // 调用 Alchemy API 获取用户持有的代币
-        const result = await fetchTokens({ 
+        // 获取 ETH 余额
+        const ethBalance = await fetchEthBalance({
           addressOrName: walletAddress
         });
-        
-        // 获取前两个代币
-        setTokens(result.tokens.slice(0, 2));
+        setEthBalance(parseEther(ethBalance));
+
+        // 获取用户持有的代币列表
+        const tokenResult = await fetchTokens({
+          addressOrName: walletAddress
+        });
+
+        // 只获取前 2 个代币
+        const topTokens = tokenResult.tokens.slice(0, 2);
+
+        // 获取每个代币的实际余额
+        const tokensWithBalance = await Promise.all(
+          topTokens.map(async (token) => {
+            try {
+              const balance = await fetchTokenBalance({
+                addressOrName: walletAddress,
+                contractAddress: token.contractAddress,
+              });
+
+              return {
+                ...token,
+                actualBalance: balance
+              };
+            } catch (error) {
+              console.error(`获取代币 ${token.symbol} 余额失败:`, error);
+              return {
+                ...token,
+                actualBalance: "0"
+              };
+            }
+          })
+        );
+
+        setTokens(tokensWithBalance);
       } catch (err) {
         console.error('获取资产失败:', err);
-        setError('无法获取资产信息');
+        setError('Failed to load assets');
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     loadAssets();
-  }, [walletAddress, fetchTokens]);
-  
+  }, [walletAddress, fetchTokens, fetchEthBalance, fetchTokenBalance]);
+
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -47,7 +85,7 @@ const WalletAssets: React.FC<WalletAssetsProps> = ({ walletAddress }) => {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className={styles.errorContainer}>
@@ -55,37 +93,42 @@ const WalletAssets: React.FC<WalletAssetsProps> = ({ walletAddress }) => {
       </div>
     );
   }
-  
-  if (tokens.length === 0) {
+
+  if (tokens.length === 0 && ethBalance === 0n) {
     return (
       <div className={styles.emptyContainer}>
-        没有找到资产
+        No assets found.
       </div>
     );
   }
-  
+
   return (
     <div className={styles.assetListContainer}>
+      {/* eth */}
+      <div
+          className={`${styles.assetItem} ${tokens.length > 0 ? styles.withBorder : ''}`}
+      >
+        <div className={styles.assetInfo}>
+          <TokenIcon logoURI={EthIcon} />
+          <span className={styles.tokenName}>ETH</span>
+        </div>
+        <div className={styles.tokenBalance}>
+          {formattedBalance(ethBalance)}
+        </div>
+      </div>
       {tokens.map((token, index) => (
-        <div 
-          key={token.contractAddress} 
+        <div
+          key={token.contractAddress}
           className={`${styles.assetItem} ${index === 0 && tokens.length > 1 ? styles.withBorder : ''}`}
         >
           <div className={styles.assetInfo}>
-            <img 
-              src={token.logo || defaultTokenIcon} 
-              alt={token.symbol || 'Token'} 
-              className={styles.tokenIcon}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = defaultTokenIcon;
-              }}
-            />
+            <TokenIcon logoURI={token.logo || defaultTokenIcon} />
             <span className={styles.tokenName}>
-              {token.name || token.symbol || '未知代币'}
+              {token.name || token.symbol || 'Unknown Token'}
             </span>
           </div>
           <div className={styles.tokenBalance}>
-            {parseFloat(token.balance || '0').toFixed(4)}
+            {formattedBalance(token.actualBalance || "0")}
           </div>
         </div>
       ))}
@@ -93,4 +136,4 @@ const WalletAssets: React.FC<WalletAssetsProps> = ({ walletAddress }) => {
   );
 };
 
-export default WalletAssets; 
+export default WalletAssets;

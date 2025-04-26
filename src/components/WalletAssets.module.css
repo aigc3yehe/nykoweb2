@@ -2,10 +2,9 @@
   width: 22.125rem; /* 354px */
   height: 6.5rem; /* 104px */
   border-radius: 0.25rem; /* 4px */
-  border: 1px solid rgba(55, 65, 81, 0.3);
   padding-right: 1.25rem; /* 20px */
   padding-left: 1.25rem; /* 20px */
-  border-top: 1px solid rgba(55, 65, 81, 0.3);
+  border: 1px solid rgba(55, 65, 81, 0.3);
   overflow: hidden;
 }
 
@@ -90,4 +89,4 @@
   color: #88A4C2;
   font-family: 'Jura', sans-serif;
   font-size: 0.875rem;
-} 
+}

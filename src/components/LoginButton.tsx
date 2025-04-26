@@ -111,8 +111,11 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };
 
-  // 格式化数字，添加千位分隔符
+  // 格式化数字，添加千位分隔符，如果为0则显示无限符号
   const formatNumber = (num: number) => {
+    if (num === 0) {
+      return "∞"; // 无限符号
+    }
     return new Intl.NumberFormat().format(num);
   };
 

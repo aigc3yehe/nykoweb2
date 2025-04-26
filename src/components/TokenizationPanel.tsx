@@ -51,6 +51,18 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
   const status = getTrainingStatus();
 
+  // 获取Twitter显示名称
+  const getDisplayName = () => {
+      if (model.users.twitter?.name) {
+            return model.users.twitter.name;
+      } else if (model.users.twitter?.username) {
+          return model.users.twitter.username;
+      } else {
+          // 如果没有Twitter信息，显示缩略的钱包地址
+          return model.creator.substring(0, 6) + '...' + model.creator.substring(model.creator.length - 4);
+      }
+  };
+
   // 定期检查 token 化状态
   useEffect(() => {
     // 首次加载时获取状态
@@ -232,7 +244,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
       // 修改 renderTokenizationStatus 函数中的完成状态部分
       if (statusData.state === 'completed' && statusData.collectionToken) {
-        const token = 
+        const token =
             {
                 "name": statusData.collectionToken.name,
                 "address": statusData.collectionToken.address,
@@ -263,13 +275,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
                 <div className={styles.tokenInfoItem}>
                   <span className={styles.tokenInfoLabel}>Creator</span>
                   <div className={styles.addressContainer}>
-                    <span className={styles.tokenInfoValue}>{formatAddress(statusData.collectionToken.creator)}</span>
-                    <img
-                      src={copySvg}
-                      alt="Copy"
-                      className={styles.copyIcon}
-                      onClick={() => copyToClipboard(statusData?.collectionToken?.creator ?? "", "Creator address")}
-                    />
+                    <span className={styles.tokenInfoValue}>{getDisplayName()}</span>
                   </div>
                 </div>
 
