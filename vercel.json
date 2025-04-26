@@ -6,7 +6,7 @@
     },
     {
       "source": "/studio-api/:path*",
-      "destination": "https://api.misato.ai/:path*"
+      "destination": "https://api.nyko.cool/:path*"
     },
     {
       "source": "/:path*",

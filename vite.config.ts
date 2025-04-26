@@ -26,7 +26,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, '')
       },
       '/studio-api': {
-        target: 'https://api.misato.ai',
+        target: 'https://api.nyko.cool',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/studio-api/, '')
       }
