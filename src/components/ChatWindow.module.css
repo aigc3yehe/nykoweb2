@@ -313,8 +313,8 @@
   border-radius: 0.5rem; /* 8px */
   padding: 1px; /* 控制边框厚度 */
   background: linear-gradient(56.31deg, #6366F1 31.74%, #43CC9C 88.68%);
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;

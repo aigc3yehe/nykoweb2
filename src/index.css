@@ -75,6 +75,9 @@ html {
 /* 移除container的固定宽度设置，允许内容继续占满屏幕 */
 .container {
   max-width: 100% !important;
+  height: 100vh !important; /* 添加高度100vh */
+  display: flex !important; /* 确保flex布局 */
+  flex-direction: column !important; /* 确保垂直方向布局 */
 }
 
 /* 当宽度超过1920px时，固定font-size不再增长，但依然占满宽度 */
@@ -89,6 +92,12 @@ html {
 @media screen and (max-width: 768px) {
   html {
     font-size: 14px; /* 可根据需要调整小屏幕的基础字体大小 */
+  }
+  
+  /* 针对移动设备的额外高度调整 */
+  .container {
+    height: 100% !important; /* 在移动设备上使用100%而不是100vh */
+    min-height: 100vh !important; /* 确保至少有视口高度 */
   }
 }
 

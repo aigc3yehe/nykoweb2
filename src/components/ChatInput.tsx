@@ -375,6 +375,11 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
           </div>
         )}
       </div>
+      
+      {/* 移动端提示信息 */}
+      <div className={styles.mobileNotice}>
+        Use landscape mode or browse on a desktop computer.
+      </div>
     </div>
   );
 };

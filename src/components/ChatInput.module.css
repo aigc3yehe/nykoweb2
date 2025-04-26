@@ -8,6 +8,7 @@
   border-top: 1px solid rgba(55, 65, 81, 0.3); /* #3741514D */
   display: flex;
   flex-direction: column;
+  position: relative; /* 添加相对定位 */
 }
 
 /* 标签容器 */
@@ -343,4 +344,24 @@
   user-select: none;
   position: relative;
   z-index: 1;
+}
+
+/* 移动端提示样式 */
+.mobileNotice {
+  display: none; /* 默认隐藏 */
+  position: absolute;
+  left: 1.5rem;
+  bottom: 0.5rem;
+  color: #6E788A;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem; /* 12px */
+  line-height: 1;
+}
+
+/* 在移动端显示提示 */
+@media (max-width: 768px) {
+  .mobileNotice {
+    display: block;
+  }
 }

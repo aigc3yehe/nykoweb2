@@ -10,6 +10,7 @@ import {
 } from "../store/accountStore";
 import { createUser } from "../services/userService";
 import { showAccountPopupAtom } from "../store/accountPopupStore";
+import {Twitter} from "../store/imageStore.ts";
 
 interface LoginButtonProps {
   className?: string;
@@ -111,6 +112,13 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };
 
+  const formatName = (x: Twitter | null, address: string | null) => {
+    if (!x) return formatAddress(address);
+    if (x.username) return x.username;
+    if (x.name) return x.name;
+    return formatAddress(address);
+  };
+
   // 格式化数字，添加千位分隔符，如果为0则显示无限符号
   const formatNumber = (num: number) => {
     if (num === 0) {
@@ -175,7 +183,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
             className={styles.avatarIcon}
           />
           <span className={styles.accountAddress}>
-            {formatAddress(walletAddress)}
+            {formatName(twitter, walletAddress)}
           </span>
         </div>
       </div>

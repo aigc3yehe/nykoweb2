@@ -83,6 +83,13 @@
   max-width: 8rem; /* 设置最大宽度 */
 }
 
+/* 在移动端显示提示 */
+@media (max-width: 768px) {
+  .accountAddress {
+    display: none;
+  }
+}
+
 /* Twitter登录按钮 */
 .twitterButton {
   display: flex;
@@ -145,7 +152,7 @@
   border-radius: 1rem;
   background: #374151;
   border: 1px solid rgba(255, 255, 255, 0.5);
-} 
+}
 
 .goldIcon {
   width: 1rem;
