@@ -268,7 +268,7 @@ export type FlagResponse = {
 // 添加设置模型标识的原子
 export const setModelFlag = atom(
   null,
-  async (_, __, { modelId, flag }: { modelId: number, flag: string }) => {
+  async (_, __, { modelId, flag, user }: { modelId: number, flag: string, user: string }) => {
     try {
       const response = await fetch('/studio-api/model/flag', {
         method: 'POST',
@@ -278,7 +278,8 @@ export const setModelFlag = atom(
         },
         body: JSON.stringify({
           model_id: modelId,
-          flag
+          flag,
+          user,
         })
       });
       

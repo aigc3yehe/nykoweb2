@@ -15,6 +15,7 @@ import {
   setModelFlag
 } from '../store/tokenStore';
 import {showToastAtom} from "../store/imagesStore.ts";
+import { usePrivy } from '@privy-io/react-auth';
 
 interface ModelInfoPanelProps {
   model: ModelDetail;
@@ -26,6 +27,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   const showGeneratePopup = useSetAtom(showGeneratePopupAtom);
   const setTokenizationFlag = useSetAtom(setModelFlag);
   const fetchState = useSetAtom(fetchTokenizationState);
+  const { user } = usePrivy();
   
   // 检查当前用户是否是模型创建者
   const isFlag = model.flag !== null && model.flag !== ""
@@ -118,7 +120,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
     // 发起 token 化请求
     const flag = 'tokenization'
     const modelId = model.id;
-    await setTokenizationFlag({ modelId, flag});
+    await setTokenizationFlag({ modelId, flag, user: user?.id || '' });
 
     // 立即获取最新状态
     await fetchState({modelId, refreshState: true});
