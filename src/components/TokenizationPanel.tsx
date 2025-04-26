@@ -15,6 +15,7 @@ import {accountAtom} from "../store/accountStore.ts";
 import {ModelDetail} from '../store/modelStore';
 import {showToastAtom} from "../store/imagesStore.ts";
 import SwapWidgetCustom from './SwapWidgetCustom.tsx';
+import { usePrivy } from '@privy-io/react-auth';
 
 interface TokenizationPanelProps {
   model: ModelDetail;
@@ -33,6 +34,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
   const [isInitiating, setIsInitiating] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
+  const { user } = usePrivy();
 
   const isFlag = model.flag !== null && model.flag !== ""
   const isShowToken = accountState.did === model.creator && !isFlag;
@@ -77,7 +79,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
       // 发起 token 化请求
       const flag = 'tokenization'
       const modelId = model.id
-      await setTokenizationFlag({ modelId, flag});
+      await setTokenizationFlag({ modelId, flag, user: user?.id || '' });
 
       // 立即获取最新状态
       await fetchState({modelId, refreshState: true});
