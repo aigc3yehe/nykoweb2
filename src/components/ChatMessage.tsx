@@ -49,10 +49,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
     if (name.length <= 9) return name;
-    
+
     const extension = name.split('.').pop() || '';
     const baseName = name.substring(0, name.length - extension.length - 1);
-    
+
     return `${baseName.substring(0, 3)}...${baseName.substring(baseName.length - 2)}.${extension}`;
   };
 
@@ -60,10 +60,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   const renderGeneratingImageComponent = () => {
     return (
       <div className={styles.generatingIndicator} key={request_id}>
-        <img 
-          src={uploadingIcon} 
-          alt="Generating" 
-          className={styles.uploadingIcon} 
+        <img
+          src={uploadingIcon}
+          alt="Generating"
+          className={styles.uploadingIcon}
         />
         <span className={styles.generatingText}>
           Generating image, please wait...
@@ -76,10 +76,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     // 计算图片展示尺寸，保持原始宽高比，短边固定为 12.5rem (200px)
     let displayWidth = 12.5; // 默认宽度 12.5rem (200px)
     let displayHeight = 12.5; // 默认高度 12.5rem (200px)
-    
+
     if (images.length > 0 && imageWidth && imageHeight) {
       const aspectRatio = imageWidth / imageHeight;
-      
+
       if (aspectRatio >= 1) {
         // 宽图：宽度大于高度，高度固定为 12.5rem
         displayHeight = 12.5;
@@ -90,22 +90,22 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         displayHeight = 12.5 / aspectRatio;
       }
     }
-    
+
     return (
       <div className={styles.imageResultContainer}>
         <div className={styles.generatedImagesGrid}>
           {/* 只显示第一张图片 */}
           {images.length > 0 && (
-            <div 
+            <div
               className={styles.generatedImageWrapper}
               style={{
                 width: `${displayWidth}rem`,
                 height: `${displayHeight}rem`
               }}
             >
-              <img 
-                src={images[0]} 
-                alt="Generated Image" 
+              <img
+                src={images[0]}
+                alt="Generated Image"
                 className={styles.generatedImage}
                 onClick={() => {
                   // 点击查看大图
@@ -125,21 +125,21 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     const hasMaxImages = uploadedFiles.length >= 10;
     const canConfirm = hasMaxImages && !isUploading && !finishUpload;
     const canAddImages = !isUploading && !finishUpload;
-    
+
     return (
       <>
         <div className={styles.uploadImageContainer}>
           <div className={styles.uploadImageHeader}>
             <span className={styles.uploadImageTitle}>Upload Images:</span>
             <div className={styles.uploadButtonGroup}>
-              <button 
-                className={`${styles.addButton} ${canAddImages ? styles.disabled : ''}`}
+              <button
+                className={`${styles.addButton} ${canAddImages ? '' : styles.disabled }`}
                 onClick={onAddImage}
                 disabled={!canAddImages}
               >
                 Add
               </button>
-              <button 
+              <button
                 className={`${styles.confirmButton} ${!canConfirm ? styles.disabled : ''}`}
                 onClick={onConfirmImages}
                 disabled={!canConfirm}
@@ -148,7 +148,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               </button>
             </div>
           </div>
-          
+
           {/* 已上传图片预览 */}
           {hasImages && (
             <div className={styles.uploadedImagesPreview}>
@@ -169,14 +169,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
           )}
         </div>
-        
+
         {/* 上传状态指示器 - 注意这是在uploadImageContainer之外的 */}
         {(isUploading || hasImages) && (
           <div className={styles.progressIndicator}>
-            <img 
-              src={isUploading ? uploadingIcon : okIcon} 
-              alt={isUploading ? "Uploading" : "Done"} 
-              className={isUploading ? styles.uploadingIcon : styles.statusIcon} 
+            <img
+              src={isUploading ? uploadingIcon : okIcon}
+              alt={isUploading ? "Uploading" : "Done"}
+              className={isUploading ? styles.uploadingIcon : styles.statusIcon}
             />
             <span className={styles.statusText}>
               {isUploading
@@ -217,7 +217,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       <div className={styles.messageContent}>
         <p className={styles.text}>{content}</p>
       </div>
-      
+
       {role === 'assistant' && type === 'upload_image' && renderUploadImageComponent()}
       {role === 'assistant' && type === 'model_config' && renderModelConfigComponent()}
       {role === 'assistant' && type === 'generate_result' && renderGenerateResultComponent()}
