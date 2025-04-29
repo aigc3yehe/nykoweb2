@@ -5,6 +5,8 @@
   overflow: hidden;
   position: relative;
   transition: transform 0.2s ease;
+  background: linear-gradient(90deg, rgba(31, 41, 55, 0.2) 0%, rgba(63, 79, 103, 0.2) 100%);
+  backdrop-filter: blur(30px);
   cursor: pointer;
 }
 
