@@ -9,10 +9,14 @@ const Header: React.FC = () => {
   const handleTwitterClick = () => {
       window.open('https://x.com/niyoko_agent', '_blank');
   }
+
+    const handleDocClick = () => {
+        window.open('https://nyko.cool', '_blank');
+    }
   return (
     <header className={styles.header}>
       <div className={styles.logoSection}>
-        <h1 className={styles.title}>NIYOKO</h1>
+        <h1 className={styles.title}>NYKO</h1>
       </div>
       <div className={styles.actionSection}>
         {/* X按钮 */}
@@ -21,7 +25,7 @@ const Header: React.FC = () => {
         </button>
 
         {/* Doc按钮 */}
-        <button className={styles.docButton}>
+        <button className={styles.docButton} onClick={handleDocClick}>
           <img src={DocIcon} alt="Documentation" className={styles.docIcon}/>
           <span>Doc</span>
         </button>

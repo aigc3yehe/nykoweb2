@@ -282,7 +282,7 @@
 /* 宽高比下拉菜单 */
 .ratioDropdown {
   position: absolute;
-  top: calc(100% + 0.5rem); /* 8px */
+  bottom: calc(100% + 0.5rem); /* 8px */
   left: 0;
   width: 6rem; /* 96px */
   background: #1F2937;

@@ -89,7 +89,6 @@
 }
 
 .premiumBadge {
-  width: 5.5625rem; /* 89px */
   height: 1.375rem; /* 22px */
   border-radius: 6.25rem; /* 100px */
   gap: 0.5rem; /* 8px */

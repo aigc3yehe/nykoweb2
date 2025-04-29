@@ -26,21 +26,23 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-top-left-radius: 0.5rem; /* 8px */
-  border-top-right-radius: 0.5rem; /* 8px */
-  border-bottom-right-radius: 0.5rem; /* 8px */
-  border-bottom-left-radius: 1.875rem; /* 30px */
+  /* 8px */
+  /* 8px */
+  /* 8px */
+  /* 30px */
+  border-radius: 0.5rem 0.5rem 0.5rem 1.875rem;
 }
 
 .tagsContainer {
-  width: 13.3125rem; /* 213px */
+  width: 12.6875rem; /* 203px */
   height: 1.375rem; /* 22px */
   gap: 0.25rem; /* 4px */
   position: absolute;
   top: 0.625rem; /* 10px */
   right: 0.625rem; /* 10px */
+  left: 0.625rem; /* 10px */
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .trainingTag {
