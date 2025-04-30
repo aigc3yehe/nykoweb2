@@ -11,6 +11,7 @@ import AccountPopup from './components/AccountPopup'
 import ExportKeyModal from './components/ExportKeyModal'
 import GeneratePopup from './components/GeneratePopup'
 import { generatePopupAtom, hideGeneratePopupAtom } from './store/generatePopupStore'
+import { Analytics } from '@vercel/analytics/react'
 
 function App() {
   const [modalState] = useAtom(modalAtom)
@@ -69,6 +70,7 @@ function App() {
           onClose={hideGeneratePopup}
         />
       )}
+      <Analytics />
     </div>
   )
 }
