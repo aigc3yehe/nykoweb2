@@ -183,7 +183,9 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
   };
 
   return (
-    <div className={styles.modelCard}>
+    <div className={styles.modelCard} style={{
+      background: 'linear-gradient(121.69deg, rgba(31, 41, 55, 0.2) 22.31%, rgba(63, 79, 103, 0.2) 86.22%, rgba(70, 125, 206, 0.2) 106.88%)'
+    }}>
       <div className={styles.modelCover}>
         <img src={getCoverUrl()} alt={localModel.name} />
 
