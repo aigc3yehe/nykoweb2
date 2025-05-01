@@ -96,9 +96,9 @@ const ContentDisplay: React.FC = () => {
   return (
     <div className={`${styles.contentDisplay} ${styles.hideScrollbar}`} ref={contentDisplayRef} onWheel={handleWheel}>
       {/* 特性展示卡片 */}
-      <div ref={featureCardRef}>
+      { !viewingModelId && <div ref={featureCardRef}>
         <FeatureCard />
-      </div>
+      </div> }
       <div className={`${styles.contentContainer} ${isHeaderSticky ? styles.stickyHeader : ''}`}>
         {viewingModelId ? (
           <>

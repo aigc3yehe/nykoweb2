@@ -3,7 +3,7 @@
   height: 18.5625rem; /* 297px */
   border-radius: 0.5rem; /* 8px */
   overflow: hidden;
-  background: linear-gradient(121.69deg, rgba(31, 41, 55, 0.2) 22.31%, rgba(63, 79, 103, 0.2) 86.22%, rgba(70, 125, 206, 0.2) 106.88%);
+  background: linear-gradient(121.69deg, rgba(31, 41, 55, 0.2) 22.31%, rgba(63, 79, 103, 0.2) 86.22%, rgba(70, 125, 206, 0.2) 106.88%) !important;
   backdrop-filter: blur(1.875rem); /* 30px */
   display: flex;
   flex-direction: column;

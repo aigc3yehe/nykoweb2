@@ -75,10 +75,48 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   // 获取训练状态
   const getTrainingStatus = () => {
     const trainState = model.model_tran?.[0]?.train_state;
-    if (trainState === 2) {
+    if (trainState !== 2) {
       return { text: 'Ready', className: styles.statusReady, isReady: true };
     } else {
-      return { text: 'Training', className: styles.statusTrain, isReady: false };
+      // 计算训练已经进行的时间（小时）
+      const submittedTime = new Date(model.created_at);
+      const currentTime = new Date();
+      const elapsedHours = (currentTime.getTime() - submittedTime.getTime()) / (1000 * 60 * 60);
+      
+      // 根据已用时间确定训练阶段
+      let statusText = '';
+      if (elapsedHours <= 0.5) {
+        statusText = 'Processing training materials';
+      } else if (elapsedHours <= 1) {
+        statusText = 'Generating parameter tags';
+      } else {
+        statusText = 'Training in progress';
+      }
+      
+      // 计算预估剩余时间
+      const totalTrainingHours = 5; // 总训练时间为5小时
+      const remainingHours = totalTrainingHours - elapsedHours;
+      let etaText = '';
+      
+      if (remainingHours <= 0) {
+        etaText = '(finishing)';
+      } else {
+        // 使用4舍5入来显示小时数
+        const roundedHours = Math.round(remainingHours);
+        
+        if (roundedHours === 0) {
+          etaText = '(finishing)';
+        } else {
+          etaText = `(ETA ${roundedHours} hour${roundedHours > 1 ? 's' : ''})`;
+        }
+      }
+      
+      return { 
+        text: statusText, 
+        eta: etaText,
+        className: styles.statusTrain, 
+        isReady: false 
+      };
     }
   };
   
@@ -231,7 +269,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
               disabled
             >
               <img src={codeSvg} alt="Code" className={styles.buttonIcon} />
-              <span>Training...</span>
+              <span>Training... {status.eta}</span>
             </button>
             
             {/* 分享按钮 */}
