@@ -4,6 +4,7 @@ import ContentHeader from './ContentHeader';
 import ModelsContent from './ModelsContent';
 import ImagesContent from './ImagesContent';
 import ModelDetail from './ModelDetail';
+import FeatureCard from './FeatureCard';
 import { useAtom, useSetAtom } from 'jotai';
 import { clearModelDetail, modelDetailAtom, modelIdAndNameAtom } from '../store/modelStore';
 
@@ -60,6 +61,8 @@ const ContentDisplay: React.FC = () => {
 
   return (
     <div className={styles.contentDisplay}>
+      {/* 在这里新增加特性展示卡片 */}
+      <FeatureCard />
       <div className={styles.contentContainer}>
         {viewingModelId ? (
           <>

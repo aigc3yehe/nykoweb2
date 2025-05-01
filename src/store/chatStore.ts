@@ -110,7 +110,7 @@ const initialState: ChatState = {
     inQueue: false
   },
   heartbeatId: undefined,
-  loraWeight: 0.8
+  loraWeight: 0.9
 };
 
 // 创建原子状态
@@ -713,7 +713,7 @@ export function checkAndAddModelConfigMessage(messages: Message[]): Message[] {
 // 修改addImage函数来处理model_config消息
 export const addImage = atom(
   null,
-  async (get, set, messageIndex: number) => {
+  async (get, set, messageIndex: number, maxSize: number) => {
     // 创建一个文件选择对话框
     const input = document.createElement('input');
     input.type = 'file';
@@ -722,9 +722,23 @@ export const addImage = atom(
 
     input.onchange = async (event) => {
       const target = event.target as HTMLInputElement;
-      const files = target.files;
+      const currentFiles = target.files;
 
-      if (!files || files.length === 0) return;
+      if (!currentFiles || currentFiles.length === 0) {
+        target.value = '';
+        return;
+      }
+
+      const originalFileCount = currentFiles.length;
+      let filesToUpload = Array.from(currentFiles);
+
+      if (originalFileCount > maxSize) {
+        filesToUpload = filesToUpload.slice(0, maxSize);
+        set(showToastAtom, {
+          message: `You selected ${originalFileCount} images, only uploading the first ${maxSize}`,
+          severity: 'warning'
+        });
+      }
 
       const chatState = get(chatAtom);
 
@@ -737,14 +751,14 @@ export const addImage = atom(
         set(chatAtom, {
           ...chatState,
           messages: updateImageUploadState(chatState.messages, messageIndex, {
-            totalCount: files.length,
+            totalCount: filesToUpload.length,
             uploadedCount: 0,
             isUploading: true
           })
         });
 
         // 准备要上传的文件信息
-        const filesWithNames = Array.from(files).map(file => ({
+        const filesWithNames = filesToUpload.map(file => ({
           file,
           name: file.name
         }));
@@ -752,7 +766,7 @@ export const addImage = atom(
         // 使用uploadImages函数上传图片
         const uploadedUrls = await uploadImages(
           messageIndex,
-          Array.from(files),
+          filesToUpload,
           // 设置上传状态的回调
           (state) => set(setImageUploadStateAtom, state),
           // 更新消息URL的回调
@@ -763,7 +777,7 @@ export const addImage = atom(
             set(chatAtom, {
               ...updatedChatState,
               messages: updateImageUploadState(updatedChatState.messages, messageId, {
-                uploadedCount: Math.floor(files.length * (progress / 100)),
+                uploadedCount: Math.floor(filesToUpload.length * (progress / 100)),
                 isUploading: progress < 100
               })
             });
@@ -822,7 +836,7 @@ export const addImage = atom(
 
         // 显示错误通知
         set(showToastAtom, {
-          message: '图片上传失败',
+          message: 'Image upload failed',
           severity: 'error'
         });
       }
@@ -905,7 +919,8 @@ export async function fetchConnectionStatus(userUuid: string): Promise<Connectio
     });
 
     if (!response.ok) {
-      throw new Error(`获取连接状态失败，状态码 ${response.status}`);
+      // throw new Error(`获取连接状态失败，状态码 ${response.status}`);
+      throw new Error('Internal service error');
     }
 
     return await response.json();

@@ -71,6 +71,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
     }
   };
 
+  const uploading = chatState.messages.some(msg => msg.imageUploadState?.isUploading)
+
   // 设置用户ID
   useEffect(() => {
     setUserInfoAction({ uuid, did });
@@ -307,7 +309,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
                 imageWidth={message.imageInfo?.width || 256}
                 imageHeight={message.imageInfo?.height || 256}
                 request_id={message.request_id}
-                onAddImage={() => addImageAction(index)}
+                onAddImage={() => addImageAction(index, 30 - (message.uploadedFiles?.length || 0))}
                 onConfirmImages={() => finishUploadImagesAction(index)}
                 onRemoveImage={(url) => removeImageAction({ messageIndex: index, fileUrl: url })}
               />
@@ -340,7 +342,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
       </div>
 
       {/* 底部输入区域组件 */}
-      <ChatInput isLoading={chatState.isLoading || chatState.isGenerating} disabled={!authenticated || !did || !isActive} />
+      <ChatInput isLoading={chatState.isLoading || chatState.isGenerating} disabled={!authenticated || !did || !isActive || uploading} />
     </div>
   );
 };

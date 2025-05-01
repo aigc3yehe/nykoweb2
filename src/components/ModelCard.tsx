@@ -190,7 +190,7 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
 
           {isTokenization && (
             <>
-              <div className={styles.completedTag}>${localModel.model_tokenization?.metadata?.name ?? 'Token'}</div>
+              <div className={styles.completedTag}>${localModel.model_tokenization?.metadata?.symbol ?? 'Token'}</div>
             </>
           )}
         </div>

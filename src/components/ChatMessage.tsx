@@ -124,7 +124,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     const hasImages = uploadedFiles.length > 0;
     const hasMaxImages = uploadedFiles.length >= 10;
     const canConfirm = hasMaxImages && !isUploading && !finishUpload;
-    const canAddImages = !isUploading && !finishUpload;
+    const canAddImages = !isUploading && !finishUpload && uploadedFiles.length < 30;
+    const showSelectImages = uploadedFiles.length == 0;
+    const canSelectImage = canAddImages
 
     return (
       <>
@@ -132,20 +134,32 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           <div className={styles.uploadImageHeader}>
             <span className={styles.uploadImageTitle}>Upload Images:</span>
             <div className={styles.uploadButtonGroup}>
-              <button
-                className={`${styles.addButton} ${canAddImages ? '' : styles.disabled }`}
-                onClick={onAddImage}
-                disabled={!canAddImages}
-              >
-                Add
-              </button>
-              <button
-                className={`${styles.confirmButton} ${!canConfirm ? styles.disabled : ''}`}
-                onClick={onConfirmImages}
-                disabled={!canConfirm}
-              >
-                Confirm
-              </button>
+              { showSelectImages ? (
+                  <button
+                      className={`${styles.selectButton} ${canSelectImage ? '' : styles.disabled }`}
+                      onClick={onAddImage}
+                      disabled={!canSelectImage}
+                  >
+                    Select Images
+                  </button>
+              ) : (
+                  <>
+                    <button
+                        className={`${styles.addButton} ${canAddImages ? '' : styles.disabled }`}
+                        onClick={onAddImage}
+                        disabled={!canAddImages}
+                    >
+                      Add
+                    </button>
+                    <button
+                        className={`${styles.confirmButton} ${!canConfirm ? styles.disabled : ''}`}
+                        onClick={onConfirmImages}
+                        disabled={!canConfirm}
+                    >
+                      Confirm
+                    </button>
+                  </>
+              )}
             </div>
           </div>
 

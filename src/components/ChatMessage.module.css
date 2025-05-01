@@ -101,6 +101,32 @@
 }
 
 /* 添加按钮 */
+.selectButton {
+  height: 1.6875rem; /* 27px */
+  gap: 0.25rem; /* 4px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.25rem 0.5rem; /* 4px 8px */
+  background: #6366F1;
+  color: #000000;
+  border: none;
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.selectButton.disabled {
+  background: transparent;
+  border: 1px solid rgba(55, 65, 81, 0.3); /* #3741514D */
+  color: #FFFFFF26;
+  cursor: not-allowed;
+}
+
+/* 添加按钮 */
 .addButton {
   width: 3rem; /* 48px */
   height: 1.6875rem; /* 27px */
@@ -108,7 +134,7 @@
   border-radius: 0.25rem; /* 4px */
   padding: 0.25rem 0.5rem; /* 4px 8px */
   background: #6366F1;
-  color: 000000;
+  color: #000000;
   border: none;
   font-family: 'Jura', sans-serif;
   font-weight: 700;

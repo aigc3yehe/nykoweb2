@@ -427,3 +427,86 @@
   vertical-align: middle;
   color: #000000;
 }
+
+/* 初始状态 */
+.initialContainer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 生成中状态 */
+.generatingContainer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.generatingContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem; /* 40px */
+}
+
+.generatingStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem; /* 12px */
+}
+
+.generatingText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 400;
+  font-size: 1.125rem; /* 18px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #FFFFFF;
+}
+
+/* 动态文案样式 */
+.generatingTip {
+  font-family: 'Jura', sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  color: #88A4C2;
+  height: 1rem; /* 固定高度，防止切换时布局跳动 */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* 文案切换动画 */
+@keyframes flipOut {
+  0% {
+    transform: perspective(400px) rotateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(400px) rotateX(-90deg);
+    opacity: 0;
+  }
+}
+
+@keyframes flipIn {
+  0% {
+    transform: perspective(400px) rotateX(90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(400px) rotateX(0);
+    opacity: 1;
+  }
+}
+
+.animateOut {
+  animation: flipOut 0.3s forwards;
+}

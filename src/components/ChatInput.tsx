@@ -28,14 +28,14 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   const [, sendMessageAction] = useAtom(sendMessage);
   const [, setAspectRatioAction] = useAtom(setAspectRatio);
   const [, setLoraWeightAction] = useAtom(setLoraWeight);
-  
+
   const [activeTags, setActiveTags] = useState<Tag[]>([]);
   const [scrollHeight, setScrollHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
   const [clientHeight, setClientHeight] = useState(0);
   const [showRatioDropdown, setShowRatioDropdown] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const customScrollbarRef = useRef<HTMLDivElement>(null);
   const ratioDropdownRef = useRef<HTMLDivElement>(null);
@@ -46,7 +46,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 220)}px`;
-      
+
       // 更新滚动条状态
       setScrollHeight(textareaRef.current.scrollHeight);
       setClientHeight(textareaRef.current.clientHeight);
@@ -72,19 +72,19 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   const handleSliderInteraction = useCallback((e: React.MouseEvent | MouseEvent) => {
     const sliderRef = loraSliderRefs;
     if (!sliderRef.current) return;
-    
+
     const rect = sliderRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const width = rect.width;
-    
+
     let newStrength = Math.max(0, Math.min(1, x / width));
     // 四舍五入到两位小数
     newStrength = Math.round(newStrength * 100) / 100;
-    
+
     // 更新全局状态
     setLoraWeightAction(newStrength);
   }, [setLoraWeightAction]);
-  
+
   // 处理滑块拖动
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -92,16 +92,16 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
         handleSliderInteraction(e);
       }
     };
-    
+
     const handleMouseUp = () => {
       setIsDragging(false);
     };
-    
+
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
-    
+
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
@@ -111,13 +111,13 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   // 根据task_type设置标签
   useEffect(() => {
     const baseTags: Tag[] = [];
-    
+
     // 如果有task_type且不是chat，则添加Task标签
     if (chatState.task_type && chatState.task_type !== 'chat') {
-      baseTags.push({ 
-        id: 'task', 
-        text: 'Task', 
-        type: 'normal', 
+      baseTags.push({
+        id: 'task',
+        text: 'Task',
+        type: 'normal',
         value: chatState.task_value
       });
     }
@@ -156,7 +156,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
         })
       }
     }
-    
+
     setActiveTags(baseTags);
   }, [chatState.task_value, chatState.task_type, chatState.currentModel, chatState.selectedAspectRatio, chatState.loraWeight]);
 
@@ -177,7 +177,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   };
 
   const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || disabled) return;
     const message = input.trim();
     setInput('');
     await sendMessageAction(message);
@@ -205,10 +205,10 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   // 处理自定义滚动条拖动
   const handleScrollThumbDrag = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    
+
     const startY = e.clientY;
     const startScrollTop = scrollTop;
-    
+
     const handleMouseMove = (moveEvent: MouseEvent) => {
       if (textareaRef.current) {
         const deltaY = moveEvent.clientY - startY;
@@ -217,12 +217,12 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
         setScrollTop(textareaRef.current.scrollTop);
       }
     };
-    
+
     const handleMouseUp = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-    
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
@@ -232,7 +232,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
     if (scrollHeight <= clientHeight) return 0;
     return Math.max(30, (clientHeight / scrollHeight) * clientHeight);
   };
-  
+
   const getScrollThumbTop = () => {
     if (scrollHeight <= clientHeight) return 0;
     return (scrollTop / (scrollHeight - clientHeight)) * (clientHeight - getScrollThumbHeight());
@@ -250,9 +250,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
             if (tag.type === 'closeable') {
               return (
                 <div key={tag.id} className={styles.tagWithClose}>
-                  <img 
-                    src={closeIcon} 
-                    alt="Close" 
+                  <img
+                    src={closeIcon}
+                    alt="Close"
                     className={styles.closeIcon}
                     onClick={() => handleTagDelete(tag.id)}
                   />
@@ -262,8 +262,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
               );
             } else if (tag.type === 'imageRatio') {
               return (
-                <div 
-                  key={tag.id} 
+                <div
+                  key={tag.id}
                   className={styles.imageRatioTag}
                   onClick={handleRatioTagClick}
                   ref={ratioDropdownRef}
@@ -271,12 +271,12 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
                   <img src={imageIcon} alt="Image" className={styles.leftIcon} />
                   <span className={styles.ratioText}>{tag.ratio}</span>
                   <img src={downIcon} alt="Down" className={styles.rightIcon} />
-                  
+
                   {/* 宽高比下拉菜单 */}
                   {showRatioDropdown && (
                     <div className={styles.ratioDropdown}>
                       {aspectRatios.map((ratio) => (
-                        <div 
+                        <div
                           key={ratio.value}
                           className={`${styles.ratioItem} ${chatState.selectedAspectRatio?.value === ratio.value ? styles.ratioItemSelected : ''}`}
                           onClick={(e) => {
@@ -359,11 +359,11 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
             </button>
           </div>
         </div>
-        
+
         {/* 自定义滚动条 */}
         {showCustomScrollbar && (
           <div className={styles.customScrollbarTrack}>
-            <div 
+            <div
               ref={customScrollbarRef}
               className={styles.customScrollbarThumb}
               style={{
@@ -375,7 +375,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
           </div>
         )}
       </div>
-      
+
       {/* 移动端提示信息 */}
       <div className={styles.mobileNotice}>
         Use landscape mode or browse on a desktop computer.
