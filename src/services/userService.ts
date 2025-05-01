@@ -42,6 +42,7 @@ export const createUser = async (userData: {
   }
   try {
     const privyToken = await getAccessToken();
+    console.debug("[PRIVY] token:", privyToken);
     const response = await fetch("/studio-api/users/create", {
       method: "POST",
       headers: {
