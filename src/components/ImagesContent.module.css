@@ -5,6 +5,7 @@
   overflow-x: hidden;
   position: relative;
   padding: 0 0 1rem 0;
+  overflow: visible; /* 改为visible，不拦截滚动 */
   
   /* 隐藏滚动条 - Webkit浏览器 */
   &::-webkit-scrollbar {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './ContentDisplay.module.css';
 import ContentHeader from './ContentHeader';
 import ModelsContent from './ModelsContent';
@@ -17,6 +17,17 @@ const ContentDisplay: React.FC = () => {
   const [modelDetailState] = useAtom(modelDetailAtom);
   const clearDetail = useSetAtom(clearModelDetail);
   const [modelIdAndName] = useAtom(modelIdAndNameAtom);
+
+  // 新增吸顶状态
+  const [isHeaderSticky, setIsHeaderSticky] = useState(false);
+  const featureCardRef = useRef<HTMLDivElement>(null);
+  const contentDisplayRef = useRef<HTMLDivElement>(null);
+
+  // 处理滚动事件的阻止冒泡问题
+  const handleWheel = (e: React.WheelEvent) => {
+    // 允许滚动事件向上冒泡到主滚动容器
+    e.stopPropagation = () => {};
+  };
 
   // 处理查看模型详情
   const handleViewModelDetail = (modelId: number, modelName: string) => {
@@ -59,41 +70,70 @@ const ContentDisplay: React.FC = () => {
     }
   }, [modelIdAndName]);
 
+  // 新增滚动监听逻辑
+  useEffect(() => {
+    const handleScroll = () => {
+      if (featureCardRef.current && contentDisplayRef.current) {
+        const featureCardBottom = featureCardRef.current.getBoundingClientRect().bottom;
+        // 当FeatureCard完全滚出可视区域时，ContentHeader变为吸顶
+        setIsHeaderSticky(featureCardBottom <= 0);
+      }
+    };
+
+    // 在主容器上添加滚动监听
+    const contentDisplay = contentDisplayRef.current;
+    if (contentDisplay) {
+      contentDisplay.addEventListener('scroll', handleScroll, { passive: true });
+    }
+
+    return () => {
+      if (contentDisplay) {
+        contentDisplay.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
+
   return (
-    <div className={styles.contentDisplay}>
-      {/* 在这里新增加特性展示卡片 */}
-      <FeatureCard />
-      <div className={styles.contentContainer}>
+    <div className={`${styles.contentDisplay} ${styles.hideScrollbar}`} ref={contentDisplayRef} onWheel={handleWheel}>
+      {/* 特性展示卡片 */}
+      <div ref={featureCardRef}>
+        <FeatureCard />
+      </div>
+      <div className={`${styles.contentContainer} ${isHeaderSticky ? styles.stickyHeader : ''}`}>
         {viewingModelId ? (
           <>
-            <ContentHeader
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              ownedOnly={ownedOnly}
-              setOwnedOnly={setOwnedOnly}
-              sortOption={sortOption}
-              setSortOption={setSortOption}
-              isDetailMode={true}
-              modelName={modelDetailState.currentModel?.name || viewingModelName || 'Loading...'}
-              onBackClick={handleBackToList}
-            />
+            <div className={styles.headerWrapper}>
+              <ContentHeader
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                ownedOnly={ownedOnly}
+                setOwnedOnly={setOwnedOnly}
+                sortOption={sortOption}
+                setSortOption={setSortOption}
+                isDetailMode={true}
+                modelName={modelDetailState.currentModel?.name || viewingModelName || 'Loading...'}
+                onBackClick={handleBackToList}
+              />
+            </div>
 
-            <div className={styles.contentBody}>
+            <div className={styles.contentBody} onWheel={handleWheel}>
               <ModelDetail modelId={viewingModelId} />
             </div>
           </>
         ) : (
           <>
-            <ContentHeader
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              ownedOnly={ownedOnly}
-              setOwnedOnly={setOwnedOnly}
-              sortOption={sortOption}
-              setSortOption={setSortOption}
-            />
+            <div className={styles.headerWrapper}>
+              <ContentHeader
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                ownedOnly={ownedOnly}
+                setOwnedOnly={setOwnedOnly}
+                sortOption={sortOption}
+                setSortOption={setSortOption}
+              />
+            </div>
 
-            <div className={styles.contentBody}>
+            <div className={styles.contentBody} onWheel={handleWheel}>
               {activeTab === 'models' ? (
                 <ModelsContent
                   ownedOnly={ownedOnly}

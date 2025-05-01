@@ -6,7 +6,8 @@
   padding: 0.75rem 0 0.75rem 0; /* 12px 0px 12px 0px */
   position: relative;
   height: 100%;
-  overflow: hidden; /* 防止内容溢出导致页面滚动 */
+  overflow-y: auto; /* 改为auto以允许内容滚动 */
+  overflow-x: hidden; /* 防止水平滚动 */
   background-image: url('/image_grid_bg.png');
   background-position: top left;
   background-repeat: repeat-y;
@@ -18,8 +19,34 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem; /* 24px */
-  height: 100%; /* 确保容器填充整个高度 */
-  overflow: hidden; /* 添加overflow:hidden */
+  height: auto; /* 允许内容自然高度流动 */
+  overflow: visible; /* 修改为visible */
+  position: relative; /* 为吸顶效果添加相对定位 */
+}
+
+/* 新增头部包装器样式 */
+.headerWrapper {
+  width: 100%;
+  z-index: 10; /* 确保在其他内容之上 */
+  background: transparent;
+  transition: background-color 0.3s ease;
+}
+
+/* 吸顶状态样式 */
+.stickyHeader .headerWrapper {
+  position: fixed;
+  top: 3.125rem;
+  width: 57.625rem; /* 与contentContainer宽度一致 */
+  background-color: rgba(17, 24, 39, 0.95); /* 半透明背景 */
+  padding: 0.75rem 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+/* 当header变为sticky时，为内容body添加上边距 */
+.stickyHeader .contentBody {
+  padding-top: 5.3125rem; /* 根据header高度调整 2.1875*/
 }
 
 .contentHeader {
@@ -101,12 +128,26 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: calc(100% - 2.5rem); /* 减去header的高度 */
   min-height: 20rem; /* 设置最小高度 */
-  overflow: hidden; /* 防止内容溢出 */
+  overflow: visible; /* 允许内容溢出 */
+  width: 100%;
 }
 
 .placeholder {
   color: #9CA3AF;
   font-family: 'Jura', sans-serif;
+}
+
+/* 隐藏原生滚动条 */
+.hideScrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hideScrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbarVisible {
+  opacity: 1;
 }

@@ -1,25 +1,10 @@
 .modelsContent {
   width: 100%;
-  height: 100%;  /* 填充父容器高度 */
-  overflow-y: auto;  /* 启用垂直滚动 */
-  overflow-x: hidden;  /* 禁用水平滚动 */
-  position: relative;  /* 为绝对定位的子元素创建上下文 */
-  padding: 0 0 1rem 0;  /* 底部留一些空间 */
+  position: relative;
+  padding: 0 0 1rem 0;
   display: flex;
   flex-direction: column;
-  flex: 1; /* 添加flex:1确保填充可用空间 */
-  
-  /* 隐藏滚动条 - Webkit浏览器 */
-  &::-webkit-scrollbar {
-    width: 0;
-    display: none;
-  }
-  
-  /* 隐藏滚动条 - Firefox */
-  scrollbar-width: none;
-  
-  /* 隐藏滚动条 - IE和Edge */
-  -ms-overflow-style: none;
+  overflow: visible; /* 改为visible，不拦截滚动 */
 }
 
 .modelsGrid {
@@ -27,6 +12,7 @@
   grid-template-columns: repeat(auto-fill, minmax(13.9375rem, 1fr)); /* 223px */
   gap: 0.625rem; /* 10px */
   width: 100%;
+  min-height: 5rem; /* 确保有最小高度 */
 }
 
 .modelCardContainer {
@@ -76,3 +62,15 @@
   color: #9CA3AF;
   font-family: 'Jura', sans-serif;
 }
+
+/* 隐藏滚动条 - Webkit浏览器 */
+&::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+/* 隐藏滚动条 - Firefox */
+scrollbar-width: none;
+
+/* 隐藏滚动条 - IE和Edge */
+-ms-overflow-style: none;

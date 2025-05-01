@@ -133,7 +133,7 @@ export const fetchImages = atom(
         });
 
         if (!response.ok) {
-          throw new Error('获取图片列表失败');
+          throw new Error('Failed to Load Images');
         }
 
         const result = await response.json();
