@@ -16,12 +16,12 @@ interface ImageDetailsModalProps {
   onClose: () => void;
 }
 
-const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({ 
-  image, 
-  imageDetail, 
-  isLoading, 
-  error, 
-  onClose 
+const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
+  image,
+  imageDetail,
+  isLoading,
+  error,
+  onClose
 }) => {
   // 使用内部状态来确保组件重新渲染
   const [localImageDetail, setLocalImageDetail] = useState<ImageDetail | null>(imageDetail);
@@ -75,7 +75,7 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
-      }).replace(/\//g, '.') + ' ' + 
+      }).replace(/\//g, '.') + ' ' +
       date.toLocaleTimeString(undefined, {
         hour: '2-digit',
         minute: '2-digit',
@@ -83,14 +83,14 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
         hour12: false
       });
     }
-    
+
     // 没有详细信息时，使用当前时间作为回退
     const date = new Date();
     return date.toLocaleDateString(undefined, {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
-    }).replace(/\//g, '.') + ' ' + 
+    }).replace(/\//g, '.') + ' ' +
     date.toLocaleTimeString(undefined, {
       hour: '2-digit',
       minute: '2-digit',
@@ -105,13 +105,13 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
     if (localImageDetail?.width && localImageDetail?.height) {
       const aspectRatio = localImageDetail.height / localImageDetail.width;
       return 25.625 * aspectRatio;
-    } 
-    
+    }
+
     if (image.width && image.height) {
       const aspectRatio = image.height / image.width;
       return 25.625 * aspectRatio;
     }
-    
+
     return 25.625; // 默认高度
   };
 
@@ -120,10 +120,10 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
     const modelId = localImageDetail?.models?.id || image.model_id;
     // 获取模型名称
     const modelName = getModelName();
-    
+
     // 首先关闭当前模态框
     onClose();
-    
+
     // 如果提供了导航函数且有有效的模型ID，则导航到模型详情
     if (modelId) {
       setModelIdAndNameAction({ modelId, modelName });
@@ -138,12 +138,16 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
 
   // 获取图片URL
   const getImageUrl = () => {
-    return localImageDetail?.url || image.url || undefined;
+    const url = localImageDetail?.url || image.url || undefined;
+    if (url != undefined) {
+      return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-615,q-100`;
+    }
+    return undefined;
   };
 
   // 获取模型名称
   const getModelName = () => {
-    return localImageDetail?.models?.name 
+    return localImageDetail?.models?.name
       ? localImageDetail.models.name
       : `AI Model #${image.model_id}`;
   };
@@ -158,7 +162,7 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
       <button className={styles.closeButton} onClick={onClose}>
         <img src={closeImgSvg} alt="关闭" />
       </button>
-      
+
       <div className={styles.modalContent} onClick={handleContentClick}>
         <div className={styles.imageContainer} style={{ height: `${calculateImageHeight()}rem` }}>
           {getImageUrl() ? (
@@ -174,13 +178,13 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className={styles.imageInfo}>
           <div className={styles.infoHeader}>
             <div className={styles.authorInfo}>
-              <img 
-                src={getAvatarUrl()} 
-                alt="作者头像" 
+              <img
+                src={getAvatarUrl()}
+                alt="作者头像"
                 className={styles.authorAvatar}
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = avatarSvg;
@@ -191,12 +195,12 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
                 <img src={twitterSvg} alt="Twitter" className={styles.twitterIcon} onClick={handleTwitterClick}/>
               )}
             </div>
-            
+
             <div className={styles.creationTime}>
               {formatCreationTime()}
             </div>
           </div>
-          
+
           <div className={styles.modelInfo}>
             <div className={styles.modelInfoHeader}>Using Model</div>
             <div className={styles.modelInfoContent}>
@@ -211,4 +215,4 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
   );
 };
 
-export default ImageDetailsModal; 
+export default ImageDetailsModal;

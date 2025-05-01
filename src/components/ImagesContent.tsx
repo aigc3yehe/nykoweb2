@@ -39,7 +39,7 @@ const ImagesContent: React.FC<ImagesContentProps> = ({ ownedOnly }) => {
   // 卡片宽度
   const [card_width_px, setCardWidth] = useState(0);
   // 列间距
-  const [_, setColumnGap] = useState(0);
+  const [, setColumnGap] = useState(0);
 
   // 根据用户角色和ownedOnly决定view参数
   // 如果是用户自己的图片列表(ownedOnly=true)，不需要传view参数

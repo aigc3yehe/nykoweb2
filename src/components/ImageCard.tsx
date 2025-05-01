@@ -70,6 +70,11 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, modelOwnerDid, onVisibilit
     return isPublic ? showSvg : hideSvg;
   }
 
+  const getScaledImageUrl = () => {
+    const url = localImage.url
+    return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-446,q-95`
+  }
+
   // 只有当图片有URL时才能点击查看详情
   const handleImageClick = () => {
     if (localImage.url) {
@@ -106,26 +111,26 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, modelOwnerDid, onVisibilit
         cancelText: 'Cancel',
         onConfirm: () => {
           setIsProcessing(true); // 设置处理中状态
-          
+
           // 调用接口，将图片设为私有
           toggleView('image', localImage.id, false)
             .then(() => {
               // 根据角色设置新的可见性状态
               const newPublicValue = accountState.role === 'admin' ? -1 : 0;
-              
+
               // 更新本地图片数据
               const updatedImage = {
                 ...localImage,
                 public: newPublicValue
               };
-              
+
               setLocalImage(updatedImage);
-              
+
               // 如果提供了回调，通知父组件图片已更新
               if (onVisibilityChange) {
                 onVisibilityChange(updatedImage);
               }
-              
+
               // 显示成功提示
               showToast({
                 message: 'Image has been hidden successfully',
@@ -155,7 +160,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, modelOwnerDid, onVisibilit
         cancelText: 'Cancel',
         onConfirm: () => {
           setIsProcessing(true); // 设置处理中状态
-          
+
           // 调用接口，将图片设为公开
           toggleView('image', localImage.id, true)
             .then(() => {
@@ -164,14 +169,14 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, modelOwnerDid, onVisibilit
                 ...localImage,
                 public: 1
               };
-              
+
               setLocalImage(updatedImage);
-              
+
               // 如果提供了回调，通知父组件图片已更新
               if (onVisibilityChange) {
                 onVisibilityChange(updatedImage);
               }
-              
+
               // 显示成功提示
               showToast({
                 message: 'Image has been made visible successfully',
@@ -200,7 +205,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, modelOwnerDid, onVisibilit
     <div className={styles.imageCard} onClick={handleImageClick}>
       <div className={styles.imageContainer}>
         {localImage.url ? (
-          <img src={localImage.url} alt={`Image ${localImage.id}`} className={styles.image} />
+          <img src={getScaledImageUrl()} alt={`Image ${localImage.id}`} className={styles.image} />
         ) : (
           <div className={styles.placeholderImage}>
             {isFailed ? 'Failed' : 'Generating...'}

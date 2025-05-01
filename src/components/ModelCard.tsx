@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styles from './ModelCard.module.css';
-import { Model, fetchToggleView } from '../store/modelStore';
+import {fetchToggleView, Model} from '../store/modelStore';
 import avatarSvg from '../assets/Avatar.svg';
 import usageSvg from '../assets/usage.svg';
 import showSvg from '../assets/show.svg';
 import hideSvg from '../assets/hidden.svg';
-import { useSetAtom, useAtom } from 'jotai';
-import { showDialogAtom } from '../store/dialogStore';
-import { accountAtom } from '../store/accountStore';
-import { showToastAtom } from "../store/imagesStore";
+import {useAtom, useSetAtom} from 'jotai';
+import {showDialogAtom} from '../store/dialogStore';
+import {accountAtom} from '../store/accountStore';
+import {showToastAtom} from "../store/imagesStore";
 
 interface ModelCardProps {
   model: Model;
@@ -65,6 +65,12 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
       return avatarSvg;
     }
   };
+
+  // 获取cover
+  const getCoverUrl = () => {
+    const cover = localModel.cover
+    return `https://ik.imagekit.io/xenoai/niyoko/${cover}?tr=w-446,h-458,q-95`
+  }
 
   // 获取可见性图标
   const getVisibilityIcon = () => {
@@ -179,7 +185,7 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
   return (
     <div className={styles.modelCard}>
       <div className={styles.modelCover}>
-        <img src={localModel.cover} alt={localModel.name} />
+        <img src={getCoverUrl()} alt={localModel.name} />
 
         <div className={styles.tagsContainer}>
           {isTraining && (
