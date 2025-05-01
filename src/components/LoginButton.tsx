@@ -10,7 +10,8 @@ import {
 } from "../store/accountStore";
 import { createUser } from "../services/userService";
 import { showAccountPopupAtom } from "../store/accountPopupStore";
-import {Twitter} from "../store/imageStore.ts";
+import { Twitter } from "../store/imageStore.ts";
+import { useCreateWallet } from "@privy-io/react-auth";
 
 interface LoginButtonProps {
   className?: string;
@@ -24,6 +25,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
   const showAccountPopup = useSetAtom(showAccountPopupAtom);
   const accountRef = useRef<HTMLDivElement>(null);
   const logoutStore = useSetAtom(logoutAction);
+  const { createWallet } = useCreateWallet();
 
   const { login } = useLogin({
     onComplete: async ({ user, isNewUser }) => {
@@ -41,6 +43,15 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
             name: user.twitter?.name,
             profilePictureUrl: user.twitter?.profilePictureUrl,
           };
+
+          if (!user.wallet?.address) {
+            try {
+              const result = await createWallet({ createAdditional: false });
+              userData.address = result.address;
+            } catch (error) {
+              console.error("Privy create wallet failed:", error);
+            }
+          }
 
           // 调用创建用户API
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
