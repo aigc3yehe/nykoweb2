@@ -83,6 +83,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  position: relative;
 }
 
 /* 空消息状态 */
@@ -405,6 +406,35 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  position: relative;
+}
+
+/* 快速选项容器 */
+.quickOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  align-items: flex-start;
+}
+
+.quickOptionButton {
+  background: rgba(31, 41, 55, 0.4);
+  border: 1px solid rgba(55, 65, 81, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  color: #F3F4F6;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: left;
+  width: auto;
+}
+
+.quickOptionButton:hover {
+  background: rgba(55, 65, 81, 0.5);
 }
 
 /* 隐藏原生滚动条 */
@@ -518,14 +548,34 @@
 .titleWithStatus {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 /* 状态指示器小圆点 */
 .statusDot {
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   display: inline-block;
   cursor: help;
+}
+
+/* 欢迎容器样式 */
+.welcomeContainer {
+  position: absolute;
+  top: 0.625rem;
+  left: 0.625rem;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.welcomeText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  color: #F3F4F6;
+  margin: 0;
 }

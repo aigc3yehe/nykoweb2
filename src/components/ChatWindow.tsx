@@ -12,7 +12,9 @@ import {
   setUserInfo,
   checkConnectionStatus,
   startHeartbeat,
-  stopHeartbeat, finishUploadImages
+  stopHeartbeat,
+  finishUploadImages,
+  sendMessage
 } from '../store/chatStore';
 import { showDialogAtom } from '../store/dialogStore';
 import { usePrivy } from '@privy-io/react-auth';
@@ -34,6 +36,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
   const [, checkConnection] = useAtom(checkConnectionStatus);
   const [, startHeartbeatAction] = useAtom(startHeartbeat);
   const [, stopHeartbeatAction] = useAtom(stopHeartbeat);
+  const [, sendMessageAction] = useAtom(sendMessage);
 
   // 添加滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -249,7 +252,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
           ) : chatState.messages.length === 0 ? (
             <div className={styles.emptyMessages}>
               {isActive ? (
-                <p>Start chatting with Niyoko</p>
+                <div className={styles.welcomeContainer}>
+                  <p className={styles.welcomeText}>You can train models and generate images simply by chatting with Niyoko.</p>
+                  <div className={styles.quickOptions}>
+                    <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to train a model.')}>
+                      🧠 I want to train a model.
+                    </button>
+                    <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to finetuning a model.')}>
+                      🧠 I want to finetuning a model.
+                    </button>
+                    <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to generate an image.')}>
+                      🌄 I want to generate an image.
+                    </button>
+                  </div>
+                </div>
               ) : inQueue ? (
                 <div className={styles.queueStatus}>
                   <p>You are currently in queue. Position: {position}</p>
