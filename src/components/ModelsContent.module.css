@@ -19,6 +19,8 @@
   width: 13.9375rem; /* 223px */
   height: 18.5625rem; /* 297px */
   cursor: pointer;
+  position: relative; /* 确保子元素的绝对定位是相对于这个容器 */
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 .modelCardContainer:hover {

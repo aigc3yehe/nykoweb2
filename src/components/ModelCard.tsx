@@ -227,10 +227,9 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
         </div>
       </div>
 
-      {/* 只有有权限的用户才能看到遮罩层和可见性控制 */}
+      {/* 确保overlay是modelCard的直接子元素 */}
       {canToggleVisibility && (
         <div className={`${styles.overlay} ${isProcessing ? styles.showOverlay : ''}`}>
-          {/* 加载中显示在卡片正中间 */}
           {isProcessing ? (
             <div className={styles.processingIndicator}>
               <div className={styles.typingIndicator}>
@@ -238,7 +237,6 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
               </div>
             </div>
           ) : (
-            /* 添加可见性切换按钮 */
             <div className={styles.visibilityControl} onClick={handleToggleVisibility}>
               <img
                 src={getVisibilityIcon()}
