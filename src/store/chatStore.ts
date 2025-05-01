@@ -146,6 +146,24 @@ export async function checkImageGenerationStatus(request_id: string): Promise<Ch
   }
 }
 
+/**
+ * 过滤掉消息数组中的系统消息
+ * @param messages 消息数组
+ * @returns 过滤后的消息数组（不包含系统消息）
+ */
+export function filterSystemMessages(messages: Message[]): Message[] {
+  return messages.filter(message => message.role !== 'system');
+}
+
+/**
+ * 判断消息数组中是否包含系统消息
+ * @param messages 消息数组
+ * @returns 是否包含系统消息
+ */
+export function hasSystemMessage(messages: Message[]): boolean {
+  return messages.some(message => message.role === 'system');
+}
+
 // 简化的轮询函数 - 使用 for 循环
 export async function pollImageGenerationTask(taskId: string, set: any, get: any): Promise<void> {
   console.log('===== 开始轮询任务:', taskId);
@@ -247,7 +265,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             // 添加消息到列表
             set(chatAtom, {
               ...chatState,
-              messages: [...chatState.messages, resultMessage],
+              messages: [...filterSystemMessages(chatState.messages), resultMessage],
               isGenerating: false
             });
           }
@@ -300,7 +318,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
           // 如果找不到对应消息，添加失败消息
           set(chatAtom, {
             ...chatState,
-            messages: [...chatState.messages, {
+            messages: [...filterSystemMessages(chatState.messages), {
               role: 'system',
               content: 'image generation failed',
               request_id: taskId
@@ -337,7 +355,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
   const finalChatState = get(chatAtom);
   set(chatAtom, {
     ...finalChatState,
-    messages: [...finalChatState.messages, {
+    messages: [...filterSystemMessages(finalChatState.messages), {
       role: 'system',
       content: 'Image generation timed out, please check again later or try again',
       request_id: taskId
@@ -525,14 +543,14 @@ export const sendMessage = atom(
         };
 
         // 停止心跳
-        if (latestState.heartbeatId) {
+        if (latestState.heartbeatId && status === 'full') {
           set(stopHeartbeat);
         }
 
         // 更新状态 - 使用最新状态作为基础
         set(chatAtom, {
           ...latestState,
-          messages: [...latestState.messages, {
+          messages: [...filterSystemMessages(latestState.messages), {
             role: 'system',
             content: content // 使用返回的提示消息
           }],
@@ -610,7 +628,7 @@ export const sendMessage = atom(
       // 更新状态 - 使用最新状态作为基础
       set(chatAtom, {
         ...latestState,
-        messages: finalMessages,
+        messages: filterSystemMessages(finalMessages),
         isLoading: false,
         isGenerating: isGenerating,
         task_type: task_type,
@@ -632,15 +650,18 @@ export const sendMessage = atom(
       const latestState = get(chatAtom);
 
       // 更新错误状态 - 使用最新状态作为基础
+      const errorMsg = "Internal service error"
       set(chatAtom, {
         ...latestState,
-        messages: [...latestState.messages, {
+        messages: [...filterSystemMessages(latestState.messages), {
           role: 'system',
-          content: error instanceof Error ? error.message : 'Send Message error, Please retry later'
+          // content: error instanceof Error ? error.message: 'Send Message error, Please retry later'
+          content: errorMsg
         }],
         isLoading: false,
         isGenerating: false,
-        error: error instanceof Error ? error.message : 'Send Message error',
+        // error: error instanceof Error ? error.message : 'Send Message error',
+        error: errorMsg,
       });
     }
   }
@@ -936,15 +957,14 @@ export const startHeartbeat = atom(
       try {
         const currentState = get(chatAtom);
 
-        // 检查用户是否仍然活跃
-        if (!currentState.connection.isActive || !currentState.userUuid) {
-          // 如果用户不再活跃，停止心跳
+        // 检查用户是否仍然活跃或在排队中
+        if ((!currentState.connection.isActive && !currentState.connection.inQueue) || !currentState.userUuid) {
+          // 如果用户不再活跃且不在排队中，停止心跳
           set(stopHeartbeat);
           return;
         }
 
         // 如果当前正在加载聊天回复，暂时跳过这次心跳
-        // 这防止心跳更新覆盖聊天请求的状态
         if (currentState.isLoading) {
           console.log('聊天正在加载中，跳过本次心跳更新');
           return;
@@ -953,7 +973,7 @@ export const startHeartbeat = atom(
         // 发送心跳并获取新的连接状态
         const newConnectionStatus = await sendHeartbeat(currentState.userUuid);
 
-        // 重新获取最新状态（可能在心跳请求期间已经被其他操作更新了）
+        // 重新获取最新状态
         const latestState = get(chatAtom);
 
         // 如果这段时间内已经开始加载聊天，不要覆盖状态
@@ -962,17 +982,16 @@ export const startHeartbeat = atom(
           return;
         }
 
-        // 仅更新连接状态，而不影响其他状态
+        // 更新连接状态
         set(chatAtom, {
-          ...latestState, // 使用最新状态作为基础
+          ...latestState,
           connection: newConnectionStatus
         });
 
-        // 如果用户不再活跃，停止心跳
-        if (!newConnectionStatus.isActive) {
+        // 如果用户不再活跃且不在排队中，停止心跳
+        if (!newConnectionStatus.isActive && !newConnectionStatus.inQueue) {
           set(stopHeartbeat);
 
-          // 可以显示通知用户已断开连接
           set(showToastAtom, {
             message: 'Your session has ended or been replaced',
             severity: 'warning'
@@ -980,7 +999,6 @@ export const startHeartbeat = atom(
         }
       } catch (error) {
         console.error('Heartbeat request failed:', error);
-        // 错误处理可以根据需要添加，例如在多次失败后停止心跳
       }
     }, HEARTBEAT_INTERVAL);
 

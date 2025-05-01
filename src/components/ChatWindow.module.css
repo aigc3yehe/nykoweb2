@@ -513,3 +513,19 @@
 .loginButton:disabled {
   cursor: not-allowed;
 }
+
+/* 标题和状态指示器容器 */
+.titleWithStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 状态指示器小圆点 */
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: help;
+}

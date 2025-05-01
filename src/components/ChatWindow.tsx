@@ -180,15 +180,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
   // 管理心跳
   useEffect(() => {
     const isActive = chatState.connection?.isActive;
+    const inQueue = chatState.connection?.inQueue;
 
     // 当连接状态变为活跃时启动心跳
-    if (isActive && !chatState.heartbeatId) {
+    if ((isActive || inQueue) && !chatState.heartbeatId) {
       console.log('启动心跳机制');
       startHeartbeatAction();
     }
 
     // 当连接状态变为非活跃时停止心跳
-    if (!isActive && chatState.heartbeatId) {
+    if ((!isActive && !inQueue) && chatState.heartbeatId) {
       console.log('停止心跳机制');
       stopHeartbeatAction();
     }
@@ -200,7 +201,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
         stopHeartbeatAction();
       }
     };
-  }, [chatState.connection?.isActive, chatState.heartbeatId, startHeartbeatAction, stopHeartbeatAction]);
+  }, [chatState.connection?.inQueue, chatState.connection?.isActive, chatState.heartbeatId, startHeartbeatAction, stopHeartbeatAction]);
 
   return (
     <div className={styles.chatWindow}>
@@ -210,7 +211,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
           <div className={styles.avatar}>
             <img src="/nyko.png" alt="Niyoko" />
           </div>
-          <span>you are chatting with Niyoko</span>
+          <div className={styles.titleWithStatus}>
+            <span>you are chatting with Niyoko</span>
+            <div
+              className={styles.statusDot}
+              style={{
+                backgroundColor: isActive ? '#34C759' : inQueue ? '#FACC15' : '#FF3C3D'
+              }}
+              title={isActive ? 'Connected' : inQueue ? 'In Queue' : 'Disconnected'}
+            />
+          </div>
         </div>
         <button className={styles.clearButton} onClick={handleClearChat}>
           <img src={clearIcon} alt="Clear chat" />
@@ -244,7 +254,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
                 <div className={styles.queueStatus}>
                   <p>You are currently in queue. Position: {position}</p>
                   {estimateWaitTime && (
-                    <p>Estimated waiting time: {Math.ceil(estimateWaitTime)} minutes</p>
+                    <p>Estimated waiting time: {Math.ceil(estimateWaitTime)} seconds.</p>
                   )}
                   <button
                     className={styles.checkStatusButton}
@@ -271,7 +281,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
             chatState.messages.map((message, index) => (
               <ChatMessage
                 key={index}
-                role={message.role as 'user' | 'assistant'}
+                role={message.role as 'user' | 'assistant' | 'system'}
                 content={message.content}
                 type={message.type || 'text'}
                 imageUploadState={message.imageUploadState}

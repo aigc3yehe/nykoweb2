@@ -13,7 +13,7 @@ interface ImageUploadState {
 }
 
 export interface ChatMessageProps {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image';
   imageUploadState?: ImageUploadState;

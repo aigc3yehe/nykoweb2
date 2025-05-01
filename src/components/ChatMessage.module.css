@@ -29,12 +29,20 @@
   color: #D1D5DB;
 }
 
-/* 消息内容 */
+/* 系统消息 */
+.system {
+  align-self: flex-start;
+}
+
+.system .messageContent {
+  color: #FACC15;
+}
+
 .messageContent {
   font-family: 'Jura', sans-serif;
   font-weight: 500;
   font-size: 0.875rem; /* 14px */
-  line-height: 100%;
+  line-height: 130%;
   letter-spacing: 0%;
   vertical-align: middle;
   word-break: break-word;
