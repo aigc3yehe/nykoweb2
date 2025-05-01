@@ -37,8 +37,8 @@ export const createUser = async (userData: {
   name?: string;
   profilePictureUrl?: string;
 }): Promise<CreateUserResponse> => {
-  if (!userData.did || !userData.address) {
-    throw new Error("Create user failed, missing did or address");
+  if (!userData.did) {
+    throw new Error("Create user failed, missing did");
   }
   try {
     const privyToken = await getAccessToken();
