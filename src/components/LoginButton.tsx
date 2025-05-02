@@ -85,8 +85,8 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
 
   const formatName = (x: Twitter | null, address: string | null) => {
     if (!x) return formatAddress(address);
-    if (x.username) return x.username;
     if (x.name) return x.name;
+    if (x.username) return x.username;
     return formatAddress(address);
   };
 

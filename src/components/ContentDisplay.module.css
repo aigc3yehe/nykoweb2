@@ -44,6 +44,14 @@
   backdrop-filter: blur(8px);
 }
 
+/* 在移动端显示提示 */
+@media (max-width: 768px) {
+  .stickyHeader .headerWrapper {
+    background-color: transparent;
+    backdrop-filter: none;
+  }
+}
+
 /* 当header变为sticky时，为内容body添加上边距 */
 .stickyHeader .contentBody {
   padding-top: 5.3125rem; /* 根据header高度调整 2.1875*/

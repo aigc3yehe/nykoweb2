@@ -338,7 +338,7 @@
   min-height: 15rem; /* 240px */
   gap: 1.25rem; /* 20px */
   border-radius: 0.5rem; /* 8px */
-  padding: 1.25rem; /* 20px */
+  padding: 0.5rem; /* 8px */
   border: 1px solid #3741514D;
   margin-top: 0.5rem;
   display: flex;

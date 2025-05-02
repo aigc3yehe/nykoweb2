@@ -66,7 +66,7 @@ const initialState: ModelListState = {
   models: [],
   totalCount: 0,
   page: 1,
-  pageSize: 20,
+  pageSize: 30,
   order: 'created_at',
   desc: 'desc',
   isLoading: false,

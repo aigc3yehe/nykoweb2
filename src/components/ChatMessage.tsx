@@ -107,10 +107,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 src={images[0]}
                 alt="Generated Image"
                 className={styles.generatedImage}
-                onClick={() => {
-                  // 点击查看大图
-                  window.open(images[0], '_blank');
-                }}
               />
             </div>
           )}

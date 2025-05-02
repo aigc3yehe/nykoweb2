@@ -77,9 +77,9 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
   };
 
   // 格式化用户名，添加@前缀
-  const formatUsername = (username: string | undefined) => {
-    if (!username) return `@${userData.name}`;
-    return `@${username}`;
+  const formatName = (name: string | undefined) => {
+    if (!name) return `@${userData.username}`;
+    return `@${name}`;
   };
 
   if (!isOpen) return null;
@@ -103,7 +103,7 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
             <div className={styles.userDetails}>
               <div className={styles.userNameRow}>
                 <div className={styles.userNameContainer}>
-                  <span className={styles.userName}>{formatUsername(userData.username)}</span>
+                  <span className={styles.userName}>{formatName(userData.name)}</span>
                   <div className={styles.premiumBadge}>
                     <img src={GoldIcon} alt="Free" width="14" height="14" />
                     <span className={styles.premiumText}>Free</span>
