@@ -57,7 +57,7 @@ const WalletAssets: React.FC<WalletAssetsProps> = ({ walletAddress }) => {
                 actualBalance: balance
               };
             } catch (error) {
-              console.error(`获取代币 ${token.symbol} 余额失败:`, error);
+              console.error(`get token ${token.symbol} balance failed:`, error);
               return {
                 ...token,
                 actualBalance: "0"
@@ -68,7 +68,7 @@ const WalletAssets: React.FC<WalletAssetsProps> = ({ walletAddress }) => {
 
         setTokens(tokensWithBalance);
       } catch (err) {
-        console.error('获取资产失败:', err);
+        console.error('get assets failed:', err);
         setError('Failed to load assets');
       } finally {
         setIsLoading(false);

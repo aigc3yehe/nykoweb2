@@ -50,7 +50,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
   const { authenticated } = usePrivy();
   const { initOAuth, loading: loginLoading } = useLoginWithOAuth({
     onComplete: async ({ user }) => {
-      console.log('登录成功', user);
+      console.log('login success', user);
       if (user) {
         setUserInfoAction({
           uuid,
@@ -59,7 +59,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
       }
     },
     onError: (error) => {
-      console.error('登录失败', error);
+      console.error('login failed', error);
     }
   });
 
@@ -67,7 +67,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
     try {
       await initOAuth({ provider: 'twitter' });
     } catch (error) {
-      console.error('启动登录时出错:', error);
+      console.error('logging twitter:', error);
     }
   };
 
@@ -189,20 +189,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
 
     // 当连接状态变为活跃时启动心跳
     if ((isActive || inQueue) && !chatState.heartbeatId) {
-      console.log('启动心跳机制');
+      console.log('start heartbeat');
       startHeartbeatAction();
     }
 
     // 当连接状态变为非活跃时停止心跳
     if ((!isActive && !inQueue) && chatState.heartbeatId) {
-      console.log('停止心跳机制');
+      console.log('stop heartbeat');
       stopHeartbeatAction();
     }
 
     // 组件卸载时清理心跳
     return () => {
       if (chatState.heartbeatId) {
-        console.log('组件卸载，停止心跳');
+        console.log('remove heartbeat');
         stopHeartbeatAction();
       }
     };

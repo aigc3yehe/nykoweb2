@@ -37,7 +37,7 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
   // 使用 useLogout hook 实现带回调的登出功能
   const { logout } = useLogout({
     onSuccess: () => {
-      console.log('用户成功退出登录');
+      console.log('logout success');
       // 调用外部传入的登出回调
       onLogout();
       // 关闭弹窗

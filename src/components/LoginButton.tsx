@@ -29,7 +29,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
 
   const { login } = useLogin({
     onComplete: async ({ user, isNewUser }) => {
-      console.log("登录成功", user);
+      console.log("login success", user);
 
       // 如果有用户信息，则调用用户创建API
       if (user) {
@@ -57,15 +57,15 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-expect-error
           await createUser(userData);
-          console.log("用户创建/更新成功");
+          console.log("user update or create success");
 
           // 特别处理新用户
           if (isNewUser) {
-            console.log("新用户", user);
+            console.log("new user", user);
             // 这里可以添加新用户的其他初始化逻辑
           }
         } catch (error) {
-          console.error("用户创建/更新失败", error);
+          console.error("user update or create failed:", error);
         }
 
         // 更新全局用户状态
@@ -73,49 +73,9 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
       }
     },
     onError: (error) => {
-      console.error("登录失败", error);
+      console.error("login failed", error);
     },
   });
-
-  // const { initOAuth, loading } = useLoginWithOAuth({
-  //   onComplete: async ({ user, isNewUser }) => {
-  //     console.log('登录成功', user);
-
-  //     // 如果有用户信息，则调用用户创建API
-  //     if (user) {
-  //       try {
-  //         // 准备用户数据
-  //         const userData = {
-  //           did: user.id,
-  //           address: user.wallet?.address,
-  //           username: user.twitter?.username,
-  //           subject: user.twitter?.subject,
-  //           name: user.twitter?.name,
-  //           profilePictureUrl: user.twitter?.profilePictureUrl
-  //         };
-
-  //         // 调用创建用户API
-  //         // @ts-ignore
-  //         await createUser(userData);
-  //         console.log('用户创建/更新成功');
-
-  //         // 特别处理新用户
-  //         if (isNewUser) {
-  //           console.log('新用户', user);
-  //           // 这里可以添加新用户的其他初始化逻辑
-  //         }
-  //       } catch (error) {
-  //         console.error('用户创建/更新失败', error);
-  //       }
-
-  //       // 更新全局用户状态
-  //       setUserData(user);
-  //     }
-  //   },
-  //   onError: (error) => {
-  //     console.error('登录失败', error);
-  //   }
-  // });
 
   // 格式化钱包地址，显示前4位和后4位
   const formatAddress = (address: string | null) => {
@@ -149,7 +109,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
       // await initOAuth({ provider: 'twitter' });
       login();
     } catch (error) {
-      console.error("启动Twitter登录时出错:", error);
+      console.error("login Twitter failed:", error);
     }
   };
 

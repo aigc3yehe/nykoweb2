@@ -141,7 +141,7 @@ export async function checkImageGenerationStatus(request_id: string): Promise<Ch
 
     return await response.json();
   } catch (error) {
-    console.error('查询图片生成状态出错:', error);
+    console.error('Check Image Generation Failed:', error);
     throw error;
   }
 }
@@ -166,7 +166,7 @@ export function hasSystemMessage(messages: Message[]): boolean {
 
 // 简化的轮询函数 - 使用 for 循环
 export async function pollImageGenerationTask(taskId: string, set: any, get: any): Promise<void> {
-  console.log('===== 开始轮询任务:', taskId);
+  console.log('Start poll image generation task:', taskId);
 
   // 最大轮询次数和间隔时间
   const MAX_POLL_COUNT = 60; // 最多轮询60次
@@ -174,7 +174,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
 
   for (let pollCount = 0; pollCount < MAX_POLL_COUNT; pollCount++) {
     try {
-      console.log(`===== 轮询任务 ${taskId} 第 ${pollCount + 1} 次`);
+      console.log(`task ${taskId} the ${pollCount + 1} times`);
 
       // 等待一段时间再查询
       if (pollCount > 0) {
@@ -183,27 +183,27 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
 
       // 查询任务状态
       const statusResponse = await checkImageGenerationStatus(taskId);
-      console.log('===== 查询任务状态响应:', statusResponse);
+      console.log('task status:', statusResponse);
 
       // 获取当前状态
       const chatState = get(chatAtom);
 
       // 如果没有状态信息，继续轮询
       if (!statusResponse?.data?.status) {
-        console.log('===== 响应中没有状态信息，继续轮询');
+        console.log('status is null，keep task');
         continue;
       }
 
       const status = statusResponse.data.status.toLowerCase();
-      console.log('===== 任务状态:', status);
+      console.log('task status:', status);
 
       // 处理不同状态
       if (status === 'completed') {
-        console.log('===== 任务完成');
+        console.log('task completed:', status);
 
         // 获取生成的图片
         const generatedImages = statusResponse.data.upscaled_urls || [];
-        console.log('===== 获取到生成的图片:', generatedImages);
+        console.log('get image url:', generatedImages);
 
         if (generatedImages.length > 0) {
           // 查找对应的 generating_image 消息
@@ -213,7 +213,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             msg => msg.type === 'generating_image' && msg.request_id === taskId
           );
           if (messageIndex !== -1) {
-            console.log('===== 找到对应的生成中消息，更新为结果消息');
+            console.log('find message，update message');
             const aspectRatio = chatState.selectedAspectRatio
             let width = 512;
             let height = 512;
@@ -241,7 +241,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
               isGenerating: false
             });
           } else {
-            console.log('===== 未找到对应的生成中消息，创建新的结果消息');
+            console.log('not found message，create new message');
             // 如果找不到对应消息，创建新消息（兜底方案）
             const aspectRatio = chatState.selectedAspectRatio
             let width = 512;
@@ -278,17 +278,17 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
 
           // 如果有当前模型，重新加载与模型相关的图片
           if (chatState.currentModel?.id) {
-            console.log('===== 重新加载与模型相关的图片，模型ID:', chatState.currentModel.id);
+            console.log('reset model images，model id:', chatState.currentModel.id);
             // 使用 fetchImages 重新加载图片
             set(fetchImages, { reset: true, model_id: chatState.currentModel.id });
           }
         }
 
         // 任务完成，退出轮询
-        console.log('===== 任务完成，退出轮询');
+        console.log('task finished，exit');
         return;
       } else if (status === 'failed' || status === 'error') {
-        console.log('===== 任务失败');
+        console.log('task failed');
 
         // 查找对应的 generating_image 消息
         const messageIndex = chatState.messages.findIndex(
@@ -297,7 +297,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
         );
 
         if (messageIndex !== -1) {
-          console.log('===== 找到对应的生成中消息，更新为失败消息');
+          console.log('find message，update failed message');
           // 更新现有消息为失败消息
           const updatedMessages = [...chatState.messages];
           updatedMessages[messageIndex] = {
@@ -314,7 +314,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             isGenerating: false
           });
         } else {
-          console.log('===== 未找到对应的生成中消息，创建新的失败消息');
+          console.log('not found message，create new failed message');
           // 如果找不到对应消息，添加失败消息
           set(chatAtom, {
             ...chatState,
@@ -333,25 +333,25 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
         });
 
         // 任务失败，退出轮询
-        console.log('===== 任务失败，退出轮询');
+        console.log('task failed, exit');
         return;
       }
 
       // 如果是其他状态（处理中、等待中），继续轮询
-      console.log('===== 任务仍在进行中，继续轮询');
+      console.log('task doing，keep doing');
 
     } catch (error) {
-      console.error('===== 轮询任务状态出错:', error);
+      console.error('task failed:', error);
 
       // 发生错误时，增加轮询间隔时间，但继续轮询
       const waitTime = Math.min(30000, POLL_INTERVAL * Math.min(5, Math.floor(pollCount / 5) + 1));
-      console.log(`===== 发生错误，等待 ${waitTime}ms 后继续轮询`);
+      console.log(`failed，waiting ${waitTime}ms keep task`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
   }
 
   // 达到最大轮询次数，添加超时消息
-  console.log('===== 达到最大轮询次数，任务可能超时');
+  console.log('more than times，task maybe failed');
   const finalChatState = get(chatAtom);
   set(chatAtom, {
     ...finalChatState,
@@ -401,12 +401,12 @@ export async function sendChatRequest(message: string, history: Message[], userU
     });
 
     if (!response.ok) {
-      throw new Error(`API请求失败，状态码 ${response.status}`);
+      throw new Error(`Internal service error`);
     }
 
     return await response.json();
   } catch (error) {
-    console.error('发送消息时出错:', error);
+    console.error('send message failed:', error);
     throw error;
   }
 }
@@ -532,6 +532,11 @@ export const sendMessage = atom(
           task_value = "fine tuning";
       }
 
+      const api_exception = response.api_exception;
+      if (api_exception) {
+        console.log("AI Call API exception", api_exception);
+      }
+
       // 处理特殊状态：full 和 queue
       if (status === 'full' || status === 'queue') {
         // 更新连接状态
@@ -570,12 +575,12 @@ export const sendMessage = atom(
 
       // 处理错误状态
       if (status === 'error') {
-        throw new Error(content || '发送消息时出错');
+        throw new Error(content || 'send message error');
       }
 
       // 如果status为Completed, 则代表创建训练模型任务完成
       if (status === 'Completed') {
-        console.log('训练模型任务完成');
+        console.log('create train model success');
       }
 
       let isGenerating = false;
@@ -637,14 +642,14 @@ export const sendMessage = atom(
       });
 
       // 如果 request_id 不为空，则代表创建生成图片任务完成
-      console.log('===== 收到 request_id:', request_id);
+      console.log('request_id:', request_id);
       if (request_id) {
         pollImageGenerationTask(request_id, set, get).catch(err => {
-          console.error('轮询任务状态出错:', err);
+          console.error('poll Image Generation Task Failed:', err);
         });
       }
     } catch (error) {
-      console.error('发送消息时出错:', error);
+      console.error('Send Message Failed:', error);
 
       // 获取最新状态
       const latestState = get(chatAtom);
@@ -925,7 +930,7 @@ export async function fetchConnectionStatus(userUuid: string): Promise<Connectio
 
     return await response.json();
   } catch (error) {
-    console.error('获取连接状态出错:', error);
+    console.error('get connection status failed:', error);
     throw error;
   }
 }
@@ -981,7 +986,7 @@ export const startHeartbeat = atom(
 
         // 如果当前正在加载聊天回复，暂时跳过这次心跳
         if (currentState.isLoading) {
-          console.log('聊天正在加载中，跳过本次心跳更新');
+          console.log('chat ing. continue heartbeat');
           return;
         }
 
@@ -993,7 +998,7 @@ export const startHeartbeat = atom(
 
         // 如果这段时间内已经开始加载聊天，不要覆盖状态
         if (latestState.isLoading) {
-          console.log('心跳期间聊天状态变为加载中，跳过心跳更新');
+          console.log('chat ing. continue heartbeat');
           return;
         }
 
@@ -1050,7 +1055,7 @@ export const checkConnectionStatus = atom(
     const { userUuid } = chatState;
 
     if (!userUuid) {
-      console.warn('无法检查连接状态: userUuid为空');
+      console.warn('check Connection Status failed: userUuid is null');
       return;
     }
 
@@ -1078,11 +1083,11 @@ export const checkConnectionStatus = atom(
 
       return connectionStatus;
     } catch (error) {
-      console.error('检查连接状态出错:', error);
+      console.error('check connection status failed:', error);
 
       set(chatAtom, {
         ...chatState,
-        error: error instanceof Error ? error.message : '检查连接状态出错',
+        error: error instanceof Error ? error.message : 'Check connection status error',
         isLoading: false
       });
     }
@@ -1106,7 +1111,7 @@ export const setUserInfo = atom(
 
     // 如果did从null/undefined变成有值，则检查连接状态
     if ((!prevDid || prevDid === '') && did) {
-      console.log('用户已登录，检查连接状态');
+      console.log('user is login success, check connection status:', prevDid);
       set(checkConnectionStatus);
     }
   }

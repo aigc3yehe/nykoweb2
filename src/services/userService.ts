@@ -54,12 +54,12 @@ export const createUser = async (userData: {
     });
 
     if (!response.ok) {
-      throw new Error("创建用户失败");
+      throw new Error("Create user failed");
     }
 
     return await response.json();
   } catch (error) {
-    console.error("创建用户API错误:", error);
+    console.error("Create user failed:", error);
     throw error;
   }
 };
@@ -87,12 +87,12 @@ export const queryUser = async (params: {
     );
 
     if (!response.ok) {
-      throw new Error("查询用户失败");
+      throw new Error("Query user failed");
     }
 
     return await response.json();
   } catch (error) {
-    console.error("查询用户API错误:", error);
+    console.error("Query user failed：", error);
     throw error;
   }
 };
