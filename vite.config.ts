@@ -26,6 +26,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       },
+      '/beta-api': {
+        target: 'http://43.153.57.123:8086',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/beta-api/, '')
+      },
       '/studio-api': {
         target: 'https://api.nyko.cool',
         changeOrigin: true,

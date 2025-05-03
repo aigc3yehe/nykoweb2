@@ -14,11 +14,13 @@ import {
   startHeartbeat,
   stopHeartbeat,
   finishUploadImages,
-  sendMessage
+  sendMessage,
+  toggleBetaMode
 } from '../store/chatStore';
 import { showDialogAtom } from '../store/dialogStore';
 import { usePrivy } from '@privy-io/react-auth';
 import { useLoginWithOAuth } from '@privy-io/react-auth';
+import { accountAtom } from '../store/accountStore';
 
 interface ChatWindowProps {
   uuid: string;
@@ -27,6 +29,7 @@ interface ChatWindowProps {
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
   const [chatState] = useAtom(chatAtom);
+  const [accountState] = useAtom(accountAtom);
   const [, addImageAction] = useAtom(addImage);
   const [, finishUploadImagesAction] = useAtom(finishUploadImages);
   const [, removeImageAction] = useAtom(removeImage);
@@ -37,6 +40,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
   const [, startHeartbeatAction] = useAtom(startHeartbeat);
   const [, stopHeartbeatAction] = useAtom(stopHeartbeat);
   const [, sendMessageAction] = useAtom(sendMessage);
+  const [, toggleBetaModeAction] = useAtom(toggleBetaMode);
 
   // 添加滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -227,9 +231,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
             />
           </div>
         </div>
-        <button className={styles.clearButton} onClick={handleClearChat}>
-          <img src={clearIcon} alt="Clear chat" />
-        </button>
+        <div className={styles.headerControls}>
+          {accountState.role === 'admin' && (
+            <button
+              className={`${styles.betaButton} ${chatState.betaMode ? styles.betaActive : ''}`}
+              onClick={toggleBetaModeAction}
+              title={chatState.betaMode ? 'Disable Beta API' : 'Enable Beta API'}
+            >
+              Beta
+            </button>
+          )}
+          <button className={styles.clearButton} onClick={handleClearChat}>
+            <img src={clearIcon} alt="Clear chat" />
+          </button>
+        </div>
       </div>
 
       {/* 消息列表容器 */}

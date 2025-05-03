@@ -39,6 +39,46 @@
   overflow: hidden;
 }
 
+.headerControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.titleWithStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.betaButton {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.betaButton:hover {
+  background-color: #444;
+}
+
+.betaActive {
+  background-color: #6366F1;
+  border-color: #6366F1;
+}
+
+.betaActive:hover {
+  background-color: #4F46E5;
+}
+
 .avatar img {
   width: 1.5rem; /* 24px */
   height: 1.5rem; /* 24px */

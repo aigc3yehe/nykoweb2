@@ -88,6 +88,7 @@ export interface ChatState {
   connection: ConnectionStatus; // 添加连接状态
   heartbeatId?: number; // 存储心跳计时器ID
   loraWeight?: number;
+  betaMode: boolean; // 添加Beta模式开关
 }
 
 // 3. 更新初始状态
@@ -110,7 +111,8 @@ const initialState: ChatState = {
     inQueue: false
   },
   heartbeatId: undefined,
-  loraWeight: 0.9
+  loraWeight: 0.9,
+  betaMode: false // 初始化为false
 };
 
 // 创建原子状态
@@ -370,46 +372,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
   });
 }
 
-// 与后端通信的API
-export async function sendChatRequest(message: string, history: Message[], userUuid: string, creator?: string, urls?: string[],
-  model_id?: number, width?: number, height?: number, lora_name?: string, lora_weight?: number
-) {
-  const API_URL = '/api/chat';
-
-  try {
-    const conversation_history = history.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message,
-        conversation_history: conversation_history,
-        user_uuid: userUuid,
-        creator: creator,
-        urls: urls || [],
-        model_id: model_id,
-        width: width,
-        height: height,
-        lora_name: lora_name,
-        lora_weight: lora_weight
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Internal service error`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('send message failed:', error);
-    throw error;
-  }
-}
+// ==== 辅助函数 ====
 
 // 添加图片上传状态更新操作
 export function updateImageUploadState(messages: Message[], messageIndex: number, newState: Partial<Message['imageUploadState']>) {
@@ -453,6 +416,7 @@ export function removeUploadedFile(messages: Message[], messageIndex: number, fi
   });
 }
 
+// 更新上传状态
 export function updateUploadedState(messages: Message[], messageIndex: number, state: boolean) {
   return messages.map((msg, index) => {
     if (index === messageIndex && msg.type === 'upload_image' && msg.imageUploadState) {
@@ -469,7 +433,7 @@ export function updateUploadedState(messages: Message[], messageIndex: number, s
   });
 }
 
-// ==== 新增的操作函数 ====
+// ==== 操作函数 ====
 
 // 发送消息的操作
 export const sendMessage = atom(
@@ -478,6 +442,8 @@ export const sendMessage = atom(
     if (!message.trim()) return;
 
     const chatState = get(chatAtom);
+    const betaMode = chatState.betaMode;
+    const apiPrefix = betaMode ? '/beta-api' : '/api';
 
     // 添加用户消息到聊天记录
     const userMessage: Message = {
@@ -504,35 +470,53 @@ export const sendMessage = atom(
       // 获取当前模型的model_id
       const model_id = chatState.currentModel?.id;
 
+      // 构建完整的API URL
+      const API_URL = `${apiPrefix}/chat`;
+
       // 发送请求到API
-      const response = await sendChatRequest(
-        userMessage.content,
-        chatState.messages,
-        chatState.userUuid,
-        chatState.did,
-        chatState.urls.map(url => url.url),
-        model_id,
-        width,
-        height,
-        lora_name,
-        0.85
-      );
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage.content,
+          conversation_history: chatState.messages.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          })),
+          user_uuid: chatState.userUuid,
+          creator: chatState.did,
+          urls: chatState.urls.map(url => url.url),
+          model_id,
+          width,
+          height,
+          lora_name,
+          lora_weight: chatState.loraWeight
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Internal service error`);
+      }
+
+      const responseData = await response.json();
 
       // 获取最新状态（可能在API请求期间已被心跳更新）
       const latestState = get(chatAtom);
 
-      const status = response.status;
-      const content = response.content;
-      const task_type = response.task_type;
-      const model = response.model;
-      const request_id = response.request_id;
+      const status = responseData.status;
+      const content = responseData.content;
+      const task_type = responseData.task_type;
+      const model = responseData.model;
+      const request_id = responseData.request_id;
 
       let task_value = task_type;
       if (task_type === 'finetuing') {
           task_value = "fine tuning";
       }
 
-      const api_exception = response.api_exception;
+      const api_exception = responseData.api_exception;
       if (api_exception) {
         console.log("AI Call API exception", api_exception);
       }
@@ -912,36 +896,15 @@ export const clearChat = atom(
   }
 );
 
-// 4. 添加获取连接状态的API函数
-export async function fetchConnectionStatus(userUuid: string): Promise<ConnectionStatus> {
-  try {
-    const response = await fetch(`/api/initial-connection/${userUuid}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      // throw new Error(`获取连接状态失败，状态码 ${response.status}`);
-      throw new Error('Internal service error');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('get connection status failed:', error);
-    throw error;
-  }
-}
-
 // 心跳相关常量
 const HEARTBEAT_INTERVAL = 15000; // 15秒发送一次心跳
 
-// 心跳检测API函数
-export async function sendHeartbeat(userUuid: string): Promise<ConnectionStatus> {
+// 修改心跳检测API函数
+export async function sendHeartbeat(userUuid: string, betaMode: boolean): Promise<ConnectionStatus> {
+  const apiPrefix = betaMode ? '/beta-api' : '/api';
+
   try {
-    const response = await fetch(`/api/heartbeat`, {
+    const response = await fetch(`${apiPrefix}/heartbeat`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
@@ -961,7 +924,7 @@ export async function sendHeartbeat(userUuid: string): Promise<ConnectionStatus>
   }
 }
 
-// 启动心跳的操作
+// 修改启动心跳的操作
 export const startHeartbeat = atom(
   null,
   (get, set) => {
@@ -991,7 +954,7 @@ export const startHeartbeat = atom(
         }
 
         // 发送心跳并获取新的连接状态
-        const newConnectionStatus = await sendHeartbeat(currentState.userUuid);
+        const newConnectionStatus = await sendHeartbeat(currentState.userUuid, currentState.betaMode);
 
         // 重新获取最新状态
         const latestState = get(chatAtom);
@@ -1047,12 +1010,12 @@ export const stopHeartbeat = atom(
   }
 );
 
-// 修改检查连接状态的操作，在成为活跃状态时启动心跳
+// 修改检查连接状态的操作，使用betaMode
 export const checkConnectionStatus = atom(
   null,
   async (get, set) => {
     const chatState = get(chatAtom);
-    const { userUuid } = chatState;
+    const { userUuid, betaMode } = chatState;
 
     if (!userUuid) {
       console.warn('check Connection Status failed: userUuid is null');
@@ -1065,7 +1028,7 @@ export const checkConnectionStatus = atom(
         isLoading: true
       });
 
-      const connectionStatus = await fetchConnectionStatus(userUuid);
+      const connectionStatus = await fetchConnectionStatus(userUuid, betaMode);
 
       set(chatAtom, {
         ...chatState,
@@ -1093,6 +1056,30 @@ export const checkConnectionStatus = atom(
     }
   }
 );
+
+// 4. 添加获取连接状态的API函数
+export async function fetchConnectionStatus(userUuid: string, betaMode: boolean): Promise<ConnectionStatus> {
+  const apiPrefix = betaMode ? '/beta-api' : '/api';
+
+  try {
+    const response = await fetch(`${apiPrefix}/initial-connection/${userUuid}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Internal service error');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('get connection status failed:', error);
+    throw error;
+  }
+}
 
 // 6. 修改setUserInfo操作，在did更新时检查连接状态
 export const setUserInfo = atom(
@@ -1164,6 +1151,19 @@ export const setLoraWeight = atom(
     set(chatAtom, {
       ...chatState,
       loraWeight: weight
+    });
+  }
+);
+
+// 添加切换Beta模式的操作
+export const toggleBetaMode = atom(
+  null,
+  (get, set) => {
+    const chatState = get(chatAtom);
+
+    set(chatAtom, {
+      ...chatState,
+      betaMode: !chatState.betaMode
     });
   }
 );
