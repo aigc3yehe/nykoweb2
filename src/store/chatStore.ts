@@ -16,8 +16,10 @@ export interface AspectRatio {
 export const aspectRatios: AspectRatio[] = [
   { label: '1:1', value: '1:1', width: 1024, height: 1024 },
   { label: '3:4', value: '3:4', width: 768, height: 1024 },
+  { label: '5:6', value: '5:6', width: 856, height: 1024 },
   //{ label: '9:16', value: '9:16', width: 1080, height: 1920 }, // 暂时不这两个尺寸
   { label: '4:3', value: '4:3', width: 1024, height: 768 },
+  { label: '6:5', value: '6:5', width: 1024, height: 856 },
   //{ label: '16:9', value: '16:9', width: 1920, height: 1080 },
 ];
 

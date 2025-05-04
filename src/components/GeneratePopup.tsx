@@ -196,7 +196,7 @@ const GeneratePopup: React.FC<GeneratePopupProps> = ({
           </div>
 
           <button className={styles.closeButton} onClick={onClose}>
-            <img src={closeImgSvg} alt="关闭" />
+            <img src={closeImgSvg} alt="Close" />
           </button>
         </div>
 

@@ -93,14 +93,14 @@ export async function checkGenerationStatus(task_id: string): Promise<CheckStats
 
     return await response.json();
   } catch (error) {
-    console.error('查询图片生成状态出错:', error);
+    console.error('checkGenerationStatus Failed:', error);
     throw error;
   }
 }
 
 // 简化的轮询函数 - 使用 for 循环
 export async function pollGenerationTask(taskId: string, set: any, get: any): Promise<void> {
-  console.log('===== 开始轮询任务:', taskId);
+  console.log('start poll Generation Task:', taskId);
 
   // 最大轮询次数和间隔时间
   const MAX_POLL_COUNT = 60; // 最多轮询60次
@@ -108,7 +108,7 @@ export async function pollGenerationTask(taskId: string, set: any, get: any): Pr
 
   for (let pollCount = 0; pollCount < MAX_POLL_COUNT; pollCount++) {
     try {
-      console.log(`===== 轮询任务 ${taskId} 第 ${pollCount + 1} 次`);
+      console.log(`start poll Generation Task: ${taskId} the ${pollCount + 1} times`);
 
       // 等待一段时间再查询
       if (pollCount > 0) {
@@ -117,31 +117,31 @@ export async function pollGenerationTask(taskId: string, set: any, get: any): Pr
 
       // 查询任务状态
       const statusResponse = await checkGenerationStatus(taskId);
-      console.log('===== 查询任务状态响应:', statusResponse);
+      console.log('Task status:', statusResponse);
 
       // 获取当前状态
       const generateState = get(generatePopupAtom);
 
       // 如果没有状态信息，继续轮询
       if (!statusResponse?.data?.status) {
-        console.log('===== 响应中没有状态信息，继续轮询');
+        console.log('There is no status information in the response, continue polling');
         continue;
       }
 
       const status = statusResponse.data.status.toLowerCase();
-      console.log('===== 任务状态:', status);
+      console.log('Task status:', status);
 
       // 处理不同状态
       if (status === 'completed') {
-        console.log('===== 任务完成');
+        console.log('Task completed');
 
         // 获取生成的图片
         const generatedImages = statusResponse.data.upscaled_urls || [];
-        console.log('===== 获取到生成的图片:', generatedImages);
+        console.log('===== get Images :', generatedImages);
 
         if (generatedImages.length > 0) {
           const generatedImage = generatedImages[0];
-          console.log('===== 获取到生成的图片:', generatedImage);
+          console.log('get Images :', generatedImage);
           // 更新状态
           set(generatePopupAtom, {
            ...generateState,
@@ -158,12 +158,12 @@ export async function pollGenerationTask(taskId: string, set: any, get: any): Pr
 
           // 如果有当前模型，重新加载与模型相关的图片
           if (generateState.model?.id) {
-            console.log('===== 重新加载与模型相关的图片，模型ID:', generateState.model?.id);
+            console.log('reload model images，model ID:', generateState.model?.id);
             // 使用 fetchImages 重新加载图片
             set(fetchImages, { reset: true, model_id: generateState.model?.id });
           }
         } else {
-          console.log('===== 未获取到生成的图片');
+          console.log('empty images');
           // 更新状态
           set(generatePopupAtom, {
             ...generateState,
@@ -174,10 +174,10 @@ export async function pollGenerationTask(taskId: string, set: any, get: any): Pr
         }
 
         // 任务完成，退出轮询
-        console.log('===== 任务完成，退出轮询');
+        console.log('finish task，exit');
         return;
       } else if (status === 'failed' || status === 'error') {
-        console.log('===== 任务失败');
+        console.log('task failed:', status);
         // 更新状态
         set(generatePopupAtom, {
           ...generateState,
@@ -193,25 +193,25 @@ export async function pollGenerationTask(taskId: string, set: any, get: any): Pr
         })
 
         // 任务失败，退出轮询
-        console.log('===== 任务失败，退出轮询');
+        console.log('task failed:', status);
         return;
       }
 
       // 如果是其他状态（处理中、等待中），继续轮询
-      console.log('===== 任务仍在进行中，继续轮询');
+      console.log('task doing');
 
     } catch (error) {
-      console.error('===== 轮询任务状态出错:', error);
+      console.error('task failed', error);
 
       // 发生错误时，增加轮询间隔时间，但继续轮询
       const waitTime = Math.min(30000, POLL_INTERVAL * Math.min(5, Math.floor(pollCount / 5) + 1));
-      console.log(`===== 发生错误，等待 ${waitTime}ms 后继续轮询`);
+      console.log(`Error，Waiting ${waitTime}ms poll`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
   }
 
   // 达到最大轮询次数，添加超时消息
-  console.log('===== 达到最大轮询次数，任务可能超时');
+  console.log('===== more than max times');
   // 获取当前状态
   const generateState = get(generatePopupAtom);
 
@@ -256,12 +256,12 @@ export async function generateRequest(prompt: string, creator?: string,
     });
 
     if (!response.ok) {
-      throw new Error(`API请求失败，状态码 ${response.status}`);
+      throw new Error(`API Failed，Status ${response.status}`);
     }
 
     return await response.json();
   } catch (error) {
-    console.error('发送消息时出错:', error);
+    console.error('Send message failed', error);
     throw error;
   }
 }
@@ -299,14 +299,14 @@ export const generate = atom(
 
       // 发送生成请求
       const response = await generateRequest(prompt, did, model_id, width, height, lora_name, loraWeight);
-      console.log('生成请求响应:', response);
+      console.log('generate Request:', response);
 
       const task_id = response.data.task_id;
-      console.log('任务ID:', task_id);
+      console.log('task ID:', task_id);
       if (task_id) {
         // 轮询任务状态
         pollGenerationTask(task_id, set, get).catch(error => {
-          console.error('轮询任务状态出错:', error)
+          console.error('pollGenerationTask Failed:', error)
           // 显示错误通知
           set(showToastAtom, {
             message: 'Image generation failed',
