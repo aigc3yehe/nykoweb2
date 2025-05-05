@@ -89,7 +89,7 @@ const initialState: PricingState = {
   error: null,
   stakeConfig: {
     nikoTokenAddress: "0x129966d7D25775b57E3C5b13b2E1c2045FBc4926",
-    contractAddrss: "0x3f3a48e55dd73af46e37d68b5a69aaeee755f3a4",
+    contractAddrss: "0xb1542ce040f0d0b9ce6958cbdda40905b4a7551a",
     defaultAmoount: 75_000,
   },
 };
