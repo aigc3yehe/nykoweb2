@@ -7,6 +7,7 @@ import Pricing from './Pricing';
 import { useAtom } from 'jotai';
 import { accountAtom } from '../store/accountStore';
 import styles from './MainLayout.module.css';
+import Activity from "./Activity.tsx";
 
 const MainLayout: React.FC = () => {
   // 生成一个随机的UUID作为用户标识
@@ -30,6 +31,11 @@ const MainLayout: React.FC = () => {
         <Route path="/pricing" element={
           <div className={styles.fullWidthContent}>
             <Pricing />
+          </div>
+        } />
+        <Route path="/activity" element={
+          <div className={styles.fullWidthContent}>
+            <Activity />
           </div>
         } />
         <Route path="*" element={

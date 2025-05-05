@@ -45,5 +45,5 @@
   flex: 1;
   width: 100%;
   height: calc(100vh - 4rem); /* 减去header高度 */
-  overflow-y: auto; /* 允许长内容滚动 */
+  overflow: hidden; /* 改为hidden，让子组件处理滚动 */
 }

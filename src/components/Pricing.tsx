@@ -1,13 +1,15 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import styles from "./Pricing.module.css";
 import StakeGrid from "../assets/stake_grid.svg";
 import PlanOkIcon from "../assets/plan_ok.svg";
 import PlanNoIcon from "../assets/plan_no.svg";
+import QuestionIcon from "../assets/question.svg";
+import FaqsGridIcon from "../assets/faqs_grid.svg";
 import {
   pricingAtom,
   isPlanCurrent,
-  // subscribeToPlan,
+  subscribeToPlan,
 } from "../store/pricingStore";
 import { useWallets } from "@privy-io/react-auth";
 import { base } from "viem/chains";
@@ -22,12 +24,20 @@ import { publicClient } from "../providers/wagmiConfig";
 const Pricing: React.FC = () => {
   const [pricingState] = useAtom(pricingAtom);
   const [isPlanCurrentFn] = useAtom(isPlanCurrent);
-  // const [, subscribe] = useAtom(subscribeToPlan);
+  const [, subscribe] = useAtom(subscribeToPlan);
   const { plans, isLoading, stakeConfig } = pricingState;
   const { wallets } = useWallets();
   const showToast = useSetAtom(showToastAtom);
   const [stakeState] = useAtom(stakeStateAtom);
   const [, fetchStakedInfo] = useAtom(getStakedInfo);
+
+  // 滚动相关状态
+  const [scrollHeight, setScrollHeight] = useState(0);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [clientHeight, setClientHeight] = useState(0);
+
+  const contentRef = useRef<HTMLDivElement>(null);
+  const customScrollbarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const wallet = wallets.find(
@@ -40,6 +50,73 @@ const Pricing: React.FC = () => {
       });
     }
   }, [wallets]);
+
+  // 更新滚动状态
+  useEffect(() => {
+    const updateScrollInfo = () => {
+      if (contentRef.current) {
+        setScrollHeight(contentRef.current.scrollHeight);
+        setClientHeight(contentRef.current.clientHeight);
+        setScrollTop(contentRef.current.scrollTop);
+      }
+    };
+
+    // 初始更新
+    updateScrollInfo();
+
+    // 添加滚动事件监听器
+    const container = contentRef.current;
+    if (container) {
+      container.addEventListener('scroll', updateScrollInfo);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', updateScrollInfo);
+      }
+    };
+  }, []);
+
+  // 处理自定义滚动条拖动
+  const handleScrollThumbDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    const startY = e.clientY;
+    const startScrollTop = scrollTop;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (contentRef.current) {
+        const deltaY = moveEvent.clientY - startY;
+        const scrollRatio = deltaY / clientHeight;
+        const newScrollTop = startScrollTop + scrollRatio * scrollHeight;
+
+        contentRef.current.scrollTop = newScrollTop;
+        setScrollTop(contentRef.current.scrollTop);
+      }
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // 计算滚动条高度和位置
+  const getScrollThumbHeight = () => {
+    if (scrollHeight <= clientHeight) return 0;
+    return Math.max(30, (clientHeight / scrollHeight) * clientHeight);
+  };
+
+  const getScrollThumbTop = () => {
+    if (scrollHeight <= clientHeight) return 0;
+    return (scrollTop / (scrollHeight - clientHeight)) * (clientHeight - getScrollThumbHeight());
+  };
+
+  // 显示自定义滚动条的条件
+  const showCustomScrollbar = scrollHeight > clientHeight;
 
   const walletClient = useMemo(async () => {
     const wallet = wallets.find(
@@ -153,147 +230,180 @@ const Pricing: React.FC = () => {
 
   return (
     <div className={styles.pricingPage}>
-      {/* 第一区域：Plans & Pricing */}
-      <div
-        className={styles.plansSection}
-        style={{ backgroundImage: `url(${StakeGrid})` }}
-      >
-        <div className={styles.plansSectionContent}>
-          <div className={styles.pricingHeader}>
-            <h1 className={styles.title}>PLANS & PRICING</h1>
-            <p className={styles.subtitle}>
-              Upgrade to gain access to Premium features
-            </p>
-          </div>
+      <div className={styles.scrollContainer}>
+        <div
+          ref={contentRef}
+          className={`${styles.scrollContent} ${styles.hideScrollbar}`}
+        >
+          {/* 第一区域：Plans & Pricing */}
+          <div
+            className={styles.plansSection}
+            style={{ backgroundImage: `url(${StakeGrid})` }}
+          >
+            <div className={styles.plansSectionContent}>
+              <div className={styles.pricingHeader}>
+                <h1 className={styles.title}>PLANS & PRICING</h1>
+                <p className={styles.subtitle}>
+                  Upgrade to gain access to Premium features
+                </p>
+              </div>
 
-          <div className={styles.plansContainer}>
-            {plans.map((plan) => (
-              <div key={plan.id} className={styles.planCard}>
-                <div className={styles.planTitleRow}>
-                  <h2 className={styles.planName}>{plan.name}</h2>
-                  {isPlanCurrentFn(plan.id) && (
-                    <div className={styles.currentBadge}>Current</div>
-                  )}
-                </div>
+              <div className={styles.plansContainer}>
+                {plans.map((plan) => (
+                  <div
+                    key={plan.id}
+                    className={`${styles.planCard} ${plan.id === 'premium' ? styles.premium : ''}`}
+                  >
+                    <div className={styles.planTitleRow}>
+                      <h2 className={styles.planName}>{plan.name}</h2>
+                      {isPlanCurrentFn(plan.id) && (
+                        <div className={styles.currentBadge}>Current</div>
+                      )}
+                    </div>
 
-                <div className={styles.planPrice}>{plan.price}</div>
-                <div className={styles.planPeriod}>{plan.description}</div>
+                    <div className={styles.planPrice}>{plan.price}</div>
+                    <div className={styles.planPeriod}>{plan.description}</div>
 
-                <ul className={styles.featuresList}>
-                  {plan.features.map((feature, idx) => (
-                    <li
-                      key={idx}
-                      className={`${styles.featureItem} ${
-                        !feature.supported ? styles.unsupportedFeature : ""
-                      }`}
-                    >
-                      <img
-                        src={feature.supported ? PlanOkIcon : PlanNoIcon}
-                        alt={feature.supported ? "Supported" : "Not supported"}
-                        className={styles.featureIcon}
-                      />
-                      <div className={styles.featureTextContainer}>
-                        <span className={styles.featureTitle}>
-                          {feature.title}
-                        </span>
-                        {feature.subtitle && (
-                          <span className={styles.featureSubtitle}>
-                            {feature.subtitle}
-                          </span>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                    <ul className={styles.featuresList}>
+                      {plan.features.map((feature, idx) => (
+                        <li
+                          key={idx}
+                          className={`${styles.featureItem} ${
+                            !feature.supported ? styles.unsupportedFeature : ""
+                          }`}
+                        >
+                          <img
+                            src={feature.supported ? PlanOkIcon : PlanNoIcon}
+                            alt={feature.supported ? "Supported" : "Not supported"}
+                            className={styles.featureIcon}
+                          />
+                          <div className={styles.featureTextContainer}>
+                            <span className={styles.featureTitle}>
+                              {feature.title}
+                            </span>
+                            {feature.subtitle && (
+                              <span className={styles.featureSubtitle}>
+                                {feature.subtitle}
+                              </span>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
 
-                {plan.buttonText && (
-                  <div className={styles.buttonContainer}>
-                    <button
-                      className={styles.subscribeButton}
-                      onClick={() => handleSubscribe()}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Processing..." : plan.buttonText}
-                    </button>
-                    {stakeState?.amount > 0 && (
-                      <button
-                        className={styles.subscribeButton}
-                        onClick={() => handleOperation("unstake")}
-                        disabled={isLoading}
-                      >
-                        {isLoading ? "Processing..." : "Unstake"}
-                      </button>
-                    )}
-                    {stakeState?.pendingClaim > 0 && (
-                      <div>
-                        Claim {stakeState?.pendingClaim} $NYKO after{" "}
-                        {new Date(
-                          stakeState?.unstakeTime * 1000
-                        ).toLocaleString()}
-                      </div>
-                    )}
-                    {stakeState?.pendingClaim > 0 &&
-                      stakeState?.unstakeTime <
-                        Math.floor(Date.now() / 1000) && (
+                    {plan.buttonText && (
+                      <div className={styles.buttonContainer}>
                         <button
                           className={styles.subscribeButton}
-                          onClick={() => handleOperation("claim")}
+                          onClick={() => handleSubscribe()}
                           disabled={isLoading}
                         >
-                          {isLoading ? "Processing..." : "Claim"}
+                          {isLoading ? "Processing..." : plan.buttonText}
                         </button>
-                      )}
+                        {stakeState?.amount > 0 && (
+                          <button
+                            className={styles.unstakeButton}
+                            onClick={() => handleOperation("unstake")}
+                            disabled={isLoading}
+                          >
+                            {isLoading ? "Processing..." : "Unstake"}
+                          </button>
+                        )}
+                        {stakeState?.pendingClaim > 0 && (
+                          <div className={styles.pendingButton}>
+                            Claim {stakeState?.pendingClaim} $NYKO after{" "}
+                            {new Date(
+                              stakeState?.unstakeTime * 1000
+                            ).toLocaleString()}
+                          </div>
+                        )}
+                        {stakeState?.pendingClaim > 0 &&
+                          stakeState?.unstakeTime <
+                            Math.floor(Date.now() / 1000) && (
+                            <button
+                              className={styles.claimButton}
+                              onClick={() => handleOperation("claim")}
+                              disabled={isLoading}
+                            >
+                              {isLoading ? "Processing..." : "Claim"}
+                            </button>
+                          )}
 
-                    {plan.tips && (
-                      <p className={styles.buttonNote}>{plan.tips}</p>
+                        {plan.tips && (
+                          <p className={styles.buttonNote}>{plan.tips}</p>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* 第二区域：FAQs */}
-      <div className={styles.faqSection}>
-        <h2 className={styles.faqTitle}>FREQUENTLY ASKED QUESTIONS</h2>
-        <div className={styles.faqItems}>
-          <div className={styles.faqItem}>
-            <h3 className={styles.faqQuestion}>How do I upgrade to Premium?</h3>
-            <p className={styles.faqAnswer}>
-              You can upgrade to Premium by clicking the "Stake to Subscribe"
-              button and following the staking instructions.
-            </p>
-          </div>
-          <div className={styles.faqItem}>
-            <h3 className={styles.faqQuestion}>What happens if I unstake?</h3>
-            <p className={styles.faqAnswer}>
-              When you unstake, your Premium subscription will be cancelled.
-              Your staked tokens will be withdrawable after a 7-day cooldown
-              period.
-            </p>
-          </div>
-          <div className={styles.faqItem}>
-            <h3 className={styles.faqQuestion}>
-              What payment methods do you accept?
-            </h3>
-            <p className={styles.faqAnswer}>
-              Our Premium plan requires staking tokens rather than traditional
-              payment. You can stake directly from your connected wallet.
-            </p>
-          </div>
-          <div className={styles.faqItem}>
-            <h3 className={styles.faqQuestion}>
-              Is there a minimum staking period?
-            </h3>
-            <p className={styles.faqAnswer}>
-              There is no minimum staking period. You can unstake at any time,
-              but there is a 7-day cooldown period before you can withdraw your
-              tokens.
-            </p>
+          {/* 第二区域：FAQs */}
+          <div className={styles.faqSection}
+            style={{ backgroundImage: `url(${FaqsGridIcon})` }}
+          >
+            <div className={styles.faqContainer}>
+              <div className={styles.faqHeader}>
+                <h2 className={styles.faqTitle}>FAQS</h2>
+                <p className={styles.faqSubtitle}>What you need to know about NYKO</p>
+              </div>
+
+              <div className={styles.faqItems}>
+                <div className={styles.faqItem}>
+                  <img src={QuestionIcon} alt="Question" className={styles.faqIcon} />
+                  <div className={styles.faqContent}>
+                    <h3 className={styles.faqQuestion}>What are compute units?</h3>
+                    <p className={styles.faqAnswer}>
+                      Compute units are a measure of computational resources used to generate images or videos.
+                      They represent the processing power, memory, and time required for each creation.
+                      Different tasks consume varying amounts of compute units based on their complexity and output quality.
+                      For example, generating a high-resolution image or a longer video will use more compute units than a smaller image or shorter video.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.faqItem}>
+                  <img src={QuestionIcon} alt="Question" className={styles.faqIcon} />
+                  <div className={styles.faqContent}>
+                    <h3 className={styles.faqQuestion}>What are compute units?</h3>
+                    <p className={styles.faqAnswer}>
+                      Compute units are a measure of computational resources used to generate images or videos.
+                      They represent the processing power, memory, and time required for each creation.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.faqItem}>
+                  <img src={QuestionIcon} alt="Question" className={styles.faqIcon} />
+                  <div className={styles.faqContent}>
+                    <h3 className={styles.faqQuestion}>What are compute units?</h3>
+                    <p className={styles.faqAnswer}>
+                      Compute units are a measure of computational resources used to generate images or videos.
+                      They represent the processing power, memory, and time required for each creation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* 自定义滚动条 */}
+        {showCustomScrollbar && (
+          <div className={styles.scrollbarTrack}>
+            <div
+              ref={customScrollbarRef}
+              className={styles.scrollbarThumb}
+              style={{
+                height: `${getScrollThumbHeight()}px`,
+                top: `${getScrollThumbTop()}px`
+              }}
+              onMouseDown={handleScrollThumbDrag}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
