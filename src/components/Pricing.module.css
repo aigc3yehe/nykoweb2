@@ -1,0 +1,347 @@
+/* 整个页面容器 */
+.pricingPage {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  color: #FFFFFF;
+  font-family: 'Jura', sans-serif;
+}
+
+/* Plans区域 */
+.plansSection {
+  width: 100%;
+  height: 47.1875rem; /* 755px */
+  gap: 0.625rem; /* 10px */
+  padding: 3.75rem 10.625rem; /* 60px 170px */
+  border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+}
+
+.plansSectionContent {
+  width: 68.75rem; /* 1100px */
+  height: 37.75rem; /* 604px */
+  display: flex;
+  flex-direction: column;
+  gap: 3.75rem; /* 60px */
+}
+
+/* 标题部分 */
+.pricingHeader {
+  width: 68.75rem; /* 1100px */
+  height: 3.9375rem; /* 63px */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem; /* 8px */
+}
+
+.title {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 2.5rem; /* 40px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.subtitle {
+  font-family: 'Jura', sans-serif;
+  font-weight: 400;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #88A4C2;
+  margin: 0;
+}
+
+/* 价格卡片容器 */
+.plansContainer {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* 价格卡片 */
+.planCard {
+  width: 23.75rem; /* 380px */
+  height: 30.0625rem; /* 481px */
+  border-radius: 0.5rem; /* 8px */
+  gap: 0.625rem; /* 10px */
+  padding: 1.875rem; /* 30px */
+  background: linear-gradient(180deg, rgba(55, 65, 81, 0) 0%, rgba(63, 79, 103, 0.15) 100%);
+  border: 1px solid rgba(55, 65, 81, 0.3);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 标题行 */
+.planTitleRow {
+  width: 20rem; /* 320px */
+  height: 2.25rem; /* 36px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* 套餐名称 */
+.planName {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 2.25rem; /* 36px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+/* 当前套餐标签 */
+.currentBadge {
+  width: 4.75rem; /* 76px */
+  height: 1.8125rem; /* 29px */
+  border-radius: 0.25rem; /* 4px */
+  gap: 0.375rem; /* 6px */
+  padding: 0.375rem 0.75rem; /* 6px 12px */
+  background: rgba(31, 41, 55, 0.4);
+  backdrop-filter: blur(8px);
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #88A4C2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 价格 */
+.planPrice {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 1.5rem; /* 24px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #FFFFFF;
+  margin-bottom: 0.5rem;
+}
+
+/* 计费周期 */
+.planPeriod {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #88A4C2;
+  margin-bottom: 1rem;
+}
+
+/* 功能列表 */
+.featuresList {
+  width: 20rem; /* 320px */
+  gap: 1.25rem; /* 20px */
+  padding: 1.25rem 0; /* 20px 0 */
+  list-style: none;
+  margin: 0;
+  flex-grow: 1;
+}
+
+/* 功能项 */
+.featureItem {
+  width: 20rem; /* 320px */
+  height: 2.375rem; /* 38px */
+  gap: 0.375rem; /* 6px */
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+/* 功能项图标 */
+.featureIcon {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.125rem;
+  margin-right: 0.5rem;
+}
+
+/* 功能项文本容器 */
+.featureTextContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* 功能项标题 */
+.featureTitle {
+  font-family: 'Jura', sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #FFFFFF;
+}
+
+/* 功能项副标题 */
+.featureSubtitle {
+  font-family: 'Jura', sans-serif;
+  font-weight: 400;
+  font-size: 0.75rem; /* 12px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #6E788A;
+}
+
+/* 不支持的功能项 */
+.unsupportedFeature .featureTitle {
+  color: #88A4C2;
+  opacity: 0.7;
+}
+
+/* 按钮容器 */
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* 订阅按钮 */
+.subscribeButton {
+  width: 20rem; /* 320px */
+  height: 2.25rem; /* 36px */
+  border-radius: 0.25rem; /* 4px */
+  gap: 0.25rem; /* 4px */
+  padding: 0.25rem 1rem; /* 4px 16px */
+  background: linear-gradient(90deg, #C7FF8C 0%, #E8C4EA 43%, #39EDFF 100%);
+  border: none;
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: #000000;
+  cursor: pointer;
+}
+
+.subscribeButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* 按钮下方提示文本 */
+.buttonNote {
+  font-family: 'Jura', sans-serif;
+  font-weight: 400;
+  font-size: 0.75rem; /* 12px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #6E788A;
+  margin: 0;
+}
+
+/* FAQ部分 */
+.faqSection {
+  padding: 5rem 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #0A0F1B;
+  min-height: 40rem;
+}
+
+.faqTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.faqItems {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.faqItem {
+  background: rgba(31, 41, 55, 0.2);
+  border: 1px solid rgba(55, 65, 81, 0.3);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.faqQuestion {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.faqAnswer {
+  font-size: 1rem;
+  color: #88A4C2;
+  line-height: 1.5;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .plansSection {
+    padding: 3.75rem 2rem;
+    height: auto;
+  }
+  
+  .plansSectionContent {
+    width: 100%;
+    height: auto;
+  }
+  
+  .pricingHeader {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .plansContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .planCard {
+    width: 100%;
+    max-width: 23.75rem; /* 380px */
+    height: auto;
+  }
+  
+  .planTitleRow, 
+  .featuresList, 
+  .featureItem,
+  .subscribeButton {
+    width: 100%;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+} 

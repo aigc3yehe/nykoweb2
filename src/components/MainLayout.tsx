@@ -1,7 +1,9 @@
 import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Header from './Header';
 import ContentDisplay from './ContentDisplay';
 import ChatWindow from './ChatWindow';
+import Pricing from './Pricing';
 import { useAtom } from 'jotai';
 import { accountAtom } from '../store/accountStore';
 import styles from './MainLayout.module.css';
@@ -15,7 +17,7 @@ const MainLayout: React.FC = () => {
 
   // 从accountStore获取用户信息
   const [accountState] = useAtom(accountAtom);
-  const { did , twitter} = accountState;
+  const { did, twitter } = accountState;
   let userUuid = twitter && twitter.subject
   if (!userUuid) {
      userUuid = uuid;
@@ -24,17 +26,26 @@ const MainLayout: React.FC = () => {
   return (
     <div className={styles.mainLayout}>
       <Header />
-      <div className={styles.contentContainer}>
-        <div className={styles.contentSection}>
-          <ContentDisplay />
-        </div>
-        <div className={styles.chatSection}>
-          <ChatWindow 
-            uuid={userUuid} 
-            did={did || undefined} 
-          />
-        </div>
-      </div>
+      <Routes>
+        <Route path="/pricing" element={
+          <div className={styles.fullWidthContent}>
+            <Pricing />
+          </div>
+        } />
+        <Route path="*" element={
+          <div className={styles.contentContainer}>
+            <div className={styles.contentSection}>
+              <ContentDisplay />
+            </div>
+            <div className={styles.chatSection}>
+              <ChatWindow
+                uuid={userUuid}
+                did={did || undefined}
+              />
+            </div>
+          </div>
+        } />
+      </Routes>
     </div>
   );
 };

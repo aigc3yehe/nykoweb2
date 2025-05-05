@@ -1,4 +1,5 @@
 import './App.css'
+import { BrowserRouter } from 'react-router-dom'
 import MainLayout from './components/MainLayout'
 import Toast from './components/Toast'
 import ConfirmDialog from './components/ConfirmDialog'
@@ -25,53 +26,55 @@ function App() {
   const handleCloseImageDetails = useSetAtom(closeImageDetails)
 
   return (
-    <div className="container">
-      <MainLayout />
-      <Toast />
-      <ConfirmDialog />
-      
-      {/* 图片详情模态框 */}
-      {modalState.isImageDetailsOpen && modalState.selectedImage && (
-        <ImageDetailsModal 
-          key={`image-detail-${modalState.selectedImage.id}`}
-          image={modalState.selectedImage}
-          imageDetail={modalState.imageDetail}
-          isLoading={modalState.isLoading}
-          error={modalState.error}
-          onClose={handleCloseImageDetails} 
-        />
-      )}
-      
-      {/* 账户弹窗 */}
-      {accountPopupState.open && (
-        <AccountPopup
-          isOpen={true}
-          onClose={hideAccountPopup}
-          onExport={showExportKey} // 点击导出按钮时显示导出私钥弹窗
-          onLogout={accountPopupState.onLogout}
-          userData={accountPopupState.userData}
-          anchorPosition={accountPopupState.anchorPosition}
-        />
-      )}
-      
-      {/* 导出私钥弹窗 */}
-      {exportKeyState.open && (
-        <ExportKeyModal
-          isOpen={true}
-          onClose={hideExportKey}
-          onCancel={hideExportKey}
-        />
-      )}
-      
-      {/* 生成弹出框 */}
-      {generatePopupState.open && (
-        <GeneratePopup
-          isOpen={true}
-          onClose={hideGeneratePopup}
-        />
-      )}
-      <Analytics />
-    </div>
+    <BrowserRouter>
+      <div className="container">
+        <MainLayout />
+        <Toast />
+        <ConfirmDialog />
+        
+        {/* 图片详情模态框 */}
+        {modalState.isImageDetailsOpen && modalState.selectedImage && (
+          <ImageDetailsModal 
+            key={`image-detail-${modalState.selectedImage.id}`}
+            image={modalState.selectedImage}
+            imageDetail={modalState.imageDetail}
+            isLoading={modalState.isLoading}
+            error={modalState.error}
+            onClose={handleCloseImageDetails} 
+          />
+        )}
+        
+        {/* 账户弹窗 */}
+        {accountPopupState.open && (
+          <AccountPopup
+            isOpen={true}
+            onClose={hideAccountPopup}
+            onExport={showExportKey} // 点击导出按钮时显示导出私钥弹窗
+            onLogout={accountPopupState.onLogout}
+            userData={accountPopupState.userData}
+            anchorPosition={accountPopupState.anchorPosition}
+          />
+        )}
+        
+        {/* 导出私钥弹窗 */}
+        {exportKeyState.open && (
+          <ExportKeyModal
+            isOpen={true}
+            onClose={hideExportKey}
+            onCancel={hideExportKey}
+          />
+        )}
+        
+        {/* 生成弹出框 */}
+        {generatePopupState.open && (
+          <GeneratePopup
+            isOpen={true}
+            onClose={hideGeneratePopup}
+          />
+        )}
+        <Analytics />
+      </div>
+    </BrowserRouter>
   )
 }
 

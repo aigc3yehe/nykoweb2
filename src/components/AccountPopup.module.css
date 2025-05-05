@@ -13,7 +13,6 @@
 /* 账户弹窗样式 */
 .accountPopup {
   width: 24.625rem; /* 394px */
-  height: 22.9375rem; /* 367px */
   border-radius: 0.75rem; /* 12px */
   background: linear-gradient(360deg, #181E31 0%, #0E111B 35.75%);
   border: 1px solid rgba(55, 65, 81, 0.3);
@@ -266,4 +265,27 @@
   vertical-align: middle;
   text-transform: capitalize;
   color: #FFFFFF;
+}
+
+/* 导出按钮区域 */
+.planContainer {
+  width: 100%;
+  height: 2.9375rem; /* 47px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.25rem; /* 0 20px */
+  border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+  cursor: pointer;
+}
+
+.planText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #FACC15; /* 导出按钮文字颜色 */
 }
