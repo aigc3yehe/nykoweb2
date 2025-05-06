@@ -39,3 +39,11 @@
     max-width: none;
   }
 }
+
+/* 新增样式 */
+.fullWidthContent {
+  flex: 1;
+  width: 100%;
+  height: calc(100vh - 4rem); /* 减去header高度 */
+  overflow: hidden; /* 改为hidden，让子组件处理滚动 */
+}

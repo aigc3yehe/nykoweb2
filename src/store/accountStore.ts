@@ -17,6 +17,7 @@ export interface AccountState {
   role: string | null;
   name: string | null;
   avatar: string | null;
+  plan: string;
 }
 
 // 初始账户状态
@@ -33,6 +34,7 @@ const initialState: AccountState = {
   role: 'user',
   name: null,
   avatar: null,
+  plan: 'Free'
 };
 
 // 创建账户状态原子
@@ -82,6 +84,7 @@ export const setUser = atom(
             role: result.data.role || 'user',
             name: result.data.name || null,
             avatar: result.data.avatar || null,
+            plan: "Free"
           });
         } catch (error) {
           // 如果查询失败，仍使用本地用户信息
@@ -103,6 +106,7 @@ export const setUser = atom(
             role: 'user',
             name: null,
             avatar: null,
+            plan: "Free"
           });
         }
       } else {
@@ -125,6 +129,7 @@ export const setUser = atom(
           role: 'user',
           name: null,
           avatar: null,
+          plan: "Free"
         });
       }
     } catch (error) {
@@ -149,6 +154,17 @@ export const setWalletAddress = atom(
     });
   }
 );
+
+export const setPlan = atom(
+    null,
+    (get, set, plan: string) => {
+      const state = get(accountAtom);
+      set(accountAtom, {
+        ...state,
+        plan: plan
+      })
+    }
+)
 
 // 设置加载状态
 export const setLoading = atom(

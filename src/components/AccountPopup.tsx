@@ -6,7 +6,9 @@ import KeyIcon from '../assets/key.svg';
 import LogoutIcon from '../assets/logout.svg';
 import CopyIcon from '../assets/copy_address.svg';
 import CloseIcon from '../assets/close_account.svg';
+import RocketIcon from '../assets/bxs_rocket.svg';
 import WalletAssets from './WalletAssets';
+import { useNavigate } from 'react-router-dom';
 
 interface AccountPopupProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ interface AccountPopupProps {
     username ?: string;
     profilePictureUrl?: string;
     walletAddress?: string;
+    plan?: string;
   };
   anchorPosition?: DOMRect | null;
 }
@@ -33,6 +36,7 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
   const [activeTab, setActiveTab] = useState('Assets');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // 使用 useLogout hook 实现带回调的登出功能
   const { logout } = useLogout({
@@ -97,17 +101,24 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
           <div className={styles.userInfoContent}>
             <img
               src={getHDProfilePicture(userData.profilePictureUrl)}
-              alt="用户头像"
+              alt="avatar"
               className={styles.popupAvatar}
             />
             <div className={styles.userDetails}>
               <div className={styles.userNameRow}>
                 <div className={styles.userNameContainer}>
                   <span className={styles.userName}>{formatName(userData.name)}</span>
-                  <div className={styles.premiumBadge}>
-                    <img src={GoldIcon} alt="Free" width="14" height="14" />
-                    <span className={styles.premiumText}>Free</span>
-                  </div>
+                  {userData.plan === "Premium" ? (
+                      <div className={styles.premiumBadge}>
+                        <img src={GoldIcon} alt="Premium" width="14" height="14" />
+                        <span className={styles.premiumText}>Premium</span>
+                      </div>
+                  ) : (
+                      <div className={styles.freeBadge}>
+                        <span className={styles.freeText}>Free</span>
+                      </div>
+                  )}
+
                 </div>
                 <button
                   className={styles.closeButton}
@@ -116,7 +127,7 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
                     onClose();
                   }}
                 >
-                  <img src={CloseIcon} alt="关闭" width="24" height="24" />
+                  <img src={CloseIcon} alt="close" width="24" height="24" />
                 </button>
               </div>
               <div className={styles.walletAddressRow}>
@@ -125,7 +136,7 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
                   e.stopPropagation();
                   navigator.clipboard.writeText(userData.walletAddress || '');
                 }}>
-                  <img src={CopyIcon} alt="复制" width="20" height="20" />
+                  <img src={CopyIcon} alt="copy" width="20" height="20" />
                 </button>
               </div>
             </div>
@@ -170,18 +181,29 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
           onExport();
         }}>
           <div className={styles.actionRow}>
-            <img src={KeyIcon} alt="导出" width="16" height="16" />
+            <img src={KeyIcon} alt="export" width="16" height="16" />
             <span className={styles.exportText}>Export Private Key</span>
           </div>
         </div>
 
-        {/* 第五部分：登出按钮 */}
+        {/* 第五部分：Plan & Pricing按钮 */}
+        <div className={styles.planContainer} onClick={() => {
+          onClose();
+          // 使用React Router的navigate函数导航到pricing页面
+          navigate('/pricing');
+        }}>
+          <div className={styles.actionRow}>
+            <img src={RocketIcon} alt="export" width="16" height="16" />
+            <span className={styles.planText}>Plan & Pricing</span>
+          </div>
+        </div>
+        {/* 第六部分：登出按钮 */}
         <div
           className={`${styles.logoutContainer} ${isLoggingOut ? styles.disabled : ''}`}
           onClick={isLoggingOut ? undefined : handleLogout}
         >
           <div className={styles.actionRow}>
-            <img src={LogoutIcon} alt="登出" width="16" height="16" />
+            <img src={LogoutIcon} alt="logout" width="16" height="16" />
             <span className={styles.logoutText}>
               {isLoggingOut ? 'Logging Out...' : 'Log Out'}
             </span>

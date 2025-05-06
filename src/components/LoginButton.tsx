@@ -1,17 +1,19 @@
-import React, { useRef } from "react";
-import { usePrivy, useLogin } from "@privy-io/react-auth";
+import React, {useEffect, useRef, useState} from "react";
+import {usePrivy, useLogin, useWallets} from "@privy-io/react-auth";
 import styles from "./LoginButton.module.css";
 import GoldIcon from "../assets/gold.svg";
 import { useAtom, useSetAtom } from "jotai";
 import {
   accountAtom,
   setUser,
-  logout as logoutAction,
+  logout as logoutAction, setPlan,
 } from "../store/accountStore";
 import { createUser } from "../services/userService";
 import { showAccountPopupAtom } from "../store/accountPopupStore";
 import { Twitter } from "../store/imageStore.ts";
 import { useCreateWallet } from "@privy-io/react-auth";
+import {getStakedInfo, stakeStateAtom} from "../store/stakeStore.ts";
+import {pricingAtom} from "../store/pricingStore.ts";
 
 interface LoginButtonProps {
   className?: string;
@@ -19,13 +21,37 @@ interface LoginButtonProps {
 
 const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
   const { authenticated } = usePrivy();
+  const [pricingState] = useAtom(pricingAtom);
+  const { stakeConfig } = pricingState;
   const [accountState] = useAtom(accountAtom);
-  const { walletAddress, credits, twitter } = accountState;
+  const { walletAddress, credits, twitter, plan } = accountState;
   const setUserData = useSetAtom(setUser);
   const showAccountPopup = useSetAtom(showAccountPopupAtom);
   const accountRef = useRef<HTMLDivElement>(null);
   const logoutStore = useSetAtom(logoutAction);
+  const setPlanAction = useSetAtom(setPlan);
   const { createWallet } = useCreateWallet();
+  const [stakeState] = useAtom(stakeStateAtom);
+  const [, fetchStakedInfo] = useAtom(getStakedInfo);
+  const { wallets } = useWallets();
+  const [checkPlan, setCheckPlan] = useState(false);
+
+  useEffect(() => {
+    if (checkPlan) {
+      console.log("Check plan", checkPlan);
+      const wallet = wallets.find(
+          (wallet) => wallet.walletClientType === "privy"
+      );
+      if (wallet) {
+        fetchStakedInfo({
+          contract: stakeConfig.contractAddrss as `0x${string}`,
+          user: wallet.address as `0x${string}`,
+        });
+      }
+    } else {
+      console.log("Check plan", checkPlan);
+    }
+  }, [fetchStakedInfo, stakeConfig.contractAddrss, wallets, checkPlan]);
 
   const { login } = useLogin({
     onComplete: async ({ user, isNewUser }) => {
@@ -67,7 +93,8 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
         } catch (error) {
           console.error("user update or create failed:", error);
         }
-
+        // 请求一下会员状态
+        setCheckPlan(true);
         // 更新全局用户状态
         setUserData(user);
       }
@@ -76,6 +103,15 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
       console.error("login failed", error);
     },
   });
+
+  useEffect(() => {
+    if (stakeState?.amount == 0 &&
+        stakeState?.unstakeTime == 0) {
+      setPlanAction("Free");
+    } else {
+      setPlanAction("Premium");
+    }
+  }, [stakeState, setPlanAction]);
 
   // 格式化钱包地址，显示前4位和后4位
   const formatAddress = (address: string | null) => {
@@ -125,6 +161,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
         username: twitter?.username || undefined,
         profilePictureUrl: twitter?.profilePictureUrl || undefined,
         walletAddress: walletAddress || undefined,
+        plan: plan
       },
       anchorPosition: position,
       onLogout: logout,
@@ -147,7 +184,9 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
           className={styles.accountContainer}
           onClick={handleAccountClick}
         >
-          <img src={GoldIcon} alt="Account" className={styles.goldIcon} />
+          {plan === "Premium" && (
+              <img src={GoldIcon} alt="Account" className={styles.goldIcon} />
+          )}
           <img
             src={twitter?.profilePictureUrl || ""}
             alt="Twitter Avatar"

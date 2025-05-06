@@ -7,6 +7,7 @@ import ModelDetail from './ModelDetail';
 import FeatureCard from './FeatureCard';
 import { useAtom, useSetAtom } from 'jotai';
 import { clearModelDetail, modelDetailAtom, modelIdAndNameAtom } from '../store/modelStore';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const ContentDisplay: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'models' | 'images'>('models');
@@ -17,6 +18,8 @@ const ContentDisplay: React.FC = () => {
   const [modelDetailState] = useAtom(modelDetailAtom);
   const clearDetail = useSetAtom(clearModelDetail);
   const [modelIdAndName] = useAtom(modelIdAndNameAtom);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // 新增吸顶状态
   const [isHeaderSticky, setIsHeaderSticky] = useState(false);
@@ -34,11 +37,8 @@ const ContentDisplay: React.FC = () => {
     setViewingModelId(modelId);
     setViewingModelName(modelName);
 
-    // 更新URL，不刷新页面
-    const url = new URL(window.location.href);
-    url.searchParams.set('model_id', modelId.toString());
-    url.searchParams.set('model_name', modelName);
-    window.history.pushState({}, '', url);
+    // 使用React Router导航，不刷新页面
+    navigate(`${location.pathname}?model_id=${modelId}&model_name=${encodeURIComponent(modelName)}`);
   };
 
   // 处理返回到模型列表
@@ -46,11 +46,8 @@ const ContentDisplay: React.FC = () => {
     setViewingModelId(null);
     clearDetail();
 
-    // 清除URL参数
-    const url = new URL(window.location.href);
-    url.searchParams.delete('model_id');
-    url.searchParams.delete('model_name');
-    window.history.pushState({}, '', url);
+    // 使用React Router导航，清除URL参数
+    navigate(location.pathname);
   };
 
   // 从URL参数中获取model_id和model_name

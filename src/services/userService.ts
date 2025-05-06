@@ -96,3 +96,34 @@ export const queryUser = async (params: {
     throw error;
   }
 };
+
+// Check user stkaed NYKO token
+export const queryStakedToken = async (params: { did: string }) => {
+  try {
+    if (!params.did || params.did.length == 0) return;
+    const queryParams = new URLSearchParams();
+
+    queryParams.append("user", params.did);
+    queryParams.append("refreshState", "true");
+
+    const privyToken = await getAccessToken();
+
+    const response = await fetch(
+      `/studio-api/users/staked?${queryParams.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          [PRIVY_TOKEN_HEADER]: privyToken || "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Query user staked token failed.");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Query user staked token failed:", error);
+  }
+};

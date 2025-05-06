@@ -99,7 +99,7 @@ export const getTokensForOwner = atom(
     } catch (error) {
       // 处理错误
       const errorMessage =
-        error instanceof Error ? error.message : "获取代币信息失败";
+        error instanceof Error ? error.message : "GetTokensForOwner Error";
 
       set(alchemyStateAtom, {
         ...get(alchemyStateAtom),
@@ -139,7 +139,7 @@ export const getAssetTransfers = atom(
     } catch (error) {
       // 处理错误
       const errorMessage =
-        error instanceof Error ? error.message : "获取资产转移历史失败";
+        error instanceof Error ? error.message : "Get AssetTransfers Error";
 
       set(alchemyStateAtom, {
         ...get(alchemyStateAtom),
@@ -196,7 +196,7 @@ export const getEthBalance = atom(
       return balance;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "获取余额失败";
+        error instanceof Error ? error.message : "Get Balance Error";
       set(alchemyStateAtom, {
         ...get(alchemyStateAtom),
         isLoading: false,
@@ -242,7 +242,7 @@ export const getTokenBalance = atom(
       return balance;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "获取余额失败";
+        error instanceof Error ? error.message : "Get Balance Error";
       set(alchemyStateAtom, {
         ...get(alchemyStateAtom),
         isLoading: false,

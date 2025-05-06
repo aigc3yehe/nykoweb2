@@ -113,7 +113,7 @@ const initialState: ChatState = {
     inQueue: false
   },
   heartbeatId: undefined,
-  loraWeight: 0.9,
+  loraWeight: 0.5,
   betaMode: false // 初始化为false
 };
 
@@ -475,6 +475,8 @@ export const sendMessage = atom(
       // 构建完整的API URL
       const API_URL = `${apiPrefix}/chat`;
 
+      const lora_weight = 0.75 + (chatState.loraWeight || 0) * 0.25
+
       // 发送请求到API
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -494,7 +496,7 @@ export const sendMessage = atom(
           width,
           height,
           lora_name,
-          lora_weight: chatState.loraWeight
+          lora_weight: lora_weight
         }),
       });
 
@@ -1086,7 +1088,7 @@ export async function fetchConnectionStatus(userUuid: string, betaMode: boolean)
 // 6. 修改setUserInfo操作，在did更新时检查连接状态
 export const setUserInfo = atom(
   null,
-  async (get, set, params: { uuid: string, did?: string }) => {
+  async (get, set, params: { uuid: string | undefined | null, did?: string }) => {
     const { uuid, did } = params;
     const chatState = get(chatAtom);
     const prevDid = chatState.did;
@@ -1094,15 +1096,12 @@ export const setUserInfo = atom(
     // 更新用户信息
     set(chatAtom, {
       ...chatState,
-      userUuid: uuid,
+      userUuid: uuid || "",
       did: did
     });
 
-    // 如果did从null/undefined变成有值，则检查连接状态
-    if ((!prevDid || prevDid === '') && did) {
-      console.log('user is login success, check connection status:', prevDid);
-      set(checkConnectionStatus);
-    }
+    console.log('user is login success, check connection status:', prevDid);
+    set(checkConnectionStatus);
   }
 );
 
