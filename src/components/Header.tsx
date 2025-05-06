@@ -36,9 +36,13 @@ const Header: React.FC = () => {
   }
   const { login } = useLogin();
 
+  const goHome = () => {
+      navigate('/');
+  }
+
   return (
     <header className={styles.header}>
-      <div className={styles.logoSection}>
+      <div className={styles.logoSection} onClick={goHome}>
         <h1 className={styles.title}>NYKO</h1>
       </div>
       <div className={styles.actionSection}>

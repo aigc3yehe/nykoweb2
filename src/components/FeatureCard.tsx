@@ -5,6 +5,7 @@ import {
   sendMessage
 } from '../store/chatStore';
 import {showToastAtom} from "../store/imagesStore.ts";
+import {usePrivy} from "@privy-io/react-auth";
 
 // @ts-ignore
 interface FeatureCardProps {
@@ -14,8 +15,27 @@ interface FeatureCardProps {
 const FeatureCard: React.FC<FeatureCardProps> = () => {
   const [, sendMessageAction] = useAtom(sendMessage);
   const showToast = useSetAtom(showToastAtom);
+  const { authenticated } = usePrivy();
 
-  const handleChatNowClick = async () => {
+  const handleGenerateClick = async () => {
+    if (!authenticated) {
+      showToast({
+        message: 'Please login first',
+        severity: 'info'
+      });
+      return;
+    }
+    await sendMessageAction('I want to generate an image.')
+  };
+
+  const handleTrainClick = async () => {
+    if (!authenticated) {
+      showToast({
+        message: 'Please login first',
+        severity: 'info'
+      });
+      return;
+    }
     await sendMessageAction('I want to finetuning a model.')
   };
 
@@ -28,13 +48,7 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
   // 处理"Apply for early access"点击事件
   const handleApplyForAccessClick = () => {
     // 前往申请表
-    // 待补充链接
-    console.log("Apply for early access clicked");
-    // 显示成功提示
-    showToast({
-      message: 'Not open yet, please stay tuned',
-      severity: 'info'
-    });
+    window.open('https://discord.com/channels/1368843355362164786/1368986279319961600', '_blank');
   };
 
   return (
@@ -47,7 +61,8 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
             <p>With natural language, easily finetuning models, set up workflows, and host your creativity on NYKO — ready to use anytime.</p>
           </div>
           <div className={styles.buttonContainer}>
-            <button className={styles.featureButton} onClick={handleChatNowClick}>Chat Now &gt;</button>
+            <button className={styles.featureButton} onClick={handleGenerateClick}>Generate an image &gt;</button>
+            <button className={styles.featureButton} onClick={handleTrainClick}>Train a model &gt;</button>
           </div>
         </div>
         <div className={styles.featureCard}>

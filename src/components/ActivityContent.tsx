@@ -62,6 +62,23 @@ const ActivityContent: React.FC = () => {
     navigate('/');
   };
 
+  const CustomLink = ({ node, href, children, ...props}: any) => {
+    const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      
+      if (href && href.startsWith('/')) {
+        navigate(href);
+      } else if (href){
+        window.open(href, '_blank', 'noopener,noreferrer');
+      }
+    }
+    return (
+      <a href={href} onClick={handleClick} {...props}>
+        {children}
+      </a>
+    );
+  };
+
   // 更新滚动状态
   useEffect(() => {
     const updateScrollInfo = () => {
@@ -163,7 +180,10 @@ const ActivityContent: React.FC = () => {
               <div className={styles.errorState}>{error}</div>
             ) : (
               <div className={styles.markdownContent}>
-                <ReactMarkdown>
+                <ReactMarkdown
+                  components={{
+                    a: CustomLink,
+                  }}>
                   {markdownContent}
                 </ReactMarkdown>
               </div>

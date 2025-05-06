@@ -43,7 +43,7 @@ const initialState: PricingState = {
       id: "free",
       name: "Free",
       price: "0 $NYKO",
-      description: "For starter AI players",
+      description: "For starter",
       features: [
         {
           title: "Up to 5 images per day",
@@ -67,7 +67,7 @@ const initialState: PricingState = {
       description: "For expert-level AI players",
       features: [
         {
-          title: "On Website",
+          title: "Unlimited images per day.",
           subtitle: "On Website & X",
           supported: true,
         },

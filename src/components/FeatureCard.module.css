@@ -79,6 +79,8 @@
 .buttonContainer {
   display: flex;
   gap: 1.25rem; /* 20px */
+  align-items: center;
+  justify-content: space-between;
 }
 
 .featureButton {

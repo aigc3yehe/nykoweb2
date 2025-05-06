@@ -22,7 +22,6 @@ import { queryStakedToken } from "../services/userService";
 const Pricing: React.FC = () => {
   const [pricingState] = useAtom(pricingAtom);
   const { authenticated } = usePrivy();
-  // const [, subscribe] = useAtom(subscribeToPlan);
   const { plans, isLoading, stakeConfig } = pricingState;
   const { wallets } = useWallets();
   const showToast = useSetAtom(showToastAtom);
@@ -456,17 +455,15 @@ const Pricing: React.FC = () => {
                   />
                   <div className={styles.faqContent}>
                     <h3 className={styles.faqQuestion}>
-                      What are compute units?
+                      What is NYKO?
                     </h3>
                     <p className={styles.faqAnswer}>
-                      Compute units are a measure of computational resources
-                      used to generate images or videos. They represent the
-                      processing power, memory, and time required for each
-                      creation. Different tasks consume varying amounts of
-                      compute units based on their complexity and output
-                      quality. For example, generating a high-resolution image
-                      or a longer video will use more compute units than a
-                      smaller image or shorter video.
+                      NYKO includes an Agent and application platform, 
+                      as well as the AI creativity tokenization contract. 
+                      The Agent and application platform are responsible for making 
+                      the generation and application of creativity simple, 
+                      while the creativity tokenization contract handles launching, 
+                      binding, and revenue distribution.
                     </p>
                   </div>
                 </div>
@@ -479,13 +476,11 @@ const Pricing: React.FC = () => {
                   />
                   <div className={styles.faqContent}>
                     <h3 className={styles.faqQuestion}>
-                      What are compute units?
+                      I like this image style, how can I generate one?
                     </h3>
                     <p className={styles.faqAnswer}>
-                      Compute units are a measure of computational resources
-                      used to generate images or videos. They represent the
-                      processing power, memory, and time required for each
-                      creation.
+                      Click the "Generate" button, just like traditional image generation apps. 
+                      Or simply tell Niyoko that you want to generate an image.
                     </p>
                   </div>
                 </div>
@@ -498,13 +493,10 @@ const Pricing: React.FC = () => {
                   />
                   <div className={styles.faqContent}>
                     <h3 className={styles.faqQuestion}>
-                      What are compute units?
+                      Will staking $NYKO burn it?
                     </h3>
                     <p className={styles.faqAnswer}>
-                      Compute units are a measure of computational resources
-                      used to generate images or videos. They represent the
-                      processing power, memory, and time required for each
-                      creation.
+                      The $NYKO used in the Stake to Subscribe system won’t be burned—you can withdraw it at any time.
                     </p>
                   </div>
                 </div>
