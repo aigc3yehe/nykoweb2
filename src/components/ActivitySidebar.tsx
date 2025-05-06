@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
 import styles from './ActivitySidebar.module.css';
 import { useAtom } from 'jotai';
-import { activityAtom } from '../store/activityStore';
+// import { activityAtom } from '../store/activityStore';
 import { accountAtom } from '../store/accountStore';
 import TwitterIcon from '../assets/twitter.svg';
 
 const ActivitySidebar: React.FC = () => {
-  const [activityState] = useAtom(activityAtom);
+  // const [activityState] = useAtom(activityAtom);
   const [accountState] = useAtom(accountAtom);
 
   // 滚动相关状态

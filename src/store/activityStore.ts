@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { accountAtom } from './accountStore';
+// import { accountAtom } from './accountStore';
 
 // 定义活动类型
 export interface Activity {
@@ -70,7 +70,7 @@ export const fetchActivities = atom(
   null,
   async (get, set) => {
     const activityState = get(activityAtom);
-    const accountState = get(accountAtom);
+    // const accountState = get(accountAtom);
     
     // 设置加载状态
     set(activityAtom, {

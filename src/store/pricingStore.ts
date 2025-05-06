@@ -168,3 +168,14 @@ export const syncPlanWithAccount = atom(null, (get, set) => {
     });
   }
 });
+
+export const setOperationLoading = atom(
+  null,
+  (get, set, isLoading: boolean) => {
+    const pricingState = get(pricingAtom);
+    set(pricingAtom, {
+      ...pricingState,
+      isLoading,
+    });
+  }
+);

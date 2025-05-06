@@ -9,7 +9,8 @@ import FaqsGridIcon from "../assets/faqs_grid.svg";
 import {
   pricingAtom,
   isPlanCurrent,
-  subscribeToPlan,
+  // subscribeToPlan,
+  setOperationLoading,
 } from "../store/pricingStore";
 import { useWallets } from "@privy-io/react-auth";
 import { base } from "viem/chains";
@@ -24,12 +25,13 @@ import { publicClient } from "../providers/wagmiConfig";
 const Pricing: React.FC = () => {
   const [pricingState] = useAtom(pricingAtom);
   const [isPlanCurrentFn] = useAtom(isPlanCurrent);
-  const [, subscribe] = useAtom(subscribeToPlan);
+  // const [, subscribe] = useAtom(subscribeToPlan);
   const { plans, isLoading, stakeConfig } = pricingState;
   const { wallets } = useWallets();
   const showToast = useSetAtom(showToastAtom);
   const [stakeState] = useAtom(stakeStateAtom);
   const [, fetchStakedInfo] = useAtom(getStakedInfo);
+  const setOperationLoadingFn = useSetAtom(setOperationLoading);
 
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -67,12 +69,12 @@ const Pricing: React.FC = () => {
     // 添加滚动事件监听器
     const container = contentRef.current;
     if (container) {
-      container.addEventListener('scroll', updateScrollInfo);
+      container.addEventListener("scroll", updateScrollInfo);
     }
 
     return () => {
       if (container) {
-        container.removeEventListener('scroll', updateScrollInfo);
+        container.removeEventListener("scroll", updateScrollInfo);
       }
     };
   }, []);
@@ -96,12 +98,12 @@ const Pricing: React.FC = () => {
     };
 
     const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
   // 计算滚动条高度和位置
@@ -112,7 +114,10 @@ const Pricing: React.FC = () => {
 
   const getScrollThumbTop = () => {
     if (scrollHeight <= clientHeight) return 0;
-    return (scrollTop / (scrollHeight - clientHeight)) * (clientHeight - getScrollThumbHeight());
+    return (
+      (scrollTop / (scrollHeight - clientHeight)) *
+      (clientHeight - getScrollThumbHeight())
+    );
   };
 
   // 显示自定义滚动条的条件
@@ -137,9 +142,15 @@ const Pricing: React.FC = () => {
   const handleSubscribe = async () => {
     if (!isLoading) {
       try {
+        setOperationLoadingFn(true);
         const client = await walletClient;
         if (!client) {
           console.error("Wallet client not found");
+          showToast({
+            message: "Pending initial",
+            severity: "warning",
+          });
+          setOperationLoadingFn(false);
           return;
         }
         const allowance = await publicClient.readContract({
@@ -182,7 +193,9 @@ const Pricing: React.FC = () => {
           message: `Stake successful: ${data}`,
           severity: "success",
         });
+        setOperationLoadingFn(false);
       } catch (error) {
+        setOperationLoadingFn(false);
         showToast({
           message: `Stake failed: ${
             (error as Error)?.message || "Unknown error"
@@ -196,9 +209,15 @@ const Pricing: React.FC = () => {
   const handleOperation = async (operation: "unstake" | "claim") => {
     if (!isLoading) {
       try {
+        setOperationLoadingFn(true);
         const client = await walletClient;
         if (!client) {
           console.error("Wallet client not found");
+          showToast({
+            message: "Pending initial",
+            severity: "warning",
+          });
+          setOperationLoadingFn(false);
           return;
         }
         const data = await client.writeContract({
@@ -217,7 +236,9 @@ const Pricing: React.FC = () => {
           message: `Unstake successful: ${data}`,
           severity: "success",
         });
+        setOperationLoadingFn(false);
       } catch (error) {
+        setOperationLoadingFn(false);
         showToast({
           message: `Unstake failed: ${
             (error as Error)?.message || "Unknown error"
@@ -252,7 +273,9 @@ const Pricing: React.FC = () => {
                 {plans.map((plan) => (
                   <div
                     key={plan.id}
-                    className={`${styles.planCard} ${plan.id === 'premium' ? styles.premium : ''}`}
+                    className={`${styles.planCard} ${
+                      plan.id === "premium" ? styles.premium : ""
+                    }`}
                   >
                     <div className={styles.planTitleRow}>
                       <h2 className={styles.planName}>{plan.name}</h2>
@@ -274,7 +297,9 @@ const Pricing: React.FC = () => {
                         >
                           <img
                             src={feature.supported ? PlanOkIcon : PlanNoIcon}
-                            alt={feature.supported ? "Supported" : "Not supported"}
+                            alt={
+                              feature.supported ? "Supported" : "Not supported"
+                            }
                             className={styles.featureIcon}
                           />
                           <div className={styles.featureTextContainer}>
@@ -293,13 +318,16 @@ const Pricing: React.FC = () => {
 
                     {plan.buttonText && (
                       <div className={styles.buttonContainer}>
-                        <button
-                          className={styles.subscribeButton}
-                          onClick={() => handleSubscribe()}
-                          disabled={isLoading}
-                        >
-                          {isLoading ? "Processing..." : plan.buttonText}
-                        </button>
+                        {stakeState?.amount == 0 &&
+                          stakeState?.unstakeTime == 0 && (
+                            <button
+                              className={styles.subscribeButton}
+                              onClick={() => handleSubscribe()}
+                              disabled={isLoading}
+                            >
+                              {isLoading ? "Processing..." : plan.buttonText}
+                            </button>
+                          )}
                         {stakeState?.amount > 0 && (
                           <button
                             className={styles.unstakeButton}
@@ -341,47 +369,76 @@ const Pricing: React.FC = () => {
           </div>
 
           {/* 第二区域：FAQs */}
-          <div className={styles.faqSection}
+          <div
+            className={styles.faqSection}
             style={{ backgroundImage: `url(${FaqsGridIcon})` }}
           >
             <div className={styles.faqContainer}>
               <div className={styles.faqHeader}>
                 <h2 className={styles.faqTitle}>FAQS</h2>
-                <p className={styles.faqSubtitle}>What you need to know about NYKO</p>
+                <p className={styles.faqSubtitle}>
+                  What you need to know about NYKO
+                </p>
               </div>
 
               <div className={styles.faqItems}>
                 <div className={styles.faqItem}>
-                  <img src={QuestionIcon} alt="Question" className={styles.faqIcon} />
+                  <img
+                    src={QuestionIcon}
+                    alt="Question"
+                    className={styles.faqIcon}
+                  />
                   <div className={styles.faqContent}>
-                    <h3 className={styles.faqQuestion}>What are compute units?</h3>
+                    <h3 className={styles.faqQuestion}>
+                      What are compute units?
+                    </h3>
                     <p className={styles.faqAnswer}>
-                      Compute units are a measure of computational resources used to generate images or videos.
-                      They represent the processing power, memory, and time required for each creation.
-                      Different tasks consume varying amounts of compute units based on their complexity and output quality.
-                      For example, generating a high-resolution image or a longer video will use more compute units than a smaller image or shorter video.
+                      Compute units are a measure of computational resources
+                      used to generate images or videos. They represent the
+                      processing power, memory, and time required for each
+                      creation. Different tasks consume varying amounts of
+                      compute units based on their complexity and output
+                      quality. For example, generating a high-resolution image
+                      or a longer video will use more compute units than a
+                      smaller image or shorter video.
                     </p>
                   </div>
                 </div>
 
                 <div className={styles.faqItem}>
-                  <img src={QuestionIcon} alt="Question" className={styles.faqIcon} />
+                  <img
+                    src={QuestionIcon}
+                    alt="Question"
+                    className={styles.faqIcon}
+                  />
                   <div className={styles.faqContent}>
-                    <h3 className={styles.faqQuestion}>What are compute units?</h3>
+                    <h3 className={styles.faqQuestion}>
+                      What are compute units?
+                    </h3>
                     <p className={styles.faqAnswer}>
-                      Compute units are a measure of computational resources used to generate images or videos.
-                      They represent the processing power, memory, and time required for each creation.
+                      Compute units are a measure of computational resources
+                      used to generate images or videos. They represent the
+                      processing power, memory, and time required for each
+                      creation.
                     </p>
                   </div>
                 </div>
 
                 <div className={styles.faqItem}>
-                  <img src={QuestionIcon} alt="Question" className={styles.faqIcon} />
+                  <img
+                    src={QuestionIcon}
+                    alt="Question"
+                    className={styles.faqIcon}
+                  />
                   <div className={styles.faqContent}>
-                    <h3 className={styles.faqQuestion}>What are compute units?</h3>
+                    <h3 className={styles.faqQuestion}>
+                      What are compute units?
+                    </h3>
                     <p className={styles.faqAnswer}>
-                      Compute units are a measure of computational resources used to generate images or videos.
-                      They represent the processing power, memory, and time required for each creation.
+                      Compute units are a measure of computational resources
+                      used to generate images or videos. They represent the
+                      processing power, memory, and time required for each
+                      creation.
                     </p>
                   </div>
                 </div>
@@ -398,7 +455,7 @@ const Pricing: React.FC = () => {
               className={styles.scrollbarThumb}
               style={{
                 height: `${getScrollThumbHeight()}px`,
-                top: `${getScrollThumbTop()}px`
+                top: `${getScrollThumbTop()}px`,
               }}
               onMouseDown={handleScrollThumbDrag}
             />
