@@ -8,7 +8,7 @@ import ReactMarkdown from 'react-markdown';
 const markdownContent = `
 # What is Project Primedata S1?
 
-Project Primedata S1 marks the launch phase of NYKO, a 12-week incentive program running from May 10 to August 3. It rewards users who contribute valuable data (by using creative components) and help amplify NYKO's presence (by sharing on X) with $NYKO tokens.
+Project Primedata S1 marks the launch phase of NYKO, a 12-week incentive program running from May 6 UTC 12:00  to July 30 UTC 12:00. It rewards users who contribute valuable data (by using creative components) and help amplify NYKO mindshare (by sharing on X) with $NYKO tokens.
 
 ## How to Participate
 
@@ -18,16 +18,13 @@ Project Primedata S1 marks the launch phase of NYKO, a 12-week incentive program
 - Earn Generation Rewards
 
   Create images using NYKO AI image generation service.
-- [Coming Soon] Earn Sharing Rewards
+- [Coming Soon] Earn Mindshare Rewards
 
   Share your creative outputs from the platform on X, or simply mention @niyoko_agent or $NYKO.
 
 ## Reward Structure
 
 - 30 million $NYKO distributed totally based on user points.
-- 10% of NYKO ecosystem revenue, including:
-  - $NYKO transaction fees
-  - Creative component token transaction fees ...distributed proportionally at the end of the season.
 
 ## Reward Calculation
 
@@ -39,7 +36,7 @@ Points = GENI × EF × Cooldown
 
 - GENI (AI Creator Score): Currently fixed at 1.
 - EF (EpochFlow): 2 if you created something yesterday, otherwise 1.
-- Cooldown: After 3 generation in a single day, value becomes 0; otherwise 1.
+- Cooldown: After 3 generation in a single day, value becomes 0; otherwise 1. Reset to 1 every 24h.
 `;
 
 const ActivityContent: React.FC = () => {
