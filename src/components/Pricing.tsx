@@ -12,7 +12,7 @@ import {
   // subscribeToPlan,
   setOperationLoading,
 } from "../store/pricingStore";
-import { useWallets } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { base } from "viem/chains";
 import { createWalletClient, custom, Hex, parseEther } from "viem";
 import NikoTokenLockerAbi from "../abi/INikoTokenLocker.json";
@@ -21,6 +21,7 @@ import { showToastAtom } from "../store/imagesStore";
 import { getStakedInfo, stakeStateAtom } from "../store/stakeStore";
 import { publicClient } from "../providers/wagmiConfig";
 import { alchemyStateAtom, getTokensForOwner } from "../store/alchemyStore";
+import { queryStakedToken } from "../services/userService";
 
 // 定义价格套餐类型
 const Pricing: React.FC = () => {
@@ -35,6 +36,7 @@ const Pricing: React.FC = () => {
   const setOperationLoadingFn = useSetAtom(setOperationLoading);
   const [alchemyState] = useAtom(alchemyStateAtom);
   const [, fetchTokens] = useAtom(getTokensForOwner);
+  const { user } = usePrivy();
 
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -221,6 +223,8 @@ const Pricing: React.FC = () => {
           user: client?.account?.address as `0x${string}`,
         });
 
+        await queryStakedToken({ did: user?.id || "" });
+
         showToast({
           message: `Stake successful: ${data}`,
           severity: "success",
@@ -263,6 +267,10 @@ const Pricing: React.FC = () => {
           contract: stakeConfig.contractAddrss as `0x${string}`,
           user: client?.account?.address as `0x${string}`,
         });
+
+        if (operation == "unstake") {
+          await queryStakedToken({ did: user?.id || "" });
+        }
 
         showToast({
           message: `Unstake successful: ${data}`,
