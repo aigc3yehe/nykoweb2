@@ -1,4 +1,4 @@
-import { formatEther, parseEther } from "viem";
+import { formatUnits, parseEther } from "viem";
 
 export const getAmountWithSlippage = (
   amount: bigint | undefined,
@@ -17,9 +17,9 @@ export const getAmountWithSlippage = (
   return (absAmount * slippageMultiplier) / BigInt(1e18);
 };
 
-export const formattedBalance = (balance: bigint) => {
-  if(!balance) return "0";
-  const val = Number(formatEther(balance));
+export const formattedBalance = (balance: bigint, decimal = 18) => {
+  if (!balance) return "0";
+  const val = Number(formatUnits(balance, decimal));
   const str = val.toString();
   if (str.includes(".")) {
     const decimalPart = str.split(".")[1];
