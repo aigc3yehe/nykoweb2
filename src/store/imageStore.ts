@@ -122,7 +122,7 @@ export const fetchImages = atom(
         }
 
         if (view) {
-          params.append('view', view.toString());
+          params.append('view', 'true');
         }
 
         // 发送请求

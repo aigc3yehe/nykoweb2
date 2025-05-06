@@ -110,8 +110,8 @@ export const fetchModels = atom(
           params.append('user', accountState.did);
         }
 
-        if (view !== undefined) {
-          params.append('view', view.toString());
+        if (view) {
+          params.append('view', 'true');
         }
 
         // 根据owned状态选择不同的API端点
