@@ -1,31 +1,26 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useAtom, useSetAtom } from "jotai";
+import React, {useEffect, useMemo, useRef, useState} from "react";
+import {useAtom, useSetAtom} from "jotai";
 import styles from "./Pricing.module.css";
 import StakeGrid from "../assets/stake_grid.svg";
 import PlanOkIcon from "../assets/plan_ok.svg";
 import PlanNoIcon from "../assets/plan_no.svg";
 import QuestionIcon from "../assets/question.svg";
 import FaqsGridIcon from "../assets/faqs_grid.svg";
-import {
-  pricingAtom,
-  isPlanCurrent,
-  // subscribeToPlan,
-  setOperationLoading,
-} from "../store/pricingStore";
-import { useWallets } from "@privy-io/react-auth";
-import { base } from "viem/chains";
-import { createWalletClient, custom, Hex, parseEther } from "viem";
+import {pricingAtom, setOperationLoading,} from "../store/pricingStore";
+import {useLogin, usePrivy, useWallets} from "@privy-io/react-auth";
+import {base} from "viem/chains";
+import {createWalletClient, custom, Hex, parseEther} from "viem";
 import NikoTokenLockerAbi from "../abi/INikoTokenLocker.json";
 import ERC20Abi from "../abi/IERC20.json";
-import { showToastAtom } from "../store/imagesStore";
-import { getStakedInfo, stakeStateAtom } from "../store/stakeStore";
-import { publicClient } from "../providers/wagmiConfig";
-import { alchemyStateAtom, getTokensForOwner } from "../store/alchemyStore";
+import {showToastAtom} from "../store/imagesStore";
+import {getStakedInfo, stakeStateAtom} from "../store/stakeStore";
+import {publicClient} from "../providers/wagmiConfig";
+import {alchemyStateAtom, getTokensForOwner} from "../store/alchemyStore";
 
 // 定义价格套餐类型
 const Pricing: React.FC = () => {
   const [pricingState] = useAtom(pricingAtom);
-  const [isPlanCurrentFn] = useAtom(isPlanCurrent);
+  const { authenticated } = usePrivy();
   // const [, subscribe] = useAtom(subscribeToPlan);
   const { plans, isLoading, stakeConfig } = pricingState;
   const { wallets } = useWallets();
@@ -35,6 +30,7 @@ const Pricing: React.FC = () => {
   const setOperationLoadingFn = useSetAtom(setOperationLoading);
   const [alchemyState] = useAtom(alchemyStateAtom);
   const [, fetchTokens] = useAtom(getTokensForOwner);
+  const [isPremium, setIsPremium] = useState(false);
 
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -55,6 +51,15 @@ const Pricing: React.FC = () => {
       });
     }
   }, [wallets]);
+
+  useEffect(() => {
+    if (stakeState?.amount == 0 &&
+      stakeState?.unstakeTime == 0) {
+      setIsPremium(false);
+    } else {
+      setIsPremium(true);
+    }
+  }, [stakeState]);
 
   // 更新滚动状态
   useEffect(() => {
@@ -93,9 +98,7 @@ const Pricing: React.FC = () => {
       if (contentRef.current) {
         const deltaY = moveEvent.clientY - startY;
         const scrollRatio = deltaY / clientHeight;
-        const newScrollTop = startScrollTop + scrollRatio * scrollHeight;
-
-        contentRef.current.scrollTop = newScrollTop;
+        contentRef.current.scrollTop = startScrollTop + scrollRatio * scrollHeight;
         setScrollTop(contentRef.current.scrollTop);
       }
     };
@@ -133,16 +136,28 @@ const Pricing: React.FC = () => {
     if (wallet) {
       await wallet.switchChain(base.id);
       const privyProvider = await wallet.getEthereumProvider();
-      const walletClient = createWalletClient({
+      return createWalletClient({
         account: wallet.address as Hex,
         chain: base,
         transport: custom(privyProvider),
       });
-      return walletClient;
     }
   }, [wallets]);
 
+  const { login } = useLogin();
+  const handleLogin = () => {
+    try {
+      login();
+    } catch (error) {
+      console.error("login Twitter failed:", error);
+    }
+  };
+
   const handleSubscribe = async () => {
+    if (!authenticated) {
+      handleLogin();
+      return;
+    }
     if (!isLoading) {
       try {
         setOperationLoadingFn(true);
@@ -311,7 +326,7 @@ const Pricing: React.FC = () => {
                   >
                     <div className={styles.planTitleRow}>
                       <h2 className={styles.planName}>{plan.name}</h2>
-                      {isPlanCurrentFn(plan.id) && (
+                      {isPremium === (plan.id === "premium") && (
                         <div className={styles.currentBadge}>Current</div>
                       )}
                     </div>
@@ -340,7 +355,18 @@ const Pricing: React.FC = () => {
                             </span>
                             {feature.subtitle && (
                               <span className={styles.featureSubtitle}>
-                                {feature.subtitle}
+                                {feature.link ? (
+                                  <a
+                                    href={feature.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={styles.featureLink}
+                                  >
+                                    {feature.subtitle}
+                                  </a>
+                                ) : (
+                                  feature.subtitle
+                                )}
                               </span>
                             )}
                           </div>

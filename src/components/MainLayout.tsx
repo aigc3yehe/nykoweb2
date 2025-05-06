@@ -33,7 +33,7 @@ const MainLayout: React.FC = () => {
             <Pricing />
           </div>
         } />
-        <Route path="/activity" element={
+        <Route path="/primedatas1" element={
           <div className={styles.fullWidthContent}>
             <Activity />
           </div>

@@ -3,7 +3,7 @@
   height: 100%;
   gap: 1.5rem; /* 24px */
   border-left: 1px solid rgba(55, 65, 81, 0.3); /* #3741514D */
-  padding: 1.5rem 0rem 1.5rem 0rem; /* 24px */
+  padding: 1.5rem 0 1.5rem 0; /* 24px */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -25,7 +25,7 @@
   font-weight: 700;
   font-size: 1.25rem; /* 20px */
   line-height: 100%;
-  letter-spacing: 0%;
+  letter-spacing: 0;
   vertical-align: middle;
   text-transform: capitalize;
   background: linear-gradient(90deg, #6366F1 0%, #FF6A00 100%);
@@ -311,6 +311,54 @@
   width: 100%;
   background-color: rgba(55, 65, 81, 0.25); /* #37415140 */
   margin: 0.75rem 0;
+}
+
+/* 空消息状态 */
+.emptyHistory {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6E788A;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+/* 添加登录相关样式 */
+.loginRequired {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  gap: 1rem;
+}
+
+.loginButton {
+  height: 1.8125rem; /* 29px */
+  padding: 0.375rem 0.75rem; /* 6px 12px */
+  border-radius: 0.25rem; /* 4px */
+  background: var(--main, #6366F1);
+  backdrop-filter: blur(8px);
+  border: none;
+  cursor: pointer;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #000000;
+  vertical-align: middle;
+}
+
+.loginButton:hover {
+  background: #4F46E5; /* 深一点的主题色 */
+}
+
+.loginButton:disabled {
+  cursor: not-allowed;
 }
 
 /* 响应式设计 */

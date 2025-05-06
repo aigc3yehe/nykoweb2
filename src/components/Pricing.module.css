@@ -539,3 +539,14 @@
 .scrollbarThumb:hover {
   background: rgba(99, 102, 241, 0.8);
 }
+
+.featureLink {
+  color: #88A4C2;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.featureLink:hover {
+  color: #FFFFFF;
+}

@@ -5,8 +5,10 @@ import XIcon from '../assets/x.svg';
 import DocIcon from '../assets/doc.svg';
 import S1ActivityIcon from '../assets/s1_activity.svg';
 import LoginButton from './LoginButton';
+import {useLogin, usePrivy} from "@privy-io/react-auth";
 
 const Header: React.FC = () => {
+  const { authenticated } = usePrivy();
   const navigate = useNavigate();
 
   const handleTwitterClick = () => {
@@ -17,9 +19,22 @@ const Header: React.FC = () => {
       window.open('https://nyko.cool', '_blank');
   }
 
+  const handleLogin = () => {
+      try {
+          login();
+      } catch (error) {
+          console.error("login Twitter failed:", error);
+      }
+  };
+
   const handleActivityClick = () => {
-      navigate('/activity');
+      if (authenticated) {
+          navigate('/primedatas1');
+      } else {
+          handleLogin();
+      }
   }
+  const { login } = useLogin();
 
   return (
     <header className={styles.header}>
