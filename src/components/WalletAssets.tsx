@@ -112,7 +112,7 @@ const WalletAssets: React.FC<WalletAssetsProps> = ({ walletAddress }) => {
               }
             />
             <span className={styles.tokenName}>
-              {token.name || token.symbol || "Unknown Token"}
+              {token.symbol || token.name || "Unknown Token"}
             </span>
           </div>
           <div className={styles.tokenBalance}>

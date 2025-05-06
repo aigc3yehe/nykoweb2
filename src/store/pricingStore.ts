@@ -99,59 +99,6 @@ const initialState: PricingState = {
 // 创建定价状态原子
 export const pricingAtom = atom<PricingState>(initialState);
 
-// 获取当前计划
-export const getCurrentPlan = atom((get) => {
-  const pricingState = get(pricingAtom);
-  const plans = pricingState.plans;
-  const currentPlanId = pricingState.currentPlanId;
-
-  return plans.find((plan) => plan.id === currentPlanId) || plans[0];
-});
-
-// 检查是否为当前计划
-export const isPlanCurrent = atom((get) => (planId: string) => {
-  const pricingState = get(pricingAtom);
-  return pricingState.currentPlanId === planId;
-});
-
-// 订阅计划
-export const subscribeToPlan = atom(null, async (get, set, planId: string) => {
-  const pricingState = get(pricingAtom);
-
-  // 设置加载状态
-  set(pricingAtom, {
-    ...pricingState,
-    isLoading: true,
-    error: null,
-  });
-
-  try {
-    // 这里将来会添加实际的订阅逻辑，例如API调用
-    console.log(`Subscribing to plan: ${planId}`);
-
-    // 模拟API调用延迟
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // 更新当前计划
-    set(pricingAtom, {
-      ...pricingState,
-      currentPlanId: planId,
-      isLoading: false,
-    });
-
-    return true;
-  } catch (error) {
-    // 处理错误
-    set(pricingAtom, {
-      ...pricingState,
-      isLoading: false,
-      error: (error as Error).message,
-    });
-
-    return false;
-  }
-});
-
 // 从账户状态同步角色/计划
 export const syncPlanWithAccount = atom(null, (get, set) => {
   const accountState = get(accountAtom);

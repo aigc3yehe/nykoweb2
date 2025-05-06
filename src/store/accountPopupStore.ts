@@ -7,6 +7,7 @@ export interface AccountPopupState {
     username?: string;
     profilePictureUrl?: string;
     walletAddress?: string;
+    plan?: string;
   };
   anchorPosition: DOMRect | null;
   onExport: () => void;
@@ -35,4 +36,4 @@ export const showAccountPopupAtom = atom(
   (get, set, update: Partial<AccountPopupState>) => {
     set(accountPopupAtom, { ...get(accountPopupAtom), ...update, open: true });
   }
-); 
+);

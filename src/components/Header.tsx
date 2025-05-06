@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
 import XIcon from '../assets/x.svg';
 import DocIcon from '../assets/doc.svg';
+import DiscordIcon from '../assets/discord.svg';
 import S1ActivityIcon from '../assets/s1_activity.svg';
 import LoginButton from './LoginButton';
 import {useLogin, usePrivy} from "@privy-io/react-auth";
@@ -10,6 +11,10 @@ import {useLogin, usePrivy} from "@privy-io/react-auth";
 const Header: React.FC = () => {
   const { authenticated } = usePrivy();
   const navigate = useNavigate();
+
+  const handleDiscordClick = () => {
+      window.open('https://discord.gg/3aEQun7TBC', '_blank');
+  }
 
   const handleTwitterClick = () => {
       window.open('https://x.com/niyoko_agent', '_blank');
@@ -46,9 +51,14 @@ const Header: React.FC = () => {
         <h1 className={styles.title}>NYKO</h1>
       </div>
       <div className={styles.actionSection}>
+        {/* Discord按钮 */}
+        <button className={styles.iconButton} onClick={handleDiscordClick}>
+          <img src={DiscordIcon} alt="discord" className={styles.discordIcon}/>
+        </button>
+
         {/* X按钮 */}
         <button className={styles.iconButton} onClick={handleTwitterClick}>
-          <img src={XIcon} alt="Close" className={styles.twitterIcon}/>
+          <img src={XIcon} alt="x" className={styles.twitterIcon}/>
         </button>
 
         {/* Doc按钮 */}

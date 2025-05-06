@@ -20,6 +20,7 @@ interface AccountPopupProps {
     username ?: string;
     profilePictureUrl?: string;
     walletAddress?: string;
+    plan?: string;
   };
   anchorPosition?: DOMRect | null;
 }
@@ -36,7 +37,7 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  
+
   // 使用 useLogout hook 实现带回调的登出功能
   const { logout } = useLogout({
     onSuccess: () => {
@@ -107,10 +108,17 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
               <div className={styles.userNameRow}>
                 <div className={styles.userNameContainer}>
                   <span className={styles.userName}>{formatName(userData.name)}</span>
-                  <div className={styles.premiumBadge}>
-                    <img src={GoldIcon} alt="Free" width="14" height="14" />
-                    <span className={styles.premiumText}>Free</span>
-                  </div>
+                  {userData.plan === "Premium" ? (
+                      <div className={styles.premiumBadge}>
+                        <img src={GoldIcon} alt="Premium" width="14" height="14" />
+                        <span className={styles.premiumText}>Premium</span>
+                      </div>
+                  ) : (
+                      <div className={styles.freeBadge}>
+                        <span className={styles.freeText}>Free</span>
+                      </div>
+                  )}
+
                 </div>
                 <button
                   className={styles.closeButton}
