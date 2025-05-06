@@ -1,14 +1,18 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './ActivitySidebar.module.css';
 import {useAtom} from 'jotai';
-// import { activityAtom } from '../store/activityStore';
+import {activityAtom, fetchCurrentPoints, fetchPointsHistory, setDid} from '../store/activityStore';
 import {accountAtom} from '../store/accountStore';
 import TwitterIcon from '../assets/twitter.svg';
 import {useLogin, usePrivy} from "@privy-io/react-auth";
 
 const ActivitySidebar: React.FC = () => {
-  // const [activityState] = useAtom(activityAtom);
+  const [activityState] = useAtom(activityAtom);
   const [accountState] = useAtom(accountAtom);
+  const [, getPoints] = useAtom(fetchCurrentPoints);
+  const [, getPointsHistory] = useAtom(fetchPointsHistory);
+  const [, setUserDid] = useAtom(setDid);
+  const { isLoading, error } = activityState;
 
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -19,8 +23,29 @@ const ActivitySidebar: React.FC = () => {
   const customScrollbarRef = useRef<HTMLDivElement>(null);
 
   const { authenticated } = usePrivy();
+  const { login } = useLogin({
+    onComplete: async ({ user }) => {
+      console.log("login success", user);
 
-  const { login } = useLogin();
+      // 如果有用户信息，则调用用户创建API
+      if (user) {
+        await setUserDid({
+          did: user.id
+        });
+      }
+    },
+    onError: (error) => {
+      console.error("login failed", error);
+    },
+  });
+
+  // 获取积分数据
+  useEffect(() => {
+    if (authenticated && accountState.did) {
+      getPoints(accountState.did);
+      getPointsHistory(accountState.did);
+    }
+  }, [authenticated, accountState.did, getPoints, getPointsHistory]);
 
   const handleLogin = async () => {
     try {
@@ -126,170 +151,93 @@ const ActivitySidebar: React.FC = () => {
                 </div>
                 <div className={styles.userInfo}>
                   <div className={styles.nameRow}>
-                    <span className={styles.name}>{accountState.twitter?.name || accountState.name || '用户'}</span>
+                    <span className={styles.name}>{accountState.twitter?.name || accountState.name || 'User'}</span>
                     <img src={TwitterIcon} alt="Twitter" className={styles.twitterIcon} />
                   </div>
-                  <span className={styles.username}>@{accountState.twitter?.username || '未绑定推特'}</span>
+                  <span className={styles.username}>@{accountState.twitter?.username || 'Unlink X'}</span>
                 </div>
               </div>
 
-              {/* 第一组列表卡片 - 本周积分 */}
-              <div className={styles.listCard}>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Points Of This Week</span>
-                  <span className={styles.valueHighlight}>50,000</span>
-                </div>
-              </div>
+              {/* 本周积分卡片 - 从API获取数据 */}
+              {isLoading ? (
+                  <div className={styles.loadingState}>Loading ...</div>
+              ) : error ? (
+                  <div className={styles.errorState}>{error}</div>
+              ): (
+                  <>
+                    <div className={styles.listCard}>
+                      <div className={styles.keyValuePair}>
+                        <span className={styles.keyTitle}>Points Of This Week</span>
+                        <span className={styles.valueHighlight}>
+                    {activityState.currentPoints?.points || 0}
+                  </span>
+                      </div>
+                    </div>
 
-              {/* 第二组列表卡片 - 两对 key-values */}
-              <div className={styles.listCard}>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>GENI</span>
-                  <span className={styles.valueText}>x1</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>EpochFlow</span>
-                  <span className={styles.valueText}>x2</span>
-                </div>
-              </div>
+                    {/* 模型使用情况卡片 */}
+                    <div className={styles.listCard}>
+                      <div className={styles.keyValuePair}>
+                        <span className={styles.keyTitle}>GENI</span>
+                        <span className={styles.valueText}>
+                    x{activityState.currentPoints?.geni || 0}
+                  </span>
+                      </div>
+                      <div className={styles.divider}></div>
+                      <div className={styles.keyValuePair}>
+                        <span className={styles.keyTitle}>EpochFlow</span>
+                        <span className={styles.valueText}>
+                    x{activityState.currentPoints?.ef || 0}
+                  </span>
+                      </div>
+                    </div>
 
-              {/* 第三组列表卡片 - 三对 key-values */}
-              <div className={styles.listCard}>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Award History</span>
-                  <span className={styles.valueText}>2</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 1</span>
-                  <span className={styles.valueText}>3,000 $NYKO</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 2</span>
-                  <span className={styles.valueText}>2,000 $NYKO</span>
-                </div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Award History</span>
-                  <span className={styles.valueText}>2</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 1</span>
-                  <span className={styles.valueText}>3,000 $NYKO</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 2</span>
-                  <span className={styles.valueText}>2,000 $NYKO</span>
-                </div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Award History</span>
-                  <span className={styles.valueText}>2</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 1</span>
-                  <span className={styles.valueText}>3,000 $NYKO</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 2</span>
-                  <span className={styles.valueText}>2,000 $NYKO</span>
-                </div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Award History</span>
-                  <span className={styles.valueText}>2</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 1</span>
-                  <span className={styles.valueText}>3,000 $NYKO</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 2</span>
-                  <span className={styles.valueText}>2,000 $NYKO</span>
-                </div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Award History</span>
-                  <span className={styles.valueText}>2</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 1</span>
-                  <span className={styles.valueText}>3,000 $NYKO</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 2</span>
-                  <span className={styles.valueText}>2,000 $NYKO</span>
-                </div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Award History</span>
-                  <span className={styles.valueText}>2</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 1</span>
-                  <span className={styles.valueText}>3,000 $NYKO</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 2</span>
-                  <span className={styles.valueText}>2,000 $NYKO</span>
-                </div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Award History</span>
-                  <span className={styles.valueText}>2</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 1</span>
-                  <span className={styles.valueText}>3,000 $NYKO</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 2</span>
-                  <span className={styles.valueText}>2,000 $NYKO</span>
-                </div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Award History</span>
-                  <span className={styles.valueText}>2</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 1</span>
-                  <span className={styles.valueText}>3,000 $NYKO</span>
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.keyValuePair}>
-                  <span className={styles.keyTitle}>Week 2</span>
-                  <span className={styles.valueText}>2,000 $NYKO</span>
-                </div>
-              </div>
+                    {/* 赛季积分历史卡片 */}
+                    {activityState.pointsHistory.length > 0 && (
+                        <div className={styles.listCard}>
+                          <div className={styles.keyValuePair}>
+                            <span className={styles.keyTitle}>Award History</span>
+                            <span className={styles.valueText}>
+                      {activityState.pointsHistory.length}
+                    </span>
+                          </div>
+
+                          {activityState.pointsHistory.map((record, index) => (
+                              <React.Fragment key={index}>
+                                <div className={styles.divider}></div>
+                                <div className={styles.keyValuePair}>
+                        <span className={styles.keyTitle}>
+                          Week {record.season || index + 1}
+                        </span>
+                                  <span className={styles.valueText}>
+                          {record.points || 0} $NYKO
+                        </span>
+                                </div>
+                              </React.Fragment>
+                          ))}
+                        </div>
+                    )}
+                  </>
+              )}
 
             </>
           )}
         </div>
-
-
       </div>
+
       {/* 自定义滚动条 */}
       {showCustomScrollbar && (
-          <div className={styles.scrollbarTrack}>
-            <div
-              ref={customScrollbarRef}
-              className={styles.scrollbarThumb}
-              style={{
-                height: `${getScrollThumbHeight()}px`,
-                top: `${getScrollThumbTop()}px`
-              }}
-              onMouseDown={handleScrollThumbDrag}
-            />
-          </div>
-        )}
+        <div className={styles.scrollbarTrack}>
+          <div
+            ref={customScrollbarRef}
+            className={styles.scrollbarThumb}
+            style={{
+              height: `${getScrollThumbHeight()}px`,
+              top: `${getScrollThumbTop()}px`
+            }}
+            onMouseDown={handleScrollThumbDrag}
+          />
+        </div>
+      )}
     </div>
   );
 };

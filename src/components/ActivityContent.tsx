@@ -1,8 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import styles from './ActivityContent.module.css';
-import {useAtom} from 'jotai';
-import {activityAtom} from '../store/activityStore';
 import BackIcon from '../assets/back.svg';
 import ReactMarkdown from 'react-markdown';
 
@@ -46,8 +44,6 @@ Points = GENI × EF × Cooldown
 
 const ActivityContent: React.FC = () => {
   const navigate = useNavigate();
-  const [activityState] = useAtom(activityAtom);
-  const { activities, isLoading, error } = activityState;
 
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -62,10 +58,11 @@ const ActivityContent: React.FC = () => {
     navigate('/');
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const CustomLink = ({ node, href, children, ...props}: any) => {
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
-      
+
       if (href && href.startsWith('/')) {
         navigate(href);
       } else if (href){
@@ -103,7 +100,7 @@ const ActivityContent: React.FC = () => {
         container.removeEventListener('scroll', updateScrollInfo);
       }
     };
-  }, [activities]);
+  }, []);
 
   // 处理自定义滚动条拖动
   const handleScrollThumbDrag = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -174,20 +171,13 @@ const ActivityContent: React.FC = () => {
             </div>
 
             {/* 内容区域 */}
-            {isLoading ? (
-              <div className={styles.loadingState}>Loading activities...</div>
-            ) : error ? (
-              <div className={styles.errorState}>{error}</div>
-            ) : (
-              <div className={styles.markdownContent}>
-                <ReactMarkdown
-                  components={{
-                    a: CustomLink,
-                  }}>
-                  {markdownContent}
-                </ReactMarkdown>
-              </div>
-            )}
+            <div className={styles.markdownContent}>
+              <ReactMarkdown components={{
+                a: CustomLink,
+              }}>
+                {markdownContent}
+              </ReactMarkdown>
+            </div>
           </div>
         </div>
 

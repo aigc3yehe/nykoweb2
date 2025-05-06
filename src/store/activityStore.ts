@@ -1,185 +1,154 @@
 import { atom } from 'jotai';
-// import { accountAtom } from './accountStore';
 
-// 定义活动类型
-export interface Activity {
-  id: string;
-  name: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  reward: string;
-  isActive: boolean;
-  isParticipating?: boolean;
-  progress?: number;
+// 添加积分相关接口
+export interface SeasonPoints {
+  points: number;
+  geni: number;
+  ef: number;
+  cd: number;
+}
+
+export interface PointsHistory {
+  points?: number;
+  season?: number;
 }
 
 // 定义活动状态接口
 export interface ActivityState {
-  activities: Activity[];
   isLoading: boolean;
   error: string | null;
+  currentPoints: SeasonPoints | null;
+  pointsHistory: PointsHistory[];
+  did: string | null;
 }
 
 // 初始活动状态
 const initialState: ActivityState = {
-  activities: [
-    {
-      id: 'activity-1',
-      name: 'Image Generation Challenge',
-      description: 'Create unique AI-generated images and share them on X with the #NykoS1 hashtag to earn rewards.',
-      startDate: '2023-09-15T00:00:00Z',
-      endDate: '2023-10-15T23:59:59Z',
-      reward: '100 $NYKO per selected image',
-      isActive: true,
-      isParticipating: false,
-      progress: 0
-    },
-    {
-      id: 'activity-2',
-      name: 'Model Training Competition',
-      description: 'Train a custom model with our platform and submit it for review. The best models will be featured and rewarded.',
-      startDate: '2023-09-20T00:00:00Z',
-      endDate: '2023-10-20T23:59:59Z',
-      reward: '5,000 $NYKO',
-      isActive: true,
-      isParticipating: true,
-      progress: 40
-    },
-    {
-      id: 'activity-3',
-      name: 'Community Feedback Program',
-      description: 'Provide valuable feedback on our platform features and earn rewards for helping us improve.',
-      startDate: '2023-09-10T00:00:00Z',
-      endDate: '2023-10-10T23:59:59Z',
-      reward: '50-500 $NYKO based on contribution',
-      isActive: false,
-      isParticipating: false,
-      progress: 0
-    }
-  ],
   isLoading: false,
-  error: null
+  error: null,
+  currentPoints: null,
+  pointsHistory: [],
+  did: null
 };
 
 // 创建活动状态原子
 export const activityAtom = atom<ActivityState>(initialState);
 
-// 获取活动列表
-export const fetchActivities = atom(
+// 获取当前赛季积分
+export const fetchCurrentPoints = atom(
   null,
-  async (get, set) => {
+  async (get, set, did?: string) => {
     const activityState = get(activityAtom);
-    // const accountState = get(accountAtom);
-    
-    // 设置加载状态
+
+    if (!did) return null;
+
     set(activityAtom, {
       ...activityState,
       isLoading: true,
       error: null
     });
-    
+
     try {
-      // 这里将来会添加实际的API调用
-      console.log('Fetching activities');
-      
-      // 模拟API调用延迟
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 更新状态
+      const response = await fetch(`/studio-api/points?user=${did}`, {
+          headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+          }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch points');
+      }
+
+      const data = await response.json();
+
+      const currentActivityState = get(activityAtom);
       set(activityAtom, {
-        ...activityState,
-        activities: activityState.activities,
+        ...currentActivityState,
+        currentPoints: data.data,
         isLoading: false
       });
-      
-      return activityState.activities;
+
+      return data.data;
     } catch (error) {
-      // 处理错误
+      const currentActivityState = get(activityAtom);
       set(activityAtom, {
-        ...activityState,
+        ...currentActivityState,
         isLoading: false,
         error: (error as Error).message
       });
-      
+
+      return null;
+    }
+  }
+);
+
+// 获取积分历史记录
+export const fetchPointsHistory = atom(
+  null,
+  async (get, set, did?: string) => {
+    const activityState = get(activityAtom);
+
+    if (!did) return [];
+
+    set(activityAtom, {
+      ...activityState,
+      isLoading: true,
+      error: null
+    });
+
+    try {
+      const response = await fetch(`/studio-api/points/list?user=${did}`, {
+          headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+          }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch points history');
+      }
+
+      const data = await response.json();
+
+      const currentActivityState = get(activityAtom);
+      set(activityAtom, {
+        ...currentActivityState,
+        pointsHistory: data.data,
+        isLoading: false
+      });
+
+      return data.data;
+    } catch (error) {
+      const currentActivityState = get(activityAtom);
+      set(activityAtom, {
+        ...currentActivityState,
+        isLoading: false,
+        error: (error as Error).message
+      });
+
       return [];
     }
   }
 );
 
-// 参与活动
-export const joinActivity = atom(
-  null,
-  async (get, set, activityId: string) => {
-    const activityState = get(activityAtom);
-    
-    // 设置加载状态
-    set(activityAtom, {
-      ...activityState,
-      isLoading: true,
-      error: null
-    });
-    
-    try {
-      // 模拟API调用
-      console.log(`Joining activity: ${activityId}`);
-      
-      // 模拟API调用延迟
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 更新活动参与状态
-      const updatedActivities = activityState.activities.map(activity => 
-        activity.id === activityId 
-          ? { ...activity, isParticipating: true } 
-          : activity
-      );
-      
-      // 更新状态
+// 6. 修改setUserInfo操作，在did更新时检查连接状态
+export const setDid = atom(
+    null,
+    async (get, set, params: { did?: string }) => {
+      const { did } = params;
+      const activityState = get(activityAtom);
+      const prevDid = activityState.did;
+
+      // 更新用户信息
       set(activityAtom, {
         ...activityState,
-        activities: updatedActivities,
-        isLoading: false
+        did: did || null
       });
-      
-      return true;
-    } catch (error) {
-      // 处理错误
-      set(activityAtom, {
-        ...activityState,
-        isLoading: false,
-        error: (error as Error).message
-      });
-      
-      return false;
+
+      // 如果did从null/undefined变成有值，则检查连接状态
+      if ((!prevDid || prevDid === '') && did) {
+        console.log('user is login success, check connection status:', prevDid);
+        set(fetchCurrentPoints);
+        set(fetchPointsHistory)
+      }
     }
-  }
-);
-
-// 更新活动进度
-export const updateActivityProgress = atom(
-  null,
-  (get, set, { activityId, progress }: { activityId: string; progress: number }) => {
-    const activityState = get(activityAtom);
-    
-    // 更新活动进度
-    const updatedActivities = activityState.activities.map(activity => 
-      activity.id === activityId 
-        ? { ...activity, progress } 
-        : activity
-    );
-    
-    // 更新状态
-    set(activityAtom, {
-      ...activityState,
-      activities: updatedActivities
-    });
-  }
-);
-
-// 获取用户参与的活动
-export const getUserActivities = atom(
-  (get) => {
-    const activityState = get(activityAtom);
-    return activityState.activities.filter(activity => activity.isParticipating);
-  }
 );

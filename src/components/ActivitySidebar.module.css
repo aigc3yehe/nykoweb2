@@ -361,6 +361,22 @@
   cursor: not-allowed;
 }
 
+/* 加载、错误和空状态 */
+.loadingState, .errorState, .emptyState {
+  width: 100%;
+  padding: 3rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #88A4C2;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.errorState {
+  color: #EF4444;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .activitySidebar {
