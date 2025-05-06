@@ -20,6 +20,7 @@ import ERC20Abi from "../abi/IERC20.json";
 import { showToastAtom } from "../store/imagesStore";
 import { getStakedInfo, stakeStateAtom } from "../store/stakeStore";
 import { publicClient } from "../providers/wagmiConfig";
+import { alchemyStateAtom, getTokensForOwner } from "../store/alchemyStore";
 
 // 定义价格套餐类型
 const Pricing: React.FC = () => {
@@ -32,6 +33,8 @@ const Pricing: React.FC = () => {
   const [stakeState] = useAtom(stakeStateAtom);
   const [, fetchStakedInfo] = useAtom(getStakedInfo);
   const setOperationLoadingFn = useSetAtom(setOperationLoading);
+  const [alchemyState] = useAtom(alchemyStateAtom);
+  const [, fetchTokens] = useAtom(getTokensForOwner);
 
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -152,6 +155,35 @@ const Pricing: React.FC = () => {
           });
           setOperationLoadingFn(false);
           return;
+        }
+        const nikoBalance =
+          alchemyState.tokens?.tokens?.find((token) => token.symbol === "NYKO")
+            ?.balance || "0";
+        if (Number(nikoBalance) < stakeConfig.defaultAmoount) {
+          const tokens = await fetchTokens({
+            addressOrName: client.account?.address as `0x${string}`,
+            options: {
+              contractAddresses: [
+                stakeConfig.nikoTokenAddress as `0x${string}`,
+              ],
+            },
+          });
+          const nikoToken = tokens.tokens?.find(
+            (token) => token.symbol === "NYKO"
+          );
+          if (
+            !nikoToken ||
+            Number(nikoToken.balance || 0) < stakeConfig.defaultAmoount
+          ) {
+            showToast({
+              message: `Not enough $NYKO token to stake, need ${
+                stakeConfig.defaultAmoount
+              } $NYKO, current ${nikoToken?.balance || 0} $NYKO`,
+              severity: "error",
+            });
+            setOperationLoadingFn(false);
+            return;
+          }
         }
         const allowance = await publicClient.readContract({
           address: stakeConfig.nikoTokenAddress as `0x${string}`,
