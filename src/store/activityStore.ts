@@ -15,12 +15,18 @@ export interface PointsHistory {
   season?: number;
 }
 
+export interface RewardsHistory {
+  reward?: number;
+  season?: number;
+}
+
 // 定义活动状态接口
 export interface ActivityState {
   isLoading: boolean;
   error: string | null;
   currentPoints: SeasonPoints | null;
   pointsHistory: PointsHistory[];
+  rewardsHistory: RewardsHistory[];
   did: string | null;
 }
 
@@ -30,6 +36,7 @@ const initialState: ActivityState = {
   error: null,
   currentPoints: null,
   pointsHistory: [],
+  rewardsHistory: [],
   did: null,
 };
 
@@ -129,6 +136,56 @@ export const fetchPointsHistory = atom(null, async (get, set, did?: string) => {
     return [];
   }
 });
+
+// Fetch token rewards history
+export const fetchRewardsHistory = atom(
+  null,
+  async (get, set, did?: string) => {
+    const activityState = get(activityAtom);
+
+    if (!did) return [];
+
+    set(activityAtom, {
+      ...activityState,
+      isLoading: true,
+      error: null,
+    });
+
+    try {
+      const privyToken = await getAccessToken();
+      const response = await fetch(`/studio-api/points/rewards?user=${did}`, {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          [PRIVY_TOKEN_HEADER]: privyToken || "",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch points history");
+      }
+
+      const data = await response.json();
+
+      const currentActivityState = get(activityAtom);
+      set(activityAtom, {
+        ...currentActivityState,
+        pointsHistory: data.data,
+        isLoading: false,
+      });
+
+      return data.data;
+    } catch (error) {
+      const currentActivityState = get(activityAtom);
+      set(activityAtom, {
+        ...currentActivityState,
+        isLoading: false,
+        error: (error as Error).message,
+      });
+
+      return [];
+    }
+  }
+);
 
 // 6. 修改setUserInfo操作，在did更新时检查连接状态
 export const setDid = atom(null, async (get, set, params: { did?: string }) => {

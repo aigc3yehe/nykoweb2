@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './ActivitySidebar.module.css';
 import {useAtom} from 'jotai';
-import {activityAtom, fetchCurrentPoints, fetchPointsHistory, setDid} from '../store/activityStore';
+import {activityAtom, fetchCurrentPoints, fetchRewardsHistory, setDid} from '../store/activityStore';
 import {accountAtom} from '../store/accountStore';
 import TwitterIcon from '../assets/twitter.svg';
 import {useLogin, usePrivy} from "@privy-io/react-auth";
@@ -10,7 +10,8 @@ const ActivitySidebar: React.FC = () => {
   const [activityState] = useAtom(activityAtom);
   const [accountState] = useAtom(accountAtom);
   const [, getPoints] = useAtom(fetchCurrentPoints);
-  const [, getPointsHistory] = useAtom(fetchPointsHistory);
+  // const [, getPointsHistory] = useAtom(fetchPointsHistory);
+  const [, getRewardsHistory] = useAtom(fetchRewardsHistory);
   const [, setUserDid] = useAtom(setDid);
   const { isLoading, error } = activityState;
 
@@ -43,9 +44,9 @@ const ActivitySidebar: React.FC = () => {
   useEffect(() => {
     if (authenticated && accountState.did) {
       getPoints(accountState.did);
-      getPointsHistory(accountState.did);
+      getRewardsHistory(accountState.did);
     }
-  }, [authenticated, accountState.did, getPoints, getPointsHistory]);
+  }, [authenticated, accountState.did, getPoints, getRewardsHistory]);
 
   const handleLogin = async () => {
     try {
@@ -192,16 +193,16 @@ const ActivitySidebar: React.FC = () => {
                     </div>
 
                     {/* 赛季积分历史卡片 */}
-                    {activityState.pointsHistory.length > 0 && (
+                    {activityState.rewardsHistory.length > 0 && (
                         <div className={styles.listCard}>
                           <div className={styles.keyValuePair}>
                             <span className={styles.keyTitle}>Award History</span>
                             <span className={styles.valueText}>
-                      {activityState.pointsHistory.length}
+                      {activityState.rewardsHistory.length}
                     </span>
                           </div>
 
-                          {activityState.pointsHistory.map((record, index) => (
+                          {activityState.rewardsHistory.map((record, index) => (
                               <React.Fragment key={index}>
                                 <div className={styles.divider}></div>
                                 <div className={styles.keyValuePair}>
@@ -209,7 +210,7 @@ const ActivitySidebar: React.FC = () => {
                           Week {record.season || index + 1}
                         </span>
                                   <span className={styles.valueText}>
-                          {record.points || 0} $NYKO
+                          {record.reward || 0} $NYKO
                         </span>
                                 </div>
                               </React.Fragment>
