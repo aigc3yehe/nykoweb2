@@ -1086,7 +1086,7 @@ export async function fetchConnectionStatus(userUuid: string, betaMode: boolean)
 // 6. 修改setUserInfo操作，在did更新时检查连接状态
 export const setUserInfo = atom(
   null,
-  async (get, set, params: { uuid: string, did?: string }) => {
+  async (get, set, params: { uuid: string | undefined | null, did?: string }) => {
     const { uuid, did } = params;
     const chatState = get(chatAtom);
     const prevDid = chatState.did;
@@ -1094,15 +1094,12 @@ export const setUserInfo = atom(
     // 更新用户信息
     set(chatAtom, {
       ...chatState,
-      userUuid: uuid,
+      userUuid: uuid || "",
       did: did
     });
 
-    // 如果did从null/undefined变成有值，则检查连接状态
-    if ((!prevDid || prevDid === '') && did) {
-      console.log('user is login success, check connection status:', prevDid);
-      set(checkConnectionStatus);
-    }
+    console.log('user is login success, check connection status:', prevDid);
+    set(checkConnectionStatus);
   }
 );
 

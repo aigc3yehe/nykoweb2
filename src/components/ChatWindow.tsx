@@ -22,7 +22,7 @@ import {showDialogAtom} from '../store/dialogStore';
 import {useLogin, usePrivy} from '@privy-io/react-auth';
 
 interface ChatWindowProps {
-  uuid: string;
+  uuid: string | undefined | null;
   did?: string;
 }
 
