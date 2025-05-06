@@ -125,14 +125,14 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
     // 如果当前进入到模型详情，则添加Base Model 和 LoraName标签
     if (chatState.currentModel && chatState.task_type === 'generation') {
       const models = chatState.currentModel?.model_tran || []
-      if (models.length > 0 && models[0].base_model_hash){
-        baseTags.push({
-          id: 'base_model',
-          text: 'Base Model',
-          type: 'normal',
-          value: models[0].base_model_hash || undefined
-        })
-      }
+      // if (models.length > 0 && models[0].base_model_hash){
+      //   baseTags.push({
+      //     id: 'base_model',
+      //     text: 'Base Model',
+      //     type: 'normal',
+      //     value: models[0].base_model_hash || undefined
+      //   })
+      // }
       if (models.length > 0 && models[0].lora_name && chatState.task_type === 'generation'){
         baseTags.push({
           id: 'lora_name',

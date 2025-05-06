@@ -113,7 +113,7 @@ const initialState: ChatState = {
     inQueue: false
   },
   heartbeatId: undefined,
-  loraWeight: 0.9,
+  loraWeight: 0.5,
   betaMode: false // 初始化为false
 };
 
@@ -475,6 +475,8 @@ export const sendMessage = atom(
       // 构建完整的API URL
       const API_URL = `${apiPrefix}/chat`;
 
+      const lora_weight = 0.75 + (chatState.loraWeight || 0) * 0.25
+
       // 发送请求到API
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -494,7 +496,7 @@ export const sendMessage = atom(
           width,
           height,
           lora_name,
-          lora_weight: chatState.loraWeight
+          lora_weight: lora_weight
         }),
       });
 

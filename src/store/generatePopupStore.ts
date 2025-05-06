@@ -28,7 +28,7 @@ const initialState: GeneratePopupState = {
   selectedAspectRatio: aspectRatios[0], // 默认选择第一个宽高比
   resultAspectRatio: aspectRatios[0], // 生图结果的宽高比
   prompt: '', // 默认提示词为空
-  loraWeight: 0.9, // 默认lora权重为0.9
+  loraWeight: 0.5, // 默认lora权重为0.9: 0.75 + 0.5 * 0.25
   isGenerating: false,
   isCompleted: false,
   did: null, // 默认did为null，即未登录状态
@@ -50,7 +50,7 @@ export const showGeneratePopupAtom = atom(
       did,
       imageUrl: '',
       prompt: '',
-      loraWeight: 0.9,
+      loraWeight: 0.5,
       isGenerating: false
     });
   }
@@ -298,7 +298,8 @@ export const generate = atom(
       const did = currentState.did || undefined;
 
       // 发送生成请求
-      const response = await generateRequest(prompt, did, model_id, width, height, lora_name, loraWeight);
+      const weight = 0.75 + loraWeight * 0.25
+      const response = await generateRequest(prompt, did, model_id, width, height, lora_name, weight);
       console.log('generate Request:', response);
 
       const task_id = response.data.task_id;
