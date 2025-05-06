@@ -6,6 +6,7 @@ export interface PricingFeature {
   title: string;
   subtitle?: string;
   supported: boolean;
+  link?: string;
 }
 
 // Define stake token on chain config
@@ -42,7 +43,7 @@ const initialState: PricingState = {
       id: "free",
       name: "Free",
       price: "0 $NYKO",
-      description: "For expert-level AI players",
+      description: "For starter AI players",
       features: [
         {
           title: "Up to 5 images per day",
@@ -74,6 +75,7 @@ const initialState: PricingState = {
           title: "1 Model Training Available",
           subtitle: "Application Required",
           supported: true,
+          link: "https://discord.com/channels/1368843355362164786/1368986279319961600"
         },
         {
           title: "eligible for Primedata rewards",

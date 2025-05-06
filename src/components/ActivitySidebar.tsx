@@ -1,9 +1,10 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import styles from './ActivitySidebar.module.css';
-import { useAtom } from 'jotai';
+import {useAtom} from 'jotai';
 // import { activityAtom } from '../store/activityStore';
-import { accountAtom } from '../store/accountStore';
+import {accountAtom} from '../store/accountStore';
 import TwitterIcon from '../assets/twitter.svg';
+import {useLogin, usePrivy} from "@privy-io/react-auth";
 
 const ActivitySidebar: React.FC = () => {
   // const [activityState] = useAtom(activityAtom);
@@ -16,6 +17,18 @@ const ActivitySidebar: React.FC = () => {
 
   const sidebarRef = useRef<HTMLDivElement>(null);
   const customScrollbarRef = useRef<HTMLDivElement>(null);
+
+  const { authenticated } = usePrivy();
+
+  const { login } = useLogin();
+
+  const handleLogin = async () => {
+    try {
+      login();
+    } catch (error) {
+      console.error("login Twitter failed:", error);
+    }
+  };
 
   // 更新滚动状态
   useEffect(() => {
@@ -54,9 +67,7 @@ const ActivitySidebar: React.FC = () => {
       if (sidebarRef.current) {
         const deltaY = moveEvent.clientY - startY;
         const scrollRatio = deltaY / clientHeight;
-        const newScrollTop = startScrollTop + scrollRatio * scrollHeight;
-
-        sidebarRef.current.scrollTop = newScrollTop;
+        sidebarRef.current.scrollTop = startScrollTop + scrollRatio * scrollHeight;
         setScrollTop(sidebarRef.current.scrollTop);
       }
     };
@@ -91,10 +102,18 @@ const ActivitySidebar: React.FC = () => {
           ref={sidebarRef}
           className={`${styles.scrollContainer} ${styles.hideScrollbar}`}
         >
-          {!accountState.did ? (
-            <div className={styles.notLoggedIn}>
-              <p>请登录以查看您的活动参与状态</p>
-            </div>
+          {!authenticated || !accountState.did ? (
+              <div className={styles.emptyHistory}>
+                <div className={styles.loginRequired}>
+                  <p>Please log in first</p>
+                  <button
+                      className={styles.loginButton}
+                      onClick={handleLogin}
+                  >
+                    Login
+                  </button>
+                </div>
+              </div>
           ) : (
             <>
               {/* 用户推特信息卡片 */}
@@ -102,7 +121,7 @@ const ActivitySidebar: React.FC = () => {
                 <div className={styles.avatar}>
                   <img
                     src={accountState.twitter?.profilePictureUrl || '/default-avatar.png'}
-                    alt="用户头像"
+                    alt="avatar"
                   />
                 </div>
                 <div className={styles.userInfo}>

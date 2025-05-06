@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect, useRef, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import styles from './ActivityContent.module.css';
-import { useAtom } from 'jotai';
-import { activityAtom } from '../store/activityStore';
+import {useAtom} from 'jotai';
+import {activityAtom} from '../store/activityStore';
 import BackIcon from '../assets/back.svg';
 import ReactMarkdown from 'react-markdown';
 
@@ -99,9 +99,7 @@ const ActivityContent: React.FC = () => {
       if (contentRef.current) {
         const deltaY = moveEvent.clientY - startY;
         const scrollRatio = deltaY / clientHeight;
-        const newScrollTop = startScrollTop + scrollRatio * scrollHeight;
-
-        contentRef.current.scrollTop = newScrollTop;
+        contentRef.current.scrollTop = startScrollTop + scrollRatio * scrollHeight;
         setScrollTop(contentRef.current.scrollTop);
       }
     };
@@ -153,8 +151,8 @@ const ActivityContent: React.FC = () => {
               </div>
 
               <div className={styles.tagsGroup}>
-                <div className={styles.tagItem}>Week 3 (5.4-5.11)</div>
-                <div className={styles.tagItem}>Rewards: 350,000 $NYKO</div>
+                <div className={styles.tagItem}>Week 1 (5.7-5.13)</div>
+                <div className={styles.tagItem}>Rewards: 1,500,000 $NYKO</div>
               </div>
             </div>
 

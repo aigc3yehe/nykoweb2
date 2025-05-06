@@ -1,26 +1,25 @@
-import { useEffect, useRef, useState } from 'react';
-import { useAtom } from 'jotai';
+import {useEffect, useRef, useState} from 'react';
+import {useAtom} from 'jotai';
 import styles from './ChatWindow.module.css';
 import clearIcon from '../assets/clear.svg';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
+import {accountAtom} from "../store/accountStore";
 import {
-  chatAtom,
   addImage,
-  removeImage,
-  clearChat,
-  setUserInfo,
+  chatAtom,
   checkConnectionStatus,
+  clearChat,
+  finishUploadImages,
+  removeImage,
+  sendMessage,
+  setUserInfo,
   startHeartbeat,
   stopHeartbeat,
-  finishUploadImages,
-  sendMessage,
   toggleBetaMode
 } from '../store/chatStore';
-import { showDialogAtom } from '../store/dialogStore';
-import { usePrivy } from '@privy-io/react-auth';
-import { useLoginWithOAuth } from '@privy-io/react-auth';
-import { accountAtom } from '../store/accountStore';
+import {showDialogAtom} from '../store/dialogStore';
+import {useLogin, usePrivy} from '@privy-io/react-auth';
 
 interface ChatWindowProps {
   uuid: string;
@@ -52,26 +51,31 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
   const customScrollbarRef = useRef<HTMLDivElement>(null);
 
   const { authenticated } = usePrivy();
-  const { initOAuth, loading: loginLoading } = useLoginWithOAuth({
+
+  const { login } = useLogin({
     onComplete: async ({ user }) => {
-      console.log('login success', user);
+      console.log("login success", user);
+
+      // 如果有用户信息，则调用用户创建API
       if (user) {
-        setUserInfoAction({
+        await setUserInfoAction({
           uuid,
           did: user.id
         });
       }
     },
     onError: (error) => {
-      console.error('login failed', error);
-    }
+      console.error("login failed", error);
+    },
   });
 
   const handleLogin = async () => {
     try {
-      await initOAuth({ provider: 'twitter' });
+      // 使用Twitter作为OAuth提供者
+      // await initOAuth({ provider: 'twitter' });
+      login();
     } catch (error) {
-      console.error('logging twitter:', error);
+      console.error("login Twitter failed:", error);
     }
   };
 
@@ -144,9 +148,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
       if (messagesContainerRef.current) {
         const deltaY = moveEvent.clientY - startY;
         const scrollRatio = deltaY / clientHeight;
-        const newScrollTop = startScrollTop + scrollRatio * scrollHeight;
-
-        messagesContainerRef.current.scrollTop = newScrollTop;
+        messagesContainerRef.current.scrollTop = startScrollTop + scrollRatio * scrollHeight;
         setScrollTop(messagesContainerRef.current.scrollTop);
       }
     };
@@ -260,9 +262,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
                 <button
                   className={styles.loginButton}
                   onClick={handleLogin}
-                  disabled={loginLoading}
                 >
-                  {loginLoading ? 'Logging...' : 'Login'}
+                  Login
                 </button>
               </div>
             </div>
