@@ -57,6 +57,11 @@
   background: rgba(55, 65, 81, 0.3); /* #3741514D */
 }
 
+.dexscreenerIcon {
+  width: 0.84rem; /* 13px */
+  height: 1rem; /* 16px */
+}
+
 .discordIcon {
   width: 1rem; /* 16px */
   height: 1rem; /* 16px */

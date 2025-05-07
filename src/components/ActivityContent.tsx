@@ -28,15 +28,17 @@ Project Primedata S1 marks the launch phase of NYKO, a 12-week incentive program
 
 ## Reward Calculation
 
-Generation Rewards
-
-Each image earns points calculated as:
-
-Points = GENI × EF × Cooldown
+Generation Points = GENI × EF × Cooldown
 
 - GENI (AI Creator Score): Currently fixed at 1.
 - EF (EpochFlow): 2 if you created something yesterday, otherwise 1.
-- Cooldown: After 3 generation in a single day, value becomes 0; otherwise 1. Reset to 1 every 24h.
+- Cooldown: After 3 generations in a single day, value becomes 0; otherwise 1. Reset to 1 every 24h.
+
+Mindshare Points = GENI × IF × Cooldown_X
+
+- GENI (AI Creator Score): Currently fixed at 1.
+- IF (Influence Factor): 1~3, depends on the social influence of your tweets.
+- Cooldown_X: Every day, we select the most influential tweet for pointing.
 `;
 
 const ActivityContent: React.FC = () => {
@@ -162,7 +164,7 @@ const ActivityContent: React.FC = () => {
               </div>
 
               <div className={styles.tagsGroup}>
-                <div className={styles.tagItem}>Week 1 (5.7-5.13)</div>
+                <div className={styles.tagItem}>Week 1 (5.6-5.12)</div>
                 <div className={styles.tagItem}>Rewards: 1,500,000 $NYKO</div>
               </div>
             </div>

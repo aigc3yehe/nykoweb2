@@ -4,6 +4,7 @@ import styles from './Header.module.css';
 import XIcon from '../assets/x.svg';
 import DocIcon from '../assets/doc.svg';
 import DiscordIcon from '../assets/discord.svg';
+import DEXScreenerIcon from '../assets/DEXScreener.svg';
 import S1ActivityIcon from '../assets/s1_activity.svg';
 import LoginButton from './LoginButton';
 import {useLogin, usePrivy} from "@privy-io/react-auth";
@@ -11,6 +12,10 @@ import {useLogin, usePrivy} from "@privy-io/react-auth";
 const Header: React.FC = () => {
   const { authenticated } = usePrivy();
   const navigate = useNavigate();
+
+  const handleDexscreenerClick = () => {
+      window.open('https://dexscreener.com/base/0xbf2351085f543ff623441c4330d145f94f513542', '_blank');
+  }
 
   const handleDiscordClick = () => {
       window.open('https://discord.gg/3aEQun7TBC', '_blank');
@@ -51,6 +56,11 @@ const Header: React.FC = () => {
         <h1 className={styles.title}>NYKO</h1>
       </div>
       <div className={styles.actionSection}>
+        {/* Dexscreener 按钮 */}
+        <button className={styles.iconButton} onClick={handleDexscreenerClick}>
+          <img src={DEXScreenerIcon} alt="dexscreener" className={styles.dexscreenerIcon}/>
+        </button>
+
         {/* Discord按钮 */}
         <button className={styles.iconButton} onClick={handleDiscordClick}>
           <img src={DiscordIcon} alt="discord" className={styles.discordIcon}/>
