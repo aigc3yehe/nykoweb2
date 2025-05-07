@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useAtom} from 'jotai';
 import styles from './ChatWindow.module.css';
 import clearIcon from '../assets/clear.svg';
@@ -16,21 +16,19 @@ import {
   setUserInfo,
   startHeartbeat,
   stopHeartbeat,
-  toggleBetaMode
+  toggleBetaMode,
+  agree
 } from '../store/chatStore';
 import {showDialogAtom} from '../store/dialogStore';
 import {useLogin, usePrivy} from '@privy-io/react-auth';
 
-interface ChatWindowProps {
-  uuid: string | undefined | null;
-  did?: string;
-}
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
+const ChatWindow: React.FC = () => {
   const [chatState] = useAtom(chatAtom);
   const [accountState] = useAtom(accountAtom);
   const [, addImageAction] = useAtom(addImage);
   const [, finishUploadImagesAction] = useAtom(finishUploadImages);
+  const [, agreeAction] = useAtom(agree);
   const [, removeImageAction] = useAtom(removeImage);
   const [, clearChatAction] = useAtom(clearChat);
   const [, setUserInfoAction] = useAtom(setUserInfo);
@@ -52,22 +50,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
 
   const { authenticated } = usePrivy();
 
-  const { login } = useLogin({
-    onComplete: async ({ user }) => {
-      console.log("login success", user);
-
-      // 如果有用户信息，则调用用户创建API
-      if (user) {
-        await setUserInfoAction({
-          uuid,
-          did: user.id
-        });
-      }
-    },
-    onError: (error) => {
-      console.error("login failed", error);
-    },
-  });
+  const { login } = useLogin();
 
   const handleLogin = async () => {
     try {
@@ -83,8 +66,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
 
   // 设置用户ID
   useEffect(() => {
-    setUserInfoAction({ uuid, did });
-  }, [uuid, did, setUserInfoAction]);
+    const uuid = accountState.twitter?.subject;
+    const wallet_address = accountState.walletAddress || undefined;
+    const did = accountState.did || undefined;
+    setUserInfoAction({ uuid, did, wallet_address });
+  }, [accountState, setUserInfoAction]);
 
   // 更新滚动状态
   useEffect(() => {
@@ -255,7 +241,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
           ref={messagesContainerRef}
           className={`${styles.messagesContainer} ${styles.hideScrollbar}`}
         >
-          {!authenticated || !did ? (
+          {!authenticated || !accountState.did ? (
             <div className={styles.emptyMessages}>
               <div className={styles.loginRequired}>
                 <p>Please login to start chatting with Niyoko</p>
@@ -325,9 +311,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
                 imageWidth={message.imageInfo?.width || 256}
                 imageHeight={message.imageInfo?.height || 256}
                 request_id={message.request_id}
+                agree={message.agree}
                 onAddImage={() => addImageAction(index, 30 - (message.uploadedFiles?.length || 0))}
                 onConfirmImages={() => finishUploadImagesAction(index)}
                 onRemoveImage={(url) => removeImageAction({ messageIndex: index, fileUrl: url })}
+                onAgree={() => agreeAction(index)}
               />
             ))
           )}
@@ -358,7 +346,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ uuid, did }) => {
       </div>
 
       {/* 底部输入区域组件 */}
-      <ChatInput isLoading={chatState.isLoading || chatState.isGenerating} disabled={!authenticated || !did || !isActive || uploading} />
+      <ChatInput isLoading={chatState.isLoading || chatState.isGenerating} disabled={!authenticated || !accountState.did || !isActive || uploading} />
     </div>
   );
 };

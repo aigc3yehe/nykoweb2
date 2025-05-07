@@ -4,6 +4,8 @@ import imageIcon from '../assets/image.svg';
 import closeIcon from '../assets/close.svg';
 import uploadingIcon from '../assets/uploading.svg';
 import okIcon from '../assets/ok.svg';
+import checkAgreeIcon from '../assets/check_agree.svg';
+import checkedAgreeIcon from '../assets/checked_agree.svg';
 
 interface ImageUploadState {
   totalCount: number;
@@ -15,13 +17,14 @@ interface ImageUploadState {
 export interface ChatMessageProps {
   role: 'user' | 'assistant' | 'system';
   content: string;
-  type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image';
+  type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image' | 'tokenization_agreement';
   imageUploadState?: ImageUploadState;
   uploadedFiles?: Array<{name: string, url: string}>;
   modelParam?: {
     modelName?: string;
     description?: string;
   };
+  agree?: boolean;
   images?: string[];
   imageWidth?: number;
   imageHeight?: number;
@@ -29,6 +32,7 @@ export interface ChatMessageProps {
   onAddImage?: () => void;
   onConfirmImages?: () => void;
   onRemoveImage?: (url: string) => void;
+  onAgree?: () => void;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -38,13 +42,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   imageUploadState = { totalCount: 0, uploadedCount: 0, isUploading: false, finishUpload: false },
   uploadedFiles = [],
   modelParam = { modelName: undefined, description: undefined },
+  agree = false,
   images = [],
   imageWidth = 256,
   imageHeight = 256,
   request_id = '',
   onAddImage,
   onConfirmImages,
-  onRemoveImage
+  onRemoveImage,
+  onAgree,
 }) => {
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
@@ -69,6 +75,57 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           Generating image, please wait...
         </span>
       </div>
+    );
+  };
+
+  // 处理文本中的链接
+  const processContent = (content: string) => {
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const parts = content.split(linkRegex);
+    const result = [];
+
+    for (let i = 0; i < parts.length; i += 3) {
+      if (i + 2 < parts.length) {
+        // 添加链接前的文本
+        if (parts[i]) {
+          result.push(<span key={`text-${i}`}>{parts[i]}</span>);
+        }
+        // 添加链接
+        result.push(
+          <a
+            key={`link-${i}`}
+            href={parts[i + 2]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.contentLink}
+          >
+            {parts[i + 1]}
+          </a>
+        );
+      } else {
+        // 添加剩余的文本
+        result.push(<span key={`text-${i}`}>{parts[i]}</span>);
+      }
+    }
+
+    return result;
+  };
+
+  // 更新 renderTokenizationAgreementComponent
+  const renderTokenizationAgreementComponent = () => {
+    return (
+        <button
+          className={`${styles.agreeButton} ${agree ? styles.disabled : ''}`}
+          onClick={onAgree}
+          disabled={agree}
+        >
+          <img
+            src={agree ? checkedAgreeIcon : checkAgreeIcon}
+            alt="Agree"
+            className={styles.agreeButtonIcon}
+          />
+          I Have Read And Agree
+        </button>
     );
   };
 
@@ -225,13 +282,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   return (
     <div className={`${styles.messageContainer} ${styles[role]}`}>
       <div className={styles.messageContent}>
-        <p className={styles.text}>{content}</p>
+        {type === 'tokenization_agreement' ? (
+          <p className={styles.text}>{processContent(content)}</p>
+        ) : (
+          <p className={styles.text}>{content}</p>
+        )}
       </div>
 
       {role === 'assistant' && type === 'upload_image' && renderUploadImageComponent()}
       {role === 'assistant' && type === 'model_config' && renderModelConfigComponent()}
       {role === 'assistant' && type === 'generate_result' && renderGenerateResultComponent()}
       {role === 'assistant' && type === 'generating_image' && renderGeneratingImageComponent()}
+      {role === 'assistant' && type === 'tokenization_agreement' && renderTokenizationAgreementComponent()}
     </div>
   );
 };

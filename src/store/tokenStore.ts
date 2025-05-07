@@ -13,7 +13,7 @@ export type ModelTokenizationStateResponse = {
 
 // 任务进入队列, 但是还未执行
 export type JobStateResponse = {
-  state?: string; // waiting / failed / active 
+  state?: string; // waiting / failed / active
 };
 
 // 任务开始执行, 并且已经发送给 Flaunch API
@@ -81,7 +81,7 @@ export interface Metadata {
 export interface TokenizationConfig {
   creator: string; // 模型的创建者地址, privy生成的钱包地址
   network?: number; // 默认是8453, 测试时可以使用84532
-  method?: 'flaunch_api'; 
+  method?: 'flaunch_api';
   useOriginImage?: boolean; // 是否要利用 flaunch 的 api 将图片上传到ipfs
 }
 
@@ -111,7 +111,7 @@ export const fetchTokenizationState = atom(
       isLoading: true,
       error: null
     });
-    
+
     try {
       const params = new URLSearchParams({
         model_id: modelId.toString(),
@@ -122,19 +122,19 @@ export const fetchTokenizationState = atom(
           'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
         }
       });
-      
+
       if (!response.ok) {
-        throw new Error('获取 token 化状态失败');
+        throw new Error('get token state failed');
       }
-      
+
       const result: ModelTokenizationStateResponse = await response.json();
-      
+
       set(tokenizationStateAtom, {
         data: result.data || null,
         isLoading: false,
         error: null
       });
-      
+
       return result;
     } catch (error) {
       set(tokenizationStateAtom, {
@@ -142,7 +142,7 @@ export const fetchTokenizationState = atom(
         isLoading: false,
         error: (error as Error).message
       });
-      
+
       throw error;
     }
   }
@@ -166,7 +166,7 @@ export const isTokenizationCompleted = atom(
   (get) => {
     const state = get(tokenizationStateAtom);
     if (!state.data) return false;
-    
+
     // 检查是否是 FlaunchStatusResponse 类型
     const data = state.data as FlaunchStatusResponse;
     return data.state === 'completed' && !!data.collectionToken;
@@ -178,13 +178,13 @@ export const getTokenAddress = atom(
   (get) => {
     const state = get(tokenizationStateAtom);
     if (!state.data) return null;
-    
+
     // 检查是否是 FlaunchStatusResponse 类型且已完成
     const data = state.data as FlaunchStatusResponse;
     if (data.state === 'completed' && data.collectionToken) {
       return data.collectionToken.address;
     }
-    
+
     return null;
   }
 );
@@ -208,11 +208,11 @@ export const tokenizeModel = atom(
           config
         })
       });
-      
+
       if (!response.ok) {
         throw new Error('模型 token 化失败');
       }
-      
+
       const result: ModelTokenizationResponse = await response.json();
       return result;
     } catch (error) {
@@ -220,7 +220,7 @@ export const tokenizeModel = atom(
         ...initialTokenizationState,
         error: (error as Error).message
       });
-      
+
       throw error;
     }
   }
@@ -246,11 +246,11 @@ export const retryTokenization = atom(
           }
         })
       });
-      
+
       if (!response.ok) {
         throw new Error('模型 token 化重试失败');
       }
-      
+
       const result: ModelTokenizationResponse = await response.json();
       return result;
     } catch (error) {
@@ -258,7 +258,7 @@ export const retryTokenization = atom(
         ...initialTokenizationState,
         error: (error as Error).message
       });
-      
+
       throw error;
     }
   }
@@ -289,11 +289,11 @@ export const setModelFlag = atom(
           user,
         })
       });
-      
+
       if (!response.ok) {
         throw new Error('设置模型标识失败');
       }
-      
+
       const result: FlagResponse = await response.json();
       return result;
     } catch (error) {

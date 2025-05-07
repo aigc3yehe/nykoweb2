@@ -16,6 +16,7 @@ import {ModelDetail} from '../store/modelStore';
 import {showToastAtom} from "../store/imagesStore.ts";
 import SwapWidgetCustom from './SwapWidgetCustom.tsx';
 import { usePrivy } from '@privy-io/react-auth';
+import {setModelStatus} from "../store/chatStore.ts";
 
 interface TokenizationPanelProps {
   model: ModelDetail;
@@ -31,6 +32,8 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
   const fetchState = useSetAtom(fetchTokenizationState);
   const setTokenizationFlag = useSetAtom(setModelFlag);
   const retryTokenize = useSetAtom(retryTokenization);
+
+  const setModelStatusInChat = useSetAtom(setModelStatus);
 
   const [isInitiating, setIsInitiating] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -62,6 +65,29 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
           return model.creator.substring(0, 6) + '...' + model.creator.substring(model.creator.length - 4);
       }
   };
+
+  // 监听当前模型变化，更新聊天存储中的当前模型(模型Ready的时候才更新)
+  useEffect(() => {
+      const data = tokenizationState.data
+      if (data) {
+          setModelStatusInChat("tokenized")
+      } else {
+          if (!status.isReady) {
+              setModelStatusInChat("not_ready")
+              return;
+          }
+          if (isFlag) {
+              setModelStatusInChat("registered")
+              return;
+          }
+          if (isShowToken) {
+              setModelStatusInChat("ready")
+              return;
+          }
+          setModelStatusInChat("not_ready")
+      }
+
+  }, [tokenizationState, setModelStatusInChat, status.isReady, isFlag, isShowToken]);
 
   // 定期检查 token 化状态
   useEffect(() => {

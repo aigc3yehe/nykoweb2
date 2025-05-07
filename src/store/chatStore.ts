@@ -3,7 +3,8 @@
 import { atom } from 'jotai';
 import { imageUploadAtom, setImageUploadStateAtom, updateMessageUrlsAtom, showToastAtom, uploadImages } from './imagesStore';
 import { ModelDetail } from './modelStore';
-import { fetchImages } from './imageStore'; // 添加这一行导入
+import { fetchImages } from './imageStore';
+import {fetchTokenizationState} from "./tokenStore.ts"; // 添加这一行导入
 
 // 添加宽高比相关接口
 export interface AspectRatio {
@@ -38,7 +39,7 @@ export interface TaskInfo {
 export interface Message {
   role: string;
   content: string;
-  type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image';
+  type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image' | 'tokenization_agreement';
   imageUploadState?: {
     totalCount: number;
     uploadedCount: number;
@@ -56,6 +57,7 @@ export interface Message {
     width: number;
     height: number;
   }
+  agree?: boolean;
 }
 
 // 1. 添加连接状态接口
@@ -77,6 +79,7 @@ export interface ChatState {
   error: string | null;
   userUuid: string;
   did?: string;
+  wallet_address?: string;
   urls: Array<{name: string, url: string}>;
   task_type?: string;
   task_value?: string;
@@ -85,6 +88,8 @@ export interface ChatState {
     description?: string;
   };
   currentModel?: ModelDetail | null;
+  modelStatus: string | null;
+  agree: boolean;
   selectedAspectRatio?: AspectRatio;
   activeTasks: Record<string, TaskInfo>;
   connection: ConnectionStatus; // 添加连接状态
@@ -101,11 +106,14 @@ const initialState: ChatState = {
   error: null,
   userUuid: '',
   did: '0x4272e3150A81B9735ccc58692f5dd3Cf73fB3B92', // 测试privy did
+  wallet_address: undefined,
   urls: [],
   task_type: 'chat',
   task_value: 'chat',
   modelParam: undefined,
   currentModel: null,
+  modelStatus: null,
+  agree: false,
   selectedAspectRatio: aspectRatios[0], // 默认选择1:1
   activeTasks: {},
   connection: {
@@ -435,6 +443,19 @@ export function updateUploadedState(messages: Message[], messageIndex: number, s
   });
 }
 
+// 更新同意状态
+export function updateAgreeState(messages: Message[], messageIndex: number) {
+  return messages.map((msg, index) => {
+    if (index === messageIndex && msg.type === 'tokenization_agreement') {
+      return {
+        ...msg,
+        agree: true,
+      };
+    }
+    return msg;
+  });
+}
+
 // ==== 操作函数 ====
 
 // 发送消息的操作
@@ -472,6 +493,21 @@ export const sendMessage = atom(
       // 获取当前模型的model_id
       const model_id = chatState.currentModel?.id;
 
+      // 获取当前模型的作者
+      const model_creator = chatState.currentModel?.creator;
+
+      const model_status = chatState.modelStatus
+
+      const model_name = chatState.currentModel?.name;
+
+      const model_cover = chatState.currentModel?.cover;
+
+      const model_description = chatState.currentModel?.description;
+
+      const agree = chatState.agree
+
+      const wallet_address = chatState.wallet_address
+
       // 构建完整的API URL
       const API_URL = `${apiPrefix}/chat`;
 
@@ -496,7 +532,14 @@ export const sendMessage = atom(
           width,
           height,
           lora_name,
-          lora_weight: lora_weight
+          lora_weight: lora_weight,
+          model_creator,
+          model_name,
+          model_cover,
+          model_description,
+          wallet_address,
+          model_status,
+          agree,
         }),
       });
 
@@ -580,14 +623,21 @@ export const sendMessage = atom(
         isGenerating = true;
       }
 
+      if (status === "tokenization_agreement" && task_type === 'tokenization') {
+        // "agreement": "tokenization_agreement",
+        // tokenization
+        messageType = 'tokenization_agreement';
+      }
+
       const receivedMessage: Message = {
         role: 'assistant',
         content: content,
-        type: messageType as 'text' | 'upload_image' | 'generating_image' | 'generate_result',
+        type: messageType as 'text' | 'upload_image' | 'generating_image' | 'generate_result' | 'tokenization_agreement',
         imageUploadState: messageType === 'upload_image'
           ? { totalCount: 0, uploadedCount: 0, isUploading: false, finishUpload: false }
           : undefined,
-        request_id: request_id || undefined
+        request_id: request_id || undefined,
+        agree: messageType === 'tokenization_agreement' ? agree : undefined,
       };
 
       // 更新消息历史 - 使用最新状态的消息列表
@@ -635,6 +685,12 @@ export const sendMessage = atom(
         pollImageGenerationTask(request_id, set, get).catch(err => {
           console.error('poll Image Generation Task Failed:', err);
         });
+      }
+
+      if (status === 'tokenization' && chatState.currentModel?.id) {
+        // 使用 fetchTokenizationState 重新加载Token状态
+        console.log('reset model images，model id:', chatState.currentModel.id);
+        set(fetchTokenizationState, { modelId: chatState.currentModel.id})
       }
     } catch (error) {
       console.error('Send Message Failed:', error);
@@ -837,6 +893,23 @@ export const addImage = atom(
 
     input.click();
   }
+);
+
+// 修改removeImage函数来处理model_config消息
+export const agree = atom(
+    null,
+    (get, set, messageIndex: number ) => {
+      const chatState = get(chatAtom);
+
+      // 更新同意协议情况
+      const updatedMessages = updateAgreeState(chatState.messages, messageIndex);
+
+      set(chatAtom, {
+        ...chatState,
+        messages: updatedMessages,
+        agree: true
+      });
+    }
 );
 
 // 修改removeImage函数来处理model_config消息
@@ -1088,8 +1161,8 @@ export async function fetchConnectionStatus(userUuid: string, betaMode: boolean)
 // 6. 修改setUserInfo操作，在did更新时检查连接状态
 export const setUserInfo = atom(
   null,
-  async (get, set, params: { uuid: string | undefined | null, did?: string }) => {
-    const { uuid, did } = params;
+  async (get, set, params: { uuid: string | undefined | null, did?: string, wallet_address?: string }) => {
+    const { uuid, did, wallet_address } = params;
     const chatState = get(chatAtom);
     const prevDid = chatState.did;
 
@@ -1097,7 +1170,8 @@ export const setUserInfo = atom(
     set(chatAtom, {
       ...chatState,
       userUuid: uuid || "",
-      did: did
+      did: did,
+      wallet_address: wallet_address
     });
 
     console.log('user is login success, check connection status:', prevDid);
@@ -1129,6 +1203,32 @@ export const clearCurrentModel = atom(
       currentModel: null
     });
   }
+);
+
+// 设置当前正在查看的模型详情
+export const setModelStatus = atom(
+    null,
+    (get, set, status: string | null) => {
+      const chatState = get(chatAtom);
+      console.log("current model status", status)
+      set(chatAtom, {
+        ...chatState,
+        modelStatus: status
+      });
+    }
+);
+
+// 清除当前模型详情（退出模型详情页时调用）
+export const clearModelStatus = atom(
+    null,
+    (get, set) => {
+      const chatState = get(chatAtom);
+
+      set(chatAtom, {
+        ...chatState,
+        modelStatus: null
+      });
+    }
 );
 
 // 添加设置宽高比的操作

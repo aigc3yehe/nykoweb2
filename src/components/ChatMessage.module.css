@@ -406,3 +406,46 @@
 }
 
 /* 使用现有的uploadingIcon样式，它已经有旋转动画 */
+
+/* 同意按钮样式 */
+.agreeButton {
+  width: 14.375rem; /* 230px */
+  height: 2.25rem; /* 36px */
+  gap: 0.25rem; /* 4px */
+  border-radius: 0.25rem; /* 4px */
+  background: #6366F1;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
+  cursor: pointer;
+}
+
+.agreeButton.disabled {
+  width: 14.375rem; /* 230px */
+  background: transparent;
+  border: 1px solid #3741514D;
+  color: #FFFFFF26;
+  cursor: not-allowed;
+}
+
+.agreeButtonIcon {
+  width: 1.25rem; /* 20px */
+  height: 1.25rem; /* 20px */
+}
+
+/* 链接样式 */
+.contentLink {
+  color: #6366F1;
+  text-decoration: underline;
+  cursor: pointer;
+}
