@@ -204,6 +204,13 @@
   background-color: #FACC15;
 }
 
+/* Dexscreener按钮 */
+.dexButton {
+  width: 2.25rem; /* 36px */
+  height: 2.25rem; /* 36px */
+  background-color: #FFFFFF;
+}
+
 .modelName {
   font-family: 'Jura', sans-serif;
   font-weight: 700;

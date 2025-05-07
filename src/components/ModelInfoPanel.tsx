@@ -8,6 +8,7 @@ import twitterSvg from '../assets/twitter.svg';
 import createSvg from '../assets/create.svg';
 import shareSvg from '../assets/share.svg';
 import coinsSvg from '../assets/coins.svg';
+import dexSvg from '../assets/dex.svg';
 import codeSvg from '../assets/code.svg';
 import { ModelDetail } from '../store/modelStore';
 import {
@@ -16,6 +17,7 @@ import {
 } from '../store/tokenStore';
 import {showToastAtom} from "../store/imagesStore.ts";
 import { usePrivy } from '@privy-io/react-auth';
+import { Link } from 'react-router-dom';
 
 interface ModelInfoPanelProps {
   model: ModelDetail;
@@ -260,6 +262,19 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
                 <img src={coinsSvg} alt="Token" className={styles.buttonIcon} />
               </button>
             )}
+
+            {/* Token按钮 - Dexscreener 跳转 */}
+            {
+              model?.model_tokenization?.meme_token && (
+                <Link target="_blank" to={`https://dexscreener.com/base/${model.model_tokenization.meme_token}`}>
+                  <button
+                    className={styles.dexButton}
+                >
+                    <img src={dexSvg} alt="Dexscreener" className={styles.buttonIcon} />
+                  </button>
+                </Link>
+              )
+            }
           </>
         ) : (
           <>
