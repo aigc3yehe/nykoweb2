@@ -211,6 +211,12 @@
   background-color: #FFFFFF;
 }
 
+.flaunchButton {
+  width: 2.25rem; /* 36px */
+  height: 2.25rem; /* 36px */
+  background-color: #E7692C;
+}
+
 .modelName {
   font-family: 'Jura', sans-serif;
   font-weight: 700;

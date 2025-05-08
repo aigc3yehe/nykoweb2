@@ -9,6 +9,7 @@ import createSvg from '../assets/create.svg';
 import shareSvg from '../assets/share.svg';
 import coinsSvg from '../assets/coins.svg';
 import dexSvg from '../assets/dex.svg';
+import flaunchIcon from '../assets/flaunch.png';
 import codeSvg from '../assets/code.svg';
 import { ModelDetail } from '../store/modelStore';
 import {
@@ -290,6 +291,18 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
                     className={styles.dexButton}
                 >
                     <img src={dexSvg} alt="Dexscreener" className={styles.buttonIcon} />
+                  </button>
+                </Link>
+              )
+            }
+            {/* Token按钮 - Flaunch 跳转 */}
+            {
+              model?.model_tokenization?.meme_token && (
+                <Link target="_blank" to={`https://flaunch.gg/base/coin/${model.model_tokenization.meme_token}`}>
+                  <button
+                    className={styles.flaunchButton}
+                >
+                    <img src={flaunchIcon} alt="Flaunch" className={styles.buttonIcon} />
                   </button>
                 </Link>
               )
