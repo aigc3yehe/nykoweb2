@@ -119,11 +119,13 @@ const SwapWidgetCustom = ({ token }: Props) => {
     type: "EXACT_IN" | "EXACT_OUT" | "SELL",
     amount: string
   ) => {
+    console.debug("[FLAUNCH]:", type, token.address);
     if (type === "EXACT_IN") {
       const data = await flaunchWrite?.readQuoter?.getBuyQuoteExactInput(
         token.address as `0x${string}`,
         parseEther(amount)
       );
+     
       const amountOutMin = getAmountWithSlippage(
         data,
         (parseFloat(slippage) / 100).toFixed(18).toString(),
