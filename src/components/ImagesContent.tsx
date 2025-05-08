@@ -40,6 +40,8 @@ const ImagesContent: React.FC<ImagesContentProps> = ({ ownedOnly }) => {
   const [card_width_px, setCardWidth] = useState(0);
   // 列间距
   const [, setColumnGap] = useState(0);
+  // 添加新状态来跟踪之前的容器高度
+  const [prevContainerHeight, setPrevContainerHeight] = useState(0);
 
   // 根据用户角色和ownedOnly决定view参数
   // 如果是用户自己的图片列表(ownedOnly=true)，不需要传view参数
@@ -50,6 +52,9 @@ const ImagesContent: React.FC<ImagesContentProps> = ({ ownedOnly }) => {
   // 计算瀑布流布局
   const calculateLayout = useCallback(() => {
     if (!containerRef.current) return;
+
+    // 保存之前的高度
+    setPrevContainerHeight(containerHeight);
 
     const containerWidth = containerRef.current.clientWidth;
 
@@ -84,12 +89,13 @@ const ImagesContent: React.FC<ImagesContentProps> = ({ ownedOnly }) => {
       columnHeights[minHeightColumn] += imageHeight + column_gap_px;
     });
 
-    // 更新容器高度为最高的列高度
-    setContainerHeight(Math.max(...columnHeights));
+    // 更新容器高度 - 如果是加载中，使用之前的高度和新计算的高度中的较大值
+    const newHeight = Math.max(...columnHeights);
+    setContainerHeight(isLoading ? Math.max(prevContainerHeight, newHeight) : newHeight);
 
     // 更新位置状态
     setImagePositions(positions);
-  }, [images]);
+  }, [images, isLoading, prevContainerHeight, containerHeight]);
 
   // 监听容器宽度变化
   useEffect(() => {
@@ -127,8 +133,8 @@ const ImagesContent: React.FC<ImagesContentProps> = ({ ownedOnly }) => {
         fetchImagesList({ reset: false, ownedOnly, view: viewParam });
       }
     }, {
-      root: scrollContainerRef.current,
-      rootMargin: '200px',
+      root: null,
+      rootMargin: '256px',
       threshold: 0.1
     });
 
@@ -181,12 +187,22 @@ const ImagesContent: React.FC<ImagesContentProps> = ({ ownedOnly }) => {
         </div>
       )}
 
-      {/* 加载更多触发元素 */}
-      <div ref={loadMoreTriggerRef} className={styles.loadMoreTrigger}></div>
-
-      {isLoading && (
-        <StatePrompt message="Loading Images..." showIcon={false} />
-      )}
+      {/* 修改加载更多触发器和加载状态显示 */}
+      <div 
+        className={styles.loadMoreArea} 
+        style={{ 
+          height: isLoading ? '5rem' : '1.25rem',
+          opacity: 1
+        }}
+      >
+        <div ref={loadMoreTriggerRef} className={styles.loadMoreTrigger}></div>
+        
+        {isLoading && (
+          <div className={styles.loadingIndicator}>
+            <StatePrompt message="Loading Images..." showIcon={false} />
+          </div>
+        )}
+      </div>
 
       {error && (
         <StatePrompt

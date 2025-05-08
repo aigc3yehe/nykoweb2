@@ -179,8 +179,8 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
         fetchImagesList({ reset: false, model_id: modelId, view: viewParam });
       }
     }, {
-      root: scrollContainerRef.current,
-      rootMargin: '200px',
+      root: null,
+      rootMargin: '256px',
       threshold: 0.1
     });
 

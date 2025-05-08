@@ -44,8 +44,8 @@ const ModelsContent: React.FC<ModelsContentProps> = ({ ownedOnly, sortOption, on
         fetchModelsList({ reset: false, ownedOnly, order, view: viewParam });
       }
     }, {
-      root: scrollContainerRef.current,
-      rootMargin: '100px', // 增加根元素边距，提前触发加载
+      root: null,
+      rootMargin: '256px', // 增加根元素边距，提前触发加载
       threshold: 0.1
     });
 
