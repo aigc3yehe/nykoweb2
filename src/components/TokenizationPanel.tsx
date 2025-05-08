@@ -78,16 +78,12 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
           }
           if (isFlag) {
               setModelStatusInChat("registered")
-              return;
-          }
-          if (isShowToken) {
+          } else {
               setModelStatusInChat("ready")
-              return;
           }
-          setModelStatusInChat("not_ready")
       }
 
-  }, [tokenizationState, setModelStatusInChat, status.isReady, isFlag, isShowToken]);
+  }, [tokenizationState, setModelStatusInChat, status.isReady, isFlag]);
 
   // 定期检查 token 化状态
   useEffect(() => {
@@ -309,7 +305,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
                 {
                   model?.model_tokenization?.deployer && (
-                    <>  
+                    <>
                     <div className={styles.tokenInfoItem}>
                       <span className={styles.tokenInfoLabel}>Deployer</span>
                       <div className={styles.addressContainer}>
@@ -352,6 +348,14 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
                 </div>
                 <div className={`${styles.rightIframeWrapper} Uniswap`}>
                   <SwapWidgetCustom token={token} />
+                    <div className="w-full flex-grow flex items-center justify-center justify-center bg-[#111827] min-h-[2.5rem]">
+                        <a href='https://x.com/flaunchgg'
+                           className="font-jura font-normal text-sm text-[#6366F1] underline"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            Powered by Flaunch SDK
+                        </a>
+                    </div>
                 </div>
             </div>
           </div>
