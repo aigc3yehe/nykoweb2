@@ -4,12 +4,16 @@ import { useAtom, useSetAtom } from 'jotai';
 import { fetchModelDetail, modelDetailAtom, clearModelDetail } from '../store/modelStore';
 import { fetchImages, imageListAtom } from '../store/imageStore';
 import {setCurrentModel, clearCurrentModel, clearModelStatus} from '../store/chatStore';
-
+import {
+  fetchTokenizationState,
+  tokenizationStateAtom,
+} from '../store/tokenStore';
 import ImageCard from './ImageCard';
 import ModelCarousel from './ModelCarousel';
 import ModelInfoPanel from './ModelInfoPanel';
 import StatePrompt from './StatePrompt';
 import TokenizationPanel from './TokenizationPanel';
+import {accountAtom} from "../store/accountStore.ts";
 
 interface ModelDetailProps {
   modelId: number;
@@ -18,18 +22,37 @@ interface ModelDetailProps {
 const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   const [modelDetailState] = useAtom(modelDetailAtom);
   const [imageListState] = useAtom(imageListAtom);
+  const [accountState] = useAtom(accountAtom);
   const fetchDetail = useSetAtom(fetchModelDetail);
   const fetchImagesList = useSetAtom(fetchImages);
   const clearDetail = useSetAtom(clearModelDetail);
-
+  const [tokenizationState] = useAtom(tokenizationStateAtom);
+  const { data } = tokenizationState;
+  const fetchState = useSetAtom(fetchTokenizationState);
   const setCurrentModelInChat = useSetAtom(setCurrentModel);
   const clearCurrentModelInChat = useSetAtom(clearCurrentModel);
   const clearModelStatusInChat = useSetAtom(clearModelStatus);
+  const [showBuyToken, setShowBuyToken] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'description' | 'tokenization'>('description');
 
   const { currentModel, isLoading, error } = modelDetailState;
-  const { images = [], isLoading: imagesLoading, error: imagesError, hasMore } = imageListState;
+  const { images: originalImages = [], isLoading: imagesLoading, error: imagesError, hasMore } = imageListState;
+
+  // 过滤重复ID的图片
+  const uniqueImageIds = new Set<number>();
+  const images = originalImages.filter(image => {
+    if (!uniqueImageIds.has(image.id)) {
+      uniqueImageIds.add(image.id);
+      return true;
+    }
+    return false;
+  });
+
+  // 根据用户角色决定view参数
+  // 如果是admin查看所有图片，不传view参数，显示所有图片
+  // 如果是普通用户查看所有图片，设置view=true，只显示可见的图片
+  const viewParam =  accountState.role === 'admin' ? undefined : true;
 
   // 图片瀑布流相关状态
   const [containerHeight, setContainerHeight] = useState(0);
@@ -45,7 +68,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     fetchDetail(modelId);
 
     // 加载与模型相关的图片
-    fetchImagesList({ reset: true, model_id: modelId });
+    fetchImagesList({ reset: true, model_id: modelId, view: viewParam });
 
     // 组件卸载时清除详情
     return () => {
@@ -53,7 +76,29 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
       clearCurrentModelInChat();
       clearModelStatusInChat();
     };
-  }, [modelId, fetchDetail, fetchImagesList, clearDetail, clearCurrentModelInChat, clearModelStatusInChat]);
+  }, [modelId, fetchDetail, fetchImagesList, clearDetail, clearCurrentModelInChat, clearModelStatusInChat, viewParam]);
+
+  // 定期检查 token 化状态
+  useEffect(() => {
+    // 首次加载时获取状态
+    fetchState({ modelId })
+  }, [fetchState, modelId]);
+
+  useEffect(() => {
+    // 修改 renderTokenizationStatus 函数中的完成状态部分
+    if (data) {
+      setShowBuyToken(true);
+      setActiveTab('tokenization')
+    } else{
+      setShowBuyToken(false);
+      setActiveTab('description');
+    }
+
+    return () => {
+      setActiveTab('description');
+      setShowBuyToken(false);
+    };
+  }, [data, setShowBuyToken, setActiveTab]);
 
   // 监听当前模型变化，更新聊天存储中的当前模型(模型Ready的时候才更新)
   useEffect(() => {
@@ -131,7 +176,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
 
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMore) {
-        fetchImagesList({ reset: false, model_id: modelId });
+        fetchImagesList({ reset: false, model_id: modelId, view: viewParam });
       }
     }, {
       root: scrollContainerRef.current,
@@ -140,7 +185,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     });
 
     if (node) observer.current.observe(node);
-  }, [imagesLoading, hasMore, fetchImagesList, modelId]);
+  }, [imagesLoading, hasMore, fetchImagesList, modelId, viewParam]);
 
   if (isLoading) {
     return (
@@ -189,17 +234,19 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
       {/* 2. Tab 部分 */}
       <div className={styles.tabSection}>
         <div className={styles.tabHeader}>
+          {showBuyToken && (
+              <button
+                  className={`${styles.tabButton} ${activeTab === 'tokenization' ? styles.activeTab : ''}`}
+                  onClick={() => setActiveTab('tokenization')}
+              >
+                Buy Token
+              </button>
+          )}
           <button
             className={`${styles.tabButton} ${activeTab === 'description' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('description')}
           >
             Description
-          </button>
-          <button
-            className={`${styles.tabButton} ${activeTab === 'tokenization' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('tokenization')}
-          >
-            Tokenization
           </button>
         </div>
 
@@ -213,7 +260,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
 
           <div
             className={styles.tokenizationContent}
-            style={{ display: activeTab === 'tokenization' ? 'block' : 'none' }}
+            style={{ display: activeTab === 'tokenization' && showBuyToken ? 'block' : 'none' }}
           >
             <TokenizationPanel model={currentModel}/>
           </div>
@@ -277,7 +324,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
             message="Failed to Load Images"
             action={{
               text: 'Retry',
-              onClick: () => fetchImagesList({ reset: false, model_id: modelId })
+              onClick: () => fetchImagesList({ reset: false, model_id: modelId, view: viewParam })
             }}
           />
         )}

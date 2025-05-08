@@ -81,13 +81,6 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
   }, [tokenizationState, setModelStatusInChat, status.isReady, isFlag]);
 
-  // 定期检查 token 化状态
-  useEffect(() => {
-    // 首次加载时获取状态
-    const modelId = model.id
-    fetchState({ modelId })
-  }, [fetchState, model]);
-
   const formatAddress = (address: string) => {
     if (!address) return '';
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
