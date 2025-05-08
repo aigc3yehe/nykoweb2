@@ -72,14 +72,10 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
       if (data) {
           setModelStatusInChat("tokenized")
       } else {
-          if (!status.isReady) {
-              setModelStatusInChat("not_ready")
-              return;
-          }
-          if (isFlag) {
-              setModelStatusInChat("registered")
-          } else {
+          if (status.isReady) {
               setModelStatusInChat("ready")
+          } else {
+              setModelStatusInChat("not_ready")
           }
       }
 
