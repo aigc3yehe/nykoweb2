@@ -259,11 +259,11 @@ const ChatWindow: React.FC = () => {
                 <div className={styles.welcomeContainer}>
                   <p className={styles.welcomeText}>You can train models and generate images simply by chatting with Niyoko.</p>
                   <div className={styles.quickOptions}>
-                    <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to train a model.')}>
-                      🧠 I want to train a model.
+                    <button className={styles.quickOptionButton} onClick={() => sendMessageAction('launch a token for this model.')}>
+                      🪙 launch a token for this model.
                     </button>
-                    <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to finetuning a model.')}>
-                      🧠 I want to finetuning a model.
+                    <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to FINETUNE a model.')}>
+                      🧠 I want to FINETUNE a model.
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to generate an image.')}>
                       🌄 I want to generate an image.

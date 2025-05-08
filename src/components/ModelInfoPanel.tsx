@@ -13,9 +13,10 @@ import codeSvg from '../assets/code.svg';
 import { ModelDetail } from '../store/modelStore';
 import {
   fetchTokenizationState,
-  setModelFlag
+  setModelFlag,
+  tokenizationStateAtom,
+  FlaunchStatusResponse
 } from '../store/tokenStore';
-import {showToastAtom} from "../store/imagesStore.ts";
 import { usePrivy } from '@privy-io/react-auth';
 import { Link } from 'react-router-dom';
 
@@ -25,10 +26,11 @@ interface ModelInfoPanelProps {
 
 const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   const [accountState] = useAtom(accountAtom);
-  const showToast = useSetAtom(showToastAtom);
   const showGeneratePopup = useSetAtom(showGeneratePopupAtom);
   const setTokenizationFlag = useSetAtom(setModelFlag);
   const fetchState = useSetAtom(fetchTokenizationState);
+  const [tokenizationState] = useAtom(tokenizationStateAtom);
+  const { data } = tokenizationState;
   const { user } = usePrivy();
 
   // 检查当前用户是否是模型创建者
@@ -129,31 +131,48 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
     showGeneratePopup(accountState.did, model);
   };
 
+  // 点击分享按钮触发x的分享
   const handleShare = () => {
-    // 获取当前页面URL
+    // 1. 获取当前页面URL并构建设模型链接
     const currentUrl = window.location.href;
+    const modelLinkUrl = new URL(currentUrl);
+    // 确保分享链接是模型详情页的基础链接，不包含其他可能存在的查询参数，然后添加模型ID和名称
+    const baseUrl = `${modelLinkUrl.protocol}//${modelLinkUrl.host}${modelLinkUrl.pathname}`;
+    const shareUrl = new URL(baseUrl);
+    shareUrl.searchParams.set('model_id', model.id.toString());
+    shareUrl.searchParams.set('model_name', model.name);
+    const modelLink = shareUrl.toString();
 
-    // 确保URL包含模型ID和名称参数
-    const url = new URL(currentUrl);
-    url.searchParams.set('model_id', model.id.toString());
-    url.searchParams.set('model_name', model.name);
 
-    // 复制到剪贴板
-    navigator.clipboard.writeText(url.toString())
-      .then(() => {
-        // 显示英文提示
-        showToast({
-          message: 'Link copied to clipboard! You can now share it with others.',
-          severity: 'success'
-        });
-      })
-      .catch(err => {
-        console.error('Failed to copy URL: ', err);
-        showToast({
-          message: 'Failed to copy link. Please try again.',
-          severity: 'error'
-        });
-      });
+
+    // 修改 renderTokenizationStatus 函数中的完成状态部分
+    let symbol = ""
+    if (data && 'success' in data && 'state' in data) {
+      // 如果是 FlaunchStatusResponse
+      const statusData = data as FlaunchStatusResponse;
+      if (statusData.state === 'completed' && statusData.collectionToken) {
+        symbol = statusData.collectionToken.symbol
+      }
+    }
+
+    console.log(symbol);
+
+    // 2. 根据是否有代币确定分享文本
+    let tweetText = '';
+    const modelName = model.name;
+
+    if (symbol) {
+      tweetText = `This style is insane!\n${modelName} is an amazing AI model I found on nyko.cool\nit even has its own token $${symbol}\nCome create and trade with me!\n${modelLink}`;
+    } else {
+      tweetText = `This style is insane!\n${modelName} is an amazing AI model I found on nyko.cool.\nCome create and mine with me!\n${modelLink}`;
+    }
+
+    // 3. 构建 Twitter Intent URL
+    const encodedTweetText = encodeURIComponent(tweetText);
+    const twitterUrl = `https://x.com/intent/post?text=${encodedTweetText}`;
+
+    // 4. 在新标签页中打开 Twitter 分享链接
+    window.open(twitterUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleToken = async () => {

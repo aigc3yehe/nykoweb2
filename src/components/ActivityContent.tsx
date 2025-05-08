@@ -18,7 +18,7 @@ Project Primedata S1 marks the launch phase of NYKO, a 12-week incentive program
 - Earn Generation Rewards
 
   Create images using NYKO AI image generation service.
-- [Coming Soon] Earn Mindshare Rewards
+- Earn Mindshare Rewards
 
   Share your creative outputs from the platform on X, or simply mention @niyoko_agent or $NYKO.
 
@@ -37,7 +37,7 @@ Generation Points = GENI × EF × Cooldown
 Mindshare Points = GENI × IF × Cooldown_X
 
 - GENI (AI Creator Score): Currently fixed at 1.
-- IF (Influence Factor): 1~3, depends on the social influence of your tweets.
+- IF (Influence Factor): 5~20, depends on the social influence of your tweets.
 - Cooldown_X: Every day, we select the most influential tweet for pointing.
 `;
 
