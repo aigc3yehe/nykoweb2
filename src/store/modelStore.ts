@@ -15,6 +15,7 @@ export interface ModelToken {
   meme_token?: string;
   metadata?: TokenMetadata;
   network?: number;
+  deployer?: string;
 }
 
 // 定义Model接口

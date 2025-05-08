@@ -307,6 +307,21 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
                 <div className={styles.tokenInfoDivider}></div>
 
+                {
+                  model?.model_tokenization?.deployer && (
+                    <>  
+                    <div className={styles.tokenInfoItem}>
+                      <span className={styles.tokenInfoLabel}>Deployer</span>
+                      <div className={styles.addressContainer}>
+                        <span className={styles.tokenInfoValue}>{model?.model_tokenization?.deployer}</span>
+                      </div>
+                    </div>
+
+                    <div className={styles.tokenInfoDivider}></div>
+                    </>
+                  )
+                }
+
                 <div className={styles.tokenInfoItem}>
                   <span className={styles.tokenInfoLabel}>Address</span>
                   <div className={styles.addressContainer}>
