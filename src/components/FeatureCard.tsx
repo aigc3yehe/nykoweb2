@@ -72,7 +72,7 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
           </div>
           <div className={styles.buttonContainer}>
             <button className={styles.featureButton} onClick={handleCreativityEconomyClick}>Creativity economy model &gt;</button>
-            <button className={styles.featureButton} onClick={handleApplyForAccessClick}>Apply for early access &gt;</button>
+            <button className={styles.featureButton} onClick={handleApplyForAccessClick} style={{ display: 'none' }}>Apply for early access &gt;</button>
           </div>
         </div>
       </div>
