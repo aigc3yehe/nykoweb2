@@ -72,7 +72,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, modelOwnerDid, onVisibilit
 
   const getScaledImageUrl = () => {
     const url = localImage.url
-    return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-446,q-95`
+    return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-335,q-90`
   }
 
   // 只有当图片有URL时才能点击查看详情

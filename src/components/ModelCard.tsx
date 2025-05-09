@@ -69,7 +69,7 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
   // 获取cover
   const getCoverUrl = () => {
     const cover = localModel.cover
-    return `https://ik.imagekit.io/xenoai/niyoko/${cover}?tr=w-446,h-458,q-95`
+    return `https://ik.imagekit.io/xenoai/niyoko/${cover}?tr=w-335,h-344,q-95`
   }
 
   // 获取可见性图标

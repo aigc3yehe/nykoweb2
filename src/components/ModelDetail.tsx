@@ -57,6 +57,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   // 图片瀑布流相关状态
   const [containerHeight, setContainerHeight] = useState(0);
   const [imagePositions, setImagePositions] = useState<{top: number, left: number, height: number}[]>([]);
+  const [galleryContainerWidth, setGalleryContainerWidth] = useState(0);
 
   // 引用
   const observer = useRef<IntersectionObserver | null>(null);
@@ -77,6 +78,29 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
       clearModelStatusInChat();
     };
   }, [modelId, fetchDetail, fetchImagesList, clearDetail, clearCurrentModelInChat, clearModelStatusInChat, viewParam]);
+
+  useEffect(() => {
+    const element = galleryContainerRef.current;
+    if (!element) {
+      return; // 如果元素不存在，则不执行任何操作
+    }
+
+    const observer = new ResizeObserver(entries => {
+      // 当 ResizeObserver 被触发时，更新 galleryContainerWidth
+      if (entries[0]) {
+        setGalleryContainerWidth(entries[0].contentRect.width);
+      }
+    });
+
+    observer.observe(element);
+    // 设置初始宽度
+    setGalleryContainerWidth(element.clientWidth);
+
+    return () => {
+      // 清理 observer
+      observer.unobserve(element);
+    };
+  }, []);
 
   // 定期检查 token 化状态
   useEffect(() => {
@@ -138,35 +162,18 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
       columnHeights[minHeightColumn] += imageHeight + columnGap;
     });
 
-    // 更新容器高度为最高的列高度
-    setContainerHeight(Math.max(...columnHeights));
-
-    // 更新位置状态
-    setImagePositions(positions);
-  }, [images]);
-
-  // 监听容器宽度变化
-  useEffect(() => {
-    const resizeObserver = new ResizeObserver(() => {
-      // 当容器大小变化时重新计算布局
-      if (galleryContainerRef.current) {
-        // const containerWidth = galleryContainerRef.current.clientWidth;
-        // const containerWidthRem = containerWidth / 16;
-
-        // 这里可以添加重新计算布局的逻辑，或者直接调用一个函数
-        // 为了简化，我们可以依赖于 images 依赖项更改，触发上面的 useEffect
-        setImagePositions([]); // 强制触发重新计算
-      }
-    });
-
-    if (galleryContainerRef.current) {
-      resizeObserver.observe(galleryContainerRef.current);
+    // 使用ref来跟踪上一次的高度，避免不必要的更新
+    const newContainerHeight = Math.max(...columnHeights);
+    if (Math.abs(newContainerHeight - containerHeight) > 0.1) { // 添加一个阈值判断
+      setContainerHeight(newContainerHeight);
     }
 
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
+    // 更新位置状态
+    const newImagePositions = positions;
+    if (JSON.stringify(newImagePositions) !== JSON.stringify(imagePositions)) {
+      setImagePositions(newImagePositions);
+    }
+  }, [images, galleryContainerWidth, containerHeight]);
 
   // 无限滚动的观察元素
   const loadMoreTriggerRef = useCallback((node: HTMLDivElement | null) => {

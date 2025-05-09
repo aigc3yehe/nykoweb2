@@ -4,6 +4,7 @@ import styles from './ChatWindow.module.css';
 import clearIcon from '../assets/clear.svg';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
+import GoldIcon from "../assets/gold.svg";
 import {accountAtom} from "../store/accountStore";
 import {
   addImage,
@@ -21,6 +22,7 @@ import {
 } from '../store/chatStore';
 import {showDialogAtom} from '../store/dialogStore';
 import {useLogin, usePrivy} from '@privy-io/react-auth';
+import {useNavigate} from "react-router-dom";
 
 
 const ChatWindow: React.FC = () => {
@@ -49,6 +51,7 @@ const ChatWindow: React.FC = () => {
   const customScrollbarRef = useRef<HTMLDivElement>(null);
 
   const { authenticated } = usePrivy();
+  const navigate = useNavigate();
 
   const { login } = useLogin();
 
@@ -122,6 +125,14 @@ const ChatWindow: React.FC = () => {
       cancelButtonColor: '#6366F1'
     });
   };
+
+  const handleStake = async () => {
+    if (!authenticated || !accountState.did) {
+      await handleLogin();
+    } else {
+      navigate('/pricing');
+    }
+  }
 
   // 处理自定义滚动条拖动
   const handleScrollThumbDrag = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -202,6 +213,16 @@ const ChatWindow: React.FC = () => {
 
   return (
     <div className={styles.chatWindow}>
+      {/* 活动title */}
+      <div className={styles.activityBanner}>
+        <div className={styles.activityInfo}>
+          <img src={GoldIcon} alt="Gold" className={styles.goldIcon} />
+          <span className={styles.activityText}>stake $NYKO. go premium. share 30M in rewards!</span>
+        </div>
+        <button className={styles.stakeButton} onClick={handleStake}>
+          Stake
+        </button>
+      </div>
       {/* 聊天标题栏 */}
       <div className={styles.chatHeader}>
         <div className={styles.headerTitle}>
