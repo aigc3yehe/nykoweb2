@@ -64,6 +64,11 @@ const initialState: ImageListState = {
 // 创建图片列表原子
 export const imageListAtom = atom<ImageListState>(initialState);
 
+// 记录上次刷新时间
+let lastRefreshTime = 0;
+// 刷新间隔时间（毫秒）
+const REFRESH_INTERVAL = 2 * 60 * 1000; // 2分钟
+
 // 获取图片列表
 export const fetchImages = atom(
   null,
@@ -85,17 +90,33 @@ export const fetchImages = atom(
 
     // 如果重置或者还有更多数据可加载
     if (reset || imageState.hasMore) {
-      // 设置为加载中
-      set(imageListAtom, {
-        ...imageState,
-        isLoading: true,
-        error: null,
-        // 如果是重置，则页码为1，否则保持当前页
-        page: reset ? 1 : imageState.page,
-        // 更新过滤条件
-        model_id,
-        state
-      });
+      if (reset && ownedOnly) {
+        const ownedImages = imageState.images.filter((image) => image.creator == accountState.did);
+        set(imageListAtom, {
+          ...imageState,
+          images: ownedImages,
+          isLoading: true,
+          error: null,
+          // 如果是重置，则页码为1，否则保持当前页
+          page: 1,
+          // 更新过滤条件
+          model_id,
+          state
+        });
+      } else {
+        // 设置为加载中
+        set(imageListAtom, {
+          ...imageState,
+          isLoading: true,
+          error: null,
+          // 如果是重置，则页码为1，否则保持当前页
+          page: reset ? 1 : imageState.page,
+          // 更新过滤条件
+          model_id,
+          state
+        });
+      }
+
 
       try {
         // 构建查询参数
@@ -138,6 +159,35 @@ export const fetchImages = atom(
 
         const result = await response.json();
 
+        // 检查是否有待处理的图片（state=0）
+        const hasPendingImages = result.data.images.some((image: Image) => image.state === 0);
+
+        // 如果有待处理的图片，并且距离上次刷新已经超过了设定的时间间隔，调用刷新接口
+        const now = Date.now();
+        if (hasPendingImages && (now - lastRefreshTime > REFRESH_INTERVAL)) {
+          // 更新最后刷新时间
+          lastRefreshTime = now;
+
+          // 不使用await，避免阻塞主流程
+          fetch('/studio-api/aigc/refresh', {
+            headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+            }
+          })
+            .then(refreshResponse => {
+              if (refreshResponse.ok) {
+                return refreshResponse.json();
+              }
+              console.error('refresh images failed');
+            })
+            .then(refreshResult => {
+              console.log('refresh images success', refreshResult.data);
+            })
+            .catch(refreshError => {
+              console.error('refresh images failed', refreshError);
+            });
+        }
+
         // 更新状态
         set(imageListAtom, {
           ...imageState,
@@ -159,44 +209,6 @@ export const fetchImages = atom(
   }
 );
 
-// 更改排序方式
-export const changeImageOrder = atom(
-  null,
-  (get, set, newOrder: ImageOrderType) => {
-    const state = get(imageListAtom);
-
-    set(imageListAtom, {
-      ...state,
-      order: newOrder,
-      page: 1, // 重置页码
-      images: [], // 清空当前图片列表
-      hasMore: true // 重置是否有更多数据
-    });
-
-    // 重新获取数据
-    // @ts-ignore
-    get(fetchImages)({ reset: true });
-  }
-);
-
-// 更改排序方向
-export const changeImageOrderDirection = atom(
-  null,
-  (get, set, newDirection: OrderDirection) => {
-    const state = get(imageListAtom);
-
-    set(imageListAtom, {
-      ...state,
-      desc: newDirection,
-      page: 1,
-      images: [],
-      hasMore: true
-    });
-
-    // @ts-ignore
-    get(fetchImages)({ reset: true });
-  }
-);
 
 // 按模型ID筛选
 export const filterByModelId = atom(
@@ -273,18 +285,18 @@ export const fetchImageDetail = async (imageId: number): Promise<ImageDetail> =>
     });
 
     if (!response.ok) {
-      throw new Error(`获取图片详情失败: ${response.statusText}`);
+      throw new Error(`fetchImageDetail error: ${response.statusText}`);
     }
 
     const result = await response.json();
 
     if (!result.data) {
-      throw new Error('图片详情数据格式无效');
+      throw new Error('fetchImageDetail empty');
     }
 
     return result.data;
   } catch (error) {
-    console.error('获取图片详情出错:', error);
+    console.error('fetchImageDetail error:', error);
     throw error;
   }
 };

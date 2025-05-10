@@ -87,15 +87,30 @@ export const fetchModels = atom(
 
     // 如果重置或者还有更多数据可加载
     if (reset || state.hasMore) {
-      // 设置为加载中
-      set(modelListAtom, {
-        ...state,
-        order: order as 'created_at' | 'usage',
-        isLoading: true,
-        error: null,
-        // 如果是重置，则页码为1，否则保持当前页
-        page: reset ? 1 : state.page
-      });
+      if (ownedOnly && reset) {
+        // 重置且切换为only owner
+
+        const ownedModels = state.models.filter(model => model.creator == accountState.did)
+        // 设置为加载中
+        set(modelListAtom, {
+          ...state,
+          models: ownedModels,
+          order: order as 'created_at' | 'usage',
+          isLoading: true,
+          error: null,
+          page: 1
+        });
+      } else {
+        // 设置为加载中
+        set(modelListAtom, {
+          ...state,
+          order: order as 'created_at' | 'usage',
+          isLoading: true,
+          error: null,
+          // 如果是重置，则页码为1，否则保持当前页
+          page: reset ? 1 : state.page
+        });
+      }
 
       try {
         // 构建查询参数
@@ -128,7 +143,7 @@ export const fetchModels = atom(
         });
 
         if (!response.ok) {
-          throw new Error('获取模型列表失败');
+          throw new Error('get models error');
         }
 
         const result = await response.json();

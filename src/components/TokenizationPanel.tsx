@@ -5,7 +5,6 @@ import {
     fetchTokenizationState,
     FlaunchLaunchTokenResponse,
     FlaunchStatusResponse,
-    retryTokenization,
     setModelFlag,
     tokenizationStateAtom,
 } from '../store/tokenStore';
@@ -31,12 +30,10 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
   const [tokenizationState] = useAtom(tokenizationStateAtom);
   const fetchState = useSetAtom(fetchTokenizationState);
   const setTokenizationFlag = useSetAtom(setModelFlag);
-  const retryTokenize = useSetAtom(retryTokenization);
 
   const setModelStatusInChat = useSetAtom(setModelStatus);
 
   const [isInitiating, setIsInitiating] = useState(false);
-  const [isRetrying, setIsRetrying] = useState(false);
   const { user } = usePrivy();
 
   const isFlag = model.flag !== null && model.flag !== ""
@@ -111,27 +108,6 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
       console.error('Failed to initiate tokenization:', error);
     } finally {
       setIsInitiating(false);
-    }
-  };
-
-  // 处理重试请求
-  const handleRetry = async () => {
-    try {
-      setIsRetrying(true);
-
-      // 发起重试请求
-      const modelId = model.id
-      await retryTokenize({
-        modelId,
-        creator: "" // 这里可能需要从用户信息中获取
-      });
-
-      // 立即获取最新状态
-      fetchState({ modelId, refreshState: true });
-    } catch (error) {
-      console.error('Failed to retry tokenization:', error);
-    } finally {
-      setIsRetrying(false);
     }
   };
 
@@ -217,13 +193,6 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
           </div>
           <h3>Tokenization Failed</h3>
           <p>There was an error during the tokenization process.</p>
-          <button
-            className={styles.retryButton}
-            onClick={handleTokenize}
-            disabled={isRetrying}
-          >
-            {isRetrying ? 'Retrying...' : 'Retry Tokenization'}
-          </button>
         </div>
       );
     }
@@ -379,13 +348,6 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
             </div>
             <h3>Tokenization Failed</h3>
             <p>{statusData.error}</p>
-            <button
-              className={styles.retryButton}
-              onClick={handleRetry}
-              disabled={isRetrying}
-            >
-              {isRetrying ? 'Retrying...' : 'Retry Tokenization'}
-            </button>
           </div>
         );
       }
