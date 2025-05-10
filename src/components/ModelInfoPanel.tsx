@@ -163,9 +163,9 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
     const modelName = model.name;
 
     if (symbol) {
-      tweetText = `This style is insane!\n${modelName} is an amazing AI model I found on nyko.cool\nit even has its own token $${symbol}\nCome create and trade with me!\n${modelLink}`;
+      tweetText = `This style is insane!\n${modelName} is an amazing AI model I found on @niyoko_agent \nit even has its own token $${symbol}\nCome create and trade with me!\n${modelLink}`;
     } else {
-      tweetText = `This style is insane!\n${modelName} is an amazing AI model I found on nyko.cool.\nCome create and mine with me!\n${modelLink}`;
+      tweetText = `This style is insane!\n${modelName} is an amazing AI model I found on @niyoko_agent \nCome create and mine with me!\n${modelLink}`;
     }
 
     // 3. 构建 Twitter Intent URL

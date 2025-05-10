@@ -58,7 +58,7 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
         <div className={styles.featureCard}>
           <div className={styles.cardContent}>
             <h3>Host creativity</h3>
-            <p>With natural language, easily finetuning models, set up workflows, and host your creativity on NYKO — ready to use anytime.</p>
+            <p>With natural language, easily fine-tune models, set up workflows, and host your creativity on NYKO — ready to use anytime.</p>
           </div>
           <div className={styles.buttonContainer}>
             <button className={styles.featureButton} onClick={handleGenerateClick}>Generate an image &gt;</button>

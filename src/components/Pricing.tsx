@@ -317,7 +317,7 @@ const Pricing: React.FC = () => {
           >
             <div className={styles.plansSectionContent}>
               <div className={styles.pricingHeader}>
-                <h1 className={styles.title}>PLANS & PRICING</h1>
+                <h1 className={styles.title}>Stake to Subscribe</h1>
                 <p className={styles.subtitle}>
                   Upgrade to gain access to Premium features
                 </p>
