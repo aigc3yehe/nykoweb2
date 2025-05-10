@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { walletClientAtom } from "../store/providerStore";
-import { TokenInfo } from "@uniswap/widgets";
+// import { TokenInfo } from "@uniswap/widgets";
 import EthIcon from "../assets/eth.svg";
 import { Settings, SwapVert, Close } from "@mui/icons-material";
 import TokenIcon from "./TokenIcon";
@@ -16,8 +16,18 @@ import { createWalletClient, custom, formatEther, Hex, parseEther } from "viem";
 import { formattedBalance, getAmountWithSlippage } from "../utils/format";
 import { getEthBalance, getTokenBalance } from "../store/alchemyStore";
 import { showToastAtom } from "../store/imagesStore.ts";
+
+interface FlaunchSwapToken {
+  name: string;
+  address: string;
+  symbol?: string;
+  decimals?: number;
+  chainId: number;
+  logoURI?: string;
+  isV1Token?: boolean;
+}
 interface Props {
-  token: TokenInfo;
+  token: FlaunchSwapToken;
 }
 
 const SwapWidgetCustom = ({ token }: Props) => {
@@ -121,11 +131,12 @@ const SwapWidgetCustom = ({ token }: Props) => {
   ) => {
     console.debug("[FLAUNCH]:", type, token.address);
     if (type === "EXACT_IN") {
-      const data = await flaunchWrite?.readQuoter?.getBuyQuoteExactInput(
+      const data = await flaunchWrite?.getBuyQuoteExactInput(
         token.address as `0x${string}`,
-        parseEther(amount)
+        parseEther(amount),
+        token.isV1Token ?? false
       );
-     
+
       const amountOutMin = getAmountWithSlippage(
         data,
         (parseFloat(slippage) / 100).toFixed(18).toString(),
@@ -135,9 +146,10 @@ const SwapWidgetCustom = ({ token }: Props) => {
       setOutputAmount(formatEther(amountOutMin ?? 0n));
     }
     if (type === "EXACT_OUT") {
-      const data = await flaunchWrite?.readQuoter?.getBuyQuoteExactOutput(
+      const data = await flaunchWrite?.getBuyQuoteExactOutput(
         token.address as `0x${string}`,
-        parseEther(amount)
+        parseEther(amount),
+        token.isV1Token ?? false
       );
       const amountOutMin = getAmountWithSlippage(
         data,
@@ -148,9 +160,10 @@ const SwapWidgetCustom = ({ token }: Props) => {
       setInputAmount(formatEther(amountOutMin ?? 0n));
     }
     if (type === "SELL") {
-      const data = await flaunchWrite?.readQuoter?.getSellQuoteExactInput(
+      const data = await flaunchWrite?.getSellQuoteExactInput(
         token.address as `0x${string}`,
-        parseEther(amount)
+        parseEther(amount),
+        token.isV1Token ?? false
       );
       const ethOutMin = getAmountWithSlippage(
         data,
@@ -443,7 +456,9 @@ const SwapWidgetCustom = ({ token }: Props) => {
         <div className="space-y-6 w-full">
           <div className="bg-gray-900 p-3 rounded">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-lg">{direction === "buy" ? "From" : "Sell"}</span>
+              <span className="text-lg">
+                {direction === "buy" ? "From" : "Sell"}
+              </span>
               <div className="flex items-center gap-2">
                 <TokenIcon
                   logoURI={
@@ -465,7 +480,7 @@ const SwapWidgetCustom = ({ token }: Props) => {
                 className="w-full bg-transparent text-xl pr-[100px] outline-none no-spinner"
                 placeholder="0.0"
                 disabled={loading || txLoading}
-                style={{ fontSize: '22px'}}
+                style={{ fontSize: "22px" }}
               />
               <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[12px]">
                 <button
@@ -494,7 +509,9 @@ const SwapWidgetCustom = ({ token }: Props) => {
           {/* 输出Token */}
           <div className="bg-gray-900 p-3 rounded w-full">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-lg">{direction === "buy" ? "To" : "Receive"}</span>
+              <span className="text-lg">
+                {direction === "buy" ? "To" : "Receive"}
+              </span>
               <div className="flex items-center gap-2">
                 <TokenIcon
                   logoURI={
@@ -516,7 +533,7 @@ const SwapWidgetCustom = ({ token }: Props) => {
               className="w-full bg-transparent text-xl outline-none no-spinner"
               placeholder="0.0"
               disabled={direction === "sell" || loading || txLoading}
-              style={{ fontSize: '22px'}}
+              style={{ fontSize: "22px" }}
             />
           </div>
         </div>

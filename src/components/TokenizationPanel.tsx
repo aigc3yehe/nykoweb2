@@ -263,7 +263,8 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
                 "symbol": statusData.collectionToken.symbol,
                 "decimals": 18,
                 "chainId": 8453,
-                "logoURI": statusData.collectionToken.imageIpfs
+                "logoURI": statusData.collectionToken.imageIpfs,
+                "isV1Token": !!statusData.collectionToken?.isV1Token
             }
         console.log(token);
         return (

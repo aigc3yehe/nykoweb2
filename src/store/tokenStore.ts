@@ -52,6 +52,7 @@ export type FlaunchStatusResponse = {
     symbol: string;
     tokenURI: string;
     creator: string;
+    isV1Token?: boolean;
   };
   error?: string;
 };
