@@ -15,6 +15,9 @@ const ActivitySidebar: React.FC = () => {
   const [, setUserDid] = useAtom(setDid);
   const { isLoading, error } = activityState;
 
+  // 定时展示新内容
+  const [showNewContent, setShowNewContent] = useState(false);
+
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
@@ -121,6 +124,24 @@ const ActivitySidebar: React.FC = () => {
   // 显示自定义滚动条的条件
   const showCustomScrollbar = scrollHeight > clientHeight;
 
+  // 检查是否应该显示第二周信息
+  const shouldShowWeek2 = () => {
+    // 检查用户是否是管理员
+    if (accountState.role === 'admin') {
+       return true;
+    }
+    
+    // 检查当前时间是否超过北京时间2025-05-13上午8点
+    const targetDate = new Date('2025-05-13T00:00:00.000Z'); // UTC时间
+    
+    const currentDate = new Date();
+    return currentDate >= targetDate;
+  }
+
+  useEffect(() => {
+    setShowNewContent(shouldShowWeek2());
+  }, [shouldShowWeek2, setShowNewContent]);
+
   return (
     <div className={styles.activitySidebar}>
       <div className={styles.sidebarScrollArea}>
@@ -170,9 +191,20 @@ const ActivitySidebar: React.FC = () => {
                       <div className={styles.keyValuePair}>
                         <span className={styles.keyTitle}>Points Of This Week</span>
                         <span className={styles.valueHighlight}>
-                    {activityState.currentPoints?.points || 0}
-                  </span>
+                          {activityState.currentPoints?.points || 0}
+                        </span>
                       </div>
+                      
+                      {/* 添加积分兑换比例信息 */}
+                      {showNewContent && (
+                        <>
+                          <div className={styles.divider}></div>
+                          <div className={styles.keyValuePair}>
+                            <span className={styles.keyTitle}>Currently: 1 Point = {activityState.currentPoints?.current_season_total_points || 0} $NYKO</span>
+                          </div>
+                        </>
+                      )}
+                      
                     </div>
 
                     {/* 模型使用情况卡片 */}

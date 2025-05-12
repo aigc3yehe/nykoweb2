@@ -8,6 +8,7 @@ export interface SeasonPoints {
   geni: number;
   ef: number;
   cd: number;
+  current_season_total_points: number;
 }
 
 export interface PointsHistory {

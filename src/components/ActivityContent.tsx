@@ -3,6 +3,8 @@ import {useNavigate} from 'react-router-dom';
 import styles from './ActivityContent.module.css';
 import BackIcon from '../assets/back.svg';
 import ReactMarkdown from 'react-markdown';
+import { useAtom } from 'jotai';
+import { accountAtom } from '../store/accountStore';
 
 // 示例 Markdown 内容
 const markdownContent = `
@@ -43,6 +45,7 @@ Mindshare Points = GENI × IF × Cooldown_X
 
 const ActivityContent: React.FC = () => {
   const navigate = useNavigate();
+  const [accountState] = useAtom(accountAtom);
 
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -74,6 +77,25 @@ const ActivityContent: React.FC = () => {
       </a>
     );
   };
+
+  // 检查是否应该显示第二周信息
+  const shouldShowWeek2 = () => {
+    // 检查用户是否是管理员
+    if (accountState.role === 'admin') {
+       return true;
+    }
+    
+    // 检查当前时间是否超过北京时间2025-05-13上午8点
+    const targetDate = new Date('2025-05-13T00:00:00.000Z'); // UTC时间
+    
+    const currentDate = new Date();
+    return currentDate >= targetDate;
+  }
+  
+  // 根据条件确定要显示的周信息
+  const weekInfo = shouldShowWeek2() 
+    ? { week: 'Week 2 (5.13-5.19)', rewards: '2,500,000' }
+    : { week: 'Week 1 (5.6-5.12)', rewards: '1,500,000' };
 
   // 更新滚动状态
   useEffect(() => {
@@ -164,8 +186,8 @@ const ActivityContent: React.FC = () => {
               </div>
 
               <div className={styles.tagsGroup}>
-                <div className={styles.tagItem}>Week 1 (5.6-5.12)</div>
-                <div className={styles.tagItem}>Rewards: 1,500,000 $NYKO</div>
+                <div className={styles.tagItem}>{weekInfo.week}</div>
+                <div className={styles.tagItem}>Rewards: {weekInfo.rewards} $NYKO</div>
               </div>
             </div>
 
