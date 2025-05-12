@@ -6,6 +6,7 @@ import ChatWindow from './ChatWindow';
 import Pricing from './Pricing';
 import styles from './MainLayout.module.css';
 import Activity from "./Activity.tsx";
+import TokenMarquee from './TokenMarquee';
 
 const MainLayout: React.FC = () => {
 
@@ -26,6 +27,7 @@ const MainLayout: React.FC = () => {
         <Route path="*" element={
           <div className={styles.contentContainer}>
             <div className={styles.contentSection}>
+              <TokenMarquee />
               <ContentDisplay />
             </div>
             <div className={styles.chatSection}>

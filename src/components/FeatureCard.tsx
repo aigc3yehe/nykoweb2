@@ -53,12 +53,11 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
 
   return (
     <div className={styles.featureCardContainer}>
-      <h2 className={styles.featureTitle}>SIMPLIFY AI CREATIVITY</h2>
       <div className={styles.featureCards}>
         <div className={styles.featureCard}>
           <div className={styles.cardContent}>
             <h3>Host creativity</h3>
-            <p>With natural language, easily fine-tune models, set up workflows, and host your creativity on NYKO — ready to use anytime.</p>
+            <p>host your creativity on NYKO — ready to use anytime.</p>
           </div>
           <div className={styles.buttonContainer}>
             <button className={styles.featureButton} onClick={handleGenerateClick}>Generate an image &gt;</button>
@@ -68,7 +67,7 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
         <div className={styles.featureCard}>
           <div className={styles.cardContent}>
             <h3>Tokenize creativity</h3>
-            <p>Launch an associated token for your creativity and earn from its trading fees.</p>
+            <p>Launch an associated token for your creativity and earn </p>
           </div>
           <div className={styles.buttonContainer}>
             <button className={styles.featureButton} onClick={handleCreativityEconomyClick}>Creativity economy model &gt;</button>
