@@ -175,7 +175,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     }
   }, [images, galleryContainerWidth, containerHeight]);
 
-  // 无限滚动的观察元素
+  // 修改loadMoreTriggerRef回调函数，保持root为null（使用viewport）
   const loadMoreTriggerRef = useCallback((node: HTMLDivElement | null) => {
     if (imagesLoading) return;
 
@@ -186,13 +186,30 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
         fetchImagesList({ reset: false, model_id: modelId, view: viewParam });
       }
     }, {
-      root: null,
-      rootMargin: '256px',
+      root: null, // 使用viewport作为root
+      rootMargin: '100px', // 适当的rootMargin
       threshold: 0.1
     });
 
     if (node) observer.current.observe(node);
   }, [imagesLoading, hasMore, fetchImagesList, modelId, viewParam]);
+
+  // 添加一个新的useEffect来监听滚动事件
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer || imagesLoading || !hasMore) return;
+    
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      // 当滚动到距离底部200px时加载更多
+      if (scrollHeight - scrollTop - clientHeight < 200 && hasMore && !imagesLoading) {
+        fetchImagesList({ reset: false, model_id: modelId, view: viewParam });
+      }
+    };
+    
+    scrollContainer.addEventListener('scroll', handleScroll);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [hasMore, imagesLoading, fetchImagesList, modelId, viewParam]);
 
   if (isLoading) {
     return (
@@ -319,8 +336,21 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
           </div>
         )}
 
-        {/* 加载更多触发元素 - 替代按钮实现自动加载 */}
-        <div ref={loadMoreTriggerRef} className={styles.loadMoreTrigger}></div>
+        {/* 修改loadMoreTrigger的样式和位置 */}
+        {hasMore && (
+          <div 
+            ref={loadMoreTriggerRef} 
+            className={styles.loadMoreTrigger}
+            style={{ 
+              height: '30px', 
+              width: '100%',
+              margin: '10px 0',
+              opacity: 0,  // 设置为不可见但仍可检测
+              position: 'relative',
+              bottom: '0'
+            }}
+          />
+        )}
 
         {imagesLoading && (
           <StatePrompt message="Loading Images..." showIcon={false} />
