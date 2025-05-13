@@ -170,7 +170,7 @@ export const fetchRewardsHistory = atom(
       const currentActivityState = get(activityAtom);
       set(activityAtom, {
         ...currentActivityState,
-        pointsHistory: data.data,
+        rewardsHistory: data.data,
         isLoading: false,
       });
 
