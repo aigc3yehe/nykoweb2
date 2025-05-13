@@ -1,10 +1,16 @@
-import React, {useEffect, useRef, useState} from 'react';
-import styles from './ActivitySidebar.module.css';
-import {useAtom} from 'jotai';
-import {activityAtom, fetchCurrentPoints, fetchRewardsHistory, setDid} from '../store/activityStore';
-import {accountAtom} from '../store/accountStore';
-import TwitterIcon from '../assets/twitter.svg';
-import {useLogin, usePrivy} from "@privy-io/react-auth";
+import React, { useEffect, useRef, useState } from "react";
+import styles from "./ActivitySidebar.module.css";
+import { useAtom } from "jotai";
+import {
+  activityAtom,
+  fetchCurrentPoints,
+  fetchRewardsHistory,
+  setDid,
+} from "../store/activityStore";
+import { accountAtom } from "../store/accountStore";
+import TwitterIcon from "../assets/twitter.svg";
+import { useLogin, usePrivy } from "@privy-io/react-auth";
+import { getCurrentPointsRewards } from "../utils/season";
 
 const ActivitySidebar: React.FC = () => {
   const [activityState] = useAtom(activityAtom);
@@ -34,7 +40,7 @@ const ActivitySidebar: React.FC = () => {
       // 如果有用户信息，则调用用户创建API
       if (user) {
         await setUserDid({
-          did: user.id
+          did: user.id,
         });
       }
     },
@@ -75,12 +81,12 @@ const ActivitySidebar: React.FC = () => {
     // 添加滚动事件监听器
     const container = sidebarRef.current;
     if (container) {
-      container.addEventListener('scroll', updateScrollInfo);
+      container.addEventListener("scroll", updateScrollInfo);
     }
 
     return () => {
       if (container) {
-        container.removeEventListener('scroll', updateScrollInfo);
+        container.removeEventListener("scroll", updateScrollInfo);
       }
     };
   }, []);
@@ -96,18 +102,19 @@ const ActivitySidebar: React.FC = () => {
       if (sidebarRef.current) {
         const deltaY = moveEvent.clientY - startY;
         const scrollRatio = deltaY / clientHeight;
-        sidebarRef.current.scrollTop = startScrollTop + scrollRatio * scrollHeight;
+        sidebarRef.current.scrollTop =
+          startScrollTop + scrollRatio * scrollHeight;
         setScrollTop(sidebarRef.current.scrollTop);
       }
     };
 
     const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
   // 计算滚动条高度和位置
@@ -118,7 +125,10 @@ const ActivitySidebar: React.FC = () => {
 
   const getScrollThumbTop = () => {
     if (scrollHeight <= clientHeight) return 0;
-    return (scrollTop / (scrollHeight - clientHeight)) * (clientHeight - getScrollThumbHeight());
+    return (
+      (scrollTop / (scrollHeight - clientHeight)) *
+      (clientHeight - getScrollThumbHeight())
+    );
   };
 
   // 显示自定义滚动条的条件
@@ -127,16 +137,16 @@ const ActivitySidebar: React.FC = () => {
   // 检查是否应该显示第二周信息
   const shouldShowWeek2 = () => {
     // 检查用户是否是管理员
-    if (accountState.role === 'admin') {
-       return true;
+    if (accountState.role === "admin") {
+      return true;
     }
-    
+
     // 检查当前时间是否超过北京时间2025-05-13上午8点
-    const targetDate = new Date('2025-05-13T00:00:00.000Z'); // UTC时间
-    
+    const targetDate = new Date("2025-05-13T00:00:00.000Z"); // UTC时间
+
     const currentDate = new Date();
     return currentDate >= targetDate;
-  }
+  };
 
   useEffect(() => {
     setShowNewContent(shouldShowWeek2());
@@ -150,108 +160,124 @@ const ActivitySidebar: React.FC = () => {
           className={`${styles.scrollContainer} ${styles.hideScrollbar}`}
         >
           {!authenticated || !accountState.did ? (
-              <div className={styles.emptyHistory}>
-                <div className={styles.loginRequired}>
-                  <p>Please log in first</p>
-                  <button
-                      className={styles.loginButton}
-                      onClick={handleLogin}
-                  >
-                    Login
-                  </button>
-                </div>
+            <div className={styles.emptyHistory}>
+              <div className={styles.loginRequired}>
+                <p>Please log in first</p>
+                <button className={styles.loginButton} onClick={handleLogin}>
+                  Login
+                </button>
               </div>
+            </div>
           ) : (
             <>
               {/* 用户推特信息卡片 */}
               <div className={styles.twitterCard}>
                 <div className={styles.avatar}>
                   <img
-                    src={accountState.twitter?.profilePictureUrl || '/default-avatar.png'}
+                    src={
+                      accountState.twitter?.profilePictureUrl ||
+                      "/default-avatar.png"
+                    }
                     alt="avatar"
                   />
                 </div>
                 <div className={styles.userInfo}>
                   <div className={styles.nameRow}>
-                    <span className={styles.name}>{accountState.twitter?.name || accountState.name || 'User'}</span>
-                    <img src={TwitterIcon} alt="Twitter" className={styles.twitterIcon} />
+                    <span className={styles.name}>
+                      {accountState.twitter?.name ||
+                        accountState.name ||
+                        "User"}
+                    </span>
+                    <img
+                      src={TwitterIcon}
+                      alt="Twitter"
+                      className={styles.twitterIcon}
+                    />
                   </div>
-                  <span className={styles.username}>@{accountState.twitter?.username || 'Unlink X'}</span>
+                  <span className={styles.username}>
+                    @{accountState.twitter?.username || "Unlink X"}
+                  </span>
                 </div>
               </div>
 
               {/* 本周积分卡片 - 从API获取数据 */}
               {isLoading ? (
-                  <div className={styles.loadingState}>Loading ...</div>
+                <div className={styles.loadingState}>Loading ...</div>
               ) : error ? (
-                  <div className={styles.errorState}>{error}</div>
-              ): (
-                  <>
+                <div className={styles.errorState}>{error}</div>
+              ) : (
+                <>
+                  <div className={styles.listCard}>
+                    <div className={styles.keyValuePair}>
+                      <span className={styles.keyTitle}>
+                        Points Of This Week
+                      </span>
+                      <span className={styles.valueHighlight}>
+                        {activityState.currentPoints?.points || 0}
+                      </span>
+                    </div>
+
+                    {/* 添加积分兑换比例信息 */}
+                    {showNewContent && (
+                      <>
+                        <div className={styles.divider}></div>
+                        <div className={styles.keyValuePair}>
+                          <span className={styles.keyTitle}>
+                            Currently: 1 Point ={" "}
+                            {getCurrentPointsRewards(
+                              activityState.currentPoints?.current_season_total_points || 0
+                            )}{" "}
+                            $NYKO
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* 模型使用情况卡片 */}
+                  <div className={styles.listCard}>
+                    <div className={styles.keyValuePair}>
+                      <span className={styles.keyTitle}>GENI</span>
+                      <span className={styles.valueText}>
+                        x{activityState.currentPoints?.geni || 0}
+                      </span>
+                    </div>
+                    <div className={styles.divider}></div>
+                    <div className={styles.keyValuePair}>
+                      <span className={styles.keyTitle}>EpochFlow</span>
+                      <span className={styles.valueText}>
+                        x{activityState.currentPoints?.ef || 0}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 赛季积分历史卡片 */}
+                  {activityState.rewardsHistory.length > 0 && (
                     <div className={styles.listCard}>
                       <div className={styles.keyValuePair}>
-                        <span className={styles.keyTitle}>Points Of This Week</span>
-                        <span className={styles.valueHighlight}>
-                          {activityState.currentPoints?.points || 0}
+                        <span className={styles.keyTitle}>Award History</span>
+                        <span className={styles.valueText}>
+                          {activityState.rewardsHistory.length}
                         </span>
                       </div>
-                      
-                      {/* 添加积分兑换比例信息 */}
-                      {showNewContent && (
-                        <>
+
+                      {activityState.rewardsHistory.map((record, index) => (
+                        <React.Fragment key={index}>
                           <div className={styles.divider}></div>
                           <div className={styles.keyValuePair}>
-                            <span className={styles.keyTitle}>Currently: 1 Point = {activityState.currentPoints?.current_season_total_points || 0} $NYKO</span>
-                          </div>
-                        </>
-                      )}
-                      
-                    </div>
-
-                    {/* 模型使用情况卡片 */}
-                    <div className={styles.listCard}>
-                      <div className={styles.keyValuePair}>
-                        <span className={styles.keyTitle}>GENI</span>
-                        <span className={styles.valueText}>
-                    x{activityState.currentPoints?.geni || 0}
-                  </span>
-                      </div>
-                      <div className={styles.divider}></div>
-                      <div className={styles.keyValuePair}>
-                        <span className={styles.keyTitle}>EpochFlow</span>
-                        <span className={styles.valueText}>
-                    x{activityState.currentPoints?.ef || 0}
-                  </span>
-                      </div>
-                    </div>
-
-                    {/* 赛季积分历史卡片 */}
-                    {activityState.rewardsHistory.length > 0 && (
-                        <div className={styles.listCard}>
-                          <div className={styles.keyValuePair}>
-                            <span className={styles.keyTitle}>Award History</span>
+                            <span className={styles.keyTitle}>
+                              Week {record.season || index + 1}
+                            </span>
                             <span className={styles.valueText}>
-                      {activityState.rewardsHistory.length}
-                    </span>
+                              {record.reward || 0} $NYKO
+                            </span>
                           </div>
-
-                          {activityState.rewardsHistory.map((record, index) => (
-                              <React.Fragment key={index}>
-                                <div className={styles.divider}></div>
-                                <div className={styles.keyValuePair}>
-                        <span className={styles.keyTitle}>
-                          Week {record.season || index + 1}
-                        </span>
-                                  <span className={styles.valueText}>
-                          {record.reward || 0} $NYKO
-                        </span>
-                                </div>
-                              </React.Fragment>
-                          ))}
-                        </div>
-                    )}
-                  </>
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
-
             </>
           )}
         </div>
@@ -265,7 +291,7 @@ const ActivitySidebar: React.FC = () => {
             className={styles.scrollbarThumb}
             style={{
               height: `${getScrollThumbHeight()}px`,
-              top: `${getScrollThumbTop()}px`
+              top: `${getScrollThumbTop()}px`,
             }}
             onMouseDown={handleScrollThumbDrag}
           />
