@@ -14,12 +14,11 @@ import { showToastAtom } from "../store/imagesStore";
 
 interface ImageCardProps {
   image: Image;
-  modelOwnerDid?: string; // 添加模型所有者的DID
   onVisibilityChange?: (updatedImage: Image) => void;
   showEditCover?: boolean;
 }
 
-const ImageCard: React.FC<ImageCardProps> = ({ image, modelOwnerDid, onVisibilityChange, showEditCover }) => {
+const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEditCover }) => {
   const handleOpenImageDetails = useSetAtom(openImageDetails);
   const [, toggleView] = useAtom(fetchToggleView);
   const [, editCover] = useAtom(fetchEditCover);
@@ -42,8 +41,8 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, modelOwnerDid, onVisibilit
   // 只有管理员或图片创建者或模型所有者可以切换
   const canToggleVisibility =
     accountState.role === 'admin' ||
-    (accountState.did && accountState.did === localImage.creator) ||
-    (accountState.did && modelOwnerDid && accountState.did === modelOwnerDid);
+    (accountState.did && accountState.did === localImage.creator)
+    //(accountState.did && modelOwnerDid && accountState.did === modelOwnerDid);
 
   // 获取Twitter显示名称
   const getDisplayName = () => {
@@ -283,7 +282,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, modelOwnerDid, onVisibilit
         {/* 悬停时显示的半透明黑色遮罩和作者信息 */}
         <div className={styles.overlay}>
           {/* 可见性按钮 - 仅对有权限的用户显示 */}
-          {canToggleVisibility && (
+          {(canToggleVisibility || showEditCover)&& (
             <div className={styles.imagePublicStatus}>
               {isProcessing ? (
                 <div className={styles.processingIndicator}>
@@ -301,12 +300,14 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, modelOwnerDid, onVisibilit
                           onClick={handleCoverClick}
                       />
                   )}
-                  <img
+                  {canToggleVisibility && (
+                    <img
                       src={getImagePublicUrl()}
                       alt={isPublic ? "Visible" : "Hidden"}
                       className={styles.imagePublic}
                       onClick={handleToggleViewClick}
-                  />
+                    />
+                  )}
                 </>
 
               )}

@@ -33,6 +33,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   const clearCurrentModelInChat = useSetAtom(clearCurrentModel);
   const clearModelStatusInChat = useSetAtom(clearModelStatus);
   const [showBuyToken, setShowBuyToken] = useState(false);
+  const [showEditCover, setShowEditCover] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'description' | 'tokenization'>('description');
 
@@ -63,6 +64,14 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   const observer = useRef<IntersectionObserver | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const galleryContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (accountState.role === 'admin' || accountState.did === currentModel?.creator) {
+      setShowEditCover(true)
+    } else {
+      setShowEditCover(false)
+    }
+  }, [accountState.did, accountState.role, currentModel?.creator]);
 
   useEffect(() => {
     // 加载模型详情
@@ -324,7 +333,6 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
                 >
                   <ImageCard
                     image={image}
-                    modelOwnerDid={currentModel.creator}
                     onVisibilityChange={(updatedImage) => {
                       // 更新本地图片数据
                       const updatedImages = [...images];
@@ -332,7 +340,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
                       // React将会响应这些变化
                       imageListState.images = updatedImages;
                     }}
-                    showEditCover={true}
+                    showEditCover={showEditCover}
                   />
                 </div>
               );
