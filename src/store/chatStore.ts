@@ -4,7 +4,8 @@ import { atom } from 'jotai';
 import { imageUploadAtom, setImageUploadStateAtom, updateMessageUrlsAtom, showToastAtom, uploadImages } from './imagesStore';
 import { ModelDetail } from './modelStore';
 import { fetchImages } from './imageStore';
-import {fetchTokenizationState} from "./tokenStore.ts"; // 添加这一行导入
+import { fetchModelDetail } from './modelStore.ts'
+import {fetchTokenizationState} from "./tokenStore.ts";
 
 // 添加宽高比相关接口
 export interface AspectRatio {
@@ -691,6 +692,7 @@ export const sendMessage = atom(
         // 使用 fetchTokenizationState 重新加载Token状态
         console.log('reset model images，model id:', chatState.currentModel.id);
         set(fetchTokenizationState, { modelId: chatState.currentModel.id})
+        set(fetchModelDetail, chatState.currentModel.id , false)
       }
     } catch (error) {
       console.error('Send Message Failed:', error);

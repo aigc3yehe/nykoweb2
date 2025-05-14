@@ -266,10 +266,10 @@ export const modelDetailAtom = atom<ModelDetailState>(initialDetailState);
 // 获取模型详情
 export const fetchModelDetail = atom(
   null,
-  async (get, set, modelId: number) => {
+  async (get, set, modelId: number, showLoading: boolean = true) => {
     set(modelDetailAtom, {
       ...get(modelDetailAtom),
-      isLoading: true,
+      isLoading: showLoading,
       error: null
     });
 

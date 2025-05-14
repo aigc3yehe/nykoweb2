@@ -66,7 +66,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
 
   useEffect(() => {
     // 加载模型详情
-    fetchDetail(modelId);
+    fetchDetail(modelId, true);
 
     // 加载与模型相关的图片
     fetchImagesList({ reset: true, model_id: modelId, view: viewParam });
@@ -229,7 +229,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
           message="Failed to Load Model"
           action={{
             text: 'Retry',
-            onClick: () => fetchDetail(modelId)
+            onClick: () => fetchDetail(modelId, true)
           }}
         />
       </div>

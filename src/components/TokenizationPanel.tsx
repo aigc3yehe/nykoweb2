@@ -164,7 +164,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
                         <Tooltip title="Not finished yet, please wait a moment.">
                             <div className="flex gap-1 items-center justify-center cursor-pointer" >
                         <span className="font-jura font-normal text-sm leading-none tracking-normal align-middle capitalize text-[#6366F1]">
-                            ${token.metadata?.name}
+                            ${token.metadata?.symbol || token?.metadata?.name}
                         </span>
                                 <img
                                     src={linkSvg}
