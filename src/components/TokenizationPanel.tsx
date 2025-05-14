@@ -19,6 +19,7 @@ import SwapWidgetCustom from './SwapWidgetCustom.tsx';
 import { usePrivy } from '@privy-io/react-auth';
 import {setModelStatus} from "../store/chatStore.ts";
 import {Link} from "react-router-dom";
+import {Tooltip} from "@mui/material";
 
 interface TokenizationPanelProps {
   model: ModelDetail;
@@ -143,19 +144,36 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
             </div>
 
             {community_tokens?.map((token) => {
-                return (
-                    <Link target="_blank" to={`https://flaunch.gg/base/coin/${token.meme_token}`}>
-                        <div className="flex gap-1 items-center justify-center cursor-pointer" >
+                if (token.state == 2) {
+                    // finished
+                    return (
+                        <Link target="_blank" to={`https://flaunch.gg/base/coin/${token.meme_token}`}>
+                            <div className="flex gap-1 items-center justify-center cursor-pointer" >
                         <span className="font-jura font-normal text-sm leading-none tracking-normal align-middle capitalize text-[#6366F1]">
                             ${token.metadata?.symbol || token?.metadata?.name}
                         </span>
-                            <img
-                                src={linkSvg}
-                                alt="link"
-                                className="w-3.5 h-3.5"/>
-                        </div>
-                    </Link>
-                )
+                                <img
+                                    src={linkSvg}
+                                    alt="link"
+                                    className="w-3.5 h-3.5"/>
+                            </div>
+                        </Link>
+                    )
+                } else {
+                    return (
+                        <Tooltip title="Not finished yet, please wait a moment.">
+                            <div className="flex gap-1 items-center justify-center cursor-pointer" >
+                        <span className="font-jura font-normal text-sm leading-none tracking-normal align-middle capitalize text-[#6366F1]">
+                            ${token.metadata?.name}
+                        </span>
+                                <img
+                                    src={linkSvg}
+                                    alt="link"
+                                    className="w-3.5 h-3.5"/>
+                            </div>
+                        </Tooltip>
+                    )
+                }
             })}
         </div>
   };

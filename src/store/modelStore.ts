@@ -3,6 +3,7 @@ import { accountAtom } from './accountStore';
 import { Twitter } from './imageStore'; // 导入Twitter接口
 import { PRIVY_TOKEN_HEADER } from '../utils/constants';
 import { getAccessToken } from '@privy-io/react-auth';
+import {FlaunchStatusResponse, ModelTokenizationStateResponse} from './tokenStore';
 
 export interface TokenMetadata {
   description?: string;
@@ -285,6 +286,21 @@ export const fetchModelDetail = atom(
 
       const result = await response.json();
 
+      // 检查是否有未完成的社区token
+      const communityTokens = result.data.model_community_tokenization;
+      if (communityTokens && communityTokens.length > 0) {
+        // 查找第一个state不等于2的token
+        const pendingToken = communityTokens.find((token: { state: number; }) => token.state !== 2);
+
+        // 如果找到未完成的token，直接使用set调用fetchCommunityTokenizationState
+        if (pendingToken) {
+          set(fetchCommunityTokenizationState, {
+            modelId,
+            token_tokenization_id: pendingToken.id
+          });
+        }
+      }
+
       set(modelDetailAtom, {
         currentModel: result.data,
         isLoading: false,
@@ -393,6 +409,60 @@ export const fetchEditCover = atom(
       } catch (error) {
         console.log(error);
         throw error; // 抛出错误以便在组件中捕获
+      }
+    }
+);
+
+// 获取社区token状态的函数
+export const fetchCommunityTokenizationState = atom(
+    null,
+    async (_get, set, { modelId, token_tokenization_id }: { modelId: number, token_tokenization_id: number }) => {
+
+      try {
+        const params = new URLSearchParams({
+          model_id: modelId.toString(),
+          refreshState: 'true',
+          is_community_token: 'true',
+          token_tokenization_id: token_tokenization_id.toString()
+        });
+
+        const response = await fetch(`/studio-api/model/tokenization/state?${params.toString()}`, {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('get community tokenization state error');
+        }
+
+        const result: ModelTokenizationStateResponse = await response.json();
+        const data = result.data as FlaunchStatusResponse;
+
+        // 如果社区token已完成，重新获取模型详情
+        if (data && data.state === 'completed') {
+          const response = await fetch(`/studio-api/model/detail?id=${modelId}`, {
+              headers: {
+                'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+              }
+          });
+
+          if (!response.ok) {
+            throw new Error('get error detail error');
+          }
+
+          const result = await response.json();
+
+          set(modelDetailAtom, {
+            currentModel: result.data,
+            isLoading: false,
+            error: null
+          });
+
+          return result.data;
+        }
+      } catch (error) {
+        console.error(error);
       }
     }
 );
