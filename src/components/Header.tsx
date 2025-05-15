@@ -74,13 +74,14 @@ const Header: React.FC = () => {
         {/* Doc按钮 */}
         <button className={styles.docButton} onClick={handleDocClick}>
           <img src={DocIcon} alt="Documentation" className={styles.docIcon}/>
-          <span>Doc</span>
+          <span className='pc:inline hidden'>Doc</span>
         </button>
 
         {/* 活动按钮 */}
         <button className={styles.activityButton} onClick={handleActivityClick}>
           <img src={S1ActivityIcon} alt="Activity" className={styles.activityIcon}/>
-          <span>Primedata S1</span>
+          <span className="hidden pc:inline">Primedata S1</span>
+          <span className="inline pc:hidden">S1</span>
         </button>
 
         {/* 登录按钮组件 */}
