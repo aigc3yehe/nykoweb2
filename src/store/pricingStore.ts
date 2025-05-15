@@ -46,16 +46,12 @@ const initialState: PricingState = {
       description: "For starter",
       features: [
         {
-          title: "Up to 5 images per day",
+          title: "100 Credits Every Week",
           subtitle: "On Website",
           supported: true,
         },
         {
-          title: "Model training",
-          supported: false,
-        },
-        {
-          title: "Not eligible for Primedata rewards",
+          title: "Not Eligible For Primedata Rewards",
           supported: false,
         },
       ],
@@ -68,18 +64,12 @@ const initialState: PricingState = {
       description: "For expert-level AI players",
       features: [
         {
-          title: "Unlimited images per day.",
-          subtitle: "On Website & X",
+          title: "2,500 Credits Every Week",
+          subtitle: "On Website",
           supported: true,
         },
         {
-          title: "1 Model Training Available",
-          subtitle: "Application Required",
-          supported: true,
-          link: "https://discord.com/channels/1368843355362164786/1368986279319961600",
-        },
-        {
-          title: "eligible for Primedata rewards",
+          title: "Eligible For Primedata Rewards",
           supported: true,
         },
       ],
@@ -94,18 +84,20 @@ const initialState: PricingState = {
       description: "For expert-level AI players",
       features: [
         {
-          title: "Unlimited images per day.",
+          title: "12,000 Credits Every Week",
           subtitle: "On Website & X",
           supported: true,
         },
         {
-          title: "1 Model Training Available",
-          subtitle: "Application Required",
+          title: "Eligible for Primedata Rewards",
           supported: true,
-          link: "https://discord.com/channels/1368843355362164786/1368986279319961600",
         },
         {
-          title: "eligible for Primedata rewards",
+          title: "Access to Premium+ Creators Channel",
+          supported: true,
+        },
+        {
+          title: "Voting Rights for Sponsorships",
           supported: true,
         },
       ],

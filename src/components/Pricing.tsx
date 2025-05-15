@@ -526,7 +526,7 @@ const Pricing: React.FC = () => {
                 </div>
               </div>
               {/* sponsor */}
-              <div
+              {/* <div
                 className="w-full h-[7.8125rem] gap-[0.375rem] py-[1.5rem] px-[1.875rem] rounded border border-[#3741514D] backdrop-blur-[20px] flex flex-col"
                 style={{
                   backgroundImage: `url('/sponsor.png')`,
@@ -540,7 +540,7 @@ const Pricing: React.FC = () => {
                     Apply for NYKO Creator Sponsor !
                   </span>
                   <button
-                    onClick={handleBuy}
+                    onClick={}
                     className="gap py-[0.375rem] px-[1.875rem] rounded bg-white font-['Jura'] font-bold text-[1rem] leading-[100%] text-center align-middle text-black"
                   >
                     APPLY
@@ -554,7 +554,7 @@ const Pricing: React.FC = () => {
                     you can now apply for the nyko AI cerativity fund.
                   </span>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 
