@@ -5,7 +5,7 @@ import { publicClient } from "../providers/wagmiConfig";
 import NikoTokenLockerAbi from "../abi/INikoTokenLocker.json";
 
 // 定义状态接口
-interface StakeState {
+export interface StakeState {
   isLoading: boolean;
   error: string | null;
   amount: number;

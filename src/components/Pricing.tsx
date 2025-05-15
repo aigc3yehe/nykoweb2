@@ -2,8 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import styles from "./Pricing.module.css";
 import StakeGrid from "../assets/stake_grid.svg";
-import PlanOkIcon from "../assets/plan_ok.svg";
-import PlanNoIcon from "../assets/plan_no.svg";
 import QuestionIcon from "../assets/question.svg";
 import FaqsGridIcon from "../assets/faqs_grid.svg";
 import SubNormalIcon from "../assets/sub_normal.svg";
@@ -27,6 +25,7 @@ import {
 } from "../services/userService";
 import { Link } from "react-router-dom";
 import { CuBuyConfig } from "../utils/plan";
+import PlanCard from "./PlanCard";
 
 // 定义价格套餐类型
 const Pricing: React.FC = () => {
@@ -406,111 +405,61 @@ const Pricing: React.FC = () => {
               </div>
 
               <div className={styles.plansContainer}>
-                {plans.map((plan) => (
-                  <div
-                    key={plan.id}
-                    className={`${styles.planCard} ${
-                      plan.id === "premium" ? styles.premium : ""
-                    } ${plan.id === "premiumPlus" ? styles.premiumPlus : ""}`}
-                  >
-                    <div className={styles.planTitleRow}>
-                      <h2 className={styles.planName}>{plan.name}</h2>
-                      {currentPlan === plan.id && (
-                        <div className={styles.currentBadge}>Current</div>
-                      )}
-                    </div>
-
-                    <div className={styles.planPrice}>{plan.price}</div>
-                    <div className={styles.planPeriod}>{plan.description}</div>
-
-                    <ul className={styles.featuresList}>
-                      {plan.features.map((feature, idx) => (
-                        <li
-                          key={idx}
-                          className={`${styles.featureItem} ${
-                            !feature.supported ? styles.unsupportedFeature : ""
-                          }`}
-                        >
-                          <img
-                            src={feature.supported ? PlanOkIcon : PlanNoIcon}
-                            alt={
-                              feature.supported ? "Supported" : "Not supported"
-                            }
-                            className={styles.featureIcon}
-                          />
-                          <div className={styles.featureTextContainer}>
-                            <span className={styles.featureTitle}>
-                              {feature.title}
-                            </span>
-                            {feature.subtitle && (
-                              <span className={styles.featureSubtitle}>
-                                {feature.link ? (
-                                  <a
-                                    href={feature.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={styles.featureLink}
-                                  >
-                                    {feature.subtitle}
-                                  </a>
-                                ) : (
-                                  feature.subtitle
-                                )}
-                              </span>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-
-                    {plan.buttonText && (
-                      <div className={styles.buttonContainer}>
-                        {stakeState?.amount < plan.staked &&
-                          stakeState?.unstakeTime == 0 && (
-                            <button
-                              className={styles.subscribeButton}
-                              onClick={() => handleSubscribe(plan.id)}
-                              disabled={isLoading}
-                            >
-                              {isLoading ? "Processing..." : plan.buttonText}
-                            </button>
-                          )}
-                        {stakeState?.amount >= plan.staked && (
-                          <button
-                            className={styles.unstakeButton}
-                            onClick={() => handleOperation("unstake")}
-                            disabled={isLoading}
-                          >
-                            {isLoading ? "Processing..." : "Unstake"}
-                          </button>
-                        )}
-                        {stakeState?.pendingClaim >= plan.staked && (
-                          <div className={styles.pendingButton}>
-                            Claim {stakeState?.pendingClaim} $NYKO after{" "}
-                            {new Date(
-                              stakeState?.unstakeTime * 1000
-                            ).toLocaleString()}
-                          </div>
-                        )}
-                        {stakeState?.pendingClaim >= plan.staked &&
-                          stakeState?.unstakeTime <
-                            Math.floor(Date.now() / 1000) && (
-                            <button
-                              className={styles.claimButton}
-                              onClick={() => handleOperation("claim")}
-                              disabled={isLoading}
-                            >
-                              {isLoading ? "Processing..." : "Claim"}
-                            </button>
-                          )}
-
-                        {plan.tips && (
-                          <p className={styles.buttonNote}>{plan.tips}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                {/* Free */}
+                <PlanCard
+                  plan={plans[0]}
+                  currentPlan={currentPlan}
+                  handleSubscribe={handleSubscribe}
+                  handleOperation={handleOperation}
+                  isLoading={isLoading}
+                />
+                {/* Premium */}
+                <PlanCard
+                  plan={plans[1]}
+                  currentPlan={currentPlan}
+                  handleSubscribe={handleSubscribe}
+                  handleOperation={handleOperation}
+                  isLoading={isLoading}
+                  showStake={
+                    stakeState.amount < plans[1].staked &&
+                    stakeState.unstakeTime == 0
+                  }
+                  showUnstake={
+                    stakeState.amount >= plans[1].staked &&
+                    stakeState.amount < plans[2].staked
+                  }
+                  showPendingClaim={
+                    stakeState.pendingClaim >= plans[1].staked &&
+                    stakeState.pendingClaim < plans[2].staked
+                  }
+                  showClaim={
+                    stakeState.pendingClaim >= plans[1].staked &&
+                    stakeState.pendingClaim < plans[2].staked &&
+                    stakeState?.unstakeTime < Math.floor(Date.now() / 1000)
+                  }
+                  pendingClaim={stakeState.pendingClaim}
+                  unstakeTime={stakeState.unstakeTime}
+                />
+                {/* Premium Plus */}
+                <PlanCard
+                  plan={plans[2]}
+                  currentPlan={currentPlan}
+                  handleSubscribe={handleSubscribe}
+                  handleOperation={handleOperation}
+                  isLoading={isLoading}
+                  showStake={
+                    stakeState.amount < plans[2].staked &&
+                    stakeState.unstakeTime == 0
+                  }
+                  showUnstake={stakeState.amount >= plans[2].staked}
+                  showPendingClaim={stakeState.pendingClaim >= plans[2].staked}
+                  showClaim={
+                    stakeState.pendingClaim >= plans[2].staked &&
+                    stakeState?.unstakeTime < Math.floor(Date.now() / 1000)
+                  }
+                  pendingClaim={stakeState.pendingClaim}
+                  unstakeTime={stakeState.unstakeTime}
+                />
               </div>
 
               {/* quit buy nyko */}
