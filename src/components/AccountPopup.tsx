@@ -56,7 +56,7 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
   // 格式化数字，添加千位分隔符，如果为0则显示无限符号
   const formatNumber = (num: number) => {
     if (num === 0) {
-      return "∞"; // 无限符号
+      return "0"; // 无限符号
     }
     return new Intl.NumberFormat().format(num);
   };
