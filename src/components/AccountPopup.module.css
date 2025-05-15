@@ -335,3 +335,37 @@
   text-transform: capitalize;
   color: #FACC15; /* 导出按钮文字颜色 */
 }
+
+/* Credits显示区域 */
+.creditsContainer {
+  width: 100%;
+  height: 2.9375rem; /* 47px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.25rem; /* 0 20px */
+  border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+  cursor: pointer;
+}
+
+.creditsLabel {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #FACC15; /* 黄色，与Plan文本相同 */
+  margin-right: 0.25rem; /* 4px */
+}
+
+.creditsValue {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  color: #4ADE80; /* 绿色 */
+}

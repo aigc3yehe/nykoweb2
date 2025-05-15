@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLogout } from '@privy-io/react-auth';
 import styles from './AccountPopup.module.css';
 import GoldIcon from '../assets/gold.svg';
@@ -11,6 +11,9 @@ import RocketIcon from '../assets/bxs_rocket.svg';
 import WalletAssets from './WalletAssets';
 import { useNavigate } from 'react-router-dom';
 import { PLAN_TYPE } from "../services/userService.ts";
+import { useAtom } from 'jotai';
+import { refreshUserPlanAtom } from '../store/accountStore';
+import { accountAtom } from "../store/accountStore";
 
 interface AccountPopupProps {
   isOpen: boolean;
@@ -39,6 +42,24 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [, refreshUserPlan] = useAtom(refreshUserPlanAtom);
+  const [accountState] = useAtom(accountAtom);
+  const { credits } = accountState;
+
+  // 在弹窗打开时刷新用户的credits
+  useEffect(() => {
+    if (isOpen) {
+      refreshUserPlan();
+    }
+  }, [isOpen, refreshUserPlan]);
+
+  // 格式化数字，添加千位分隔符，如果为0则显示无限符号
+  const formatNumber = (num: number) => {
+    if (num === 0) {
+      return "∞"; // 无限符号
+    }
+    return new Intl.NumberFormat().format(num);
+  };
 
   // 使用 useLogout hook 实现带回调的登出功能
   const { logout } = useLogout({
@@ -204,7 +225,19 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
             <span className={styles.planText}>Plan & Pricing</span>
           </div>
         </div>
-        {/* 第六部分：登出按钮 */}
+
+        {/* 新增：第六部分，显示用户Credits */}
+        <div className={styles.creditsContainer} onClick={() => {
+          onClose();
+          navigate('/pricing');
+        }}>
+          <div className={styles.actionRow}>
+            <span className={styles.creditsLabel}>Credits</span>
+            <span className={styles.creditsValue}>{formatNumber(credits || 0)}</span>
+          </div>
+        </div>
+
+        {/* 第七部分：登出按钮 */}
         <div
           className={`${styles.logoutContainer} ${isLoggingOut ? styles.disabled : ''}`}
           onClick={isLoggingOut ? undefined : handleLogout}

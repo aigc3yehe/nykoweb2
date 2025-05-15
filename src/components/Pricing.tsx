@@ -469,18 +469,18 @@ const Pricing: React.FC = () => {
               </div>
 
               {/* quit buy nyko */}
-              <div className="pt-5 pb-5 pl-7 pr-7 gap-1.5 flex justify-between items-center bg-gradient-to-r from-[rgba(255,106,0,0.2)] via-[rgba(31,41,55,0.2)] to-[rgba(82,84,181,0.2)] rounded border border-[#3741514D] backdrop-blur-[20px] gap-[20px]">
-                <div className="font-['Jura'] font-bold text-[20px] leading-[120%] align-middle capitalize bg-gradient-to-r from-[#6366F1] to-[#FF6A00] bg-clip-text text-transparent">
+              <div className="pt-5 pb-5 pl-7 pr-7 gap-1.5 flex flex-col lg:flex-row justify-between items-center bg-gradient-to-r from-[rgba(255,106,0,0.2)] via-[rgba(31,41,55,0.2)] to-[rgba(82,84,181,0.2)] rounded border border-[#3741514D] backdrop-blur-[20px] gap-[1.25rem]">
+                <div className="font-['Jura'] font-bold text-[1.25rem] leading-[120%] align-middle capitalize bg-gradient-to-r from-[#6366F1] to-[#FF6A00] bg-clip-text text-transparent">
                   Get Additional Credits <span className="text-white">✨</span>
                 </div>
 
-                <div className="flex items-center gap-[20px]">
-                  <span className="font-['Jura'] font-normal text-[20px] leading-[100%] align-middle capitalize text-white">
+                <div className="flex items-center gap-[1.25rem]">
+                  <span className="font-['Jura'] font-normal text-[1.25rem] leading-[100%] align-middle capitalize text-white">
                     {CuBuyConfig.price} ETH ={" "}
                     {CuBuyConfig.amount.toLocaleString()} Credits
                   </span>
 
-                  <div className="flex items-center gap-[6px]">
+                  <div className="flex items-center gap-[0.375rem]">
                     <button
                       onClick={handleDecrease}
                       className="w-[2.5rem] h-[2.0625rem] flex items-center justify-center"
@@ -494,8 +494,8 @@ const Pricing: React.FC = () => {
                       />
                     </button>
 
-                    <div className="w-[56px] h-[2.0625rem] gap-[8px] py-[8px] px-[14px] rounded-[4px] border border-[#37415180] flex items-center justify-center">
-                      <span className="font-['Jura'] font-medium text-[14px] leading-[100%] text-center align-middle text-white">
+                    <div className="w-[3.5rem] h-[2.0625rem] gap-[0.5rem] py-[0.5rem] px-[0.875rem] rounded-[0.25rem] border border-[#37415180] flex items-center justify-center">
+                      <span className="font-['Jura'] font-medium text-[0.875rem] leading-[100%] text-center align-middle text-white">
                         {purchaseQuantity}
                       </span>
                     </div>
@@ -540,7 +540,7 @@ const Pricing: React.FC = () => {
                     Apply for NYKO Creator Sponsor !
                   </span>
                   <button
-                    onClick={}
+                    onClick={()=>{}}
                     className="gap py-[0.375rem] px-[1.875rem] rounded bg-white font-['Jura'] font-bold text-[1rem] leading-[100%] text-center align-middle text-black"
                   >
                     APPLY
