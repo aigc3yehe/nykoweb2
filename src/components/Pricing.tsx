@@ -465,7 +465,7 @@ const Pricing: React.FC = () => {
 
                     {plan.buttonText && (
                       <div className={styles.buttonContainer}>
-                        {stakeState?.amount == 0 &&
+                        {stakeState?.amount < plan.staked &&
                           stakeState?.unstakeTime == 0 && (
                             <button
                               className={styles.subscribeButton}
@@ -475,7 +475,7 @@ const Pricing: React.FC = () => {
                               {isLoading ? "Processing..." : plan.buttonText}
                             </button>
                           )}
-                        {stakeState?.amount > 0 && (
+                        {stakeState?.amount >= plan.staked && (
                           <button
                             className={styles.unstakeButton}
                             onClick={() => handleOperation("unstake")}
@@ -484,7 +484,7 @@ const Pricing: React.FC = () => {
                             {isLoading ? "Processing..." : "Unstake"}
                           </button>
                         )}
-                        {stakeState?.pendingClaim > 0 && (
+                        {stakeState?.pendingClaim >= plan.staked && (
                           <div className={styles.pendingButton}>
                             Claim {stakeState?.pendingClaim} $NYKO after{" "}
                             {new Date(
@@ -492,7 +492,7 @@ const Pricing: React.FC = () => {
                             ).toLocaleString()}
                           </div>
                         )}
-                        {stakeState?.pendingClaim > 0 &&
+                        {stakeState?.pendingClaim >= plan.staked &&
                           stakeState?.unstakeTime <
                             Math.floor(Date.now() / 1000) && (
                             <button
