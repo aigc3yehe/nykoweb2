@@ -35,51 +35,53 @@ const PlanCard = ({
         plan.id === "premium" ? styles.premium : ""
       } ${plan.id === "premiumPlus" ? styles.premiumPlus : ""}`}
     >
-      <div className={styles.planTitleRow}>
-        <h2 className={styles.planName}>{plan.name}</h2>
-        {currentPlan === plan.id && (
-          <div className={styles.currentBadge}>Current</div>
-        )}
+      <div className={styles.planCardContent}>
+        <div className={styles.planTitleRow}>
+          <h2 className={styles.planName}>{plan.name}</h2>
+          {currentPlan === plan.id && (
+            <div className={styles.currentBadge}>Current</div>
+          )}
+        </div>
+
+        <div className={styles.planPrice}>{plan.price}</div>
+        <div className={styles.planPeriod}>{plan.description}</div>
+
+        <ul className={styles.featuresList}>
+          {plan.features.map((feature, idx) => (
+            <li
+              key={idx}
+              className={`${styles.featureItem} ${
+                !feature.supported ? styles.unsupportedFeature : ""
+              }`}
+            >
+              <img
+                src={feature.supported ? PlanOkIcon : PlanNoIcon}
+                alt={feature.supported ? "Supported" : "Not supported"}
+                className={styles.featureIcon}
+              />
+              <div className={styles.featureTextContainer}>
+                <span className={styles.featureTitle}>{feature.title}</span>
+                {feature.subtitle && (
+                  <span className={styles.featureSubtitle}>
+                    {feature.link ? (
+                      <a
+                        href={feature.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.featureLink}
+                      >
+                        {feature.subtitle}
+                      </a>
+                    ) : (
+                      feature.subtitle
+                    )}
+                  </span>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
-
-      <div className={styles.planPrice}>{plan.price}</div>
-      <div className={styles.planPeriod}>{plan.description}</div>
-
-      <ul className={styles.featuresList}>
-        {plan.features.map((feature, idx) => (
-          <li
-            key={idx}
-            className={`${styles.featureItem} ${
-              !feature.supported ? styles.unsupportedFeature : ""
-            }`}
-          >
-            <img
-              src={feature.supported ? PlanOkIcon : PlanNoIcon}
-              alt={feature.supported ? "Supported" : "Not supported"}
-              className={styles.featureIcon}
-            />
-            <div className={styles.featureTextContainer}>
-              <span className={styles.featureTitle}>{feature.title}</span>
-              {feature.subtitle && (
-                <span className={styles.featureSubtitle}>
-                  {feature.link ? (
-                    <a
-                      href={feature.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.featureLink}
-                    >
-                      {feature.subtitle}
-                    </a>
-                  ) : (
-                    feature.subtitle
-                  )}
-                </span>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
 
       {plan.buttonText && (
         <div className={styles.buttonContainer}>
