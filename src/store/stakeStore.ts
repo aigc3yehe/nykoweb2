@@ -28,22 +28,20 @@ export const stakeStateAtom = atom<StakeState>(initialState);
 // Get token staked info
 export const getStakedInfo = atom(
   null,
-  async (get, set, params: { contract: string, user: string }) => {
+  async (get, set, params: { contract: string; user: string }) => {
     const { contract, user } = params;
     const stakeInfo = await publicClient.readContract({
       abi: NikoTokenLockerAbi,
       address: contract as `0x${string}`,
       functionName: "stakedInfo",
-      args: [user as `0x${string}`]
+      args: [user as `0x${string}`],
     });
     console.log("stakeInfo:", stakeInfo);
-    const amount = formatEther((stakeInfo as { amount: bigint })?.amount);
-    const pendingClaim = formatEther(
-      (stakeInfo as { pendingClaim: bigint })?.pendingClaim
-    );
-    const unstakeTime = (
-      stakeInfo as { unstakeTime: bigint }
-    )?.unstakeTime?.toString();
+    const amount = formatEther((stakeInfo as { amount: bigint })?.amount) || '0';
+    const pendingClaim =
+      formatEther((stakeInfo as { pendingClaim: bigint })?.pendingClaim) || '0';
+    const unstakeTime =
+      (stakeInfo as { unstakeTime: bigint })?.unstakeTime?.toString() || '0';
 
     // 更新加载状态
     set(stakeStateAtom, {
@@ -57,9 +55,9 @@ export const getStakedInfo = atom(
       set(stakeStateAtom, {
         ...get(stakeStateAtom),
         isLoading: false,
-        amount: Number(amount),
-        pendingClaim: Number(pendingClaim),
-        unstakeTime: Number(unstakeTime),
+        amount: Number(amount || 0),
+        pendingClaim: Number(pendingClaim || 0),
+        unstakeTime: Number(unstakeTime || 0),
       });
 
       return stakeInfo;
