@@ -474,7 +474,7 @@ const Pricing: React.FC = () => {
                   Get Additional Credits <span className="text-white">✨</span>
                 </div>
 
-                <div className="flex items-center gap-[1.25rem]">
+                <div className="flex flex-col lg:flex-row items-center gap-[1.25rem]">
                   <span className="font-['Jura'] font-normal text-[1.25rem] leading-[100%] align-middle capitalize text-white">
                     {CuBuyConfig.price} ETH ={" "}
                     {CuBuyConfig.amount.toLocaleString()} Credits
