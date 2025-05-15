@@ -442,7 +442,13 @@ const Pricing: React.FC = () => {
                 />
                 {/* Premium Plus */}
                 <PlanCard
-                  plan={plans[2]}
+                  plan={{
+                    ...plans[2],
+                    buttonText:
+                      stakeState.amount >= plans[1].staked
+                        ? "Upgrade to Premium+"
+                        : plans[2].buttonText,
+                  }}
                   currentPlan={currentPlan}
                   handleSubscribe={handleSubscribe}
                   handleOperation={handleOperation}
