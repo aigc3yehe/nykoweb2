@@ -81,7 +81,7 @@ const initialState: PricingState = {
       id: "premiumPlus",
       name: "Premium+",
       price: "300,000 $NYKO",
-      description: "For expert-level AI players",
+      description: "For Revolutionary AI creators",
       features: [
         {
           title: "12,000 Credits Every Week",
