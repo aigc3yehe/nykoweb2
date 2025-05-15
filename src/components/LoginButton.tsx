@@ -2,13 +2,14 @@ import React, {useEffect, useRef, useState} from "react";
 import {usePrivy, useLogin, useWallets} from "@privy-io/react-auth";
 import styles from "./LoginButton.module.css";
 import GoldIcon from "../assets/gold.svg";
+import PlanPlusIcon from "../assets/plan_plus.svg";
 import { useAtom, useSetAtom } from "jotai";
 import {
   accountAtom,
   setUser,
   logout as logoutAction, setPlan,
 } from "../store/accountStore";
-import { createUser } from "../services/userService";
+import {createUser, PLAN_TYPE} from "../services/userService";
 import { showAccountPopupAtom } from "../store/accountPopupStore";
 import { Twitter } from "../store/imageStore.ts";
 import { useCreateWallet } from "@privy-io/react-auth";
@@ -24,7 +25,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
   const [pricingState] = useAtom(pricingAtom);
   const { stakeConfig } = pricingState;
   const [accountState] = useAtom(accountAtom);
-  const { walletAddress, credits, twitter, plan } = accountState;
+  const { walletAddress, twitter, plan } = accountState;
   const setUserData = useSetAtom(setUser);
   const showAccountPopup = useSetAtom(showAccountPopupAtom);
   const accountRef = useRef<HTMLDivElement>(null);
@@ -126,13 +127,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
     return formatAddress(address);
   };
 
-  // 格式化数字，添加千位分隔符，如果为0则显示无限符号
-  const formatNumber = (num: number) => {
-    if (num === 0) {
-      return "∞"; // 无限符号
-    }
-    return new Intl.NumberFormat().format(num);
-  };
+
 
   const logout = () => {
     console.log("logout success");
@@ -173,10 +168,10 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
     return (
       <div className={styles.loggedInContainer}>
         {/* Credits显示 */}
-        <div className={styles.creditsContainer}>
+        {/* <div className={styles.creditsContainer}>
           <span className={styles.creditsAmount}>{formatNumber(credits)}</span>
           <span className={styles.creditsLabel}>Credits</span>
-        </div>
+        </div> */}
 
         {/* 账户显示 */}
         <div
@@ -184,8 +179,11 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
           className={styles.accountContainer}
           onClick={handleAccountClick}
         >
-          {plan === "Premium" && (
+          {plan === PLAN_TYPE.PREMIUM && (
               <img src={GoldIcon} alt="Account" className={styles.goldIcon} />
+          )}
+          {plan === PLAN_TYPE.PREMIUM_PLUS && (
+              <img src={PlanPlusIcon} alt="Account" className={styles.goldIcon} />
           )}
           <img
             src={twitter?.profilePictureUrl || ""}

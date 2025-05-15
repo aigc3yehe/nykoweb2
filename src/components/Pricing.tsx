@@ -1,22 +1,31 @@
-import React, {useEffect, useMemo, useRef, useState} from "react";
-import {useAtom, useSetAtom} from "jotai";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useAtom, useSetAtom } from "jotai";
 import styles from "./Pricing.module.css";
 import StakeGrid from "../assets/stake_grid.svg";
-import PlanOkIcon from "../assets/plan_ok.svg";
-import PlanNoIcon from "../assets/plan_no.svg";
 import QuestionIcon from "../assets/question.svg";
 import FaqsGridIcon from "../assets/faqs_grid.svg";
-import {pricingAtom, setOperationLoading,} from "../store/pricingStore";
-import {useLogin, usePrivy, useWallets} from "@privy-io/react-auth";
-import {base} from "viem/chains";
-import {createWalletClient, custom, Hex, parseEther} from "viem";
+import SubNormalIcon from "../assets/sub_normal.svg";
+import SubDisableIcon from "../assets/sub_disable.svg";
+import AddNormalIcon from "../assets/add_normal.svg";
+import AddDisableIcon from "../assets/add_disable.svg";
+import { pricingAtom, setOperationLoading } from "../store/pricingStore";
+import { useLogin, usePrivy, useWallets } from "@privy-io/react-auth";
+import { base } from "viem/chains";
+import { createWalletClient, custom, Hex, parseEther } from "viem";
 import NikoTokenLockerAbi from "../abi/INikoTokenLocker.json";
 import ERC20Abi from "../abi/IERC20.json";
-import {showToastAtom} from "../store/imagesStore";
-import {getStakedInfo, stakeStateAtom} from "../store/stakeStore";
-import {publicClient} from "../providers/wagmiConfig";
-import {alchemyStateAtom, getTokensForOwner} from "../store/alchemyStore";
-import { queryStakedToken } from "../services/userService";
+import { showToastAtom } from "../store/imagesStore";
+import { getStakedInfo, stakeStateAtom } from "../store/stakeStore";
+import { publicClient } from "../providers/wagmiConfig";
+import { alchemyStateAtom, getTokensForOwner } from "../store/alchemyStore";
+import {
+  queryStakedToken,
+  chargeCredit,
+  updatePlan,
+} from "../services/userService";
+import { Link } from "react-router-dom";
+import { CuBuyConfig } from "../utils/plan";
+import PlanCard from "./PlanCard";
 
 // 定义价格套餐类型
 const Pricing: React.FC = () => {
@@ -31,7 +40,23 @@ const Pricing: React.FC = () => {
   const [alchemyState] = useAtom(alchemyStateAtom);
   const [, fetchTokens] = useAtom(getTokensForOwner);
   const { user } = usePrivy();
-  const [isPremium, setIsPremium] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState("free");
+  const [buyCuLoading, setBuyCuLoading] = useState(false);
+
+  const [purchaseQuantity, setPurchaseQuantity] = useState(1); // 添加购买数量状态
+
+  // 处理数量增减的函数
+  const handleDecrease = () => {
+    if (purchaseQuantity > 1) {
+      setPurchaseQuantity(purchaseQuantity - 1);
+    }
+  };
+
+  const handleIncrease = () => {
+    if (purchaseQuantity < 10) {
+      setPurchaseQuantity(purchaseQuantity + 1);
+    }
+  };
 
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -51,16 +76,17 @@ const Pricing: React.FC = () => {
         user: wallet.address as `0x${string}`,
       });
     }
-  }, [wallets]);
+  }, [fetchStakedInfo, stakeConfig, wallets]);
 
   useEffect(() => {
-    if (stakeState?.amount == 0 &&
-      stakeState?.unstakeTime == 0) {
-      setIsPremium(false);
+    if (stakeState?.amount == 0) {
+      setCurrentPlan("free");
+    } else if (stakeState?.amount >= plans[2].staked) {
+      setCurrentPlan("premiumPlus");
     } else {
-      setIsPremium(true);
+      setCurrentPlan("premium");
     }
-  }, [stakeState]);
+  }, [stakeState, plans]);
 
   // 更新滚动状态
   useEffect(() => {
@@ -99,7 +125,8 @@ const Pricing: React.FC = () => {
       if (contentRef.current) {
         const deltaY = moveEvent.clientY - startY;
         const scrollRatio = deltaY / clientHeight;
-        contentRef.current.scrollTop = startScrollTop + scrollRatio * scrollHeight;
+        contentRef.current.scrollTop =
+          startScrollTop + scrollRatio * scrollHeight;
         setScrollTop(contentRef.current.scrollTop);
       }
     };
@@ -146,6 +173,8 @@ const Pricing: React.FC = () => {
   }, [wallets]);
 
   const { login } = useLogin();
+
+  // Login by Twitter
   const handleLogin = () => {
     try {
       login();
@@ -154,7 +183,37 @@ const Pricing: React.FC = () => {
     }
   };
 
-  const handleSubscribe = async () => {
+  // Buy training slots
+  const handleBuy = async () => {
+    if (buyCuLoading) return;
+    // 这里添加购买逻辑
+    console.log(`Buy ${purchaseQuantity} CUs`);
+    const ethAmount = purchaseQuantity * CuBuyConfig.price;
+    try {
+      setBuyCuLoading(true);
+      const client = await walletClient;
+      const tx = await client?.sendTransaction({
+        to: CuBuyConfig.treasure as `0x${string}`,
+        value: parseEther(ethAmount.toString()),
+      });
+      await chargeCredit({ tx_hash: tx });
+      showToast({
+        message: `Buy successful: ${tx}`,
+        severity: "success",
+      });
+      setBuyCuLoading(false);
+    } catch (error) {
+      console.error("Buy CUs failed:", error);
+      showToast({
+        message: `Buy failed: ${(error as Error)?.message || "Unknown error"}`,
+        severity: "error",
+      });
+      setBuyCuLoading(false);
+    }
+  };
+
+  // Subscribe to plan by staking $NYKO
+  const handleSubscribe = async (planId: string) => {
     if (!authenticated) {
       handleLogin();
       return;
@@ -172,10 +231,21 @@ const Pricing: React.FC = () => {
           setOperationLoadingFn(false);
           return;
         }
+        const plan = plans.find((plan) => plan.id === planId);
+        if (!plan) {
+          console.error("Plan not found");
+          showToast({
+            message: "Plan not found",
+            severity: "error",
+          });
+          setOperationLoadingFn(false);
+          return;
+        }
         const nikoBalance =
           alchemyState.tokens?.tokens?.find((token) => token.symbol === "NYKO")
             ?.balance || "0";
-        if (Number(nikoBalance) < stakeConfig.defaultAmoount) {
+        const needStakedAmont = plan.staked - Number(stakeState?.amount);
+        if (Number(nikoBalance) < needStakedAmont) {
           const tokens = await fetchTokens({
             addressOrName: client.account?.address as `0x${string}`,
             options: {
@@ -187,14 +257,11 @@ const Pricing: React.FC = () => {
           const nikoToken = tokens.tokens?.find(
             (token) => token.symbol === "NYKO"
           );
-          if (
-            !nikoToken ||
-            Number(nikoToken.balance || 0) < stakeConfig.defaultAmoount
-          ) {
+          if (!nikoToken || Number(nikoToken.balance || 0) < needStakedAmont) {
             showToast({
-              message: `Not enough $NYKO token to stake, need ${
-                stakeConfig.defaultAmoount
-              } $NYKO, current ${nikoToken?.balance || 0} $NYKO`,
+              message: `Not enough $NYKO token to stake, need ${needStakedAmont} $NYKO, current ${
+                nikoToken?.balance || 0
+              } $NYKO`,
               severity: "error",
             });
             setOperationLoadingFn(false);
@@ -211,17 +278,14 @@ const Pricing: React.FC = () => {
           ],
         });
         console.log("allowance", allowance);
-        if (
-          (allowance as bigint) <
-          parseEther(stakeConfig.defaultAmoount.toString())
-        ) {
+        if ((allowance as bigint) < parseEther(needStakedAmont.toString())) {
           await client.writeContract({
             address: stakeConfig.nikoTokenAddress as `0x${string}`,
             abi: ERC20Abi,
             functionName: "approve",
             args: [
               stakeConfig.contractAddrss as `0x${string}`,
-              parseEther(stakeConfig.defaultAmoount.toString()),
+              parseEther(needStakedAmont.toString()),
             ],
           });
         }
@@ -229,7 +293,7 @@ const Pricing: React.FC = () => {
           address: stakeConfig.contractAddrss as `0x${string}`,
           abi: NikoTokenLockerAbi,
           functionName: "stake",
-          args: [parseEther(stakeConfig.defaultAmoount.toString())],
+          args: [parseEther(needStakedAmont.toString())],
         });
 
         await fetchStakedInfo({
@@ -237,7 +301,12 @@ const Pricing: React.FC = () => {
           user: client?.account?.address as `0x${string}`,
         });
 
-        await queryStakedToken({ did: user?.id || "" });
+        try {
+          await queryStakedToken({ did: user?.id || "" });
+          await updatePlan({ did: user?.id || "" });
+        } catch (error) {
+          console.error("Update plan failed:", error);
+        }
 
         showToast({
           message: `Stake successful: ${data}`,
@@ -255,7 +324,7 @@ const Pricing: React.FC = () => {
       }
     }
   };
-
+  // Unstake or claim staked $NYKO
   const handleOperation = async (operation: "unstake" | "claim") => {
     if (!isLoading) {
       try {
@@ -283,7 +352,12 @@ const Pricing: React.FC = () => {
         });
 
         if (operation == "unstake") {
-          await queryStakedToken({ did: user?.id || "" });
+          try {
+            await queryStakedToken({ did: user?.id || "" });
+            await updatePlan({ did: user?.id || "" });
+          } catch (error) {
+            console.error("Update plan failed:", error);
+          }
         }
 
         showToast({
@@ -320,116 +394,167 @@ const Pricing: React.FC = () => {
                 <h1 className={styles.title}>Stake to Subscribe</h1>
                 <p className={styles.subtitle}>
                   Upgrade to gain access to Premium features
+                  <Link
+                    target="_blank"
+                    to={`https://flaunch.gg/base/coin`}
+                    className="m-1"
+                  >
+                    Bug $NYKO
+                  </Link>
                 </p>
               </div>
 
               <div className={styles.plansContainer}>
-                {plans.map((plan) => (
-                  <div
-                    key={plan.id}
-                    className={`${styles.planCard} ${
-                      plan.id === "premium" ? styles.premium : ""
-                    }`}
-                  >
-                    <div className={styles.planTitleRow}>
-                      <h2 className={styles.planName}>{plan.name}</h2>
-                      {isPremium === (plan.id === "premium") && (
-                        <div className={styles.currentBadge}>Current</div>
-                      )}
+                {/* Free */}
+                <PlanCard
+                  plan={plans[0]}
+                  currentPlan={currentPlan}
+                  handleSubscribe={handleSubscribe}
+                  handleOperation={handleOperation}
+                  isLoading={isLoading}
+                />
+                {/* Premium */}
+                <PlanCard
+                  plan={plans[1]}
+                  currentPlan={currentPlan}
+                  handleSubscribe={handleSubscribe}
+                  handleOperation={handleOperation}
+                  isLoading={isLoading}
+                  showStake={
+                    stakeState.amount < plans[1].staked &&
+                    stakeState.unstakeTime == 0
+                  }
+                  showUnstake={
+                    stakeState.amount >= plans[1].staked &&
+                    stakeState.amount < plans[2].staked
+                  }
+                  showPendingClaim={
+                    stakeState.pendingClaim >= plans[1].staked &&
+                    stakeState.pendingClaim < plans[2].staked
+                  }
+                  showClaim={
+                    stakeState.pendingClaim >= plans[1].staked &&
+                    stakeState.pendingClaim < plans[2].staked &&
+                    stakeState?.unstakeTime < Math.floor(Date.now() / 1000)
+                  }
+                  pendingClaim={stakeState.pendingClaim}
+                  unstakeTime={stakeState.unstakeTime}
+                />
+                {/* Premium Plus */}
+                <PlanCard
+                  plan={{
+                    ...plans[2],
+                    buttonText:
+                      stakeState.amount >= plans[1].staked
+                        ? "Upgrade to Premium+"
+                        : plans[2].buttonText,
+                  }}
+                  currentPlan={currentPlan}
+                  handleSubscribe={handleSubscribe}
+                  handleOperation={handleOperation}
+                  isLoading={isLoading}
+                  showStake={
+                    stakeState.amount < plans[2].staked &&
+                    stakeState.unstakeTime == 0
+                  }
+                  showUnstake={stakeState.amount >= plans[2].staked}
+                  showPendingClaim={stakeState.pendingClaim >= plans[2].staked}
+                  showClaim={
+                    stakeState.pendingClaim >= plans[2].staked &&
+                    stakeState?.unstakeTime < Math.floor(Date.now() / 1000)
+                  }
+                  pendingClaim={stakeState.pendingClaim}
+                  unstakeTime={stakeState.unstakeTime}
+                />
+              </div>
+
+              {/* quit buy nyko */}
+              <div className="pt-5 pb-5 pl-7 pr-7 gap-1.5 flex flex-col lg:flex-row justify-between items-center bg-gradient-to-r from-[rgba(255,106,0,0.2)] via-[rgba(31,41,55,0.2)] to-[rgba(82,84,181,0.2)] rounded border border-[#3741514D] backdrop-blur-[20px] gap-[1.25rem]">
+                <div className="font-['Jura'] font-bold text-[1.25rem] leading-[120%] align-middle capitalize bg-gradient-to-r from-[#6366F1] to-[#FF6A00] bg-clip-text text-transparent">
+                  Get Additional Credits <span className="text-white">✨</span>
+                </div>
+
+                <div className="flex flex-col lg:flex-row items-center gap-[1.25rem]">
+                  <span className="font-['Jura'] font-normal text-[1.25rem] leading-[100%] align-middle capitalize text-white">
+                    {CuBuyConfig.price} ETH ={" "}
+                    {CuBuyConfig.amount.toLocaleString()} Credits
+                  </span>
+
+                  <div className="flex items-center gap-[0.375rem]">
+                    <button
+                      onClick={handleDecrease}
+                      className="w-[2.5rem] h-[2.0625rem] flex items-center justify-center"
+                    >
+                      <img
+                        src={
+                          purchaseQuantity <= 1 ? SubDisableIcon : SubNormalIcon
+                        }
+                        alt="Decrease"
+                        className="w-full h-full"
+                      />
+                    </button>
+
+                    <div className="w-[3.5rem] h-[2.0625rem] gap-[0.5rem] py-[0.5rem] px-[0.875rem] rounded-[0.25rem] border border-[#37415180] flex items-center justify-center">
+                      <span className="font-['Jura'] font-medium text-[0.875rem] leading-[100%] text-center align-middle text-white">
+                        {purchaseQuantity}
+                      </span>
                     </div>
 
-                    <div className={styles.planPrice}>{plan.price}</div>
-                    <div className={styles.planPeriod}>{plan.description}</div>
-
-                    <ul className={styles.featuresList}>
-                      {plan.features.map((feature, idx) => (
-                        <li
-                          key={idx}
-                          className={`${styles.featureItem} ${
-                            !feature.supported ? styles.unsupportedFeature : ""
-                          }`}
-                        >
-                          <img
-                            src={feature.supported ? PlanOkIcon : PlanNoIcon}
-                            alt={
-                              feature.supported ? "Supported" : "Not supported"
-                            }
-                            className={styles.featureIcon}
-                          />
-                          <div className={styles.featureTextContainer}>
-                            <span className={styles.featureTitle}>
-                              {feature.title}
-                            </span>
-                            {feature.subtitle && (
-                              <span className={styles.featureSubtitle}>
-                                {feature.link ? (
-                                  <a
-                                    href={feature.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={styles.featureLink}
-                                  >
-                                    {feature.subtitle}
-                                  </a>
-                                ) : (
-                                  feature.subtitle
-                                )}
-                              </span>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-
-                    {plan.buttonText && (
-                      <div className={styles.buttonContainer}>
-                        {stakeState?.amount == 0 &&
-                          stakeState?.unstakeTime == 0 && (
-                            <button
-                              className={styles.subscribeButton}
-                              onClick={() => handleSubscribe()}
-                              disabled={isLoading}
-                            >
-                              {isLoading ? "Processing..." : plan.buttonText}
-                            </button>
-                          )}
-                        {stakeState?.amount > 0 && (
-                          <button
-                            className={styles.unstakeButton}
-                            onClick={() => handleOperation("unstake")}
-                            disabled={isLoading}
-                          >
-                            {isLoading ? "Processing..." : "Unstake"}
-                          </button>
-                        )}
-                        {stakeState?.pendingClaim > 0 && (
-                          <div className={styles.pendingButton}>
-                            Claim {stakeState?.pendingClaim} $NYKO after{" "}
-                            {new Date(
-                              stakeState?.unstakeTime * 1000
-                            ).toLocaleString()}
-                          </div>
-                        )}
-                        {stakeState?.pendingClaim > 0 &&
-                          stakeState?.unstakeTime <
-                            Math.floor(Date.now() / 1000) && (
-                            <button
-                              className={styles.claimButton}
-                              onClick={() => handleOperation("claim")}
-                              disabled={isLoading}
-                            >
-                              {isLoading ? "Processing..." : "Claim"}
-                            </button>
-                          )}
-
-                        {plan.tips && (
-                          <p className={styles.buttonNote}>{plan.tips}</p>
-                        )}
-                      </div>
-                    )}
+                    <button
+                      onClick={handleIncrease}
+                      className="w-[2.5rem] h-[2.0625rem] flex items-center justify-center"
+                    >
+                      <img
+                        src={
+                          purchaseQuantity >= 10
+                            ? AddDisableIcon
+                            : AddNormalIcon
+                        }
+                        alt="Increase"
+                        className="w-full h-full"
+                      />
+                    </button>
                   </div>
-                ))}
+
+                  <button
+                    onClick={handleBuy}
+                    className="gap py-[0.375rem] px-[1.875rem] rounded bg-[#6366F1] font-['Jura'] font-bold text-[16px] leading-[100%] text-center align-middle text-black"
+                    disabled={buyCuLoading}
+                  >
+                    {buyCuLoading ? "BUYING..." : "BUY"}
+                  </button>
+                </div>
               </div>
+              {/* sponsor */}
+              {/* <div
+                className="w-full h-[7.8125rem] gap-[0.375rem] py-[1.5rem] px-[1.875rem] rounded border border-[#3741514D] backdrop-blur-[20px] flex flex-col"
+                style={{
+                  backgroundImage: `url('/sponsor.png')`,
+                  backgroundSize: "100% 100%",
+                  backgroundPosition: "left top",
+                  backgroundRepeat: "no-repeat",
+                }}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="font-['Jura'] font-bold text-[1.875rem] leading-[100%] align-middle capitalize text-white">
+                    Apply for NYKO Creator Sponsor !
+                  </span>
+                  <button
+                    onClick={()=>{}}
+                    className="gap py-[0.375rem] px-[1.875rem] rounded bg-white font-['Jura'] font-bold text-[1rem] leading-[100%] text-center align-middle text-black"
+                  >
+                    APPLY
+                  </button>
+                </div>
+                <div className="mt-2">
+                  <span className="font-['Jura'] font-normal text-[0.875rem] leading-[130%] align-middle capitalize text-white block">
+                    want to create more on Nyko?
+                  </span>
+                  <span className="font-['Jura'] font-normal text-[0.875rem] leading-[130%] align-middle capitalize text-white block">
+                    you can now apply for the nyko AI cerativity fund.
+                  </span>
+                </div>
+              </div> */}
             </div>
           </div>
 
@@ -454,15 +579,13 @@ const Pricing: React.FC = () => {
                     className={styles.faqIcon}
                   />
                   <div className={styles.faqContent}>
-                    <h3 className={styles.faqQuestion}>
-                      What is NYKO?
-                    </h3>
+                    <h3 className={styles.faqQuestion}>What is NYKO?</h3>
                     <p className={styles.faqAnswer}>
-                      NYKO includes an Agent and application platform, 
-                      as well as the AI creativity tokenization contract. 
-                      The Agent and application platform are responsible for making 
-                      the generation and application of creativity simple, 
-                      while the creativity tokenization contract handles launching, 
+                      NYKO includes an Agent and application platform, as well
+                      as the AI creativity tokenization contract. The Agent and
+                      application platform are responsible for making the
+                      generation and application of creativity simple, while the
+                      creativity tokenization contract handles launching,
                       binding, and revenue distribution.
                     </p>
                   </div>
@@ -479,8 +602,9 @@ const Pricing: React.FC = () => {
                       I like this image style, how can I generate one?
                     </h3>
                     <p className={styles.faqAnswer}>
-                      Click the "Generate" button, just like traditional image generation apps. 
-                      Or simply tell Niyoko that you want to generate an image.
+                      Click the "Generate" button, just like traditional image
+                      generation apps. Or simply tell Niyoko that you want to
+                      generate an image.
                     </p>
                   </div>
                 </div>
@@ -496,7 +620,8 @@ const Pricing: React.FC = () => {
                       Will staking $NYKO burn it?
                     </h3>
                     <p className={styles.faqAnswer}>
-                      The $NYKO used in the Stake to Subscribe system won’t be burned—you can withdraw it at any time.
+                      The $NYKO used in the Stake to Subscribe system won’t be
+                      burned—you can withdraw it at any time.
                     </p>
                   </div>
                 </div>
@@ -523,5 +648,4 @@ const Pricing: React.FC = () => {
     </div>
   );
 };
-
 export default Pricing;

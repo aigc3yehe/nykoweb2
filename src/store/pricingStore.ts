@@ -13,7 +13,6 @@ export interface PricingFeature {
 export interface StakeConfig {
   nikoTokenAddress: string;
   contractAddrss: string;
-  defaultAmoount: number;
 }
 
 // 定义价格套餐类型
@@ -25,6 +24,7 @@ export interface PricingPlan {
   features: PricingFeature[];
   buttonText?: string;
   tips?: string;
+  staked: number;
 }
 
 // 定义定价状态接口
@@ -46,19 +46,16 @@ const initialState: PricingState = {
       description: "For starter",
       features: [
         {
-          title: "Up to 5 images per day",
+          title: "100 Credits Every Week",
           subtitle: "On Website",
           supported: true,
         },
         {
-          title: "Model training",
-          supported: false,
-        },
-        {
-          title: "Not eligible for Primedata rewards",
+          title: "Not Eligible For Primedata Rewards",
           supported: false,
         },
       ],
+      staked: 0,
     },
     {
       id: "premium",
@@ -67,23 +64,46 @@ const initialState: PricingState = {
       description: "For expert-level AI players",
       features: [
         {
-          title: "Unlimited images per day.",
-          subtitle: "On Website & X",
+          title: "2,500 Credits Every Week",
+          subtitle: "On Website",
           supported: true,
         },
         {
-          title: "1 Model Training Available",
-          subtitle: "Application Required",
-          supported: true,
-          link: "https://discord.com/channels/1368843355362164786/1368986279319961600"
-        },
-        {
-          title: "eligible for Primedata rewards",
+          title: "Eligible For Primedata Rewards",
           supported: true,
         },
       ],
       buttonText: "Stake to Subscribe",
       tips: "*You can unstake to cancel your subscription. Withdrawable after a 7-day cooldown",
+      staked: 75_000,
+    },
+    {
+      id: "premiumPlus",
+      name: "Premium+",
+      price: "300,000 $NYKO",
+      description: "For expert-level AI players",
+      features: [
+        {
+          title: "12,000 Credits Every Week",
+          subtitle: "On Website & X",
+          supported: true,
+        },
+        {
+          title: "Eligible for Primedata Rewards",
+          supported: true,
+        },
+        {
+          title: "Access to Premium+ Creators Channel",
+          supported: true,
+        },
+        {
+          title: "Voting Rights for Sponsorships",
+          supported: true,
+        },
+      ],
+      buttonText: "Stake to Subscribe",
+      tips: "*You can unstake to cancel your subscription. Withdrawable after a 7-day cooldown",
+      staked: 300_000,
     },
   ],
   currentPlanId: "free",
@@ -92,7 +112,6 @@ const initialState: PricingState = {
   stakeConfig: {
     nikoTokenAddress: "0x129966d7D25775b57E3C5b13b2E1c2045FBc4926",
     contractAddrss: "0xb1542ce040f0d0b9ce6958cbdda40905b4a7551a",
-    defaultAmoount: 75_000,
   },
 };
 

@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { User, Google } from '@privy-io/react-auth';
-import { queryUser } from '../services/userService';
+import {queryUser, queryUserPlan} from '../services/userService';
 import { Twitter } from './imageStore';
 import { chatAtom } from './chatStore'; // 导入聊天状态
 
@@ -70,6 +70,7 @@ export const setUser = atom(
 
         try {
           const result = await queryUser(queryParams);
+          const planResult = await queryUserPlan(queryParams);
 
           set(accountAtom, {
             user,
@@ -79,12 +80,12 @@ export const setUser = atom(
             isLoading: false,
             isLoggedIn: true,
             error: null,
-            credits: result.data.credit,
+            credits: planResult.data.sub_balance + planResult.data.paid_balance,
             did,
             role: result.data.role || 'user',
             name: result.data.name || null,
             avatar: result.data.avatar || null,
-            plan: "Free"
+            plan: planResult.data.plan_type
           });
         } catch (error) {
           // 如果查询失败，仍使用本地用户信息
@@ -101,12 +102,12 @@ export const setUser = atom(
             isLoading: false,
             isLoggedIn: true,
             error: (error as Error).message,
-            credits: 0,
+            credits: 0, // Fallback credits
             did,
             role: 'user',
             name: null,
             avatar: null,
-            plan: "Free"
+            plan: "free" // Fallback plan
           });
         }
       } else {
@@ -138,6 +139,38 @@ export const setUser = atom(
         isLoading: false,
         error: (error as Error).message
       });
+    }
+  }
+);
+
+// Atom to trigger refreshing user plan (credits and plan type)
+export const refreshUserPlanAtom = atom(
+  null,
+  async (get, set) => {
+    const accountState = get(accountAtom);
+    const did = accountState.did;
+
+    if (did) {
+      try {
+        // Optional: set loading state if you have a specific loading indicator for this
+        // set(accountAtom, (prev) => ({ ...prev, isLoading: true }));
+
+        const planResult = await queryUserPlan({ did });
+        set(accountAtom, (prev) => ({
+          ...prev,
+          credits: planResult.data.sub_balance + planResult.data.paid_balance,
+          plan: planResult.data.plan_type,
+          // isLoading: false, // Optional: clear loading state
+        }));
+      } catch (error) {
+        console.error("Failed to refresh user plan:", error);
+        set(accountAtom, (prev) => ({
+          ...prev,
+          // isLoading: false, // Optional: clear loading state
+          // Optionally update an error field specific to plan refresh
+          // error: `Failed to refresh credits: ${(error as Error).message}`,
+        }));
+      }
     }
   }
 );

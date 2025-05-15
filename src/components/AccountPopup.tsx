@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLogout } from '@privy-io/react-auth';
 import styles from './AccountPopup.module.css';
 import GoldIcon from '../assets/gold.svg';
+import PlanPlusIcon from '../assets/plan_plus.svg';
 import KeyIcon from '../assets/key.svg';
 import LogoutIcon from '../assets/logout.svg';
 import CopyIcon from '../assets/copy_address.svg';
@@ -9,6 +10,10 @@ import CloseIcon from '../assets/close_account.svg';
 import RocketIcon from '../assets/bxs_rocket.svg';
 import WalletAssets from './WalletAssets';
 import { useNavigate } from 'react-router-dom';
+import { PLAN_TYPE } from "../services/userService.ts";
+import { useAtom } from 'jotai';
+import { refreshUserPlanAtom } from '../store/accountStore';
+import { accountAtom } from "../store/accountStore";
 
 interface AccountPopupProps {
   isOpen: boolean;
@@ -37,6 +42,24 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [, refreshUserPlan] = useAtom(refreshUserPlanAtom);
+  const [accountState] = useAtom(accountAtom);
+  const { credits } = accountState;
+
+  // 在弹窗打开时刷新用户的credits
+  useEffect(() => {
+    if (isOpen) {
+      refreshUserPlan();
+    }
+  }, [isOpen, refreshUserPlan]);
+
+  // 格式化数字，添加千位分隔符，如果为0则显示无限符号
+  const formatNumber = (num: number) => {
+    if (num === 0) {
+      return "∞"; // 无限符号
+    }
+    return new Intl.NumberFormat().format(num);
+  };
 
   // 使用 useLogout hook 实现带回调的登出功能
   const { logout } = useLogout({
@@ -108,7 +131,12 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
               <div className={styles.userNameRow}>
                 <div className={styles.userNameContainer}>
                   <span className={styles.userName}>{formatName(userData.name)}</span>
-                  {userData.plan === "Premium" ? (
+                  {userData.plan === PLAN_TYPE.PREMIUM_PLUS ? (
+                      <div className={styles.premiumPlusBadge}>
+                        <img src={PlanPlusIcon} alt="PremiumPlus" width="14" height="14" />
+                        <span className={styles.premiumPlusText}>Premium +</span>
+                      </div>
+                  ) : userData.plan === PLAN_TYPE.PREMIUM ? (
                       <div className={styles.premiumBadge}>
                         <img src={GoldIcon} alt="Premium" width="14" height="14" />
                         <span className={styles.premiumText}>Premium</span>
@@ -197,7 +225,19 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
             <span className={styles.planText}>Plan & Pricing</span>
           </div>
         </div>
-        {/* 第六部分：登出按钮 */}
+
+        {/* 新增：第六部分，显示用户Credits */}
+        <div className={styles.creditsContainer} onClick={() => {
+          onClose();
+          navigate('/pricing');
+        }}>
+          <div className={styles.actionRow}>
+            <span className={styles.creditsLabel}>Credits</span>
+            <span className={styles.creditsValue}>{formatNumber(credits || 0)}</span>
+          </div>
+        </div>
+
+        {/* 第七部分：登出按钮 */}
         <div
           className={`${styles.logoutContainer} ${isLoggingOut ? styles.disabled : ''}`}
           onClick={isLoggingOut ? undefined : handleLogout}
