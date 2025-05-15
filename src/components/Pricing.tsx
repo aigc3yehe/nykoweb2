@@ -20,7 +20,11 @@ import { showToastAtom } from "../store/imagesStore";
 import { getStakedInfo, stakeStateAtom } from "../store/stakeStore";
 import { publicClient } from "../providers/wagmiConfig";
 import { alchemyStateAtom, getTokensForOwner } from "../store/alchemyStore";
-import { queryStakedToken, chargeCredit } from "../services/userService";
+import {
+  queryStakedToken,
+  chargeCredit,
+  updatePlan,
+} from "../services/userService";
 import { Link } from "react-router-dom";
 import { CuBuyConfig } from "../utils/plan";
 
@@ -298,7 +302,12 @@ const Pricing: React.FC = () => {
           user: client?.account?.address as `0x${string}`,
         });
 
-        await queryStakedToken({ did: user?.id || "" });
+        try {
+          await queryStakedToken({ did: user?.id || "" });
+          await updatePlan({ did: user?.id || "" });
+        } catch (error) {
+          console.error("Update plan failed:", error);
+        }
 
         showToast({
           message: `Stake successful: ${data}`,
@@ -344,7 +353,12 @@ const Pricing: React.FC = () => {
         });
 
         if (operation == "unstake") {
-          await queryStakedToken({ did: user?.id || "" });
+          try {
+            await queryStakedToken({ did: user?.id || "" });
+            await updatePlan({ did: user?.id || "" });
+          } catch (error) {
+            console.error("Update plan failed:", error);
+          }
         }
 
         showToast({

@@ -128,6 +128,28 @@ export const queryStakedToken = async (params: { did: string }) => {
   }
 };
 
+export const updatePlan = async (params: { did: string }) => {
+  if (!params.did) return;
+  try {
+    const response = await fetch("/studio-api/users/plan/update", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+      },
+      body: JSON.stringify({ user: params.did }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Update plan failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Update plan failed:", error);
+  }
+};
+
 export const chargeCredit = async (params: { tx_hash?: string }) => {
   try {
     if (!params.tx_hash) return;
