@@ -85,6 +85,31 @@ const initialState: PricingState = {
       buttonText: "Stake to Subscribe",
       tips: "*You can unstake to cancel your subscription. Withdrawable after a 7-day cooldown",
     },
+    {
+      id: "premiumPlus",
+      name: "Premium+",
+      price: "300,000 $NYKO",
+      description: "For expert-level AI players",
+      features: [
+        {
+          title: "Unlimited images per day.",
+          subtitle: "On Website & X",
+          supported: true,
+        },
+        {
+          title: "1 Model Training Available",
+          subtitle: "Application Required",
+          supported: true,
+          link: "https://discord.com/channels/1368843355362164786/1368986279319961600"
+        },
+        {
+          title: "eligible for Primedata rewards",
+          supported: true,
+        },
+      ],
+      buttonText: "Stake to Subscribe",
+      tips: "*You can unstake to cancel your subscription. Withdrawable after a 7-day cooldown",
+    },
   ],
   currentPlanId: "free",
   isLoading: false,
@@ -93,7 +118,7 @@ const initialState: PricingState = {
     nikoTokenAddress: "0x129966d7D25775b57E3C5b13b2E1c2045FBc4926",
     contractAddrss: "0xb1542ce040f0d0b9ce6958cbdda40905b4a7551a",
     defaultAmoount: 75_000,
-  },
+  }
 };
 
 // 创建定价状态原子

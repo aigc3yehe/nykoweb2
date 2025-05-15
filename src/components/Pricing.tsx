@@ -6,6 +6,10 @@ import PlanOkIcon from "../assets/plan_ok.svg";
 import PlanNoIcon from "../assets/plan_no.svg";
 import QuestionIcon from "../assets/question.svg";
 import FaqsGridIcon from "../assets/faqs_grid.svg";
+import SubNormalIcon from "../assets/sub_normal.svg";
+import SubDisableIcon from "../assets/sub_disable.svg";
+import AddNormalIcon from "../assets/add_normal.svg";
+import AddDisableIcon from "../assets/add_disable.svg";
 import {pricingAtom, setOperationLoading,} from "../store/pricingStore";
 import {useLogin, usePrivy, useWallets} from "@privy-io/react-auth";
 import {base} from "viem/chains";
@@ -17,6 +21,7 @@ import {getStakedInfo, stakeStateAtom} from "../store/stakeStore";
 import {publicClient} from "../providers/wagmiConfig";
 import {alchemyStateAtom, getTokensForOwner} from "../store/alchemyStore";
 import { queryStakedToken } from "../services/userService";
+import { Link } from "react-router-dom";
 
 // 定义价格套餐类型
 const Pricing: React.FC = () => {
@@ -31,7 +36,28 @@ const Pricing: React.FC = () => {
   const [alchemyState] = useAtom(alchemyStateAtom);
   const [, fetchTokens] = useAtom(getTokensForOwner);
   const { user } = usePrivy();
-  const [isPremium, setIsPremium] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState("free");
+
+  const [purchaseQuantity, setPurchaseQuantity] = useState(1); // 添加购买数量状态
+
+  // 处理数量增减的函数
+  const handleDecrease = () => {
+    if (purchaseQuantity > 1) {
+      setPurchaseQuantity(purchaseQuantity - 1);
+    }
+  };
+
+  const handleIncrease = () => {
+    if (purchaseQuantity < 10) {
+      setPurchaseQuantity(purchaseQuantity + 1);
+    }
+  };
+
+  const handleBuy = () => {
+    // 这里添加购买逻辑
+    console.log(`购买 ${purchaseQuantity} 个训练槽`);
+    // 可以调用相应的API或合约函数
+  };
 
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -56,9 +82,10 @@ const Pricing: React.FC = () => {
   useEffect(() => {
     if (stakeState?.amount == 0 &&
       stakeState?.unstakeTime == 0) {
-      setIsPremium(false);
+        setCurrentPlan("free");
+
     } else {
-      setIsPremium(true);
+      setCurrentPlan("premium");
     }
   }, [stakeState]);
 
@@ -320,6 +347,9 @@ const Pricing: React.FC = () => {
                 <h1 className={styles.title}>Stake to Subscribe</h1>
                 <p className={styles.subtitle}>
                   Upgrade to gain access to Premium features
+                  <Link target="_blank" to={`https://flaunch.gg/base/coin`} className="m-1">
+                    Bug $NYKO
+                  </Link>
                 </p>
               </div>
 
@@ -329,11 +359,13 @@ const Pricing: React.FC = () => {
                     key={plan.id}
                     className={`${styles.planCard} ${
                       plan.id === "premium" ? styles.premium : ""
+                    } ${
+                      plan.id === "premiumPlus" ? styles.premiumPlus : ""
                     }`}
                   >
                     <div className={styles.planTitleRow}>
                       <h2 className={styles.planName}>{plan.name}</h2>
-                      {isPremium === (plan.id === "premium") && (
+                      {currentPlan === plan.id && (
                         <div className={styles.currentBadge}>Current</div>
                       )}
                     </div>
@@ -430,6 +462,76 @@ const Pricing: React.FC = () => {
                   </div>
                 ))}
               </div>
+
+              {/* quit buy nyko */}
+              <div className="pt-5 pb-5 pl-7 pr-7 gap-1.5 flex justify-between items-center bg-gradient-to-r from-[rgba(255,106,0,0.2)] via-[rgba(31,41,55,0.2)] to-[rgba(82,84,181,0.2)] rounded border border-[#3741514D] backdrop-blur-[20px] gap-[20px]">
+
+                <div className="font-['Jura'] font-bold text-[20px] leading-[120%] align-middle capitalize bg-gradient-to-r from-[#6366F1] to-[#FF6A00] bg-clip-text text-transparent">
+                  Get Additional model training slots <span className="text-white">✨</span>
+                </div>
+
+                <div className="flex items-center gap-[20px]">
+                  <span className="font-['Jura'] font-normal text-[20px] leading-[100%] align-middle capitalize text-white">
+                    65,000 $NYKO / training
+                  </span>
+
+                  <div className="flex items-center gap-[6px]">
+                    <button
+                      onClick={handleDecrease}
+                      className="w-[2.5rem] h-[2.0625rem] flex items-center justify-center"
+                    >
+                      <img src={purchaseQuantity <= 1 ? SubDisableIcon : SubNormalIcon} alt="Decrease" className="w-full h-full"/>
+                    </button>
+
+                    <div className="w-[56px] h-[2.0625rem] gap-[8px] py-[8px] px-[14px] rounded-[4px] border border-[#37415180] flex items-center justify-center">
+                      <span className="font-['Jura'] font-medium text-[14px] leading-[100%] text-center align-middle text-white">
+                        {purchaseQuantity}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={handleIncrease}
+                      className="w-[2.5rem] h-[2.0625rem] flex items-center justify-center"
+                    >
+                      <img src={purchaseQuantity >= 10 ? AddDisableIcon : AddNormalIcon} alt="Increase" className="w-full h-full"/>
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={handleBuy}
+                    className="gap py-[0.375rem] px-[1.875rem] rounded bg-[#6366F1] font-['Jura'] font-bold text-[16px] leading-[100%] text-center align-middle text-black"
+                  >
+                    BUY
+                  </button>
+                </div>
+              </div>
+             {/* sponsor */}
+             <div className="w-full h-[7.8125rem] gap-[0.375rem] py-[1.5rem] px-[1.875rem] rounded border border-[#3741514D] backdrop-blur-[20px] flex flex-col" style={{ 
+                backgroundImage: `url('/sponsor.png')`, 
+                backgroundSize: '100% 100%', 
+                backgroundPosition: 'left top',
+                backgroundRepeat: 'no-repeat'
+              }}>
+                <div className="flex justify-between items-center">
+                  <span className="font-['Jura'] font-bold text-[1.875rem] leading-[100%] align-middle capitalize text-white">
+                    Apply for NYKO Creator Sponsor !
+                  </span>
+                  <button
+                    onClick={handleBuy}
+                    className="gap py-[0.375rem] px-[1.875rem] rounded bg-white font-['Jura'] font-bold text-[1rem] leading-[100%] text-center align-middle text-black"
+                  >
+                    APPLY
+                  </button>
+                </div>
+                <div className="mt-2">
+                  <span className="font-['Jura'] font-normal text-[0.875rem] leading-[130%] align-middle capitalize text-white block">
+                    want to create more on Nyko?
+                  </span>
+                  <span className="font-['Jura'] font-normal text-[0.875rem] leading-[130%] align-middle capitalize text-white block">
+                    you can now apply for the nyko AI cerativity fund.
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -458,11 +560,11 @@ const Pricing: React.FC = () => {
                       What is NYKO?
                     </h3>
                     <p className={styles.faqAnswer}>
-                      NYKO includes an Agent and application platform, 
-                      as well as the AI creativity tokenization contract. 
-                      The Agent and application platform are responsible for making 
-                      the generation and application of creativity simple, 
-                      while the creativity tokenization contract handles launching, 
+                      NYKO includes an Agent and application platform,
+                      as well as the AI creativity tokenization contract.
+                      The Agent and application platform are responsible for making
+                      the generation and application of creativity simple,
+                      while the creativity tokenization contract handles launching,
                       binding, and revenue distribution.
                     </p>
                   </div>
@@ -479,7 +581,7 @@ const Pricing: React.FC = () => {
                       I like this image style, how can I generate one?
                     </h3>
                     <p className={styles.faqAnswer}>
-                      Click the "Generate" button, just like traditional image generation apps. 
+                      Click the "Generate" button, just like traditional image generation apps.
                       Or simply tell Niyoko that you want to generate an image.
                     </p>
                   </div>
@@ -523,5 +625,4 @@ const Pricing: React.FC = () => {
     </div>
   );
 };
-
 export default Pricing;
