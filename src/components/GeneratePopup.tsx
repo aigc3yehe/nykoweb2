@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { generatePopupAtom, generate, setAspectRatio } from '../store/generatePopupStore';
 import styles from './GeneratePopup.module.css';
 import closeImgSvg from '../assets/close_img.svg';
@@ -10,6 +10,9 @@ import createSvg from '../assets/create.svg';
 import statusSvg from '../assets/status.svg';
 import downloadSvg from '../assets/download.svg';
 import { aspectRatios, AspectRatio } from '../store/chatStore';
+import { accountAtom, refreshUserPlanAtom } from '../store/accountStore';
+import { GENERATE_IMAGE_SERVICE_CONFIG } from '../utils/plan';
+import { showToastAtom } from '../store/imagesStore';
 
 interface GeneratePopupProps {
   isOpen: boolean;
@@ -27,6 +30,9 @@ const GeneratePopup: React.FC<GeneratePopupProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [accountState, ] = useAtom(accountAtom);
+  const showToast = useSetAtom(showToastAtom);
+  const [, refreshUserPlan] = useAtom(refreshUserPlanAtom);
 
   const [, generateAction] = useAtom(generate);
   const [, setAspectRatioAction] = useAtom(setAspectRatio);
@@ -155,10 +161,22 @@ const GeneratePopup: React.FC<GeneratePopupProps> = ({
   // 处理生成请求
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
+    if(accountState?.credits < GENERATE_IMAGE_SERVICE_CONFIG.cu){
+      showToast({
+        message: 'Credits not enough.',
+        severity: 'error'
+      });
+      return;
+    }
     await generateAction(
       prompt.trim(),
       loraStrength
     );
+    try {
+      await refreshUserPlan();
+    } catch {
+      console.error("Refresh user plan failed.");
+    }
   };
 
   // 处理输入变化
