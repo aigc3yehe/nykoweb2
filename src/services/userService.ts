@@ -127,3 +127,25 @@ export const queryStakedToken = async (params: { did: string }) => {
     console.error("Query user staked token failed:", error);
   }
 };
+
+export const chargeCredit = async (params: { tx_hash?: string }) => {
+  try {
+    if (!params.tx_hash) return;
+    const response = await fetch("/studio-api/users/plan/charge", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      throw new Error("Buy CU failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Buy CU failed:", error);
+  }
+};

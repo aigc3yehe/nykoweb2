@@ -13,7 +13,6 @@ export interface PricingFeature {
 export interface StakeConfig {
   nikoTokenAddress: string;
   contractAddrss: string;
-  defaultAmoount: number;
 }
 
 // 定义价格套餐类型
@@ -25,6 +24,7 @@ export interface PricingPlan {
   features: PricingFeature[];
   buttonText?: string;
   tips?: string;
+  staked: number;
 }
 
 // 定义定价状态接口
@@ -59,6 +59,7 @@ const initialState: PricingState = {
           supported: false,
         },
       ],
+      staked: 0,
     },
     {
       id: "premium",
@@ -75,7 +76,7 @@ const initialState: PricingState = {
           title: "1 Model Training Available",
           subtitle: "Application Required",
           supported: true,
-          link: "https://discord.com/channels/1368843355362164786/1368986279319961600"
+          link: "https://discord.com/channels/1368843355362164786/1368986279319961600",
         },
         {
           title: "eligible for Primedata rewards",
@@ -84,6 +85,7 @@ const initialState: PricingState = {
       ],
       buttonText: "Stake to Subscribe",
       tips: "*You can unstake to cancel your subscription. Withdrawable after a 7-day cooldown",
+      staked: 75_000,
     },
     {
       id: "premiumPlus",
@@ -100,7 +102,7 @@ const initialState: PricingState = {
           title: "1 Model Training Available",
           subtitle: "Application Required",
           supported: true,
-          link: "https://discord.com/channels/1368843355362164786/1368986279319961600"
+          link: "https://discord.com/channels/1368843355362164786/1368986279319961600",
         },
         {
           title: "eligible for Primedata rewards",
@@ -109,6 +111,7 @@ const initialState: PricingState = {
       ],
       buttonText: "Stake to Subscribe",
       tips: "*You can unstake to cancel your subscription. Withdrawable after a 7-day cooldown",
+      staked: 300_000,
     },
   ],
   currentPlanId: "free",
@@ -117,8 +120,7 @@ const initialState: PricingState = {
   stakeConfig: {
     nikoTokenAddress: "0x129966d7D25775b57E3C5b13b2E1c2045FBc4926",
     contractAddrss: "0xb1542ce040f0d0b9ce6958cbdda40905b4a7551a",
-    defaultAmoount: 75_000,
-  }
+  },
 };
 
 // 创建定价状态原子
