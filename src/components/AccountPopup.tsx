@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useLogout } from '@privy-io/react-auth';
 import styles from './AccountPopup.module.css';
 import GoldIcon from '../assets/gold.svg';
+import PlanPlusIcon from '../assets/plan_plus.svg';
 import KeyIcon from '../assets/key.svg';
 import LogoutIcon from '../assets/logout.svg';
 import CopyIcon from '../assets/copy_address.svg';
@@ -9,6 +10,7 @@ import CloseIcon from '../assets/close_account.svg';
 import RocketIcon from '../assets/bxs_rocket.svg';
 import WalletAssets from './WalletAssets';
 import { useNavigate } from 'react-router-dom';
+import { PLAN_TYPE } from "../services/userService.ts";
 
 interface AccountPopupProps {
   isOpen: boolean;
@@ -108,7 +110,12 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
               <div className={styles.userNameRow}>
                 <div className={styles.userNameContainer}>
                   <span className={styles.userName}>{formatName(userData.name)}</span>
-                  {userData.plan === "Premium" ? (
+                  {userData.plan === PLAN_TYPE.PREMIUM_PLUS ? (
+                      <div className={styles.premiumPlusBadge}>
+                        <img src={PlanPlusIcon} alt="PremiumPlus" width="14" height="14" />
+                        <span className={styles.premiumPlusText}>Premium +</span>
+                      </div>
+                  ) : userData.plan === PLAN_TYPE.PREMIUM ? (
                       <div className={styles.premiumBadge}>
                         <img src={GoldIcon} alt="Premium" width="14" height="14" />
                         <span className={styles.premiumText}>Premium</span>

@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { User, Google } from '@privy-io/react-auth';
-import { queryUser } from '../services/userService';
+import {queryUser, queryUserPlan} from '../services/userService';
 import { Twitter } from './imageStore';
 import { chatAtom } from './chatStore'; // 导入聊天状态
 
@@ -70,6 +70,7 @@ export const setUser = atom(
 
         try {
           const result = await queryUser(queryParams);
+          const planResult = await queryUserPlan(queryParams);
 
           set(accountAtom, {
             user,
@@ -79,12 +80,12 @@ export const setUser = atom(
             isLoading: false,
             isLoggedIn: true,
             error: null,
-            credits: result.data.credit,
+            credits: planResult.data.sub_balance + planResult.data.paid_balance,
             did,
             role: result.data.role || 'user',
             name: result.data.name || null,
             avatar: result.data.avatar || null,
-            plan: "Free"
+            plan: planResult.data.plan_type
           });
         } catch (error) {
           // 如果查询失败，仍使用本地用户信息
@@ -106,7 +107,7 @@ export const setUser = atom(
             role: 'user',
             name: null,
             avatar: null,
-            plan: "Free"
+            plan: "free"
           });
         }
       } else {

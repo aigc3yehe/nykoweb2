@@ -2,13 +2,14 @@ import React, {useEffect, useRef, useState} from "react";
 import {usePrivy, useLogin, useWallets} from "@privy-io/react-auth";
 import styles from "./LoginButton.module.css";
 import GoldIcon from "../assets/gold.svg";
+import PlanPlusIcon from "../assets/plan_plus.svg";
 import { useAtom, useSetAtom } from "jotai";
 import {
   accountAtom,
   setUser,
   logout as logoutAction, setPlan,
 } from "../store/accountStore";
-import { createUser } from "../services/userService";
+import {createUser, PLAN_TYPE} from "../services/userService";
 import { showAccountPopupAtom } from "../store/accountPopupStore";
 import { Twitter } from "../store/imageStore.ts";
 import { useCreateWallet } from "@privy-io/react-auth";
@@ -184,8 +185,11 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
           className={styles.accountContainer}
           onClick={handleAccountClick}
         >
-          {plan === "Premium" && (
+          {plan === PLAN_TYPE.PREMIUM && (
               <img src={GoldIcon} alt="Account" className={styles.goldIcon} />
+          )}
+          {plan === PLAN_TYPE.PREMIUM_PLUS && (
+              <img src={PlanPlusIcon} alt="Account" className={styles.goldIcon} />
           )}
           <img
             src={twitter?.profilePictureUrl || ""}
