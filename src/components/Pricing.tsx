@@ -397,7 +397,7 @@ const Pricing: React.FC = () => {
                   <Link
                     target="_blank"
                     to={`https://app.virtuals.io/virtuals/22053`}
-                    className="m-1"
+                    className="m-1 font-bold underline text-white"
                   >
                     Buy $NYKO
                   </Link>
