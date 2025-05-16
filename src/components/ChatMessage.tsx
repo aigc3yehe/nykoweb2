@@ -1,11 +1,12 @@
-import React from 'react';
-import styles from './ChatMessage.module.css';
-import imageIcon from '../assets/image.svg';
-import closeIcon from '../assets/close.svg';
-import uploadingIcon from '../assets/uploading.svg';
-import okIcon from '../assets/ok.svg';
-import checkAgreeIcon from '../assets/check_agree.svg';
-import checkedAgreeIcon from '../assets/checked_agree.svg';
+import React from "react";
+import styles from "./ChatMessage.module.css";
+import imageIcon from "../assets/image.svg";
+import closeIcon from "../assets/close.svg";
+import uploadingIcon from "../assets/uploading.svg";
+import okIcon from "../assets/ok.svg";
+import checkAgreeIcon from "../assets/check_agree.svg";
+import checkedAgreeIcon from "../assets/checked_agree.svg";
+import { GENERATE_IMAGE_SERVICE_CONFIG, TRAIN_MODEL_SERVICE_CONFIG } from "../utils/plan";
 
 interface ImageUploadState {
   totalCount: number;
@@ -15,11 +16,17 @@ interface ImageUploadState {
 }
 
 export interface ChatMessageProps {
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   content: string;
-  type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image' | 'tokenization_agreement';
+  type?:
+    | "text"
+    | "upload_image"
+    | "model_config"
+    | "generate_result"
+    | "generating_image"
+    | "tokenization_agreement";
   imageUploadState?: ImageUploadState;
-  uploadedFiles?: Array<{name: string, url: string}>;
+  uploadedFiles?: Array<{ name: string; url: string }>;
   modelParam?: {
     modelName?: string;
     description?: string;
@@ -38,15 +45,20 @@ export interface ChatMessageProps {
 const ChatMessage: React.FC<ChatMessageProps> = ({
   role,
   content,
-  type = 'text',
-  imageUploadState = { totalCount: 0, uploadedCount: 0, isUploading: false, finishUpload: false },
+  type = "text",
+  imageUploadState = {
+    totalCount: 0,
+    uploadedCount: 0,
+    isUploading: false,
+    finishUpload: false,
+  },
   uploadedFiles = [],
   modelParam = { modelName: undefined, description: undefined },
   agree = false,
   images = [],
   imageWidth = 256,
   imageHeight = 256,
-  request_id = '',
+  request_id = "",
   onAddImage,
   onConfirmImages,
   onRemoveImage,
@@ -56,10 +68,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   const formatFileName = (name: string): string => {
     if (name.length <= 9) return name;
 
-    const extension = name.split('.').pop() || '';
+    const extension = name.split(".").pop() || "";
     const baseName = name.substring(0, name.length - extension.length - 1);
 
-    return `${baseName.substring(0, 3)}...${baseName.substring(baseName.length - 2)}.${extension}`;
+    return `${baseName.substring(0, 3)}...${baseName.substring(
+      baseName.length - 2
+    )}.${extension}`;
   };
 
   // 添加图片生成中组件
@@ -114,18 +128,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   // 更新 renderTokenizationAgreementComponent
   const renderTokenizationAgreementComponent = () => {
     return (
-        <button
-          className={`${styles.agreeButton} ${agree ? styles.disabled : ''}`}
-          onClick={onAgree}
-          disabled={agree}
-        >
-          <img
-            src={agree ? checkedAgreeIcon : checkAgreeIcon}
-            alt="Agree"
-            className={styles.agreeButtonIcon}
-          />
-          I Have Read And Agree
-        </button>
+      <button
+        className={`${styles.agreeButton} ${agree ? styles.disabled : ""}`}
+        onClick={onAgree}
+        disabled={agree}
+      >
+        <img
+          src={agree ? checkedAgreeIcon : checkAgreeIcon}
+          alt="Agree"
+          className={styles.agreeButtonIcon}
+        />
+        I Have Read And Agree
+      </button>
     );
   };
 
@@ -157,7 +171,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               className={styles.generatedImageWrapper}
               style={{
                 width: `${displayWidth}rem`,
-                height: `${displayHeight}rem`
+                height: `${displayHeight}rem`,
               }}
             >
               <img
@@ -168,18 +182,23 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
           )}
         </div>
+        <div className="text-[0.625rem] leading-[0.625rem] font-medium text-[#88A4C2] text-start font-['Jura']">
+          {GENERATE_IMAGE_SERVICE_CONFIG.cu} Credits
+        </div>
       </div>
     );
   };
 
   const renderUploadImageComponent = () => {
-    const { totalCount, uploadedCount, isUploading, finishUpload } = imageUploadState;
+    const { totalCount, uploadedCount, isUploading, finishUpload } =
+      imageUploadState;
     const hasImages = uploadedFiles.length > 0;
     const hasMaxImages = uploadedFiles.length >= 10;
     const canConfirm = hasMaxImages && !isUploading && !finishUpload;
-    const canAddImages = !isUploading && !finishUpload && uploadedFiles.length < 30;
+    const canAddImages =
+      !isUploading && !finishUpload && uploadedFiles.length < 30;
     const showSelectImages = uploadedFiles.length == 0;
-    const canSelectImage = canAddImages
+    const canSelectImage = canAddImages;
 
     return (
       <>
@@ -187,54 +206,75 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           <div className={styles.uploadImageHeader}>
             <span className={styles.uploadImageTitle}>Upload Images:</span>
             <div className={styles.uploadButtonGroup}>
-              { showSelectImages ? (
-                  <button
-                      className={`${styles.selectButton} ${canSelectImage ? '' : styles.disabled }`}
-                      onClick={onAddImage}
-                      disabled={!canSelectImage}
-                  >
-                    Select Images
-                  </button>
+              {showSelectImages ? (
+                <button
+                  className={`${styles.selectButton} ${
+                    canSelectImage ? "" : styles.disabled
+                  }`}
+                  onClick={onAddImage}
+                  disabled={!canSelectImage}
+                >
+                  Select Images
+                </button>
               ) : (
-                  <>
-                    <button
-                        className={`${styles.addButton} ${canAddImages ? '' : styles.disabled }`}
-                        onClick={onAddImage}
-                        disabled={!canAddImages}
-                    >
-                      Add
-                    </button>
-                    <button
-                        className={`${styles.confirmButton} ${!canConfirm ? styles.disabled : ''}`}
-                        onClick={onConfirmImages}
-                        disabled={!canConfirm}
-                    >
-                      Confirm
-                    </button>
-                  </>
+                <>
+                  <button
+                    className={`${styles.addButton} ${
+                      canAddImages ? "" : styles.disabled
+                    }`}
+                    onClick={onAddImage}
+                    disabled={!canAddImages}
+                  >
+                    Add
+                  </button>
+                  <button
+                    className={`${styles.confirmButton} ${
+                      !canConfirm ? styles.disabled : ""
+                    }`}
+                    onClick={onConfirmImages}
+                    disabled={!canConfirm}
+                  >
+                    Confirm
+                  </button>
+                </>
               )}
             </div>
           </div>
-
           {/* 已上传图片预览 */}
           {hasImages && (
             <div className={styles.uploadedImagesPreview}>
               {uploadedFiles.map((file, index) => (
-                <div key={index} className={`${styles.imageItem} ${isUploading ? styles.isUploading : ''}`}>
-                  <img src={imageIcon} alt="File" className={styles.imageIcon} />
-                  <span className={styles.fileName}>{formatFileName(file.name)}</span>
-                  { !finishUpload && (
-                      <img
-                          src={closeIcon}
-                          alt="Remove"
-                          className={styles.removeIcon}
-                          onClick={() => !isUploading && onRemoveImage && onRemoveImage(file.url)}
-                      />
+                <div
+                  key={index}
+                  className={`${styles.imageItem} ${
+                    isUploading ? styles.isUploading : ""
+                  }`}
+                >
+                  <img
+                    src={imageIcon}
+                    alt="File"
+                    className={styles.imageIcon}
+                  />
+                  <span className={styles.fileName}>
+                    {formatFileName(file.name)}
+                  </span>
+                  {!finishUpload && (
+                    <img
+                      src={closeIcon}
+                      alt="Remove"
+                      className={styles.removeIcon}
+                      onClick={() =>
+                        !isUploading && onRemoveImage && onRemoveImage(file.url)
+                      }
+                    />
                   )}
                 </div>
               ))}
             </div>
           )}
+          <div className="text-xs font-medium text-[#88A4C2] text-end font-['Jura']">
+            Cost {TRAIN_MODEL_SERVICE_CONFIG.cu} Credits
+          </div>
         </div>
 
         {/* 上传状态指示器 - 注意这是在uploadImageContainer之外的 */}
@@ -248,16 +288,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             <span className={styles.statusText}>
               {isUploading
                 ? `Uploading (${uploadedCount}/${totalCount})`
-                : `Uploaded your ${uploadedFiles.length} ${uploadedFiles.length === 1 ? 'image' : 'images'}!`
-              }
+                : `Uploaded your ${uploadedFiles.length} ${
+                    uploadedFiles.length === 1 ? "image" : "images"
+                  }!`}
             </span>
           </div>
         )}
 
         {!finishUpload && hasMaxImages && (
-            <div className={styles.confirmHint}>
-              You've uploaded the maximum of 10 images. Please click Confirm to continue.
-            </div>
+          <div className={styles.confirmHint}>
+            You've uploaded the maximum of 10 images. Please click Confirm to
+            continue.
+          </div>
         )}
       </>
     );
@@ -269,11 +311,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       <div className={styles.modelConfigContainer}>
         <div className={styles.modelConfigItem}>
           <span className={styles.modelConfigLabel}>Model name: </span>
-          <span className={styles.modelConfigValue}>{modelParam?.modelName || '?'}</span>
+          <span className={styles.modelConfigValue}>
+            {modelParam?.modelName || "?"}
+          </span>
         </div>
         <div className={styles.modelConfigItem}>
           <span className={styles.modelConfigLabel}>Description: </span>
-          <span className={styles.modelConfigValue}>{modelParam?.description || '?'}</span>
+          <span className={styles.modelConfigValue}>
+            {modelParam?.description || "?"}
+          </span>
         </div>
       </div>
     );
@@ -282,18 +328,28 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   return (
     <div className={`${styles.messageContainer} ${styles[role]}`}>
       <div className={styles.messageContent}>
-        {type === 'tokenization_agreement' ? (
+        {type === "tokenization_agreement" ? (
           <p className={styles.text}>{processContent(content)}</p>
         ) : (
           <p className={styles.text}>{content}</p>
         )}
       </div>
 
-      {role === 'assistant' && type === 'upload_image' && renderUploadImageComponent()}
-      {role === 'assistant' && type === 'model_config' && renderModelConfigComponent()}
-      {role === 'assistant' && type === 'generate_result' && renderGenerateResultComponent()}
-      {role === 'assistant' && type === 'generating_image' && renderGeneratingImageComponent()}
-      {role === 'assistant' && type === 'tokenization_agreement' && renderTokenizationAgreementComponent()}
+      {role === "assistant" &&
+        type === "upload_image" &&
+        renderUploadImageComponent()}
+      {role === "assistant" &&
+        type === "model_config" &&
+        renderModelConfigComponent()}
+      {role === "assistant" &&
+        type === "generate_result" &&
+        renderGenerateResultComponent()}
+      {role === "assistant" &&
+        type === "generating_image" &&
+        renderGeneratingImageComponent()}
+      {role === "assistant" &&
+        type === "tokenization_agreement" &&
+        renderTokenizationAgreementComponent()}
     </div>
   );
 };

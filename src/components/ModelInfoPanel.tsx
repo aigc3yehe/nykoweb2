@@ -20,6 +20,7 @@ import {
 } from '../store/tokenStore';
 import { usePrivy } from '@privy-io/react-auth';
 import { Link } from 'react-router-dom';
+import { GENERATE_IMAGE_SERVICE_CONFIG } from '../utils/plan';
 
 interface ModelInfoPanelProps {
   model: ModelDetail;
@@ -262,7 +263,10 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
               onClick={handleGenerate}
             >
               <img src={createSvg} alt="Generate" className={styles.buttonIcon} />
-              <span>Generate</span>
+              <div className='flex items-end gap-[1px]'>
+                <span>Generate</span>
+                <span className='!text-xs'>({GENERATE_IMAGE_SERVICE_CONFIG.cu} Credits)</span>
+              </div>
             </button>
 
             {/* 分享按钮 */}

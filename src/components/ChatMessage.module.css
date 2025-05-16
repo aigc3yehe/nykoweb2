@@ -336,7 +336,7 @@
 .imageResultContainer {
   width: 100%;
   min-height: 15rem; /* 240px */
-  gap: 1.25rem; /* 20px */
+  gap: 0.875rem; /* 14px */
   border-radius: 0.5rem; /* 8px */
   padding: 0.5rem; /* 8px */
   border: 1px solid #3741514D;
