@@ -396,10 +396,10 @@ const Pricing: React.FC = () => {
                   Upgrade to gain access to Premium features
                   <Link
                     target="_blank"
-                    to={`https://flaunch.gg/base/coin`}
+                    to={`https://app.virtuals.io/virtuals/22053`}
                     className="m-1"
                   >
-                    Bug $NYKO
+                    Buy $NYKO
                   </Link>
                 </p>
               </div>
