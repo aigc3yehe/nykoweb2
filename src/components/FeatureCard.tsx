@@ -20,7 +20,7 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
   const handleGenerateClick = async () => {
     if (!authenticated) {
       showToast({
-        message: 'Please login first',
+        message: 'Please log in first',
         severity: 'info'
       });
       return;
@@ -31,7 +31,7 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
   const handleTrainClick = async () => {
     if (!authenticated) {
       showToast({
-        message: 'Please login first',
+        message: 'Please log in first',
         severity: 'info'
       });
       return;
@@ -56,8 +56,8 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
       <div className={styles.featureCards}>
         <div className={styles.featureCard}>
           <div className={styles.cardContent}>
-            <h3>Host creativity</h3>
-            <p>host your creativity on NYKO — ready to use anytime.</p>
+            <h3>Share your creativity</h3>
+            <p>Publish your work on NYKO — access it anytime</p>
           </div>
           <div className={styles.buttonContainer}>
             <button className={styles.featureButton} onClick={handleGenerateClick}>Generate an image &gt;</button>
@@ -66,11 +66,11 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
         </div>
         <div className={styles.featureCard}>
           <div className={styles.cardContent}>
-            <h3>Tokenize creativity</h3>
-            <p>Launch an associated token for your creativity and earn </p>
+            <h3>Tokenize your creativity</h3>
+            <p>Launch an token for your work and earn rewards</p>
           </div>
           <div className={styles.buttonContainer}>
-            <button className={styles.featureButton} onClick={handleCreativityEconomyClick}>Creativity economy model &gt;</button>
+            <button className={styles.featureButton} onClick={handleCreativityEconomyClick}>Show how it works &gt;</button>
             <button className={styles.featureButton} onClick={handleApplyForAccessClick} style={{ display: 'none' }}>Apply for early access &gt;</button>
           </div>
         </div>

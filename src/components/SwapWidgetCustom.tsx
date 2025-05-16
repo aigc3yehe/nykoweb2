@@ -397,7 +397,7 @@ const SwapWidgetCustom = ({ token }: Props) => {
       if (requiredAmount == 0n) return "Invalid amount";
       return "Swap";
     }
-    return "Login";
+    return "Log in";
   };
 
   return (
