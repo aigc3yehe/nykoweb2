@@ -7,8 +7,8 @@ export const privyConfig: PrivyClientConfig = {
     createOnLogin: 'all-users',
     // requireUserPasswordOnCreate: true,
     showWalletUIs: true
-    
   },
+  loginMethods: ['twitter'],
   defaultChain: base,
   supportedChains: [base],
   // 自定义登录外观
