@@ -30,13 +30,13 @@ Project Primedata S1 marks the launch phase of NYKO, a 12-week incentive program
 
 Generation Points = GENI × EF × Cooldown
 
-- GENI (AI Creator Score): Currently fixed at 1.
+- GENI (AI Creator Score): Default is 1. After being certified as an AI expert-level creator, increased up to 3. Open a ticket in Discord to apply.
 - EF (EpochFlow): 2 if you created something yesterday, otherwise 1.
 - Cooldown: After 3 generations in a single day, value becomes 0; otherwise 1. Reset to 1 every 24h.
 
 Mindshare Points = GENI × IF × Cooldown_X
 
-- GENI (AI Creator Score): Currently fixed at 1.
+- GENI (AI Creator Score): Default is 1. After being certified as an AI expert-level creator, increased up to 3. Open a ticket in Discord to apply.
 - IF (Influence Factor): 5~20, depends on the social influence of your tweets.
 - Cooldown_X: Every day, we select the most influential tweet for pointing.
 `;

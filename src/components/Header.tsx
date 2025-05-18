@@ -74,7 +74,6 @@ const Header: React.FC = () => {
         {/* Doc按钮 */}
         <button className={styles.docButton} onClick={handleDocClick}>
           <img src={DocIcon} alt="Documentation" className={styles.docIcon}/>
-          <span className='pc:inline hidden'>Doc</span>
         </button>
 
         {/* 活动按钮 */}
