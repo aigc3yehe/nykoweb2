@@ -157,7 +157,7 @@
 .generateButton {
   flex: 1;
   gap: 0.25rem; /* 4px */
-  padding: 0.375rem 1rem; /* 6px 16px */
+  padding: 0.375rem 0.75rem; /* 6px 12px */
   background: linear-gradient(90deg, #C7FF8C 0%, #E8C4EA 43%, #39EDFF 100%);
 }
 
@@ -215,6 +215,12 @@
   width: 2.25rem; /* 36px */
   height: 2.25rem; /* 36px */
   background-color: #E7692C;
+}
+
+.virtualsButton {
+  width: 2.25rem; /* 36px */
+  height: 2.25rem; /* 36px */
+  background-color: #F1FFD5;
 }
 
 .modelName {

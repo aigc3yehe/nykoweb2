@@ -9,8 +9,12 @@ export interface CreateUserResponse {
 }
 
 export interface UserPermission {
+  generate_image?: boolean; // 是否有生成图片的权限
   create_model?: boolean; // 是否有创建模型的权限
   train_model?: boolean; // 是否有训练模型的权限
+  model_tokenization?: boolean; // 是否有将模型token化的权限
+  create_workflow?: boolean; // 是否有创建工作流的权限
+  use_workflow?: boolean; // 是否有使用工作流的权限
 }
 
 // 查询用户响应接口

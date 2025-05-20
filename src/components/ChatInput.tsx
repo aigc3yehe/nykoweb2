@@ -345,7 +345,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             onScroll={handleTextareaScroll}
-            placeholder="Write something here..."
+            placeholder="Type a message..."
             rows={1}
             className={styles.hideScrollbar}
           />

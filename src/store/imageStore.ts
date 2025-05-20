@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { atom } from 'jotai';
 import { accountAtom } from './accountStore';
+import { SOURCE_TYPE } from '../types/api.type';
 
 // 定义Twitter接口
 export interface Twitter {
@@ -258,10 +259,11 @@ export const resetImageList = atom(
 
 // 定义详细图片信息接口
 export interface ImageDetail {
-  models: {
+  source_info: {
     id: number;
     name: string;
   };
+  source: SOURCE_TYPE;
   users: {
     did: string;
     twitter: Twitter | null;

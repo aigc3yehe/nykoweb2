@@ -1,14 +1,16 @@
 import { atom } from "jotai";
+import { SOURCE_TYPE } from "../types/api.type";
 
 // 定义数据类型
 export type McTopToken = {
-  model_id: number | string;
-  model_name: string;
+  id: number | string;
+  name: string;
   token_symbol: string;
   token_address: string;
   token_base_uri: string;
   mc_eth: string;
   mc_usd: string; // UI中展示的值
+  source: SOURCE_TYPE;
 };
 
 // 定义API响应类型

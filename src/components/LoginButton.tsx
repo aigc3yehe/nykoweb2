@@ -208,7 +208,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
         // disabled={loading}
       >
         {/* {loading ? "Logining..." : "Login"} */}
-        Login
+        Log in
       </button>
     </div>
   );

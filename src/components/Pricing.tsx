@@ -396,10 +396,10 @@ const Pricing: React.FC = () => {
                   Upgrade to gain access to Premium features
                   <Link
                     target="_blank"
-                    to={`https://flaunch.gg/base/coin`}
-                    className="m-1"
+                    to={`https://app.virtuals.io/virtuals/22053`}
+                    className="m-1 font-bold underline text-white"
                   >
-                    Bug $NYKO
+                    Buy $NYKO
                   </Link>
                 </p>
               </div>
@@ -476,8 +476,9 @@ const Pricing: React.FC = () => {
 
                 <div className="flex flex-col lg:flex-row items-center gap-[1.25rem]">
                   <span className="font-['Jura'] font-normal text-[1.25rem] leading-[100%] align-middle capitalize text-white">
-                    {CuBuyConfig.price} ETH ={" "}
-                    {CuBuyConfig.amount.toLocaleString()} Credits
+                    {purchaseQuantity} Booster Pack ={" "}
+                    {(purchaseQuantity * CuBuyConfig.amount)?.toLocaleString()}{" "}
+                    Credits
                   </span>
 
                   <div className="flex items-center gap-[0.375rem]">
@@ -518,10 +519,15 @@ const Pricing: React.FC = () => {
 
                   <button
                     onClick={handleBuy}
-                    className="gap py-[0.375rem] px-[1.875rem] rounded bg-[#6366F1] font-['Jura'] font-bold text-[16px] leading-[100%] text-center align-middle text-black"
+                    className="flex flex-col gap py-[0.375rem] px-[1.875rem] rounded bg-[#6366F1] font-['Jura'] font-bold text-sm leading-[0.875rem] text-center align-middle text-black hover:brightness-125"
                     disabled={buyCuLoading}
                   >
                     {buyCuLoading ? "BUYING..." : "BUY"}
+                    {!buyCuLoading && (
+                      <span className="text-[0.625rem]">
+                        {purchaseQuantity * CuBuyConfig.price} ETH
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>

@@ -143,7 +143,7 @@ const ActivitySidebar: React.FC = () => {
               <div className={styles.loginRequired}>
                 <p>Please log in first</p>
                 <button className={styles.loginButton} onClick={handleLogin}>
-                  Login
+                  Log in
                 </button>
               </div>
             </div>

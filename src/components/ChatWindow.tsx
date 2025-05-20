@@ -230,7 +230,7 @@ const ChatWindow: React.FC = () => {
             <img src="/nyko.png" alt="Niyoko" />
           </div>
           <div className={styles.titleWithStatus}>
-            <span>you are chatting with Niyoko</span>
+            <span>Chatting with Niyoko</span>
             <div
               className={styles.statusDot}
               style={{
@@ -265,12 +265,12 @@ const ChatWindow: React.FC = () => {
           {!authenticated || !accountState.did ? (
             <div className={styles.emptyMessages}>
               <div className={styles.loginRequired}>
-                <p>Please login to start chatting with Niyoko</p>
+                <p>Please log in to start chatting with Niyoko</p>
                 <button
                   className={styles.loginButton}
                   onClick={handleLogin}
                 >
-                  Login
+                  Log in
                 </button>
               </div>
             </div>
