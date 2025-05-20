@@ -20,6 +20,7 @@ export const getSeasonNumber = (date?: Date) => {
 export const SeasonRewards = {
   "1": 1_500_000,
   "2": 2_500_000,
+  "3": 2_500_000,
 };
 
 export const getCurrentPointsRewards = (totalPoints: number) => {
@@ -29,7 +30,7 @@ export const getCurrentPointsRewards = (totalPoints: number) => {
     return 0;
   }
   const key = seasonNumber.toString() as keyof typeof SeasonRewards;
-  const rewards = SeasonRewards[key];
+  const rewards = SeasonRewards[key] || 2_500_000;
   if (!totalPoints) {
     return rewards?.toLocaleString();
   }
