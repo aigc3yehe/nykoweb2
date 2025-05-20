@@ -190,7 +190,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
     await setTokenizationFlag({ modelId, flag, user: user?.id || "" });
 
     // 立即获取最新状态
-    await fetchState({ modelId, refreshState: true });
+    await fetchState({ modelId, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true });
   };
 
   const handleTwitterClick = () => {
