@@ -284,10 +284,10 @@ const ChatWindow: React.FC = () => {
                       🪙 launch a token for this model.
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to FINETUNE a model.')}>
-                      🧠 I want to FINETUNE a model.
+                      🧠 I want to FINETUNE a model.(Cost 7,500 Credits)
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to generate an image.')}>
-                      🌄 I want to generate an image.
+                      🌄 I want to generate an image.(Cost 5 Credits)
                     </button>
                   </div>
                 </div>
