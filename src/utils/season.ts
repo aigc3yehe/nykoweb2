@@ -31,7 +31,7 @@ export const getCurrentPointsRewards = (totalPoints: number) => {
   const key = seasonNumber.toString() as keyof typeof SeasonRewards;
   const rewards = SeasonRewards[key];
   if (!totalPoints) {
-    return rewards.toLocaleString();
+    return rewards?.toLocaleString();
   }
   return (rewards / totalPoints)?.toLocaleString();
 };

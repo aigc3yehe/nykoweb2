@@ -477,7 +477,7 @@ const Pricing: React.FC = () => {
                 <div className="flex flex-col lg:flex-row items-center gap-[1.25rem]">
                   <span className="font-['Jura'] font-normal text-[1.25rem] leading-[100%] align-middle capitalize text-white">
                     {purchaseQuantity} Booster Pack ={" "}
-                    {(purchaseQuantity * CuBuyConfig.amount).toLocaleString()}{" "}
+                    {(purchaseQuantity * CuBuyConfig.amount)?.toLocaleString()}{" "}
                     Credits
                   </span>
 

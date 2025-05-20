@@ -106,7 +106,7 @@ const PlanCard = ({
           {showPendingClaim && (
             <div className={styles.pendingButton}>
               Claim {pendingClaim} $NYKO after{" "}
-              {new Date((unstakeTime || 0) * 1000).toLocaleString()}
+              {new Date((unstakeTime || 0) * 1000)?.toLocaleString()}
             </div>
           )}
           {showClaim && (
