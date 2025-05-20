@@ -76,7 +76,7 @@ const ActivityContent: React.FC = () => {
   };
 
   // 根据条件确定要显示的周信息
-  const weekInfo = { week: 'Week 2 (5.13-5.19)', rewards: '2,500,000' }
+  const weekInfo = { week: 'Week 3 (5.20-5.26)', rewards: '2,500,000' }
 
   // 更新滚动状态
   useEffect(() => {
