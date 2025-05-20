@@ -20,7 +20,7 @@ Project Primedata S1 marks the launch phase of NYKO, a 12-week incentive program
   Create images using NYKO AI image generation service.
 - Earn Mindshare Rewards
 
-  Share your creative outputs from the platform on X, or simply mention @niyoko_agent or $NYKO.
+  Share your creative outputs from the platform on X, or simply mention @niyoko_agent or $NYKO. If your creation is related to Virtuals native culture, like Vader, Luna, AIXBT, you'll earn *3 points! And make sure to tag this Agent.
 
 ## Reward Structure
 
@@ -34,11 +34,12 @@ Generation Points = GENI × EF × Cooldown
 - EF (EpochFlow): 2 if you created something yesterday, otherwise 1.
 - Cooldown: After 3 generations in a single day, value becomes 0; otherwise 1. Reset to 1 every 24h.
 
-Mindshare Points = GENI × IF × Cooldown_X
+Mindshare Points = GENI × IF × Cooldown_X x Virtuality
 
 - GENI (AI Creator Score): Default is 1. After being certified as an AI expert-level creator, increased up to 3. Open a ticket in Discord to apply.
 - IF (Influence Factor): 5~20, depends on the social influence of your tweets.
 - Cooldown_X: Every day, we select the most influential tweet for pointing.
+- Virtuality: 3 if your creation is related to Virtuals native culture, like Vader, Luna, AIXBT, otherwise 1.
 `;
 
 const ActivityContent: React.FC = () => {
