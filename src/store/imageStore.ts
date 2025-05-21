@@ -15,7 +15,9 @@ export interface Twitter {
 export interface Image {
   id: number;
   url: string | null;
-  model_id: number;
+  model_id?: number;
+  workflow_id?: number;
+  source: SOURCE_TYPE;
   creator: string;
   version: number;
   task_id: string;
@@ -148,7 +150,7 @@ export const fetchImages = atom(
         }
 
         // 发送请求
-        const response = await fetch(`/studio-api/model/list/gallery?${params.toString()}`, {
+        const response = await fetch(`/studio-api/aigc/gallery?${params.toString()}`, {
           headers: {
             'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
           }
