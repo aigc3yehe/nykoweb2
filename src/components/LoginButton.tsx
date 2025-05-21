@@ -25,7 +25,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
   const [pricingState] = useAtom(pricingAtom);
   const { stakeConfig } = pricingState;
   const [accountState] = useAtom(accountAtom);
-  const { walletAddress, twitter, plan } = accountState;
+  const { walletAddress, twitter, plan, linked_wallet} = accountState;
   const setUserData = useSetAtom(setUser);
   const showAccountPopup = useSetAtom(showAccountPopupAtom);
   const accountRef = useRef<HTMLDivElement>(null);
@@ -156,7 +156,8 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
         username: twitter?.username || undefined,
         profilePictureUrl: twitter?.profilePictureUrl || undefined,
         walletAddress: walletAddress || undefined,
-        plan: plan
+        plan: plan,
+        linked_wallet: linked_wallet ? linked_wallet : undefined,
       },
       anchorPosition: position,
       onLogout: logout,

@@ -7,6 +7,7 @@ import Pricing from './Pricing';
 import styles from './MainLayout.module.css';
 import Activity from "./Activity.tsx";
 import TokenMarquee from './TokenMarquee';
+import LinkWallet from './LinkWallet.tsx';
 
 const MainLayout: React.FC = () => {
 
@@ -22,6 +23,11 @@ const MainLayout: React.FC = () => {
         <Route path="/primedatas1" element={
           <div className={styles.fullWidthContent}>
             <Activity />
+          </div>
+        } />
+        <Route path="/link-wallet" element={
+          <div className={styles.fullWidthContent}>
+            <LinkWallet />
           </div>
         } />
         <Route path="*" element={
