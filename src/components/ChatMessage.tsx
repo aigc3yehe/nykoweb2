@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./ChatMessage.module.css";
 import imageIcon from "../assets/image.svg";
 import closeIcon from "../assets/close.svg";
@@ -6,6 +6,10 @@ import uploadingIcon from "../assets/uploading.svg";
 import okIcon from "../assets/ok.svg";
 import checkAgreeIcon from "../assets/check_agree.svg";
 import checkedAgreeIcon from "../assets/checked_agree.svg";
+import selectModelIcon from "../assets/select_model.svg";
+import uploadIcon from "../assets/upload.svg";
+import createWorkflowIcon from "../assets/create_workflow.svg";
+import deleteIcon from "../assets/delete.svg";
 import { GENERATE_IMAGE_SERVICE_CONFIG, TRAIN_MODEL_SERVICE_CONFIG } from "../utils/plan";
 
 interface ImageUploadState {
@@ -24,7 +28,9 @@ export interface ChatMessageProps {
     | "model_config"
     | "generate_result"
     | "generating_image"
-    | "tokenization_agreement";
+    | "tokenization_agreement"
+    | "create_workflow"
+    | "run_workflow";
   imageUploadState?: ImageUploadState;
   uploadedFiles?: Array<{ name: string; url: string }>;
   modelParam?: {
@@ -36,10 +42,27 @@ export interface ChatMessageProps {
   imageWidth?: number;
   imageHeight?: number;
   request_id?: string;
+  workflow_name?: string;
+  workflow_prompt?: string;
+  workflow_input?: string;
+  workflow_output?: string;
+  workflow_model?: string;
   onAddImage?: () => void;
   onConfirmImages?: () => void;
   onRemoveImage?: (url: string) => void;
   onAgree?: () => void;
+  onSelectModel?: (model: string) => void;
+  onUpdatePrompt?: (text: string) => void;
+  onChangeInput?: (type: string) => void;
+  onChangeOutput?: (type: string) => void;
+  isCreatingWorkflow?: boolean;
+  creationSuccess?: boolean;
+  onCreateWorkflow?: () => void;
+  workflowId?: number;
+  workflowImageValue?: string;
+  isRunningWorkflow?: boolean;
+  onSelectWorkflowImage?: (imageUrl: string) => void;
+  onRunWorkflow?: (workflowId: number) => void;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -59,10 +82,25 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   imageWidth = 256,
   imageHeight = 256,
   request_id = "",
+  workflow_name = "",
+  workflow_prompt = "",
+  workflow_model = "",
   onAddImage,
   onConfirmImages,
   onRemoveImage,
   onAgree,
+  onSelectModel,
+  onUpdatePrompt,
+  onChangeInput,
+  onChangeOutput,
+  isCreatingWorkflow = false,
+  creationSuccess = false,
+  onCreateWorkflow,
+  workflowId = 0,
+  workflowImageValue = '',
+  isRunningWorkflow = false,
+  onSelectWorkflowImage,
+  onRunWorkflow,
 }) => {
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
@@ -325,6 +363,311 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
+  // 添加状态跟踪输入内容和是否聚焦
+  const [isFocused, setIsFocused] = useState(false);
+
+  // 在组件内部添加状态来跟踪下拉菜单是否显示
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
+
+  // 添加模型选项列表
+  const modelOptions = [
+    { value: 'gpt-4o', label: 'GPT-4o' }
+  ];
+
+  // 添加创建工作流中的状态UI
+  const renderCreatingWorkflowComponent = () => {
+    return (
+      <div className={styles.creatingWorkflowIndicator}>
+        <img
+          src={createWorkflowIcon}
+          alt="Creating"
+          className={styles.creatingWorkflowIcon}
+        />
+        <span className={styles.creatingWorkflowText}>
+          Creating workflow, please wait...
+        </span>
+      </div>
+    );
+  };
+
+  // 添加工作流创建成功UI
+  const renderWorkflowSuccessComponent = () => {
+    return (
+      <div className={styles.progressIndicator}>
+        <img
+          src={okIcon}
+          alt="Done"
+          className={styles.statusIcon}
+        />
+        <span className={styles.statusText}>
+          Save workflow success!
+        </span>
+      </div>
+    );
+  };
+
+  // 修改工作流组件，增加创建工作流功能
+  const renderCreateWorkflowComponent = () => {
+    const isPromptTooLong = workflow_prompt.length > 500;
+
+    return (
+      <>
+        <div className={styles.workflowContainer}>
+          <div className={styles.workflowTitle}>
+            {workflow_name} - Workflow
+          </div>
+
+          {/* Model选择部分 */}
+          <div className={styles.workflowSection}>
+            <div className={styles.sectionLabel}>Model:</div>
+            <div className={styles.modelSelectContainer}>
+              <button
+                className={styles.modelSelectButton}
+                onClick={() => !isCreatingWorkflow && setShowModelDropdown(!showModelDropdown)}
+                disabled={isCreatingWorkflow}
+                type="button"
+              >
+                <span className={styles.buttonText}>
+                  {workflow_model || "GPT-4o"}
+                </span>
+                <img
+                  src={selectModelIcon}
+                  alt="Select"
+                  className={styles.selectModelIcon}
+                />
+              </button>
+
+              {/* 下拉菜单 */}
+              {showModelDropdown && (
+                <div className={styles.modelDropdown}>
+                  {modelOptions.map((option) => (
+                    <div
+                      key={option.value}
+                      className={`${styles.modelOption} ${workflow_model === option.value ? styles.modelOptionSelected : ''}`}
+                      onClick={() => {
+                        if (onSelectModel) onSelectModel(option.value);
+                        setShowModelDropdown(false);
+                      }}
+                    >
+                      {option.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Prompt输入部分 */}
+          <div className={styles.workflowSection}>
+            <div className={styles.sectionLabel}>Prompt:</div>
+            <div className={`${styles.promptInputContainer} ${isFocused ? styles.focused : ''}`}>
+              <textarea
+                className={styles.promptInput}
+                value={workflow_prompt}
+                onChange={(e) => onUpdatePrompt && onUpdatePrompt(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                placeholder="Enter your prompt here"
+                maxLength={500}
+                disabled={isCreatingWorkflow}
+              />
+              <div className={`${styles.charCount} ${isPromptTooLong ? styles.charCountError : ''}`}>
+                Max 500 char
+              </div>
+            </div>
+          </div>
+
+          {/* Reference Image上传部分 */}
+          <div className={styles.workflowSection}>
+            <div className={styles.sectionLabel}>Reference Image:</div>
+            <button
+              className={styles.uploadButton}
+              onClick={onAddImage}
+              disabled={isCreatingWorkflow}
+            >
+              <img
+                src={uploadIcon}
+                alt="Upload"
+                className={styles.uploadIcon}
+              />
+              <span>Upload</span>
+            </button>
+          </div>
+
+          {/* Input类型选择部分 - 修改为只能选择Image选项 */}
+          <div className={styles.workflowSection}>
+            <div className={styles.sectionLabel}>Input:</div>
+            <div className={styles.optionsContainer}>
+              <button
+                className={`${styles.optionButton} ${styles.optionSelected}`}
+                onClick={() => onChangeInput && onChangeInput("Image")}
+                disabled={isCreatingWorkflow}
+              >
+                Image
+              </button>
+              <button
+                className={`${styles.optionButton} ${styles.disabled}`}
+                disabled={true}
+              >
+                Text
+              </button>
+              <button
+                className={`${styles.optionButton} ${styles.disabled}`}
+                disabled={true}
+              >
+                Image + Text
+              </button>
+            </div>
+          </div>
+
+          {/* Output类型选择部分 - 修改为只能选择Image选项 */}
+          <div className={styles.workflowSection}>
+            <div className={styles.sectionLabel}>Output:</div>
+            <div className={styles.optionsContainer}>
+              <button
+                className={`${styles.optionButton} ${styles.optionSelected}`}
+                onClick={() => onChangeOutput && onChangeOutput("Image")}
+                disabled={isCreatingWorkflow}
+              >
+                Image
+              </button>
+              <button
+                className={`${styles.optionButton} ${styles.disabled}`}
+                disabled={true}
+              >
+                Text
+              </button>
+              <button
+                className={`${styles.optionButton} ${styles.disabled}`}
+                disabled={true}
+              >
+                Image + Text
+              </button>
+            </div>
+          </div>
+
+          {/* 确认按钮 */}
+          <div className={styles.confirmWorkflowButtonContainer}>
+            <button
+              className={styles.confirmWorkflowButton}
+              onClick={onCreateWorkflow}
+              disabled={isCreatingWorkflow}
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+
+        {/* 创建中状态 */}
+        {isCreatingWorkflow && renderCreatingWorkflowComponent()}
+
+        {/* 创建成功状态 */}
+        {creationSuccess && renderWorkflowSuccessComponent()}
+      </>
+    );
+  };
+
+  // 使用工作流组件
+  const renderUseWorkflowComponent = () => {
+    // 使用workflowImageValue替代本地状态
+    const hasUploadedWorkflowImage = !!workflowImageValue;
+
+    // 文件选择处理函数
+    const handleSelectFile = () => {
+      // 创建文件选择对话框
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+
+      input.onchange = (event) => {
+        const target = event.target as HTMLInputElement;
+        if (target.files && target.files.length > 0) {
+          const file = target.files[0];
+          const imageUrl = URL.createObjectURL(file);
+
+          // 调用回调更新store中的图片
+          if (onSelectWorkflowImage) {
+            onSelectWorkflowImage(imageUrl);
+          }
+        }
+      };
+
+      input.click();
+    };
+
+    return (
+      <div className={styles.workflowRunContainer}>
+        <div className={styles.workflowRunTitle}>Upload Your Image</div>
+
+        {!hasUploadedWorkflowImage ? (
+          // 未上传图片状态
+          <div className={styles.uploadImageButtonContainer}>
+            <button
+              className={styles.uploadImageButton}
+              onClick={handleSelectFile}
+              disabled={isRunningWorkflow}
+            >
+              Upload Image
+            </button>
+          </div>
+        ) : (
+          // 已上传图片状态
+          <>
+            <div className={styles.workflowImagePreview}>
+              {workflowImageValue && (
+                <img
+                  src={workflowImageValue}
+                  alt="Workflow input"
+                  className={styles.workflowPreviewImage}
+                />
+              )}
+            </div>
+
+            <div className={styles.workflowButtonGroup}>
+              <button
+                className={styles.removeImageButton}
+                onClick={() => {
+                  if (onSelectWorkflowImage) {
+                    onSelectWorkflowImage("");
+                  }
+                }}
+                disabled={isRunningWorkflow}
+              >
+                <img src={deleteIcon} alt="Delete" width={20} height={20} />
+              </button>
+
+              <button
+                className={styles.confirmWorkflowButton}
+                onClick={() => {
+                  if (onRunWorkflow && workflowId) {
+                    onRunWorkflow(workflowId);
+                  }
+                }}
+                disabled={isRunningWorkflow}
+              >
+                Confirm
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* 执行工作流中状态 */}
+        {isRunningWorkflow && (
+          <div className={styles.creatingWorkflowIndicator}>
+            <img
+              src={createWorkflowIcon}
+              alt="Running"
+              className={styles.creatingWorkflowIcon}
+            />
+            <span className={styles.creatingWorkflowText}>
+              Running workflow, please wait...
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={`${styles.messageContainer} ${styles[role]}`}>
       <div className={styles.messageContent}>
@@ -350,6 +693,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       {role === "assistant" &&
         type === "tokenization_agreement" &&
         renderTokenizationAgreementComponent()}
+      {role === "assistant" &&
+        type === "create_workflow" &&
+        renderCreateWorkflowComponent()}
+      {role === "assistant" &&
+        type === "run_workflow" &&
+        renderUseWorkflowComponent()}
     </div>
   );
 };

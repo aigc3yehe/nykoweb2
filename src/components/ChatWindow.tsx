@@ -18,7 +18,14 @@ import {
   startHeartbeat,
   stopHeartbeat,
   toggleBetaMode,
-  agree
+  agree,
+  createWorkflow,
+  updateWorkflowPrompt,
+  updateWorkflowInput,
+  updateWorkflowOutput,
+  updateWorkflowModel,
+  setWorkflowImage,
+  runWorkflow
 } from '../store/chatStore';
 import {showDialogAtom} from '../store/dialogStore';
 import {useLogin, usePrivy} from '@privy-io/react-auth';
@@ -40,6 +47,13 @@ const ChatWindow: React.FC = () => {
   const [, stopHeartbeatAction] = useAtom(stopHeartbeat);
   const [, sendMessageAction] = useAtom(sendMessage);
   const [, toggleBetaModeAction] = useAtom(toggleBetaMode);
+  const [, createWorkflowAction] = useAtom(createWorkflow);
+  const [, updateWorkflowPromptAction] = useAtom(updateWorkflowPrompt);
+  const [, updateWorkflowInputAction] = useAtom(updateWorkflowInput);
+  const [, updateWorkflowOutputAction] = useAtom(updateWorkflowOutput);
+  const [, updateWorkflowModelAction] = useAtom(updateWorkflowModel);
+  const [, setWorkflowImageAction] = useAtom(setWorkflowImage);
+  const [, runWorkflowAction] = useAtom(runWorkflow);
 
   // 添加滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -333,10 +347,27 @@ const ChatWindow: React.FC = () => {
                 imageHeight={message.imageInfo?.height || 256}
                 request_id={message.request_id}
                 agree={message.agree}
+                workflow_name={chatState.workflow_name}
+                workflow_prompt={chatState.workflow_prompt}
+                workflow_input={chatState.workflow_input}
+                workflow_output={chatState.workflow_output}
+                workflow_model={chatState.workflow_model || "gpt-4o"}
+                isCreatingWorkflow={chatState.workflowCreation.isCreating}
+                creationSuccess={chatState.workflowCreation.isSuccess}
                 onAddImage={() => addImageAction(index, 30 - (message.uploadedFiles?.length || 0))}
                 onConfirmImages={() => finishUploadImagesAction(index)}
                 onRemoveImage={(url) => removeImageAction({ messageIndex: index, fileUrl: url })}
                 onAgree={() => agreeAction(index)}
+                onUpdatePrompt={(text) => updateWorkflowPromptAction(text)}
+                onChangeInput={(type) => updateWorkflowInputAction(type)}
+                onChangeOutput={(type) => updateWorkflowOutputAction(type)}
+                onSelectModel={(model) => updateWorkflowModelAction(model)}
+                onCreateWorkflow={createWorkflowAction}
+                workflowId={message.type === 'run_workflow' ? chatState.workflowCreation.workflowId : undefined}
+                workflowImageValue={chatState.workflowImageValue}
+                isRunningWorkflow={chatState.workflowRunning.isRunning}
+                onSelectWorkflowImage={(imageUrl) => setWorkflowImageAction(imageUrl)}
+                onRunWorkflow={(workflowId) => runWorkflowAction(workflowId)}
               />
             ))
           )}
