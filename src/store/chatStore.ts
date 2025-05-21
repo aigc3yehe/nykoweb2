@@ -744,7 +744,7 @@ export const sendMessage = atom(
       if (status === 'tokenization' && chatState.currentModel?.id) {
         // 使用 fetchTokenizationState 重新加载Token状态
         console.log('reset model images，model id:', chatState.currentModel.id);
-        set(fetchTokenizationState, { modelId: chatState.currentModel.id})
+        set(fetchTokenizationState, { modelId: chatState.currentModel.id, model_tokenization_id: chatState.currentModel?.model_tokenization?.id || 0})
         set(fetchModelDetail, chatState.currentModel.id , false)
       }
     } catch (error) {

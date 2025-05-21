@@ -19,6 +19,7 @@ export interface TokenMetadata {
 }
 
 export interface ModelToken {
+  id?: number;
   meme_token?: string;
   metadata?: TokenMetadata;
   network?: number;
@@ -148,9 +149,7 @@ export const fetchModels = atom(
         }
 
         // 根据owned状态选择不同的API端点
-        const endpoint = ownedOnly
-          ? '/studio-api/model/list/owned'
-          : '/studio-api/model/list/enabled';
+        const endpoint = '/studio-api/model/list/enabled';
 
         // 发送请求
         const response = await fetch(`${endpoint}?${params.toString()}`, {
@@ -303,7 +302,7 @@ export const fetchModelDetail = atom(
         if (pendingToken) {
           set(fetchCommunityTokenizationState, {
             modelId,
-            token_tokenization_id: pendingToken.id
+            model_tokenization_id: pendingToken.id
           });
         }
       }
@@ -423,14 +422,13 @@ export const fetchEditCover = atom(
 // 获取社区token状态的函数
 export const fetchCommunityTokenizationState = atom(
     null,
-    async (_get, set, { modelId, token_tokenization_id }: { modelId: number, token_tokenization_id: number }) => {
+    async (_get, set, { modelId, model_tokenization_id }: { modelId: number, model_tokenization_id: number }) => {
 
       try {
         const params = new URLSearchParams({
           model_id: modelId.toString(),
           refreshState: 'true',
-          is_community_token: 'true',
-          token_tokenization_id: token_tokenization_id.toString()
+          model_tokenization_id: model_tokenization_id.toString()
         });
 
         const response = await fetch(`/studio-api/model/tokenization/state?${params.toString()}`, {

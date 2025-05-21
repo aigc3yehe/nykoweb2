@@ -89,12 +89,12 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
   // 判断是否只显示 community tokens
   useEffect(() => {
      const data = tokenizationState.data;
-     if (!data || model.model_tokenization?.launchpad == TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS) {
+     if (!data || model?.model_tokenization?.launchpad == TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS) {
          setOnlyCommunityTokens((model.model_community_tokenization?.length || 0) > 0);
      } else {
          setOnlyCommunityTokens(false);
      }
-  }, [tokenizationState, model.model_community_tokenization, model.model_tokenization?.launchpad]);
+  }, [tokenizationState, model.model_community_tokenization, model?.model_tokenization?.launchpad]);
 
   const formatAddress = (address: string) => {
     if (!address) return '';
@@ -120,7 +120,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
       await setTokenizationFlag({ modelId, flag, user: user?.id || '' });
 
       // 立即获取最新状态
-      await fetchState({modelId, refreshState: true});
+      await fetchState({modelId, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true});
     } catch (error) {
       console.error('Failed to initiate tokenization:', error);
     } finally {
@@ -192,7 +192,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
           message={`Error: ${error}`}
           action={{
             text: 'Retry',
-            onClick: () => fetchState({ modelId: model.id, refreshState: true })
+            onClick: () => fetchState({ modelId: model.id, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true })
           }}
         />
       );
@@ -427,7 +427,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
         <p>Tokenization status: Unknown</p>
         <button
           className={styles.refreshButton}
-          onClick={() => fetchState({ modelId: model.id, refreshState: true })}
+          onClick={() => fetchState({ modelId: model.id, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true })}
         >
           Refresh Status
         </button>
