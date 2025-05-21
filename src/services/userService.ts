@@ -29,6 +29,8 @@ export interface QueryUserResponse {
     avatar?: string;
     permission?: UserPermission;
     role?: string; // 'user' or 'adimn'
+    linked_wallet?: string;
+    geni?: number;
   };
 }
 
