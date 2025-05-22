@@ -7,6 +7,8 @@ import { fetchImages } from './imageStore';
 import { fetchModelDetail } from './modelStore.ts'
 import {fetchTokenizationState} from "./tokenStore.ts";
 import {fetchWorkflowDetail, WorkflowDetail} from "./workflowStore.ts";
+import { PRIVY_TOKEN_HEADER } from '../utils/constants.ts';
+import { getAccessToken } from '@privy-io/react-auth';
 
 // 添加宽高比相关接口
 export interface AspectRatio {
@@ -1439,11 +1441,13 @@ interface CreateWorkflowResponse {
 // 创建工作流API函数
 export async function createWorkflowAPI(params: CreateWorkflowParams): Promise<CreateWorkflowResponse> {
   try {
+    const privyToken = await getAccessToken();
     const response = await fetch('/studio-api/workflow/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
       },
       body: JSON.stringify(params)
     });
