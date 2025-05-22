@@ -477,7 +477,10 @@ const Pricing: React.FC = () => {
                   plan={plans[1]}
                   currentPlan={currentPlan}
                   isLoading={isLoading}
-                  showStake={stakeState.virtuals_amount < plans[1].staked}
+                  showStake={
+                    stakeState.virtuals_amount + stakeState.amount <
+                    plans[1].staked
+                  }
                   showUnstake={
                     stakeState.virtuals_amount >= plans[1].staked &&
                     stakeState.virtuals_amount < plans[2].staked
@@ -492,7 +495,8 @@ const Pricing: React.FC = () => {
                   plan={{
                     ...plans[2],
                     buttonText:
-                      stakeState.virtuals_amount >= plans[1].staked
+                      stakeState.virtuals_amount + stakeState.amount >=
+                      plans[1].staked
                         ? "Upgrade to Premium+"
                         : plans[2].buttonText,
                   }}
