@@ -117,7 +117,7 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
 
   const handleGoClick = () => {
     // 获取模型ID，优先使用imageDetail中的数据
-    const modelId = localImageDetail?.models?.id || image.model_id;
+    const modelId = localImageDetail?.source_info?.id || image.model_id;
     // 获取模型名称
     const modelName = getModelName();
 
@@ -147,8 +147,8 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
 
   // 获取模型名称
   const getModelName = () => {
-    return localImageDetail?.models?.name
-      ? localImageDetail.models.name
+    return localImageDetail?.source_info?.name
+      ? localImageDetail.source_info.name
       : `AI Model #${image.model_id}`;
   };
 

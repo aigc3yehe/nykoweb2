@@ -114,8 +114,8 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   // 定期检查 token 化状态
   useEffect(() => {
     // 首次加载时获取状态
-    fetchState({ modelId })
-  }, [fetchState, modelId]);
+    fetchState({ modelId, model_tokenization_id: modelDetailState?.currentModel?.model_tokenization?.id || 0 })
+  }, [fetchState, modelId, modelDetailState?.currentModel?.model_tokenization?.id]);
 
   useEffect(() => {
     // 修改 renderTokenizationStatus 函数中的完成状态部分

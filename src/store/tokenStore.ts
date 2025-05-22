@@ -62,7 +62,7 @@ export type ModelTokenizationResponse = {
   message: string;
   data: {
     task_id: string;
-    token_tokenization_id: number;
+    model_tokenization_id: number;
   };
 };
 
@@ -106,7 +106,7 @@ export const tokenizationStateAtom = atom<TokenizationState>(initialTokenization
 // 获取 token 化状态
 export const fetchTokenizationState = atom(
   null,
-  async (get, set, { modelId, refreshState = true }: { modelId: number, refreshState?: boolean }) => {
+  async (get, set, { modelId, model_tokenization_id, refreshState = true }: { modelId: number, model_tokenization_id: number, refreshState?: boolean }) => {
     set(tokenizationStateAtom, {
       ...get(tokenizationStateAtom),
       isLoading: true,
@@ -114,8 +114,12 @@ export const fetchTokenizationState = atom(
     });
 
     try {
+      if(!model_tokenization_id) {
+        throw new Error('model_tokenization_id is required');
+      }
       const params = new URLSearchParams({
         model_id: modelId.toString(),
+        model_tokenization_id: model_tokenization_id.toString(),
         refreshState: refreshState.toString()
       });
       const response = await fetch(`/studio-api/model/tokenization/state?${params.toString()}`, {
@@ -230,7 +234,7 @@ export const tokenizeModel = atom(
 // 模型 token 化重试接口
 export const retryTokenization = atom(
   null,
-  async (_, set, { modelId, creator }: { modelId: number, creator: string }) => {
+  async (_, set, { model_tokenization_id, creator }: { model_tokenization_id: number, creator: string }) => {
     try {
       const privyToken = await getAccessToken();
       const response = await fetch('/studio-api/model/tokenization/retry', {
@@ -241,7 +245,7 @@ export const retryTokenization = atom(
           [PRIVY_TOKEN_HEADER]: privyToken || '',
         },
         body: JSON.stringify({
-          model_id: modelId,
+          model_tokenization_id: model_tokenization_id,
           config: {
             creator
           }

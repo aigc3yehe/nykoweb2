@@ -96,11 +96,11 @@ const TokenMarquee: React.FC = () => {
       >
         {tokenState.tokens.map((token) => (
           <div
-            key={`${token.model_id}-${token.token_symbol}`}
+            key={`${token.id}-${token.name}`}
             className={styles.tokenItem}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            onClick={() => handleTokenClick(token.model_id, token.model_name)}
+            onClick={() => handleTokenClick(token.id, token.name)}
           >
             <div className={styles.tokenIconWrapper}>
               <img

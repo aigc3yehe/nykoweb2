@@ -1,8 +1,9 @@
-import { atom } from 'jotai';
-import { User, Google } from '@privy-io/react-auth';
-import {queryUser, queryUserPlan} from '../services/userService';
-import { Twitter } from './imageStore';
-import { chatAtom } from './chatStore'; // 导入聊天状态
+import { atom } from "jotai";
+import { User, Google, getAccessToken } from "@privy-io/react-auth";
+import { queryUser, queryUserPlan } from "../services/userService";
+import { Twitter } from "./imageStore";
+import { chatAtom } from "./chatStore"; // 导入聊天状态
+import { PRIVY_TOKEN_HEADER } from "../utils/constants";
 
 export interface AccountState {
   user: User | null;
@@ -18,6 +19,8 @@ export interface AccountState {
   name: string | null;
   avatar: string | null;
   plan: string;
+  linked_wallet: string | null;
+  geni: number | null;
 }
 
 // 初始账户状态
@@ -31,149 +34,154 @@ const initialState: AccountState = {
   error: null,
   credits: 0,
   did: null,
-  role: 'user',
+  role: "user",
   name: null,
   avatar: null,
-  plan: 'Free'
+  plan: "Free",
+  linked_wallet: null,
+  geni: null,
 };
 
 // 创建账户状态原子
 export const accountAtom = atom<AccountState>(initialState);
 
 // 设置用户信息并查询用户数据
-export const setUser = atom(
-  null,
-  async (get, set, user: User | null) => {
-    if (!user) {
-      set(accountAtom, initialState);
-      return;
-    }
+export const setUser = atom(null, async (get, set, user: User | null) => {
+  if (!user) {
+    set(accountAtom, initialState);
+    return;
+  }
 
-    set(accountAtom, {
-      ...get(accountAtom),
-      isLoading: true
-    });
+  set(accountAtom, {
+    ...get(accountAtom),
+    isLoading: true,
+  });
 
-    try {
-      // 获取钱包地址
-      const walletAddress = user?.wallet?.address || null;
-      const did = user?.id || null;
+  try {
+    // 获取钱包地址
+    const walletAddress = user?.wallet?.address || null;
+    const did = user?.id || null;
 
-      // 如果有DID，查询用户信息
-      if (did) {
-        const queryParams = { did };
-        if (walletAddress) {
-          // 如果有钱包地址，查询钱包地址
-          // @ts-ignore
-          queryParams.address = walletAddress;
-        }
+    // 如果有DID，查询用户信息
+    if (did) {
+      const queryParams: { did: string; address?: string } = { did };
+      if (walletAddress) {
+        // 如果有钱包地址，查询钱包地址
+        queryParams.address = walletAddress;
+      }
 
-        try {
-          const result = await queryUser(queryParams);
-          const planResult = await queryUserPlan(queryParams);
+      try {
+        const result = await queryUser(queryParams);
+        const planResult = await queryUserPlan(queryParams);
 
-          set(accountAtom, {
-            user,
-            twitter: result.data.twitter,
-            google: user?.google || null,
-            walletAddress: result.data.address || walletAddress,
-            isLoading: false,
-            isLoggedIn: true,
-            error: null,
-            credits: planResult.data.sub_balance + planResult.data.paid_balance,
-            did,
-            role: result.data.role || 'user',
-            name: result.data.name || null,
-            avatar: result.data.avatar || null,
-            plan: planResult.data.plan_type
-          });
-        } catch (error) {
-          // 如果查询失败，仍使用本地用户信息
-          set(accountAtom, {
-            user,
-            twitter: user?.twitter ? {
-              username: user.twitter.username,
-              name: user.twitter.name,
-              profilePictureUrl: user.twitter.profilePictureUrl,
-              subject: user.twitter.subject
-            } : null,
-            google: user?.google || null,
-            walletAddress,
-            isLoading: false,
-            isLoggedIn: true,
-            error: (error as Error).message,
-            credits: 0, // Fallback credits
-            did,
-            role: 'user',
-            name: null,
-            avatar: null,
-            plan: "free" // Fallback plan
-          });
-        }
-      } else {
-        // 无DID的情况
         set(accountAtom, {
           user,
-          twitter: user?.twitter ? {
-            username: user.twitter.username,
-            name: user.twitter.name,
-            profilePictureUrl: user.twitter.profilePictureUrl,
-            subject: user.twitter.subject
-          } : null,
+          twitter: result.data.twitter,
+          google: user?.google || null,
+          walletAddress: result.data.address || walletAddress,
+          isLoading: false,
+          isLoggedIn: true,
+          error: null,
+          credits: planResult.data.sub_balance + planResult.data.paid_balance,
+          did,
+          role: result.data.role || "user",
+          name: result.data.name || null,
+          avatar: result.data.avatar || null,
+          plan: planResult.data.plan_type,
+          linked_wallet: result.data.linked_wallet || null,
+          geni: result.data.geni || 1,
+        });
+      } catch (error) {
+        // 如果查询失败，仍使用本地用户信息
+        set(accountAtom, {
+          user,
+          twitter: user?.twitter
+            ? {
+                username: user.twitter.username,
+                name: user.twitter.name,
+                profilePictureUrl: user.twitter.profilePictureUrl,
+                subject: user.twitter.subject,
+              }
+            : null,
           google: user?.google || null,
           walletAddress,
           isLoading: false,
           isLoggedIn: true,
-          error: null,
-          credits: 0,
+          error: (error as Error).message,
+          credits: 0, // Fallback credits
           did,
-          role: 'user',
+          role: "user",
           name: null,
           avatar: null,
-          plan: "Free"
+          plan: "free", // Fallback plan
+          linked_wallet: null,
+          geni: 1,
         });
       }
-    } catch (error) {
+    } else {
+      // 无DID的情况
       set(accountAtom, {
-        ...get(accountAtom),
+        user,
+        twitter: user?.twitter
+          ? {
+              username: user.twitter.username,
+              name: user.twitter.name,
+              profilePictureUrl: user.twitter.profilePictureUrl,
+              subject: user.twitter.subject,
+            }
+          : null,
+        google: user?.google || null,
+        walletAddress,
         isLoading: false,
-        error: (error as Error).message
+        isLoggedIn: true,
+        error: null,
+        credits: 0,
+        did,
+        role: "user",
+        name: null,
+        avatar: null,
+        plan: "Free",
+        linked_wallet: null,
+        geni: 0,
       });
     }
+  } catch (error) {
+    set(accountAtom, {
+      ...get(accountAtom),
+      isLoading: false,
+      error: (error as Error).message,
+    });
   }
-);
+});
 
 // Atom to trigger refreshing user plan (credits and plan type)
-export const refreshUserPlanAtom = atom(
-  null,
-  async (get, set) => {
-    const accountState = get(accountAtom);
-    const did = accountState.did;
+export const refreshUserPlanAtom = atom(null, async (get, set) => {
+  const accountState = get(accountAtom);
+  const did = accountState.did;
 
-    if (did) {
-      try {
-        // Optional: set loading state if you have a specific loading indicator for this
-        // set(accountAtom, (prev) => ({ ...prev, isLoading: true }));
+  if (did) {
+    try {
+      // Optional: set loading state if you have a specific loading indicator for this
+      // set(accountAtom, (prev) => ({ ...prev, isLoading: true }));
 
-        const planResult = await queryUserPlan({ did });
-        set(accountAtom, (prev) => ({
-          ...prev,
-          credits: planResult.data.sub_balance + planResult.data.paid_balance,
-          plan: planResult.data.plan_type,
-          // isLoading: false, // Optional: clear loading state
-        }));
-      } catch (error) {
-        console.error("Failed to refresh user plan:", error);
-        set(accountAtom, (prev) => ({
-          ...prev,
-          // isLoading: false, // Optional: clear loading state
-          // Optionally update an error field specific to plan refresh
-          // error: `Failed to refresh credits: ${(error as Error).message}`,
-        }));
-      }
+      const planResult = await queryUserPlan({ did });
+      set(accountAtom, (prev) => ({
+        ...prev,
+        credits: planResult.data.sub_balance + planResult.data.paid_balance,
+        plan: planResult.data.plan_type,
+        // isLoading: false, // Optional: clear loading state
+      }));
+    } catch (error) {
+      console.error("Failed to refresh user plan:", error);
+      set(accountAtom, (prev) => ({
+        ...prev,
+        // isLoading: false, // Optional: clear loading state
+        // Optionally update an error field specific to plan refresh
+        // error: `Failed to refresh credits: ${(error as Error).message}`,
+      }));
     }
   }
-);
+});
 
 // 设置钱包地址
 export const setWalletAddress = atom(
@@ -183,85 +191,124 @@ export const setWalletAddress = atom(
 
     set(accountAtom, {
       ...state,
-      walletAddress: address
+      walletAddress: address,
     });
   }
 );
 
-export const setPlan = atom(
-    null,
-    (get, set, plan: string) => {
-      const state = get(accountAtom);
-      set(accountAtom, {
-        ...state,
-        plan: plan
-      })
-    }
-)
+export const setPlan = atom(null, (get, set, plan: string) => {
+  const state = get(accountAtom);
+  set(accountAtom, {
+    ...state,
+    plan: plan,
+  });
+});
 
 // 设置加载状态
-export const setLoading = atom(
-  null,
-  (get, set, isLoading: boolean) => {
-    const state = get(accountAtom);
+export const setLoading = atom(null, (get, set, isLoading: boolean) => {
+  const state = get(accountAtom);
 
-    set(accountAtom, {
-      ...state,
-      isLoading
-    });
-  }
-);
+  set(accountAtom, {
+    ...state,
+    isLoading,
+  });
+});
 
 // 设置错误状态
-export const setError = atom(
-  null,
-  (get, set, error: string | null) => {
-    const state = get(accountAtom);
+export const setError = atom(null, (get, set, error: string | null) => {
+  const state = get(accountAtom);
 
-    set(accountAtom, {
-      ...state,
-      error
-    });
-  }
-);
+  set(accountAtom, {
+    ...state,
+    error,
+  });
+});
 
 // 设置积分
-export const setCredits = atom(
-  null,
-  (get, set, credits: number) => {
-    const state = get(accountAtom);
+export const setCredits = atom(null, (get, set, credits: number) => {
+  const state = get(accountAtom);
 
-    set(accountAtom, {
-      ...state,
-      credits
-    });
-  }
-);
+  set(accountAtom, {
+    ...state,
+    credits,
+  });
+});
 
 // 登出
-export const logout = atom(
+export const logout = atom(null, (get, set) => {
+  // 重置账户状态
+  set(accountAtom, initialState);
+
+  // 获取当前聊天状态
+  const chatState = get(chatAtom);
+
+  // 如果有心跳，停止心跳
+  if (chatState.heartbeatId) {
+    clearInterval(chatState.heartbeatId);
+  }
+
+  // 重置聊天连接状态
+  set(chatAtom, {
+    ...chatState,
+    connection: {
+      isActive: false,
+      inQueue: false,
+    },
+    heartbeatId: undefined,
+    did: undefined, // 确保did被清除
+  });
+});
+
+export const updateLinkedExternalWalletAtom = atom(
   null,
-  (get, set) => {
-    // 重置账户状态
-    set(accountAtom, initialState);
-
-    // 获取当前聊天状态
-    const chatState = get(chatAtom);
-
-    // 如果有心跳，停止心跳
-    if (chatState.heartbeatId) {
-      clearInterval(chatState.heartbeatId);
+  async (get, set, address?: string) => {
+    const accountState = get(accountAtom);
+    try {
+      if (!address) {
+        throw new Error("Invalid address");
+      }
+      const did = accountState.did;
+      if (!did) {
+        throw new Error("Invalid did");
+      }
+      const result = await linkedWallet(did, address);
+      if (result?.data) {
+        set(accountAtom, {
+          ...accountState,
+          linked_wallet: address,
+        });
+        await set(refreshUserPlanAtom);
+      }
+    } catch (error) {
+      console.error("Update linked external wallet failed:", error);
+      throw error;
     }
-
-    // 重置聊天连接状态
-    set(chatAtom, {
-      ...chatState,
-      connection: {
-        isActive: false,
-        inQueue: false
-      },
-      heartbeatId: undefined,
-      did: undefined // 确保did被清除
-    });
   }
 );
+
+export const linkedWallet = async (did: string, address: string) => {
+  if (!did || !address) {
+    throw new Error("Invalid DID or Address");
+  }
+  try {
+    const privyToken = await getAccessToken();
+    const response = await fetch("/studio-api/users/link-wallet", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      },
+      body: JSON.stringify({ user: did, wallet: address }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Create user failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Link wallet failed:", error);
+    throw error;
+  }
+};

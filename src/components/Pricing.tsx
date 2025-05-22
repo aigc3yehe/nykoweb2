@@ -26,10 +26,12 @@ import {
   queryStakedToken,
   chargeCredit,
   updatePlan,
+  PLAN_TYPE,
 } from "../services/userService";
 import { Link } from "react-router-dom";
 import { CuBuyConfig } from "../utils/plan";
 import PlanCard from "./PlanCard";
+import { accountAtom } from "../store/accountStore";
 
 // 定义价格套餐类型
 const Pricing: React.FC = () => {
@@ -47,6 +49,7 @@ const Pricing: React.FC = () => {
   const { user } = usePrivy();
   const [currentPlan, setCurrentPlan] = useState("free");
   const [buyCuLoading, setBuyCuLoading] = useState(false);
+  const [accountState] = useAtom(accountAtom);
 
   const [purchaseQuantity, setPurchaseQuantity] = useState(1); // 添加购买数量状态
 
@@ -96,14 +99,20 @@ const Pricing: React.FC = () => {
   }, [fetchVirutalsStakedInfo, stakeConfig, wallets]);
 
   useEffect(() => {
-    if (stakeState?.amount == 0) {
+    if (
+      stakeState?.amount + stakeState?.virtuals_amount < plans[1].staked ||
+      accountState?.plan == PLAN_TYPE.FREE
+    ) {
       setCurrentPlan("free");
-    } else if (stakeState?.amount >= plans[2].staked) {
+    } else if (
+      stakeState?.amount + stakeState?.virtuals_amount >= plans[2].staked ||
+      accountState?.plan == PLAN_TYPE.PREMIUM_PLUS
+    ) {
       setCurrentPlan("premiumPlus");
     } else {
       setCurrentPlan("premium");
     }
-  }, [stakeState, plans]);
+  }, [stakeState, plans, accountState]);
 
   // 更新滚动状态
   useEffect(() => {
