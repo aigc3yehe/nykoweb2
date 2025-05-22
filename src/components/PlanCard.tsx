@@ -97,7 +97,12 @@ const PlanCard = ({
                 // onClick={() => handleSubscribe(plan.id)}
                 disabled={isLoading}
               >
-                {isLoading ? "Processing..." : plan.buttonText}
+                <div className="flex flex-col items-center justify-center">
+                  {isLoading ? "Processing..." : plan.buttonText}
+                  {!isLoading && (
+                    <div className="text-[10px]">(on Virtuals)</div>
+                  )}
+                </div>
               </button>
             </Link>
           )}
@@ -111,7 +116,12 @@ const PlanCard = ({
                 // onClick={() => handleOperation("unstake")}
                 disabled={isLoading}
               >
-                {isLoading ? "Processing..." : "Unstake"}
+                <div className="flex flex-col items-center justify-center">
+                  {isLoading ? "Processing..." : "Unstake"}
+                  {!isLoading && (
+                    <div className="text-[10px]">(on Virtuals)</div>
+                  )}
+                </div>
               </button>
             </Link>
           )}
@@ -131,7 +141,12 @@ const PlanCard = ({
                 // onClick={() => handleOperation("claim")}
                 disabled={isLoading}
               >
-                {isLoading ? "Processing..." : "Claim"}
+                <div className="flex flex-col items-center justify-center">
+                  {isLoading ? "Processing..." : "Claim"}
+                  {!isLoading && (
+                    <div className="text-[10px]">(on Virtuals)</div>
+                  )}
+                </div>
               </button>
             </Link>
           )}
