@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from './ModelCarousel.module.css';
 import leftArrow from '../assets/left.svg';
 import rightArrow from '../assets/right.svg';
+import emptyCoverIcon from "../assets/empty_cover.png";
 
 interface ModelCarouselProps {
   images: string[];
@@ -14,7 +15,9 @@ const ModelCarousel: React.FC<ModelCarouselProps> = ({ images, coverImage }) => 
     ? [coverImage, ...images]
     : images.length > 0
       ? images
-      : ['/placeholder-image.png']; // 如果没有图片，使用占位图
+      : [emptyCoverIcon]; // 如果没有图片，使用占位图
+
+  const emptyCover = images.length == 0 && !coverImage;
 
   // 当前显示的起始索引
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -41,6 +44,9 @@ const ModelCarousel: React.FC<ModelCarouselProps> = ({ images, coverImage }) => 
   }
 
   const getScaleImageUrl = (url: string) => {
+    if (emptyCover) {
+      return url;
+    }
     return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-560,h-640,q-95`
   }
 

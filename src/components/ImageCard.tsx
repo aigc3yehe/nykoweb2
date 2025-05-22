@@ -11,6 +11,8 @@ import { fetchToggleView, fetchEditCover } from '../store/modelStore';
 import { showDialogAtom } from '../store/dialogStore';
 import { accountAtom } from '../store/accountStore';
 import { showToastAtom } from "../store/imagesStore";
+import { fetchToggleWorkflowView, fetchWorkflowEditCover } from "../store/workflowStore.ts";
+import {SOURCE_TYPE} from "../types/api.type.ts";
 import { SOURCE_TYPE } from '../types/api.type';
 
 interface ImageCardProps {
@@ -23,6 +25,8 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
   const handleOpenImageDetails = useSetAtom(openImageDetails);
   const [, toggleView] = useAtom(fetchToggleView);
   const [, editCover] = useAtom(fetchEditCover);
+  const [, toggleWorkflowView] = useAtom(fetchToggleWorkflowView);
+  const [, editWorkflowCover] = useAtom(fetchWorkflowEditCover);
   const showDialog = useSetAtom(showDialogAtom);
   const [accountState] = useAtom(accountAtom);
   const showToast = useSetAtom(showToastAtom);
@@ -98,41 +102,79 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
       onConfirm: () => {
         setIsProcessing(true); // 设置处理中状态
 
-        // 调用接口，将图片设为私有
-        editCover(localImage.source || SOURCE_TYPE.MODEL, localImage.source == SOURCE_TYPE.WORKFLOW ? localImage.workflow_id : localImage.model_id, url)
-            .then(() => {
-              // 根据角色设置新的可见性状态
-              const newPublicValue = accountState.role === 'admin' ? -1 : 0;
+        if (localImage.model_id) {
+          // 调用接口，将图片设为私有
+          editCover(localImage.model_id, url)
+              .then(() => {
+                // 根据角色设置新的可见性状态
+                const newPublicValue = accountState.role === 'admin' ? -1 : 0;
 
-              // 更新本地图片数据
-              const updatedImage = {
-                ...localImage,
-                public: newPublicValue
-              };
+                // 更新本地图片数据
+                const updatedImage = {
+                  ...localImage,
+                  public: newPublicValue
+                };
 
-              setLocalImage(updatedImage);
+                setLocalImage(updatedImage);
 
-              // 如果提供了回调，通知父组件图片已更新
-              if (onVisibilityChange) {
-                onVisibilityChange(updatedImage);
-              }
+                // 如果提供了回调，通知父组件图片已更新
+                if (onVisibilityChange) {
+                  onVisibilityChange(updatedImage);
+                }
 
-              // 显示成功提示
-              showToast({
-                message: 'The image has been successfully set as the cover',
-                severity: 'success'
+                // 显示成功提示
+                showToast({
+                  message: 'The image has been successfully set as the cover',
+                  severity: 'success'
+                });
+              })
+              .catch((error) => {
+                console.error('Failed to change visibility:', error);
+                showToast({
+                  message: 'Failed to set cover',
+                  severity: 'error'
+                });
+              })
+              .finally(() => {
+                setIsProcessing(false); // 结束处理状态
               });
-            })
-            .catch((error) => {
-              console.error('Failed to change visibility:', error);
-              showToast({
-                message: 'Failed to set cover',
-                severity: 'error'
+        } else if (localImage.workflow_id) {
+          // 调用接口，将图片设为私有
+          editWorkflowCover(localImage.workflow_id, url)
+              .then(() => {
+                // 根据角色设置新的可见性状态
+                const newPublicValue = accountState.role === 'admin' ? -1 : 0;
+
+                // 更新本地图片数据
+                const updatedImage = {
+                  ...localImage,
+                  public: newPublicValue
+                };
+
+                setLocalImage(updatedImage);
+
+                // 如果提供了回调，通知父组件图片已更新
+                if (onVisibilityChange) {
+                  onVisibilityChange(updatedImage);
+                }
+
+                // 显示成功提示
+                showToast({
+                  message: 'The image has been successfully set as the cover',
+                  severity: 'success'
+                });
+              })
+              .catch((error) => {
+                console.error('Failed to change visibility:', error);
+                showToast({
+                  message: 'Failed to set cover',
+                  severity: 'error'
+                });
+              })
+              .finally(() => {
+                setIsProcessing(false); // 结束处理状态
               });
-            })
-            .finally(() => {
-              setIsProcessing(false); // 结束处理状态
-            });
+        }
       },
       onCancel: () => {},
       confirmButtonColor: '#FF3C3D',
@@ -169,42 +211,80 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
         cancelText: 'Cancel',
         onConfirm: () => {
           setIsProcessing(true); // 设置处理中状态
+          if (localImage.source === SOURCE_TYPE.MODEL) {
+            // 调用接口，将图片设为私有
+            toggleView('image', localImage.id, false)
+                .then(() => {
+                  // 根据角色设置新的可见性状态
+                  const newPublicValue = accountState.role === 'admin' ? -1 : 0;
 
-          // 调用接口，将图片设为私有
-          toggleView('image', localImage.id, false)
-            .then(() => {
-              // 根据角色设置新的可见性状态
-              const newPublicValue = accountState.role === 'admin' ? -1 : 0;
+                  // 更新本地图片数据
+                  const updatedImage = {
+                    ...localImage,
+                    public: newPublicValue
+                  };
 
-              // 更新本地图片数据
-              const updatedImage = {
-                ...localImage,
-                public: newPublicValue
-              };
+                  setLocalImage(updatedImage);
 
-              setLocalImage(updatedImage);
+                  // 如果提供了回调，通知父组件图片已更新
+                  if (onVisibilityChange) {
+                    onVisibilityChange(updatedImage);
+                  }
 
-              // 如果提供了回调，通知父组件图片已更新
-              if (onVisibilityChange) {
-                onVisibilityChange(updatedImage);
-              }
+                  // 显示成功提示
+                  showToast({
+                    message: 'Image has been hidden successfully',
+                    severity: 'success'
+                  });
+                })
+                .catch((error) => {
+                  console.error('Failed to change visibility:', error);
+                  showToast({
+                    message: 'Failed to hide the image. Please try again.',
+                    severity: 'error'
+                  });
+                })
+                .finally(() => {
+                  setIsProcessing(false); // 结束处理状态
+                });
+          } else if (localImage.source === SOURCE_TYPE.WORKFLOW) {
+              // 调用接口，将图片设为私有
+            toggleWorkflowView('image', localImage.id, false)
+                .then(() => {
+                  // 根据角色设置新的可见性状态
+                  const newPublicValue = accountState.role === 'admin' ? -1 : 0;
 
-              // 显示成功提示
-              showToast({
-                message: 'Image has been hidden successfully',
-                severity: 'success'
-              });
-            })
-            .catch((error) => {
-              console.error('Failed to change visibility:', error);
-              showToast({
-                message: 'Failed to hide the image. Please try again.',
-                severity: 'error'
-              });
-            })
-            .finally(() => {
-              setIsProcessing(false); // 结束处理状态
-            });
+                  // 更新本地图片数据
+                  const updatedImage = {
+                    ...localImage,
+                    public: newPublicValue
+                  };
+
+                  setLocalImage(updatedImage);
+
+                  // 如果提供了回调，通知父组件图片已更新
+                  if (onVisibilityChange) {
+                    onVisibilityChange(updatedImage);
+                  }
+
+                  // 显示成功提示
+                  showToast({
+                    message: 'Image has been hidden successfully',
+                    severity: 'success'
+                  });
+                })
+                .catch((error) => {
+                  console.error('Failed to change visibility:', error);
+                  showToast({
+                    message: 'Failed to hide the image. Please try again.',
+                    severity: 'error'
+                  });
+                })
+                .finally(() => {
+                  setIsProcessing(false); // 结束处理状态
+                });
+          }
+
         },
         onCancel: () => {},
         confirmButtonColor: '#FF3C3D',

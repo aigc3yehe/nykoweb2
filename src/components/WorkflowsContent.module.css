@@ -1,0 +1,78 @@
+.workflowsContent {
+  width: 100%;
+  position: relative;
+  padding: 0 0 1rem 0;
+  display: flex;
+  flex-direction: column;
+  overflow: visible; /* 改为visible，不拦截滚动 */
+}
+
+.workflowsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13.9375rem, 1fr)); /* 223px */
+  gap: 0.625rem; /* 10px */
+  width: 100%;
+  min-height: 5rem; /* 确保有最小高度 */
+}
+
+.workflowCardContainer {
+  width: 13.9375rem; /* 223px */
+  height: 18.5625rem; /* 297px */
+  cursor: pointer;
+  position: relative; /* 确保子元素的绝对定位是相对于这个容器 */
+  overflow: hidden; /* 防止内容溢出 */
+}
+
+.workflowCardContainer:hover {
+  transform: translateY(-4px);
+  transition: transform 0.2s ease;
+}
+
+.noworkflows {
+  color: #9CA3AF;
+  font-family: 'Jura', sans-serif;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.loadingContainer {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #9CA3AF;
+  font-family: 'Jura', sans-serif;
+}
+
+.errorContainer {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #EF4444;
+  font-family: 'Jura', sans-serif;
+}
+
+.errorContainer button {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: #6366F1;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-family: 'Jura', sans-serif;
+}
+
+.placeholder {
+  color: #9CA3AF;
+  font-family: 'Jura', sans-serif;
+}
+
+/* 隐藏滚动条 - Webkit浏览器 */
+&::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+/* 隐藏滚动条 - Firefox */
+scrollbar-width: none;
+
+/* 隐藏滚动条 - IE和Edge */
+-ms-overflow-style: none;

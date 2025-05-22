@@ -449,3 +449,435 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* 工作流容器 */
+.workflowContainer {
+  width: 26.375rem; /* 422px */
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem; /* 14px */
+  border-radius: 0.5rem; /* 8px */
+  border: 0.0625rem solid rgba(55, 65, 81, 0.3); /* 1px solid #3741514D */
+  padding: 0.875rem 1.25rem 0.875rem 1.25rem; /* 14px 20px 14px 20px */
+  margin-top: 0.625rem; /* 10px */
+  background: linear-gradient(90deg, rgba(31, 41, 55, 0.2) 0%, rgba(63, 79, 103, 0.2) 100%);
+}
+
+/* 工作流标题 */
+.workflowTitle {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #D1D5DB;
+}
+
+/* 工作流部分 */
+.workflowSection {
+  width: 100%; /* 382px */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 8px */
+}
+
+/* 部分标签 */
+.sectionLabel {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #FFFFFF;
+}
+
+/* 模型选择按钮 */
+.modelSelectButton {
+  width: 100%; /* 382px */
+  height: 2.0625rem; /* 33px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem; /* 8px */
+  border-radius: 0.25rem; /* 4px */
+  border: 0.0625rem solid rgba(55, 65, 81, 0.5); /* 1px solid #37415180 */
+  padding: 0.5rem 0.875rem; /* 8px 14px */
+  background: transparent;
+  cursor: pointer;
+}
+
+.buttonText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: #FFFFFF;
+  flex: 1;
+}
+
+.selectModelIcon {
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+}
+
+/* Prompt输入容器 */
+.promptInputContainer {
+  width: 100%; /* 382px */
+  height: 8.5625rem; /* 137px */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 8px */
+  border-radius: 0.25rem; /* 4px */
+  border: 0.0625rem solid rgba(55, 65, 81, 0.5); /* 1px solid #37415180 */
+  padding: 0.5rem 0.875rem; /* 8px 14px */
+  background: transparent;
+}
+
+.promptInputContainer.focused {
+  border: 0.0625rem solid #6366F1; /* 1px solid #6366F1 */
+}
+
+/* Prompt输入框 */
+.promptInput {
+  width: 100%; /* 354px */
+  height: 6.25rem; /* 100px */
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 130%;
+  letter-spacing: 0%;
+  color: #FFFFFF;
+  background: transparent;
+  border: none;
+  resize: none;
+  outline: none;
+}
+
+/* 字符计数 */
+.charCount {
+  width: 100%; /* 354px */
+  height: 0.8125rem; /* 13px */
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.625rem; /* 10px */
+  line-height: 130%;
+  letter-spacing: 0%;
+  text-align: right;
+  vertical-align: middle;
+  color: #6E788A;
+}
+
+.charCountError {
+  color: #FF3C3D;
+}
+
+/* 上传按钮 */
+.uploadButton {
+  width: 100%; /* 382px */
+  height: 2.125rem; /* 34px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* 8px */
+  border-radius: 0.25rem; /* 4px */
+  border: 0.0625rem solid rgba(55, 65, 81, 0.5); /* 1px solid #37415180 */
+  padding: 0.5rem 0.875rem; /* 8px 14px */
+  background: transparent;
+  cursor: pointer;
+}
+
+.uploadIcon {
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+}
+
+.uploadButton span {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 130%;
+  letter-spacing: 0%;
+  text-align: center;
+  color: #6366F1;
+}
+
+/* 选项容器 */
+.optionsContainer {
+  width: 100%; /* 382px */
+  height: 2.0625rem; /* 33px */
+  display: flex;
+  gap: 0.5rem; /* 8px */
+}
+
+/* 选项按钮 */
+.optionButton {
+  height: 2.0625rem; /* 33px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.5rem 0.875rem; /* 8px 14px */
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  background: rgba(31, 41, 55, 0.6); /* #1F293799 */
+  border: none;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.optionSelected {
+  border: 1px solid #6366F1; /* 1px solid #6366F1 */
+  font-weight: 700;
+  color: #6366F1;
+  background: transparent;
+}
+
+.optionButton.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: rgba(31, 41, 55, 0.6); /* #1F293799 */
+  color: #FFFFFF;
+}
+
+/* 确认按钮容器 */
+.confirmWorkflowButtonContainer {
+  width: 23.875rem; /* 382px */
+  height: 3.1875rem; /* 51px */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.625rem 0; /* 10px 0 */
+  margin-top: 0.625rem; /* 10px */
+}
+
+/* 确认按钮 */
+.confirmWorkflowButton {
+  width: 23.875rem; /* 382px */
+  height: 1.9375rem; /* 31px */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem; /* 4px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.375rem 0.625rem; /* 6px 10px */
+  background: #34C759;
+  color: #000000;
+  border: none;
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+/* 创建工作流中指示器 */
+.creatingWorkflowIndicator {
+  width: 100%; /* 422px */
+  height: 2.8125rem; /* 45px */
+  display: flex;
+  align-items: center;
+  gap: 0.625rem; /* 10px */
+  border-radius: 0.5rem; /* 8px */
+  padding: 0.875rem; /* 14px */
+  margin-top: 0.625rem; /* 10px */
+  background: linear-gradient(90deg, rgba(31, 41, 55, 0.2) 0%, rgba(63, 79, 103, 0.2) 100%);
+  border: 1px solid #3741514D;
+}
+
+.creatingWorkflowIcon {
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+  animation: spin 1.5s linear infinite; /* 使用与uploading相同的动画 */
+}
+
+.creatingWorkflowText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #88A4C2;
+}
+
+/* 模型选择容器 - 增加相对定位 */
+.modelSelectContainer {
+  position: relative;
+  width: 100%;
+}
+
+/* 下拉菜单样式 */
+.modelDropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem); /* 按钮下方0.5rem */
+  left: 0;
+  width: 100%;
+  background: rgba(31, 41, 55, 0.95);
+  border: 0.0625rem solid rgba(55, 65, 81, 0.5);
+  border-radius: 0.25rem;
+  z-index: 10;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+/* 下拉菜单选项 */
+.modelOption {
+  padding: 0.625rem 0.875rem;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 100%;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modelOption:hover {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.modelOptionSelected {
+  background: rgba(99, 102, 241, 0.3);
+  font-weight: 700;
+}
+
+/* 运行工作流容器 */
+.workflowRunContainer {
+  width: 26.375rem; /* 422px */
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem; /* 14px */
+  border-radius: 0.5rem; /* 8px */
+  border: 0.0625rem solid rgba(55, 65, 81, 0.3); /* 1px solid #3741514D */
+  padding: 0.875rem 1.25rem 0.875rem 1.25rem; /* 14px 20px 14px 20px */
+  margin-top: 0.625rem; /* 10px */
+  background: linear-gradient(90deg, rgba(31, 41, 55, 0.2) 0%, rgba(63, 79, 103, 0.2) 100%);
+}
+
+/* 工作流运行标题 */
+.workflowRunTitle {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #D1D5DB;
+}
+
+/* 上传图片按钮容器 */
+.uploadImageButtonContainer {
+  width: 23.875rem; /* 382px */
+  height: 3.1875rem; /* 51px */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem; /* 10px */
+  padding: 0.625rem 0; /* 10px 0 */
+}
+
+/* 上传图片按钮 */
+.uploadImageButton {
+  width: 23.875rem; /* 382px */
+  height: 1.9375rem; /* 31px */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem; /* 4px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.375rem 0.625rem; /* 6px 10px */
+  background: #6366F1;
+  color: #000000;
+  border: none;
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+/* 工作流图片预览区 */
+.workflowImagePreview {
+  width: 23.875rem; /* 382px */
+  height: 15rem; /* 240px */
+  padding: 1.25rem; /* 20px */
+  gap: 0.625rem; /* 10px */
+  border-radius: 0.25rem; /* 4px */
+  background: rgba(0, 0, 0, 0.05); /* #0000000D */
+  border: 0.0625rem solid rgba(55, 65, 81, 0.3); /* 1px solid #3741514D */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 预览图片 */
+.workflowPreviewImage {
+  max-width: 21.375rem; /* 342px */
+  max-height: 12.5rem; /* 200px */
+  border-radius: 0.25rem; /* 4px */
+  object-fit: contain;
+}
+
+/* 按钮组 */
+.workflowButtonGroup {
+  width: 23.875rem; /* 382px */
+  height: 3.1875rem; /* 51px */
+  display: flex;
+  align-items: center;
+  gap: 0.625rem; /* 10px */
+  padding: 0.625rem 0; /* 10px 0 */
+}
+
+/* 移除图片按钮 */
+.removeImageButton {
+  width: 2.5rem; /* 40px */
+  height: 1.9375rem; /* 31px */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem; /* 4px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.375rem 0.625rem; /* 6px 10px */
+  background: #FF3C3D;
+  border: 0.0625rem solid #FF3C3D; /* 1px solid #FF3C3D */
+  cursor: pointer;
+}
+
+/* 移除图片按钮禁用状态 */
+.removeImageButton:disabled {
+  width: 2.5rem; /* 40px */
+  height: 1.9375rem; /* 31px */
+  gap: 0.25rem; /* 4px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.375rem 0.625rem; /* 6px 10px */
+  background: transparent;
+  border: 0.0625rem solid rgba(55, 65, 81, 0.3); /* 1px solid #3741514D */
+  cursor: not-allowed;
+}
+
+/* 确认按钮禁用状态 */
+.confirmWorkflowButton:disabled {
+  width: 20.75rem; /* 332px */
+  height: 1.9375rem; /* 31px */
+  gap: 0.25rem; /* 4px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.375rem 0.625rem; /* 6px 10px */
+  background: transparent;
+  border: 0.0625rem solid rgba(55, 65, 81, 0.3); /* 1px solid #3741514D */
+  color: rgba(255, 255, 255, 0.15); /* #FFFFFF26 */
+  cursor: not-allowed;
+}

@@ -106,7 +106,19 @@ export const tokenizationStateAtom = atom<TokenizationState>(initialTokenization
 // 获取 token 化状态
 export const fetchTokenizationState = atom(
   null,
-  async (get, set, { modelId, model_tokenization_id, refreshState = true }: { modelId: number, model_tokenization_id: number, refreshState?: boolean }) => {
+  async (get, set, {
+    modelId,
+    model_tokenization_id,
+    workflow_id,
+    workflow_tokenization_id,
+    refreshState = true
+  }: {
+    modelId?: number,
+    model_tokenization_id?: number,
+    workflow_id?: number,
+    workflow_tokenization_id?: number,
+    refreshState?: boolean
+  }) => {
     set(tokenizationStateAtom, {
       ...get(tokenizationStateAtom),
       isLoading: true,
@@ -114,21 +126,35 @@ export const fetchTokenizationState = atom(
     });
 
     try {
-      if(!model_tokenization_id) {
-        throw new Error('model_tokenization_id is required');
+      if(!model_tokenization_id && !workflow_tokenization_id) {
+        throw new Error('tokenization id is required');
       }
-      const params = new URLSearchParams({
-        model_id: modelId.toString(),
-        model_tokenization_id: model_tokenization_id.toString(),
-        refreshState: refreshState.toString()
-      });
-      const response = await fetch(`/studio-api/model/tokenization/state?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-        }
-      });
+      let response: Response | null = null;
+      if (workflow_id && workflow_tokenization_id) {
+        const params = new URLSearchParams({
+          workflow_id: workflow_id.toString(),
+          workflow_tokenization_id: workflow_tokenization_id.toString(),
+          refreshState: refreshState.toString()
+        });
+        response = await fetch(`/studio-api/workflow/tokenization/state?${params.toString()}`, {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          }
+        });
+      } else if (modelId && model_tokenization_id) {
+        const params = new URLSearchParams({
+          model_id: modelId.toString(),
+          model_tokenization_id: model_tokenization_id.toString(),
+          refreshState: refreshState.toString()
+        });
+        response = await fetch(`/studio-api/model/tokenization/state?${params.toString()}`, {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          }
+        });
+      }
 
-      if (!response.ok) {
+      if (response == null || !response.ok) {
         throw new Error('get token state failed');
       }
 

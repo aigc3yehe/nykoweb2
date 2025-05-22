@@ -79,12 +79,14 @@ export const fetchImages = atom(
     reset = false,
     ownedOnly = false,
     model_id,
+    workflow_id,
     state,
     view
   }: {
     reset?: boolean,
     ownedOnly?: boolean,
     model_id?: number,
+    workflow_id?: number,
     state?: ImageState,
     view?: boolean
   } = {}) => {
@@ -138,6 +140,13 @@ export const fetchImages = atom(
         // 添加可选的model_id参数
         if (model_id !== undefined) {
           params.append('model_id', model_id.toString());
+          params.append('source', SOURCE_TYPE.MODEL)
+        }
+
+        // 添加可选的workflow_id参数
+        if (workflow_id !== undefined) {
+          params.append('workflow_id', workflow_id.toString());
+          params.append('source', SOURCE_TYPE.WORKFLOW)
         }
 
         // 添加可选的state参数
