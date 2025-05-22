@@ -425,7 +425,7 @@ const Pricing: React.FC = () => {
         await handleOperation("unstake");
       }
       if (
-        stakeState.amount > 0 &&
+        stakeState.pendingClaim > 0 &&
         stakeState.unstakeTime > Math.floor(Date.now() / 1000)
       ) {
         await handleOperation("revoke");
