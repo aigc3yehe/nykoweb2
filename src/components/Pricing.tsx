@@ -32,6 +32,7 @@ import { Link } from "react-router-dom";
 import { CuBuyConfig } from "../utils/plan";
 import PlanCard from "./PlanCard";
 import { accountAtom } from "../store/accountStore";
+import { sleep } from "../utils/tools";
 
 // 定义价格套餐类型
 const Pricing: React.FC = () => {
@@ -50,6 +51,7 @@ const Pricing: React.FC = () => {
   const [currentPlan, setCurrentPlan] = useState("free");
   const [buyCuLoading, setBuyCuLoading] = useState(false);
   const [accountState] = useAtom(accountAtom);
+  const [opLoading, setOpLoading] = useState(false);
 
   const [purchaseQuantity, setPurchaseQuantity] = useState(1); // 添加购买数量状态
 
@@ -76,27 +78,31 @@ const Pricing: React.FC = () => {
 
   console.debug("stakeState:", stakeState);
 
-  useEffect(() => {
-    const wallet = wallets.find(
-      (wallet) => wallet.walletClientType === "privy"
-    );
-    if (wallet) {
-      fetchStakedInfo({
-        contract: stakeConfig.contractAddrss as `0x${string}`,
-        user: wallet.address as `0x${string}`,
-      });
-    }
-  }, [fetchStakedInfo, stakeConfig, wallets]);
+  const privyWallet = useMemo(() => {
+    return wallets.find((wallet) => wallet.walletClientType === "privy");
+  }, [wallets]);
+
+  const eoaWallet = useMemo(() => {
+    return wallets.find((wallet) => wallet.walletClientType != "privy");
+  }, [wallets]);
 
   useEffect(() => {
-    const wallet = wallets.find((wallet) => wallet.walletClientType != "privy");
-    if (wallet) {
-      fetchVirutalsStakedInfo({
-        contract: stakeConfig.virtualsStakedAddress as `0x${string}`,
-        user: wallet.address as `0x${string}`,
+    if (privyWallet) {
+      fetchStakedInfo({
+        contract: stakeConfig.contractAddrss as `0x${string}`,
+        user: privyWallet?.address as `0x${string}`,
       });
     }
-  }, [fetchVirutalsStakedInfo, stakeConfig, wallets]);
+  }, [fetchStakedInfo, stakeConfig, privyWallet]);
+
+  useEffect(() => {
+    if (eoaWallet) {
+      fetchVirutalsStakedInfo({
+        contract: stakeConfig.virtualsStakedAddress as `0x${string}`,
+        user: eoaWallet?.address as `0x${string}`,
+      });
+    }
+  }, [fetchVirutalsStakedInfo, stakeConfig, eoaWallet]);
 
   useEffect(() => {
     if (
@@ -406,6 +412,7 @@ const Pricing: React.FC = () => {
 
   const unstakeAndClaimHandle = async () => {
     try {
+      setOpLoading(true);
       if (stakeState.amount > 0) {
         await handleOperation("unstake");
       }
@@ -416,14 +423,17 @@ const Pricing: React.FC = () => {
         await handleOperation("revoke");
         await handleOperation("unstake");
       }
+      await sleep(1_500);
       if (
         stakeState.pendingClaim > 0 &&
         stakeState.unstakeTime <= Math.floor(Date.now() / 1000)
       ) {
         await handleOperation("claim");
       }
+      setOpLoading(false);
     } catch (error) {
       console.error("Unstake and claim failed:", error);
+      setOpLoading(false);
     }
   };
 
@@ -498,17 +508,21 @@ const Pricing: React.FC = () => {
 
               {stakeState?.amount + stakeState?.pendingClaim > 0 && (
                 <div className="flex w-full items-center justify-center text-white font-['Jura'] font-bold text-base">
-                  <span>
-                    If you have staked $NYKO in the NYKO subscribe staking
-                    contract, click here to{" "}
-                    <span
-                      className="underline cursor-pointer"
-                      onClick={unstakeAndClaimHandle}
-                    >
-                      Unstake/Claim
+                  {opLoading ? (
+                    <span>Processing...</span>
+                  ) : (
+                    <span>
+                      If you have staked $NYKO in the NYKO subscribe staking
+                      contract, click here to{" "}
+                      <span
+                        className="underline cursor-pointer"
+                        onClick={unstakeAndClaimHandle}
+                      >
+                        {stakeState?.amount > 0 ? "Unstake" : "Claim"}
+                      </span>
+                      .
                     </span>
-                    .
-                  </span>
+                  )}
                 </div>
               )}
 
