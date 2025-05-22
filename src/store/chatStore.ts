@@ -184,7 +184,7 @@ export async function checkImageGenerationStatus(request_id: string, isWorkflow:
     const status_url = isWorkflow ? `/studio-api/workflow/aigc/state?task_id=${request_id}` : `/studio-api/model/aigc/state?task_id=${request_id}&refreshState=true`
     const response = await fetch(status_url, {
       headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
       }
     });
 
@@ -1614,11 +1614,13 @@ interface AigcResponse {
 // 运行工作流API函数
 export async function runWorkflowAPI(params: RunWorkflowParams): Promise<AigcResponse> {
   try {
+    const privyToken = await getAccessToken();
     const response = await fetch('/studio-api/workflow/aigc', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
       },
       body: JSON.stringify(params)
     });
