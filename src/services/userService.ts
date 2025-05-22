@@ -9,8 +9,12 @@ export interface CreateUserResponse {
 }
 
 export interface UserPermission {
+  generate_image?: boolean; // 是否有生成图片的权限
   create_model?: boolean; // 是否有创建模型的权限
   train_model?: boolean; // 是否有训练模型的权限
+  model_tokenization?: boolean; // 是否有将模型token化的权限
+  create_workflow?: boolean; // 是否有创建工作流的权限
+  use_workflow?: boolean; // 是否有使用工作流的权限
 }
 
 // 查询用户响应接口
@@ -25,13 +29,15 @@ export interface QueryUserResponse {
     avatar?: string;
     permission?: UserPermission;
     role?: string; // 'user' or 'adimn'
+    linked_wallet?: string;
+    geni?: number;
   };
 }
 
 export enum PLAN_TYPE {
-  FREE = 'free',
-  PREMIUM = 'premium',
-  PREMIUM_PLUS = 'premium_plus',
+  FREE = "free",
+  PREMIUM = "premium",
+  PREMIUM_PLUS = "premium_plus",
 }
 
 // 查询用户响应接口
@@ -201,13 +207,13 @@ export const queryUserPlan = async (params: {
     const privyToken = await getAccessToken();
 
     const response = await fetch(
-        `/studio-api/users/plan?${queryParams.toString()}`,
-        {
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-            [PRIVY_TOKEN_HEADER]: privyToken || "",
-          },
-        }
+      `/studio-api/users/plan?${queryParams.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          [PRIVY_TOKEN_HEADER]: privyToken || "",
+        },
+      }
     );
 
     if (!response.ok) {
@@ -226,5 +232,45 @@ export const queryUserPlan = async (params: {
         next_refresh_at: new Date(),
       },
     };
-  } 
-}
+  }
+};
+
+export const refreshUserPlan = async (params: {
+  did: string;
+}): Promise<QueryPlanResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+
+    queryParams.append("user", params.did);
+    queryParams.append("refreshState", "true");
+
+    const privyToken = await getAccessToken();
+
+    const response = await fetch(
+      `/studio-api/users/plan/update?${queryParams.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          [PRIVY_TOKEN_HEADER]: privyToken || "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Query user staked token failed.");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Query user staked token failed:", error);
+    return {
+      message: "Query user plan failed",
+      data: {
+        sub_balance: 0,
+        paid_balance: 0,
+        plan_type: PLAN_TYPE.FREE,
+        next_refresh_at: new Date(),
+      },
+    };
+  }
+};

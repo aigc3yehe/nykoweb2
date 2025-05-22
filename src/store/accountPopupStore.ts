@@ -8,6 +8,7 @@ export interface AccountPopupState {
     profilePictureUrl?: string;
     walletAddress?: string;
     plan?: string;
+    linked_wallet?: string;
   };
   anchorPosition: DOMRect | null;
   onExport: () => void;

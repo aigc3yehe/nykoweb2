@@ -3,6 +3,7 @@ import { atom } from "jotai";
 import { formatEther } from "viem";
 import { publicClient } from "../providers/wagmiConfig";
 import NikoTokenLockerAbi from "../abi/INikoTokenLocker.json";
+import VirtualsLockerAbi from "../abi/VirtualsLocker.json";
 
 // 定义状态接口
 export interface StakeState {
@@ -11,6 +12,7 @@ export interface StakeState {
   amount: number;
   pendingClaim: number;
   unstakeTime: number;
+  virtuals_amount: number;
 }
 
 // 初始状态
@@ -20,6 +22,7 @@ const initialState: StakeState = {
   amount: 0,
   pendingClaim: 0,
   unstakeTime: 0,
+  virtuals_amount: 0,
 };
 
 // 创建全局状态 atom
@@ -37,11 +40,12 @@ export const getStakedInfo = atom(
       args: [user as `0x${string}`],
     });
     console.log("stakeInfo:", stakeInfo);
-    const amount = formatEther((stakeInfo as { amount: bigint })?.amount) || '0';
+    const amount =
+      formatEther((stakeInfo as { amount: bigint })?.amount) || "0";
     const pendingClaim =
-      formatEther((stakeInfo as { pendingClaim: bigint })?.pendingClaim) || '0';
+      formatEther((stakeInfo as { pendingClaim: bigint })?.pendingClaim) || "0";
     const unstakeTime =
-      (stakeInfo as { unstakeTime: bigint })?.unstakeTime?.toString() || '0';
+      (stakeInfo as { unstakeTime: bigint })?.unstakeTime?.toString() || "0";
 
     // 更新加载状态
     set(stakeStateAtom, {
@@ -61,6 +65,51 @@ export const getStakedInfo = atom(
       });
 
       return stakeInfo;
+    } catch (error) {
+      // 处理错误
+      const errorMessage =
+        error instanceof Error ? error.message : "GetTokensForOwner Error";
+
+      set(stakeStateAtom, {
+        ...get(stakeStateAtom),
+        isLoading: false,
+        error: errorMessage,
+      });
+
+      throw error;
+    }
+  }
+);
+
+export const getVirutalsStakedInfo = atom(
+  null,
+  async (get, set, params: { contract: string; user: string }) => {
+    const { contract, user } = params;
+    const stakeAmount = await publicClient.readContract({
+      abi: VirtualsLockerAbi,
+      address: contract as `0x${string}`,
+      functionName: "stakedAmountOf",
+      args: [user as `0x${string}`],
+    });
+    console.log("stakeAmount:", stakeAmount);
+    const amount = formatEther((stakeAmount as bigint) || 0n);
+
+    // 更新加载状态
+    set(stakeStateAtom, {
+      ...get(stakeStateAtom),
+      isLoading: true,
+      error: null,
+    });
+
+    try {
+      // 更新状态
+      set(stakeStateAtom, {
+        ...get(stakeStateAtom),
+        isLoading: false,
+        virtuals_amount: Number(amount || 0),
+      });
+
+      return stakeAmount;
     } catch (error) {
       // 处理错误
       const errorMessage =

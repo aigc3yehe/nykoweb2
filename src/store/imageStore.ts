@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { atom } from 'jotai';
 import { accountAtom } from './accountStore';
+import { SOURCE_TYPE } from '../types/api.type';
 
 // 定义Twitter接口
 export interface Twitter {
@@ -14,7 +15,9 @@ export interface Twitter {
 export interface Image {
   id: number;
   url: string | null;
-  model_id: number;
+  model_id?: number;
+  workflow_id?: number;
+  source: SOURCE_TYPE;
   creator: string;
   version: number;
   task_id: string;
@@ -147,7 +150,7 @@ export const fetchImages = atom(
         }
 
         // 发送请求
-        const response = await fetch(`/studio-api/model/list/gallery?${params.toString()}`, {
+        const response = await fetch(`/studio-api/aigc/gallery?${params.toString()}`, {
           headers: {
             'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
           }
@@ -258,10 +261,11 @@ export const resetImageList = atom(
 
 // 定义详细图片信息接口
 export interface ImageDetail {
-  models: {
+  source_info: {
     id: number;
     name: string;
   };
+  source: SOURCE_TYPE;
   users: {
     did: string;
     twitter: Twitter | null;

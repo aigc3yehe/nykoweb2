@@ -9,15 +9,19 @@ import SubDisableIcon from "../assets/sub_disable.svg";
 import AddNormalIcon from "../assets/add_normal.svg";
 import AddDisableIcon from "../assets/add_disable.svg";
 import { pricingAtom, setOperationLoading } from "../store/pricingStore";
-import { useLogin, usePrivy, useWallets } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { base } from "viem/chains";
 import { createWalletClient, custom, Hex, parseEther } from "viem";
 import NikoTokenLockerAbi from "../abi/INikoTokenLocker.json";
-import ERC20Abi from "../abi/IERC20.json";
+// import ERC20Abi from "../abi/IERC20.json";
 import { showToastAtom } from "../store/imagesStore";
-import { getStakedInfo, stakeStateAtom } from "../store/stakeStore";
-import { publicClient } from "../providers/wagmiConfig";
-import { alchemyStateAtom, getTokensForOwner } from "../store/alchemyStore";
+import {
+  getStakedInfo,
+  getVirutalsStakedInfo,
+  stakeStateAtom,
+} from "../store/stakeStore";
+// import { publicClient } from "../providers/wagmiConfig";
+// import { alchemyStateAtom, getTokensForOwner } from "../store/alchemyStore";
 import {
   queryStakedToken,
   chargeCredit,
@@ -26,24 +30,32 @@ import {
 import { Link } from "react-router-dom";
 import { CuBuyConfig } from "../utils/plan";
 import PlanCard from "./PlanCard";
+import { accountAtom, refreshUserPlanAtom } from "../store/accountStore";
+import { sleep } from "../utils/tools";
+import { publicClient } from "../providers/wagmiConfig";
+import { Cached } from "@mui/icons-material";
 
 // 定义价格套餐类型
 const Pricing: React.FC = () => {
   const [pricingState] = useAtom(pricingAtom);
-  const { authenticated } = usePrivy();
+  // const { authenticated } = usePrivy();
   const { plans, isLoading, stakeConfig } = pricingState;
   const { wallets } = useWallets();
   const showToast = useSetAtom(showToastAtom);
   const [stakeState] = useAtom(stakeStateAtom);
   const [, fetchStakedInfo] = useAtom(getStakedInfo);
+  const [, fetchVirutalsStakedInfo] = useAtom(getVirutalsStakedInfo);
   const setOperationLoadingFn = useSetAtom(setOperationLoading);
-  const [alchemyState] = useAtom(alchemyStateAtom);
-  const [, fetchTokens] = useAtom(getTokensForOwner);
+  // const [alchemyState] = useAtom(alchemyStateAtom);
+  // const [, fetchTokens] = useAtom(getTokensForOwner);
   const { user } = usePrivy();
   const [currentPlan, setCurrentPlan] = useState("free");
   const [buyCuLoading, setBuyCuLoading] = useState(false);
+  const [accountState] = useAtom(accountAtom);
+  const [opLoading, setOpLoading] = useState(false);
 
   const [purchaseQuantity, setPurchaseQuantity] = useState(1); // 添加购买数量状态
+  const [, refreshUserPlan] = useAtom(refreshUserPlanAtom);
 
   // 处理数量增减的函数
   const handleDecrease = () => {
@@ -66,27 +78,46 @@ const Pricing: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const customScrollbarRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const wallet = wallets.find(
-      (wallet) => wallet.walletClientType === "privy"
-    );
-    if (wallet) {
-      fetchStakedInfo({
-        contract: stakeConfig.contractAddrss as `0x${string}`,
-        user: wallet.address as `0x${string}`,
-      });
-    }
-  }, [fetchStakedInfo, stakeConfig, wallets]);
+  console.debug("stakeState:", stakeState);
+
+  const privyWallet = useMemo(() => {
+    return wallets.find((wallet) => wallet.walletClientType === "privy");
+  }, [wallets]);
+
+  const eoaWallet = useMemo(() => {
+    return wallets.find((wallet) => wallet.walletClientType != "privy");
+  }, [wallets]);
 
   useEffect(() => {
-    if (stakeState?.amount == 0) {
+    if (privyWallet) {
+      fetchStakedInfo({
+        contract: stakeConfig.contractAddrss as `0x${string}`,
+        user: privyWallet?.address as `0x${string}`,
+      });
+    }
+  }, [fetchStakedInfo, stakeConfig, privyWallet]);
+
+  useEffect(() => {
+    if (eoaWallet) {
+      fetchVirutalsStakedInfo({
+        contract: stakeConfig.virtualsStakedAddress as `0x${string}`,
+        user: eoaWallet?.address as `0x${string}`,
+      });
+    }
+  }, [fetchVirutalsStakedInfo, stakeConfig, eoaWallet]);
+
+  useEffect(() => {
+    if (stakeState?.amount + stakeState?.virtuals_amount < plans[1].staked) {
       setCurrentPlan("free");
-    } else if (stakeState?.amount >= plans[2].staked) {
+    } else if (
+      stakeState?.amount + stakeState?.virtuals_amount >=
+      plans[2].staked
+    ) {
       setCurrentPlan("premiumPlus");
     } else {
       setCurrentPlan("premium");
     }
-  }, [stakeState, plans]);
+  }, [stakeState, plans, accountState]);
 
   // 更新滚动状态
   useEffect(() => {
@@ -172,16 +203,16 @@ const Pricing: React.FC = () => {
     }
   }, [wallets]);
 
-  const { login } = useLogin();
+  // const { login } = useLogin();
 
   // Login by Twitter
-  const handleLogin = () => {
-    try {
-      login();
-    } catch (error) {
-      console.error("login Twitter failed:", error);
-    }
-  };
+  // const handleLogin = () => {
+  //   try {
+  //     login();
+  //   } catch (error) {
+  //     console.error("login Twitter failed:", error);
+  //   }
+  // };
 
   // Buy training slots
   const handleBuy = async () => {
@@ -213,119 +244,120 @@ const Pricing: React.FC = () => {
   };
 
   // Subscribe to plan by staking $NYKO
-  const handleSubscribe = async (planId: string) => {
-    if (!authenticated) {
-      handleLogin();
-      return;
-    }
-    if (!isLoading) {
-      try {
-        setOperationLoadingFn(true);
-        const client = await walletClient;
-        if (!client) {
-          console.error("Wallet client not found");
-          showToast({
-            message: "Pending initial",
-            severity: "warning",
-          });
-          setOperationLoadingFn(false);
-          return;
-        }
-        const plan = plans.find((plan) => plan.id === planId);
-        if (!plan) {
-          console.error("Plan not found");
-          showToast({
-            message: "Plan not found",
-            severity: "error",
-          });
-          setOperationLoadingFn(false);
-          return;
-        }
-        const nikoBalance =
-          alchemyState.tokens?.tokens?.find((token) => token.symbol === "NYKO")
-            ?.balance || "0";
-        const needStakedAmont = plan.staked - Number(stakeState?.amount);
-        if (Number(nikoBalance) < needStakedAmont) {
-          const tokens = await fetchTokens({
-            addressOrName: client.account?.address as `0x${string}`,
-            options: {
-              contractAddresses: [
-                stakeConfig.nikoTokenAddress as `0x${string}`,
-              ],
-            },
-          });
-          const nikoToken = tokens.tokens?.find(
-            (token) => token.symbol === "NYKO"
-          );
-          if (!nikoToken || Number(nikoToken.balance || 0) < needStakedAmont) {
-            showToast({
-              message: `Not enough $NYKO token to stake, need ${needStakedAmont} $NYKO, current ${
-                nikoToken?.balance || 0
-              } $NYKO`,
-              severity: "error",
-            });
-            setOperationLoadingFn(false);
-            return;
-          }
-        }
-        const allowance = await publicClient.readContract({
-          address: stakeConfig.nikoTokenAddress as `0x${string}`,
-          abi: ERC20Abi,
-          functionName: "allowance",
-          args: [
-            client.account?.address as `0x${string}`,
-            stakeConfig.contractAddrss as `0x${string}`,
-          ],
-        });
-        console.log("allowance", allowance);
-        if ((allowance as bigint) < parseEther(needStakedAmont.toString())) {
-          await client.writeContract({
-            address: stakeConfig.nikoTokenAddress as `0x${string}`,
-            abi: ERC20Abi,
-            functionName: "approve",
-            args: [
-              stakeConfig.contractAddrss as `0x${string}`,
-              parseEther(needStakedAmont.toString()),
-            ],
-          });
-        }
-        const data = await client.writeContract({
-          address: stakeConfig.contractAddrss as `0x${string}`,
-          abi: NikoTokenLockerAbi,
-          functionName: "stake",
-          args: [parseEther(needStakedAmont.toString())],
-        });
+  // const handleSubscribe = async (planId: string) => {
+  //   if (!authenticated) {
+  //     handleLogin();
+  //     return;
+  //   }
+  //   if (!isLoading) {
+  //     try {
+  //       setOperationLoadingFn(true);
+  //       const client = await walletClient;
+  //       if (!client) {
+  //         console.error("Wallet client not found");
+  //         showToast({
+  //           message: "Pending initial",
+  //           severity: "warning",
+  //         });
+  //         setOperationLoadingFn(false);
+  //         return;
+  //       }
+  //       const plan = plans.find((plan) => plan.id === planId);
+  //       if (!plan) {
+  //         console.error("Plan not found");
+  //         showToast({
+  //           message: "Plan not found",
+  //           severity: "error",
+  //         });
+  //         setOperationLoadingFn(false);
+  //         return;
+  //       }
+  //       const nikoBalance =
+  //         alchemyState.tokens?.tokens?.find((token) => token.symbol === "NYKO")
+  //           ?.balance || "0";
+  //       const needStakedAmont = plan.staked - Number(stakeState?.amount);
+  //       if (Number(nikoBalance) < needStakedAmont) {
+  //         const tokens = await fetchTokens({
+  //           addressOrName: client.account?.address as `0x${string}`,
+  //           options: {
+  //             contractAddresses: [
+  //               stakeConfig.nikoTokenAddress as `0x${string}`,
+  //             ],
+  //           },
+  //         });
+  //         const nikoToken = tokens.tokens?.find(
+  //           (token) => token.symbol === "NYKO"
+  //         );
+  //         if (!nikoToken || Number(nikoToken.balance || 0) < needStakedAmont) {
+  //           showToast({
+  //             message: `Not enough $NYKO token to stake, need ${needStakedAmont} $NYKO, current ${
+  //               nikoToken?.balance || 0
+  //             } $NYKO`,
+  //             severity: "error",
+  //           });
+  //           setOperationLoadingFn(false);
+  //           return;
+  //         }
+  //       }
+  //       const allowance = await publicClient.readContract({
+  //         address: stakeConfig.nikoTokenAddress as `0x${string}`,
+  //         abi: ERC20Abi,
+  //         functionName: "allowance",
+  //         args: [
+  //           client.account?.address as `0x${string}`,
+  //           stakeConfig.contractAddrss as `0x${string}`,
+  //         ],
+  //       });
+  //       console.log("allowance", allowance);
+  //       if ((allowance as bigint) < parseEther(needStakedAmont.toString())) {
+  //         await client.writeContract({
+  //           address: stakeConfig.nikoTokenAddress as `0x${string}`,
+  //           abi: ERC20Abi,
+  //           functionName: "approve",
+  //           args: [
+  //             stakeConfig.contractAddrss as `0x${string}`,
+  //             parseEther(needStakedAmont.toString()),
+  //           ],
+  //         });
+  //       }
+  //       const data = await client.writeContract({
+  //         address: stakeConfig.contractAddrss as `0x${string}`,
+  //         abi: NikoTokenLockerAbi,
+  //         functionName: "stake",
+  //         args: [parseEther(needStakedAmont.toString())],
+  //       });
 
-        await fetchStakedInfo({
-          contract: stakeConfig.contractAddrss as `0x${string}`,
-          user: client?.account?.address as `0x${string}`,
-        });
+  //       await fetchStakedInfo({
+  //         contract: stakeConfig.contractAddrss as `0x${string}`,
+  //         user: client?.account?.address as `0x${string}`,
+  //       });
 
-        try {
-          await queryStakedToken({ did: user?.id || "" });
-          await updatePlan({ did: user?.id || "" });
-        } catch (error) {
-          console.error("Update plan failed:", error);
-        }
+  //       try {
+  //         await queryStakedToken({ did: user?.id || "" });
+  //         await updatePlan({ did: user?.id || "" });
+  //       } catch (error) {
+  //         console.error("Update plan failed:", error);
+  //       }
 
-        showToast({
-          message: `Stake successful: ${data}`,
-          severity: "success",
-        });
-        setOperationLoadingFn(false);
-      } catch (error) {
-        setOperationLoadingFn(false);
-        showToast({
-          message: `Stake failed: ${
-            (error as Error)?.message || "Unknown error"
-          }`,
-          severity: "error",
-        });
-      }
-    }
-  };
+  //       showToast({
+  //         message: `Stake successful: ${data}`,
+  //         severity: "success",
+  //       });
+  //       setOperationLoadingFn(false);
+  //     } catch (error) {
+  //       setOperationLoadingFn(false);
+  //       showToast({
+  //         message: `Stake failed: ${
+  //           (error as Error)?.message || "Unknown error"
+  //         }`,
+  //         severity: "error",
+  //       });
+  //     }
+  //   }
+  // };
+
   // Unstake or claim staked $NYKO
-  const handleOperation = async (operation: "unstake" | "claim") => {
+  const handleOperation = async (operation: "unstake" | "claim" | "revoke") => {
     if (!isLoading) {
       try {
         setOperationLoadingFn(true);
@@ -346,6 +378,8 @@ const Pricing: React.FC = () => {
           args: [],
         });
 
+        await publicClient.waitForTransactionReceipt({ hash: data });
+
         await fetchStakedInfo({
           contract: stakeConfig.contractAddrss as `0x${string}`,
           user: client?.account?.address as `0x${string}`,
@@ -361,19 +395,47 @@ const Pricing: React.FC = () => {
         }
 
         showToast({
-          message: `Unstake successful: ${data}`,
+          message: `${operation} successful: ${data}`,
           severity: "success",
         });
         setOperationLoadingFn(false);
       } catch (error) {
         setOperationLoadingFn(false);
         showToast({
-          message: `Unstake failed: ${
+          message: `${operation} failed: ${
             (error as Error)?.message || "Unknown error"
           }`,
           severity: "error",
         });
       }
+    }
+  };
+
+  const unstakeAndClaimHandle = async () => {
+    if (opLoading) return;
+    try {
+      setOpLoading(true);
+      if (stakeState.amount > 0) {
+        await handleOperation("unstake");
+      }
+      if (
+        stakeState.amount > 0 &&
+        stakeState.unstakeTime > Math.floor(Date.now() / 1000)
+      ) {
+        await handleOperation("revoke");
+        await handleOperation("unstake");
+      }
+      await sleep(1_500);
+      if (
+        stakeState.pendingClaim > 0 &&
+        stakeState.unstakeTime <= Math.floor(Date.now() / 1000)
+      ) {
+        await handleOperation("claim");
+      }
+      setOpLoading(false);
+    } catch (error) {
+      console.error("Unstake and claim failed:", error);
+      setOpLoading(false);
     }
   };
 
@@ -393,7 +455,7 @@ const Pricing: React.FC = () => {
               <div className={styles.pricingHeader}>
                 <h1 className={styles.title}>Stake to Subscribe</h1>
                 <p className={styles.subtitle}>
-                  Upgrade to gain access to Premium features
+                  Stake on Virtuals to gain access to Premium
                   <Link
                     target="_blank"
                     to={`https://app.virtuals.io/virtuals/22053`}
@@ -401,6 +463,15 @@ const Pricing: React.FC = () => {
                   >
                     Buy $NYKO
                   </Link>
+                  <span onClick={() => refreshUserPlan(true)}>
+                    <Cached
+                      style={{
+                        color: "#88A4C2",
+                        fontSize: "1rem",
+                        cursor: "pointer",
+                      }}
+                    />
+                  </span>
                 </p>
               </div>
 
@@ -409,34 +480,23 @@ const Pricing: React.FC = () => {
                 <PlanCard
                   plan={plans[0]}
                   currentPlan={currentPlan}
-                  handleSubscribe={handleSubscribe}
-                  handleOperation={handleOperation}
                   isLoading={isLoading}
                 />
                 {/* Premium */}
                 <PlanCard
                   plan={plans[1]}
                   currentPlan={currentPlan}
-                  handleSubscribe={handleSubscribe}
-                  handleOperation={handleOperation}
                   isLoading={isLoading}
                   showStake={
-                    stakeState.amount < plans[1].staked &&
-                    stakeState.unstakeTime == 0
+                    stakeState.virtuals_amount + stakeState.amount <
+                    plans[1].staked
                   }
                   showUnstake={
-                    stakeState.amount >= plans[1].staked &&
-                    stakeState.amount < plans[2].staked
+                    stakeState.virtuals_amount >= plans[1].staked &&
+                    stakeState.virtuals_amount < plans[2].staked
                   }
-                  showPendingClaim={
-                    stakeState.pendingClaim >= plans[1].staked &&
-                    stakeState.pendingClaim < plans[2].staked
-                  }
-                  showClaim={
-                    stakeState.pendingClaim >= plans[1].staked &&
-                    stakeState.pendingClaim < plans[2].staked &&
-                    stakeState?.unstakeTime < Math.floor(Date.now() / 1000)
-                  }
+                  showPendingClaim={false}
+                  showClaim={false}
                   pendingClaim={stakeState.pendingClaim}
                   unstakeTime={stakeState.unstakeTime}
                 />
@@ -445,31 +505,43 @@ const Pricing: React.FC = () => {
                   plan={{
                     ...plans[2],
                     buttonText:
-                      stakeState.amount >= plans[1].staked
+                      stakeState.virtuals_amount + stakeState.amount >=
+                      plans[1].staked
                         ? "Upgrade to Premium+"
                         : plans[2].buttonText,
                   }}
                   currentPlan={currentPlan}
-                  handleSubscribe={handleSubscribe}
-                  handleOperation={handleOperation}
                   isLoading={isLoading}
-                  showStake={
-                    stakeState.amount < plans[2].staked &&
-                    stakeState.unstakeTime == 0
-                  }
-                  showUnstake={stakeState.amount >= plans[2].staked}
-                  showPendingClaim={stakeState.pendingClaim >= plans[2].staked}
-                  showClaim={
-                    stakeState.pendingClaim >= plans[2].staked &&
-                    stakeState?.unstakeTime < Math.floor(Date.now() / 1000)
-                  }
+                  showStake={stakeState.virtuals_amount < plans[2].staked}
+                  showUnstake={stakeState.virtuals_amount >= plans[2].staked}
+                  showPendingClaim={false}
+                  showClaim={false}
                   pendingClaim={stakeState.pendingClaim}
                   unstakeTime={stakeState.unstakeTime}
                 />
               </div>
 
+              {stakeState?.amount + stakeState?.pendingClaim > 0 && (
+                <div className="flex w-full items-center justify-center text-white font-['Jura'] font-bold text-base">
+                  {opLoading ? (
+                    <span>Processing...</span>
+                  ) : (
+                    <span>
+                      Click here to{" "}
+                      <span
+                        className="underline cursor-pointer"
+                        onClick={unstakeAndClaimHandle}
+                      >
+                        {stakeState?.amount > 0 ? "Unstake" : "Claim"}
+                      </span>
+                      .
+                    </span>
+                  )}
+                </div>
+              )}
+
               {/* quit buy nyko */}
-              <div className="pt-5 pb-5 pl-7 pr-7 gap-1.5 flex flex-col lg:flex-row justify-between items-center bg-gradient-to-r from-[rgba(255,106,0,0.2)] via-[rgba(31,41,55,0.2)] to-[rgba(82,84,181,0.2)] rounded border border-[#3741514D] backdrop-blur-[20px] gap-[1.25rem]">
+              <div className="pt-5 pb-5 pl-7 pr-7 flex flex-col lg:flex-row justify-between items-center bg-gradient-to-r from-[rgba(255,106,0,0.2)] via-[rgba(31,41,55,0.2)] to-[rgba(82,84,181,0.2)] rounded border border-[#3741514D] backdrop-blur-[20px] gap-[1.25rem]">
                 <div className="font-['Jura'] font-bold text-[1.25rem] leading-[120%] align-middle capitalize bg-gradient-to-r from-[#6366F1] to-[#FF6A00] bg-clip-text text-transparent">
                   Get Additional Credits <span className="text-white">✨</span>
                 </div>
@@ -628,6 +700,43 @@ const Pricing: React.FC = () => {
                     <p className={styles.faqAnswer}>
                       The $NYKO used in the Stake to Subscribe system won’t be
                       burned—you can withdraw it at any time.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.faqItem}>
+                  <img
+                    src={QuestionIcon}
+                    alt="Question"
+                    className={styles.faqIcon}
+                  />
+                  <div className={styles.faqContent}>
+                    <h3 className={styles.faqQuestion}>
+                      If I stake $NYKO on Virtuals, can I get Premium or
+                      Premium+?
+                    </h3>
+                    <p className={styles.faqAnswer}>Yes.</p>
+                  </div>
+                </div>
+
+                <div className={styles.faqItem}>
+                  <img
+                    src={QuestionIcon}
+                    alt="Question"
+                    className={styles.faqIcon}
+                  />
+                  <div className={styles.faqContent}>
+                    <h3 className={styles.faqQuestion}>
+                      How are credits used? How can I get more?
+                    </h3>
+                    <p className={styles.faqAnswer}>
+                      Generating one image costs 5 credits, training one model
+                      costs 7,500 credits. <br />
+                      Premium users receive 1,000 credits per week, and Premium+
+                      users receive 8,200 credits per week. Unused credits reset
+                      weekly. <br />
+                      If you run out during the week, you can purchase
+                      additional credits separately.
                     </p>
                   </div>
                 </div>
