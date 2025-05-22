@@ -26,13 +26,13 @@ import {
   queryStakedToken,
   chargeCredit,
   updatePlan,
-  PLAN_TYPE,
 } from "../services/userService";
 import { Link } from "react-router-dom";
 import { CuBuyConfig } from "../utils/plan";
 import PlanCard from "./PlanCard";
 import { accountAtom } from "../store/accountStore";
 import { sleep } from "../utils/tools";
+import { publicClient } from "../providers/wagmiConfig";
 
 // 定义价格套餐类型
 const Pricing: React.FC = () => {
@@ -106,13 +106,11 @@ const Pricing: React.FC = () => {
 
   useEffect(() => {
     if (
-      stakeState?.amount + stakeState?.virtuals_amount < plans[1].staked ||
-      accountState?.plan == PLAN_TYPE.FREE
+      stakeState?.amount + stakeState?.virtuals_amount < plans[1].staked
     ) {
       setCurrentPlan("free");
     } else if (
-      stakeState?.amount + stakeState?.virtuals_amount >= plans[2].staked ||
-      accountState?.plan == PLAN_TYPE.PREMIUM_PLUS
+      stakeState?.amount + stakeState?.virtuals_amount >= plans[2].staked
     ) {
       setCurrentPlan("premiumPlus");
     } else {
@@ -378,6 +376,8 @@ const Pricing: React.FC = () => {
           functionName: operation,
           args: [],
         });
+
+        await publicClient.waitForTransactionReceipt({ hash: data });
 
         await fetchStakedInfo({
           contract: stakeConfig.contractAddrss as `0x${string}`,
