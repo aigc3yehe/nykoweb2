@@ -88,6 +88,8 @@ const Pricing: React.FC = () => {
     return wallets.find((wallet) => wallet.walletClientType != "privy");
   }, [wallets]);
 
+  console.debug("Connect Wallet:", privyWallet?.address, eoaWallet?.address);
+
   useEffect(() => {
     if (privyWallet) {
       fetchStakedInfo({
