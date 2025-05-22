@@ -13,6 +13,7 @@ export interface PricingFeature {
 export interface StakeConfig {
   nikoTokenAddress: string;
   contractAddrss: string;
+  virtualsStakedAddress: string;
 }
 
 // 定义价格套餐类型
@@ -46,7 +47,7 @@ const initialState: PricingState = {
       description: "For starter",
       features: [
         {
-          title: "100 Credits Every Week",
+          title: "80 Credits Every Week",
           subtitle: "On Website",
           supported: true,
         },
@@ -64,7 +65,7 @@ const initialState: PricingState = {
       description: "For expert-level AI players",
       features: [
         {
-          title: "2,500 Credits Every Week",
+          title: "1,000 Credits Every Week",
           subtitle: "On Website",
           supported: true,
         },
@@ -74,7 +75,7 @@ const initialState: PricingState = {
         },
       ],
       buttonText: "Stake to Subscribe",
-      tips: "*You can unstake to cancel your subscription. Withdrawable after a 7-day cooldown",
+      tips: "*You can unstake to cancel your subscription. Withdrawable after a 14-day cooldown",
       staked: 75_000,
     },
     {
@@ -84,7 +85,7 @@ const initialState: PricingState = {
       description: "For Revolutionary AI creators",
       features: [
         {
-          title: "12,000 Credits Every Week",
+          title: "8,200 Credits Every Week",
           subtitle: "On Website & X",
           supported: true,
         },
@@ -102,7 +103,7 @@ const initialState: PricingState = {
         },
       ],
       buttonText: "Stake to Subscribe",
-      tips: "*You can unstake to cancel your subscription. Withdrawable after a 7-day cooldown",
+      tips: "*You can unstake to cancel your subscription. Withdrawable after a 14-day cooldown",
       staked: 300_000,
     },
   ],
@@ -112,6 +113,7 @@ const initialState: PricingState = {
   stakeConfig: {
     nikoTokenAddress: "0x129966d7D25775b57E3C5b13b2E1c2045FBc4926",
     contractAddrss: "0xb1542ce040f0d0b9ce6958cbdda40905b4a7551a",
+    virtualsStakedAddress: "0x37C589356A4e49aD8174808039869Dd18a288458"
   },
 };
 

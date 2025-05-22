@@ -2,12 +2,11 @@ import { PricingPlan } from "../store/pricingStore";
 import styles from "./Pricing.module.css";
 import PlanOkIcon from "../assets/plan_ok.svg";
 import PlanNoIcon from "../assets/plan_no.svg";
+import { Link } from "react-router-dom";
 
 const PlanCard = ({
   plan,
   currentPlan,
-  handleSubscribe,
-  handleOperation,
   isLoading,
   showStake,
   showUnstake,
@@ -18,8 +17,8 @@ const PlanCard = ({
 }: {
   plan: PricingPlan;
   currentPlan: string;
-  handleSubscribe: (planId: string) => void;
-  handleOperation: (operation: 'unstake' | 'claim') => void;
+  handleSubscribe?: (planId: string) => void;
+  handleOperation?: (operation: "unstake" | "claim") => void;
   isLoading: boolean;
   showStake?: boolean;
   showUnstake?: boolean;
@@ -43,7 +42,10 @@ const PlanCard = ({
           )}
         </div>
 
-        <div className={styles.planPrice}>{plan.price}</div>
+        <div className={styles.planPrice}>
+          {plan.price != "0" ? "≥" : ""}
+          {plan.price}
+        </div>
         <div className={styles.planPeriod}>{plan.description}</div>
 
         <ul className={styles.featuresList}>
@@ -86,22 +88,32 @@ const PlanCard = ({
       {plan.buttonText && (
         <div className={styles.buttonContainer}>
           {showStake && (
-            <button
-              className={styles.subscribeButton}
-              onClick={() => handleSubscribe(plan.id)}
-              disabled={isLoading}
+            <Link
+              to="https://app.virtuals.io/stake-agent?id=22053"
+              target="_blank"
             >
-              {isLoading ? "Processing..." : plan.buttonText}
-            </button>
+              <button
+                className={styles.subscribeButton}
+                // onClick={() => handleSubscribe(plan.id)}
+                disabled={isLoading}
+              >
+                {isLoading ? "Processing..." : plan.buttonText}
+              </button>
+            </Link>
           )}
           {showUnstake && (
-            <button
-              className={styles.unstakeButton}
-              onClick={() => handleOperation("unstake")}
-              disabled={isLoading}
+            <Link
+              to="https://app.virtuals.io/stake-agent?id=22053"
+              target="_blank"
             >
-              {isLoading ? "Processing..." : "Unstake"}
-            </button>
+              <button
+                className={styles.unstakeButton}
+                // onClick={() => handleOperation("unstake")}
+                disabled={isLoading}
+              >
+                {isLoading ? "Processing..." : "Unstake"}
+              </button>
+            </Link>
           )}
           {showPendingClaim && (
             <div className={styles.pendingButton}>
@@ -110,13 +122,18 @@ const PlanCard = ({
             </div>
           )}
           {showClaim && (
-            <button
-              className={styles.claimButton}
-              onClick={() => handleOperation("claim")}
-              disabled={isLoading}
+            <Link
+              to="https://app.virtuals.io/stake-agent?id=22053"
+              target="_blank"
             >
-              {isLoading ? "Processing..." : "Claim"}
-            </button>
+              <button
+                className={styles.claimButton}
+                // onClick={() => handleOperation("claim")}
+                disabled={isLoading}
+              >
+                {isLoading ? "Processing..." : "Claim"}
+              </button>
+            </Link>
           )}
 
           {plan.tips && <p className={styles.buttonNote}>{plan.tips}</p>}
