@@ -366,8 +366,9 @@ const ChatWindow: React.FC = () => {
                 workflowId={message.type === 'run_workflow' ? chatState.workflowCreation.workflowId : undefined}
                 workflowImageValue={chatState.workflowImageValue}
                 isRunningWorkflow={chatState.workflowRunning.isRunning}
-                onSelectWorkflowImage={(imageUrl) => setWorkflowImageAction(imageUrl)}
-                onRunWorkflow={(workflowId) => runWorkflowAction(workflowId)}
+                isConfirmedWorkflow={chatState.workflowRunning.isSuccess}
+                onSelectWorkflowImage={(url, file) => setWorkflowImageAction({ url, file })}
+                onRunWorkflow={runWorkflowAction}
               />
             ))
           )}

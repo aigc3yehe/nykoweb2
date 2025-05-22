@@ -7,16 +7,22 @@ import ModelDetail from './ModelDetail';
 import FeatureCard from './FeatureCard';
 import { useAtom, useSetAtom } from 'jotai';
 import { clearModelDetail, modelDetailAtom, modelIdAndNameAtom } from '../store/modelStore';
+import { clearWorkflowDetail, workflowDetailAtom } from '../store/workflowStore';
 import { useNavigate, useLocation } from 'react-router-dom';
+import WorkflowsContent from "./WorkflowsContent.tsx";
+import WorkflowDetail from "./WorkflowDetail.tsx";
 
 const ContentDisplay: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'models' | 'images'>('models');
+  const [activeTab, setActiveTab] = useState<'models' | 'workflows' | 'images'>('models');
   const [ownedOnly, setOwnedOnly] = useState(false);
   const [sortOption, setSortOption] = useState<'New Model' | 'Popular'>('Popular');
   const [viewingModelId, setViewingModelId] = useState<number | null>(null);
   const [viewingModelName, setViewingModelName] = useState<string | null>(null);
+  const [viewingWorkflowId, setViewingWorkflowId] = useState<number | null>(null);
+  const [viewingWorkflowName, setViewingWorkflowName] = useState<string | null>(null);
   const [modelDetailState] = useAtom(modelDetailAtom);
   const clearDetail = useSetAtom(clearModelDetail);
+  const clearWorkflow = useSetAtom(clearWorkflowDetail);
   const [modelIdAndName] = useAtom(modelIdAndNameAtom);
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,10 +47,21 @@ const ContentDisplay: React.FC = () => {
     navigate(`${location.pathname}?model_id=${modelId}&model_name=${encodeURIComponent(modelName)}`);
   };
 
+  // 处理查看工作流详情
+  const handleViewWorkflowDetail = (workflowId: number, workflowName: string) => {
+    setViewingWorkflowId(workflowId);
+    setViewingWorkflowName(workflowName);
+
+    // 使用React Router导航，不刷新页面
+    navigate(`${location.pathname}?workflow_id=${workflowId}&workflow_name=${encodeURIComponent(workflowName)}`);
+  };
+
   // 处理返回到模型列表
   const handleBackToList = () => {
     setViewingModelId(null);
+    setViewingWorkflowId(null);
     clearDetail();
+    clearWorkflow();
 
     // 使用React Router导航，清除URL参数
     navigate(location.pathname);
@@ -58,6 +75,12 @@ const ContentDisplay: React.FC = () => {
 
     if (modelId && modelName) {
       handleViewModelDetail(parseInt(modelId), modelName);
+    }
+
+    const workflowId = searchParams.get('workflow_id');
+    const workflowName = searchParams.get('workflow_name');
+    if (workflowId && workflowName) {
+      handleViewWorkflowDetail(parseInt(workflowId), workflowName)
     }
   }, []);
 
@@ -93,7 +116,7 @@ const ContentDisplay: React.FC = () => {
   return (
     <div className={`${styles.contentDisplay} ${styles.hideScrollbar}`} ref={contentDisplayRef} onWheel={handleWheel}>
       {/* 特性展示卡片 */}
-      { !viewingModelId && <div ref={featureCardRef}>
+      { !viewingModelId && !viewingWorkflowId && <div ref={featureCardRef}>
         <FeatureCard />
       </div> }
       <div className={`${styles.contentContainer} ${isHeaderSticky ? styles.stickyHeader : ''}`}>
@@ -107,7 +130,7 @@ const ContentDisplay: React.FC = () => {
                 setOwnedOnly={setOwnedOnly}
                 sortOption={sortOption}
                 setSortOption={setSortOption}
-                isDetailMode={true}
+                isModelDetailMode={true}
                 modelName={modelDetailState.currentModel?.name || viewingModelName || 'Loading...'}
                 onBackClick={handleBackToList}
               />
@@ -117,6 +140,26 @@ const ContentDisplay: React.FC = () => {
               <ModelDetail modelId={viewingModelId} />
             </div>
           </>
+        ) : viewingWorkflowId ? (
+            <>
+              <div className={styles.headerWrapper}>
+                <ContentHeader
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    ownedOnly={ownedOnly}
+                    setOwnedOnly={setOwnedOnly}
+                    sortOption={sortOption}
+                    setSortOption={setSortOption}
+                    isWorkflowDetailMode={true}
+                    modelName={modelDetailState.currentModel?.name || viewingWorkflowName || 'Loading...'}
+                    onBackClick={handleBackToList}
+                />
+              </div>
+
+              <div className={styles.contentBody} onWheel={handleWheel}>
+                <WorkflowDetail workflowId={viewingWorkflowId} />
+              </div>
+            </>
         ) : (
           <>
             <div className={styles.headerWrapper}>
@@ -137,7 +180,13 @@ const ContentDisplay: React.FC = () => {
                   sortOption={sortOption}
                   onModelClick={handleViewModelDetail}
                 />
-              ) : (
+              ) : activeTab === 'workflows' ? (
+                  <WorkflowsContent
+                      ownedOnly={ownedOnly}
+                      sortOption={sortOption}
+                      onWorkflowClick={handleViewWorkflowDetail}
+                  />
+              ): (
                 <ImagesContent ownedOnly={ownedOnly} />
               )}
             </div>

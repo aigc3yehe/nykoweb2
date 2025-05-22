@@ -10,6 +10,7 @@ import selectModelIcon from "../assets/select_model.svg";
 import uploadIcon from "../assets/upload.svg";
 import createWorkflowIcon from "../assets/create_workflow.svg";
 import deleteIcon from "../assets/delete.svg";
+import deleteDisableIcon from "../assets/delete_disable.svg";
 import { GENERATE_IMAGE_SERVICE_CONFIG, TRAIN_MODEL_SERVICE_CONFIG } from "../utils/plan";
 
 interface ImageUploadState {
@@ -61,8 +62,9 @@ export interface ChatMessageProps {
   workflowId?: number;
   workflowImageValue?: string;
   isRunningWorkflow?: boolean;
-  onSelectWorkflowImage?: (imageUrl: string) => void;
-  onRunWorkflow?: (workflowId: number) => void;
+  onSelectWorkflowImage?: (imageUrl: string, file: File | null) => void;
+  onRunWorkflow?: () => void;
+  isConfirmedWorkflow?: boolean;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -96,11 +98,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   isCreatingWorkflow = false,
   creationSuccess = false,
   onCreateWorkflow,
-  workflowId = 0,
   workflowImageValue = '',
   isRunningWorkflow = false,
   onSelectWorkflowImage,
   onRunWorkflow,
+  isConfirmedWorkflow = false,
 }) => {
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
@@ -569,8 +571,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
   // 使用工作流组件
   const renderUseWorkflowComponent = () => {
-    // 使用workflowImageValue替代本地状态
-    const hasUploadedWorkflowImage = !!workflowImageValue;
+    // 如果有store中的workflowImageValue，优先显示它
+    const displayImageUrl = workflowImageValue;
+    const hasSelectedImage = !!displayImageUrl;
+    
+    // 按钮状态判断 - 当运行中或已确认时都禁用
+    const isButtonDisabled = isRunningWorkflow || isConfirmedWorkflow;
+    
+    // 获取确认按钮文本 - 根据状态显示不同文本
+    const getConfirmButtonText = () => {
+      if (isConfirmedWorkflow) return "Confirmed";
+      return "Confirm";
+    };
 
     // 文件选择处理函数
     const handleSelectFile = () => {
@@ -583,11 +595,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         const target = event.target as HTMLInputElement;
         if (target.files && target.files.length > 0) {
           const file = target.files[0];
-          const imageUrl = URL.createObjectURL(file);
-
-          // 调用回调更新store中的图片
+          // 创建本地临时URL用于预览
+          const tempUrl = URL.createObjectURL(file);
+          // 保存文件到全局状态以便后续上传
           if (onSelectWorkflowImage) {
-            onSelectWorkflowImage(imageUrl);
+            onSelectWorkflowImage(tempUrl, file);
           }
         }
       };
@@ -599,24 +611,24 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       <div className={styles.workflowRunContainer}>
         <div className={styles.workflowRunTitle}>Upload Your Image</div>
 
-        {!hasUploadedWorkflowImage ? (
-          // 未上传图片状态
+        {!hasSelectedImage ? (
+          // 未选择图片状态
           <div className={styles.uploadImageButtonContainer}>
             <button
               className={styles.uploadImageButton}
               onClick={handleSelectFile}
-              disabled={isRunningWorkflow}
+              disabled={isButtonDisabled}
             >
               Upload Image
             </button>
           </div>
         ) : (
-          // 已上传图片状态
+          // 已选择图片状态
           <>
             <div className={styles.workflowImagePreview}>
-              {workflowImageValue && (
+              {displayImageUrl && (
                 <img
-                  src={workflowImageValue}
+                  src={displayImageUrl}
                   alt="Workflow input"
                   className={styles.workflowPreviewImage}
                 />
@@ -627,25 +639,30 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               <button
                 className={styles.removeImageButton}
                 onClick={() => {
-                  if (onSelectWorkflowImage) {
-                    onSelectWorkflowImage("");
+                  if (onSelectWorkflowImage && !isButtonDisabled) {
+                    onSelectWorkflowImage("", null);
                   }
                 }}
-                disabled={isRunningWorkflow}
+                disabled={isButtonDisabled}
               >
-                <img src={deleteIcon} alt="Delete" width={20} height={20} />
+                <img 
+                  src={isButtonDisabled ? deleteDisableIcon : deleteIcon} 
+                  alt="Delete" 
+                  width={20} 
+                  height={20} 
+                />
               </button>
-
+              
               <button
                 className={styles.confirmWorkflowButton}
                 onClick={() => {
-                  if (onRunWorkflow && workflowId) {
-                    onRunWorkflow(workflowId);
+                  if (onRunWorkflow && !isButtonDisabled) {
+                    onRunWorkflow();
                   }
                 }}
-                disabled={isRunningWorkflow}
+                disabled={isButtonDisabled}
               >
-                Confirm
+                {getConfirmButtonText()}
               </button>
             </div>
           </>

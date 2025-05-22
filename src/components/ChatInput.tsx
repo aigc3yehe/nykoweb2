@@ -122,6 +122,15 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
       });
     }
 
+    if (chatState.currentWorkflow && chatState.task_type === "use_workflow") {
+      baseTags.push({
+        id: 'image_ratio',
+        text: 'image',
+        type: 'imageRatio',
+        ratio: chatState.selectedAspectRatio?.value || '1:1'
+      })
+    }
+
     // 如果当前进入到模型详情，则添加Base Model 和 LoraName标签
     if (chatState.currentModel && chatState.task_type === 'generation') {
       const models = chatState.currentModel?.model_tran || []
@@ -158,7 +167,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
     }
 
     setActiveTags(baseTags);
-  }, [chatState.task_value, chatState.task_type, chatState.currentModel, chatState.selectedAspectRatio, chatState.loraWeight]);
+  }, [chatState.task_value, chatState.task_type, chatState.currentModel, chatState.selectedAspectRatio, chatState.loraWeight, chatState.currentWorkflow]);
 
   // 监听textarea的滚动事件
   const handleTextareaScroll = () => {

@@ -20,14 +20,17 @@ import { usePrivy } from '@privy-io/react-auth';
 import {setModelStatus} from "../store/chatStore.ts";
 import {Link} from "react-router-dom";
 import {Tooltip} from "@mui/material";
+import {WorkflowDetail} from "../store/workflowStore.ts";
 
 interface TokenizationPanelProps {
-  model: ModelDetail;
+  model?: ModelDetail;
+  workflow?: WorkflowDetail;
 }
 
 // 修改：使用 memo 包装组件，避免不必要的重新渲染
 const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
-   model
+   model,
+   workflow,
 }) => {
   const [accountState] = useAtom(accountAtom);
   const showToast = useSetAtom(showToastAtom);
@@ -40,12 +43,21 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
   const [isInitiating, setIsInitiating] = useState(false);
   const { user } = usePrivy();
 
-  const isFlag = model.flag !== null && model.flag !== ""
-  const isShowToken = accountState.did === model.creator && !isFlag;
+  let isFlag = false
+  if (model && model.flag !== null && model.flag !== "") {
+      isFlag = true;
+  } else if (workflow && workflow.flag !== null && workflow.flag !== "") {
+      isFlag = true;
+  }
+  const creator = model?.creator ?? workflow?.creator;
+  const isShowToken = accountState.did === creator && !isFlag;
 
   // 获取训练状态
   const getTrainingStatus = () => {
-      const trainState = model.model_tran?.[0]?.train_state;
+      if (workflow) {
+          return { text: 'Ready', className: styles.statusReady, isReady: true };
+      }
+      const trainState = model?.model_tran?.[0]?.train_state;
       if (trainState === 2) {
           return { text: 'Ready', className: styles.statusReady, isReady: true };
       } else {
@@ -55,18 +67,23 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
   const status = getTrainingStatus();
 
-  const community_tokens = model.model_community_tokenization;
+  const community_tokens = model?.model_community_tokenization ?? workflow?.model_community_tokenization;
   const has_community_tokens = community_tokens && community_tokens.length > 0;
 
   // 获取Twitter显示名称
   const getDisplayName = () => {
-      if (model.users.twitter?.name) {
-            return model.users.twitter.name;
-      } else if (model.users.twitter?.username) {
-          return model.users.twitter.username;
+      const twitter = model?.users?.twitter ?? workflow?.users?.twitter;
+      if (twitter?.name) {
+            return twitter.name;
+      } else if (twitter?.username) {
+          return twitter.username;
       } else {
           // 如果没有Twitter信息，显示缩略的钱包地址
-          return model.creator.substring(0, 6) + '...' + model.creator.substring(model.creator.length - 4);
+          const creator = model?.creator ?? workflow?.creator;
+          if (creator && creator.length > 10) {
+              return creator.substring(0, 6) + '...' + creator.substring(creator.length - 4);
+          }
+          return creator??"";
       }
   };
 
@@ -89,12 +106,13 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
   // 判断是否只显示 community tokens
   useEffect(() => {
      const data = tokenizationState.data;
+     const model_community_tokenization = model?.model_community_tokenization ?? workflow?.model_community_tokenization
      if (!data || model?.model_tokenization?.launchpad == TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS) {
-         setOnlyCommunityTokens((model.model_community_tokenization?.length || 0) > 0);
+         setOnlyCommunityTokens((model_community_tokenization?.length || 0) > 0);
      } else {
          setOnlyCommunityTokens(false);
      }
-  }, [tokenizationState, model.model_community_tokenization, model?.model_tokenization?.launchpad]);
+  }, [tokenizationState, model?.model_community_tokenization, model?.model_tokenization?.launchpad, workflow?.model_community_tokenization]);
 
   const formatAddress = (address: string) => {
     if (!address) return '';
@@ -113,6 +131,9 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
   // 处理 token 化请求
   const handleTokenize = async () => {
     try {
+      if (!model) {
+          return;
+      }
       setIsInitiating(true);
       // 发起 token 化请求
       const flag = 'tokenization'
@@ -120,7 +141,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
       await setTokenizationFlag({ modelId, flag, user: user?.id || '' });
 
       // 立即获取最新状态
-      await fetchState({modelId, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true});
+      await fetchState({modelId, model_tokenization_id: model.model_tokenization?.id || 0, refreshState: true});
     } catch (error) {
       console.error('Failed to initiate tokenization:', error);
     } finally {
@@ -192,7 +213,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
           message={`Error: ${error}`}
           action={{
             text: 'Retry',
-            onClick: () => fetchState({ modelId: model.id, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true })
+            onClick: () => fetchState({ modelId: model?.id, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true })
           }}
         />
       );
@@ -427,7 +448,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
         <p>Tokenization status: Unknown</p>
         <button
           className={styles.refreshButton}
-          onClick={() => fetchState({ modelId: model.id, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true })}
+          onClick={() => fetchState({ modelId: model?.id, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true })}
         >
           Refresh Status
         </button>

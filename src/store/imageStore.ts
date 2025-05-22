@@ -15,7 +15,9 @@ export interface Twitter {
 export interface Image {
   id: number;
   url: string | null;
-  model_id: number;
+  model_id?: number;
+  workflow_id?: number;
+  source: SOURCE_TYPE;
   creator: string;
   version: number;
   task_id: string;
@@ -77,12 +79,14 @@ export const fetchImages = atom(
     reset = false,
     ownedOnly = false,
     model_id,
+    workflow_id,
     state,
     view
   }: {
     reset?: boolean,
     ownedOnly?: boolean,
     model_id?: number,
+    workflow_id?: number,
     state?: ImageState,
     view?: boolean
   } = {}) => {
@@ -136,6 +140,13 @@ export const fetchImages = atom(
         // 添加可选的model_id参数
         if (model_id !== undefined) {
           params.append('model_id', model_id.toString());
+          params.append('source', SOURCE_TYPE.MODEL)
+        }
+
+        // 添加可选的workflow_id参数
+        if (workflow_id !== undefined) {
+          params.append('workflow_id', workflow_id.toString());
+          params.append('source', SOURCE_TYPE.WORKFLOW)
         }
 
         // 添加可选的state参数
@@ -148,7 +159,7 @@ export const fetchImages = atom(
         }
 
         // 发送请求
-        const response = await fetch(`/studio-api/model/list/gallery?${params.toString()}`, {
+        const response = await fetch(`/studio-api/aigc/gallery?${params.toString()}`, {
           headers: {
             'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
           }

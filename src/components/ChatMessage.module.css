@@ -826,7 +826,7 @@
 
 /* 预览图片 */
 .workflowPreviewImage {
-  max-width: 12.5rem; /* 200px */
+  max-width: 21.375rem; /* 342px */
   max-height: 12.5rem; /* 200px */
   border-radius: 0.25rem; /* 4px */
   object-fit: contain;
@@ -855,4 +855,29 @@
   background: #FF3C3D;
   border: 0.0625rem solid #FF3C3D; /* 1px solid #FF3C3D */
   cursor: pointer;
+}
+
+/* 移除图片按钮禁用状态 */
+.removeImageButton:disabled {
+  width: 2.5rem; /* 40px */
+  height: 1.9375rem; /* 31px */
+  gap: 0.25rem; /* 4px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.375rem 0.625rem; /* 6px 10px */
+  background: transparent;
+  border: 0.0625rem solid rgba(55, 65, 81, 0.3); /* 1px solid #3741514D */
+  cursor: not-allowed;
+}
+
+/* 确认按钮禁用状态 */
+.confirmWorkflowButton:disabled {
+  width: 20.75rem; /* 332px */
+  height: 1.9375rem; /* 31px */
+  gap: 0.25rem; /* 4px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.375rem 0.625rem; /* 6px 10px */
+  background: transparent;
+  border: 0.0625rem solid rgba(55, 65, 81, 0.3); /* 1px solid #3741514D */
+  color: rgba(255, 255, 255, 0.15); /* #FFFFFF26 */
+  cursor: not-allowed;
 }
