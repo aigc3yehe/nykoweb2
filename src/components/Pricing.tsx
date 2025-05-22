@@ -529,6 +529,9 @@ const Pricing: React.FC = () => {
                     <span>Processing...</span>
                   ) : (
                     <span>
+                      {stakeState?.amount > 0
+                        ? "If you have staked $NYKO in the NYKO subscribe staking contract, "
+                        : ""}
                       Click here to{" "}
                       <span
                         className="underline cursor-pointer"
