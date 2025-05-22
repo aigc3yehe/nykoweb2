@@ -343,7 +343,7 @@ const Pricing: React.FC = () => {
   // };
 
   // Unstake or claim staked $NYKO
-  const handleOperation = async (operation: "unstake" | "claim") => {
+  const handleOperation = async (operation: "unstake" | "claim" | "revoke") => {
     if (!isLoading) {
       try {
         setOperationLoadingFn(true);
@@ -379,14 +379,14 @@ const Pricing: React.FC = () => {
         }
 
         showToast({
-          message: `Unstake successful: ${data}`,
+          message: `${operation} successful: ${data}`,
           severity: "success",
         });
         setOperationLoadingFn(false);
       } catch (error) {
         setOperationLoadingFn(false);
         showToast({
-          message: `Unstake failed: ${
+          message: `${operation} failed: ${
             (error as Error)?.message || "Unknown error"
           }`,
           severity: "error",
@@ -398,6 +398,13 @@ const Pricing: React.FC = () => {
   const unstakeAndClaimHandle = async () => {
     try {
       if (stakeState.amount > 0) {
+        await handleOperation("unstake");
+      }
+      if (
+        stakeState.amount > 0 &&
+        stakeState.unstakeTime > Math.floor(Date.now() / 1000)
+      ) {
+        await handleOperation("revoke");
         await handleOperation("unstake");
       }
       if (
