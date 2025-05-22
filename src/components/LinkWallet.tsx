@@ -8,6 +8,8 @@ import PrivyIcon from "../assets/privy.svg";
 import { Link } from "react-router-dom";
 import { updateLinkedExternalWalletAtom } from "../store/accountStore";
 import { showToastAtom } from "../store/imagesStore";
+import { formatAddress } from "../utils/format";
+import { useMediaQuery } from "@mui/material";
 
 const LinkWallet = () => {
   const [accountState] = useAtom(accountAtom);
@@ -18,6 +20,7 @@ const LinkWallet = () => {
   );
   const showToast = useSetAtom(showToastAtom);
   const [loading, setLoading] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 744px)");
 
   const linkedWallet = useMemo(() => {
     return wallets?.find(
@@ -71,7 +74,7 @@ const LinkWallet = () => {
   const UnLinkHeader = () => {
     return (
       <div className="flex flex-col items-center justify-center gap-3 w-full">
-        <div className="text-white text-4xl font-bold uppercase">
+        <div className="text-white pc:text-4xl text-2xl font-bold uppercase text-center">
           Link another wallet to your NYKO Account
         </div>
         <button
@@ -88,19 +91,21 @@ const LinkWallet = () => {
     return (
       <div className="flex flex-col items-center justify-center gap-6 w-full">
         {/* title */}
-        <div className="text-white text-4xl font-bold uppercase">
+        <div className="text-white pc:text-4xl text-2xl font-bold uppercase text-center">
           Link another wallet to your NYKO Account
         </div>
         {/* wallet info */}
-        <div className="flex w-full px-6 py-4 items-center justify-between text-[#1F29371A] border border-[#3741514D] rounded-[1px]">
-          <div className="flex items-center gap-6">
+        <div className="flex w-full pc:px-6 px-4 py-4 items-center justify-between text-[#1F29371A] border border-[#3741514D] rounded-[1px]">
+          <div className="flex items-center pc:gap-6 gap-3">
             <div className="text-sm font-medium text-white">
               External Wallet
             </div>
             <div className="flex items-center gap-2">
               <img src={WalletIcon} width={24} height={24} />
               <div className="text-sm font-medium text-[#88A4C2]">
-                {linkedWallet?.address}
+                {isMobile
+                  ? formatAddress(linkedWallet?.address)
+                  : linkedWallet?.address}
               </div>
             </div>
           </div>
@@ -121,7 +126,7 @@ const LinkWallet = () => {
     return (
       <div className="flex flex-col items-center w-full">
         <CheckCircleOutline style={{ fontSize: "5rem", color: "#34C759" }} />
-        <div className="text-[#34C759] text-2xl font-bold capitalize">
+        <div className="text-[#34C759] pc:text-2xl text-lg font-bold capitalize text-center">
           You have successfully connected your external wallet !
         </div>
       </div>
@@ -158,7 +163,7 @@ const LinkWallet = () => {
       <div className="flex flex-col gap-6 w-full bg-[#1F29371A] border border-[#3741514D] p-6">
         {/* Twitter */}
         <div className="flex items-center gap-2">
-          <div className="w-1/6">Your X</div>
+          <div className="pc:w-1/6 w-1/3">Your X</div>
           <div className="gap-2 items-center flex">
             <img
               src={user?.twitter?.profilePictureUrl || ""}
@@ -172,23 +177,27 @@ const LinkWallet = () => {
           </div>
         </div>
         {/* Pirvy Wallet */}
-        <div className="flex items-center gap-2">
-          <div className="w-1/6">Your Privy Wallet</div>
+        <div className="flex items-center gap-2 w-full">
+          <div className="pc:w-1/6 w-1/3">Your Privy Wallet</div>
           <div className="gap-2 items-center flex">
             <img src={PrivyIcon} width={24} height={24} />
             <div className="text-[#88A4C2] text-sm font-medium">
-              {user?.wallet?.address}
+              {isMobile
+                ? formatAddress(user?.wallet?.address)
+                : user?.wallet?.address}
             </div>
           </div>
         </div>
         {/* External Wallet */}
         {accountState.linked_wallet && (
           <div className="flex items-center gap-2">
-            <div className="w-1/6">External Wallet</div>
+            <div className="pc:w-1/6 w-1/3">External Wallet</div>
             <div className="gap-2 items-center flex">
               <img src={WalletIcon} width={24} height={24} />
               <div className="text-[#88A4C2] text-sm font-medium">
-                {accountState.linked_wallet}
+                {isMobile
+                  ? formatAddress(accountState.linked_wallet)
+                  : accountState.linked_wallet}
               </div>
             </div>
           </div>
@@ -221,15 +230,15 @@ const LinkWallet = () => {
   };
 
   return (
-    <div className="flex w-full items-center justify-center py-6 text-white font-['Jura']">
-      <div className="flex flex-col items-center justify-center gap-6 pc:w-[80rem] w-full">
+    <div className="flex w-full h-full justify-center py-6 text-white font-['Jura'] overflow-y-scroll">
+      <div className="flex flex-col items-center gap-6 pc:w-[80rem] w-full p-4">
         {linkedState == "linked" && <LinkedHeader />}
         {linkedState == "pending" && <PendingConfirmHeader />}
         {linkedState == "none" && <UnLinkHeader />}
         {linkedState != "linked" && <Tips />}
         {linkedState == "linked" && <UserInfo />}
         {linkedState != "linked" && (
-          <div className="flex text-2xl font-bold text-white w-full items-center justify-center">
+          <div className="flex pc:text-2xl text-xl font-bold text-white w-full items-center justify-center">
             Link To
           </div>
         )}
