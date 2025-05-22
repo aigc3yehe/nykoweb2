@@ -411,6 +411,7 @@ const Pricing: React.FC = () => {
   };
 
   const unstakeAndClaimHandle = async () => {
+    if (opLoading) return;
     try {
       setOpLoading(true);
       if (stakeState.amount > 0) {
