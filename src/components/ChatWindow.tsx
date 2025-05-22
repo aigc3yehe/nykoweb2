@@ -303,6 +303,9 @@ const ChatWindow: React.FC = () => {
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to generate an image.')}>
                       🌄 I want to generate an image.(Cost 5 Credits)
                     </button>
+                    <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to use this workflow.')}>
+                      🌄 I want to use this workflow.(Cost 5 Credits)
+                    </button>
                   </div>
                 </div>
               ) : inQueue ? (

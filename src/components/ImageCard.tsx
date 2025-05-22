@@ -13,7 +13,6 @@ import { accountAtom } from '../store/accountStore';
 import { showToastAtom } from "../store/imagesStore";
 import { fetchToggleWorkflowView, fetchWorkflowEditCover } from "../store/workflowStore.ts";
 import {SOURCE_TYPE} from "../types/api.type.ts";
-import { SOURCE_TYPE } from '../types/api.type';
 
 interface ImageCardProps {
   image: Image;
@@ -104,7 +103,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
 
         if (localImage.model_id) {
           // 调用接口，将图片设为私有
-          editCover(localImage.model_id, url)
+          editCover(SOURCE_TYPE.MODEL ,localImage.model_id, url)
               .then(() => {
                 // 根据角色设置新的可见性状态
                 const newPublicValue = accountState.role === 'admin' ? -1 : 0;
