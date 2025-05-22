@@ -1,6 +1,10 @@
 import { atom } from "jotai";
 import { User, Google, getAccessToken } from "@privy-io/react-auth";
-import { queryUser, queryUserPlan } from "../services/userService";
+import {
+  queryUser,
+  queryUserPlan,
+  refreshUserPlan,
+} from "../services/userService";
 import { Twitter } from "./imageStore";
 import { chatAtom } from "./chatStore"; // 导入聊天状态
 import { PRIVY_TOKEN_HEADER } from "../utils/constants";
@@ -155,33 +159,42 @@ export const setUser = atom(null, async (get, set, user: User | null) => {
 });
 
 // Atom to trigger refreshing user plan (credits and plan type)
-export const refreshUserPlanAtom = atom(null, async (get, set) => {
-  const accountState = get(accountAtom);
-  const did = accountState.did;
+export const refreshUserPlanAtom = atom(
+  null,
+  async (get, set, update?: boolean) => {
+    const accountState = get(accountAtom);
+    const did = accountState.did;
 
   if (did) {
     try {
       // Optional: set loading state if you have a specific loading indicator for this
       // set(accountAtom, (prev) => ({ ...prev, isLoading: true }));
 
-      const planResult = await queryUserPlan({ did });
-      set(accountAtom, (prev) => ({
-        ...prev,
-        credits: planResult.data.sub_balance + planResult.data.paid_balance,
-        plan: planResult.data.plan_type,
-        // isLoading: false, // Optional: clear loading state
-      }));
-    } catch (error) {
-      console.error("Failed to refresh user plan:", error);
-      set(accountAtom, (prev) => ({
-        ...prev,
-        // isLoading: false, // Optional: clear loading state
-        // Optionally update an error field specific to plan refresh
-        // error: `Failed to refresh credits: ${(error as Error).message}`,
-      }));
+        let planResult;
+        if (update) {
+          planResult = await refreshUserPlan({ did });
+        } else {
+          planResult = await queryUserPlan({ did });
+        }
+
+        set(accountAtom, (prev) => ({
+          ...prev,
+          credits: planResult.data.sub_balance + planResult.data.paid_balance,
+          plan: planResult.data.plan_type,
+          // isLoading: false, // Optional: clear loading state
+        }));
+      } catch (error) {
+        console.error("Failed to refresh user plan:", error);
+        set(accountAtom, (prev) => ({
+          ...prev,
+          // isLoading: false, // Optional: clear loading state
+          // Optionally update an error field specific to plan refresh
+          // error: `Failed to refresh credits: ${(error as Error).message}`,
+        }));
+      }
     }
   }
-});
+);
 
 // 设置钱包地址
 export const setWalletAddress = atom(

@@ -30,9 +30,10 @@ import {
 import { Link } from "react-router-dom";
 import { CuBuyConfig } from "../utils/plan";
 import PlanCard from "./PlanCard";
-import { accountAtom } from "../store/accountStore";
+import { accountAtom, refreshUserPlanAtom } from "../store/accountStore";
 import { sleep } from "../utils/tools";
 import { publicClient } from "../providers/wagmiConfig";
+import { Cached } from "@mui/icons-material";
 
 // 定义价格套餐类型
 const Pricing: React.FC = () => {
@@ -54,6 +55,7 @@ const Pricing: React.FC = () => {
   const [opLoading, setOpLoading] = useState(false);
 
   const [purchaseQuantity, setPurchaseQuantity] = useState(1); // 添加购买数量状态
+  const [, refreshUserPlan] = useAtom(refreshUserPlanAtom);
 
   // 处理数量增减的函数
   const handleDecrease = () => {
@@ -86,6 +88,8 @@ const Pricing: React.FC = () => {
     return wallets.find((wallet) => wallet.walletClientType != "privy");
   }, [wallets]);
 
+  console.debug("Connect Wallet:", privyWallet?.address, eoaWallet?.address);
+
   useEffect(() => {
     if (privyWallet) {
       fetchStakedInfo({
@@ -105,12 +109,11 @@ const Pricing: React.FC = () => {
   }, [fetchVirutalsStakedInfo, stakeConfig, eoaWallet]);
 
   useEffect(() => {
-    if (
-      stakeState?.amount + stakeState?.virtuals_amount < plans[1].staked
-    ) {
+    if (stakeState?.amount + stakeState?.virtuals_amount < plans[1].staked) {
       setCurrentPlan("free");
     } else if (
-      stakeState?.amount + stakeState?.virtuals_amount >= plans[2].staked
+      stakeState?.amount + stakeState?.virtuals_amount >=
+      plans[2].staked
     ) {
       setCurrentPlan("premiumPlus");
     } else {
@@ -462,6 +465,15 @@ const Pricing: React.FC = () => {
                   >
                     Buy $NYKO
                   </Link>
+                  <span onClick={() => refreshUserPlan(true)}>
+                    <Cached
+                      style={{
+                        color: "#88A4C2",
+                        fontSize: "1rem",
+                        cursor: "pointer",
+                      }}
+                    />
+                  </span>
                 </p>
               </div>
 
@@ -517,8 +529,10 @@ const Pricing: React.FC = () => {
                     <span>Processing...</span>
                   ) : (
                     <span>
-                      If you have staked $NYKO in the NYKO subscribe staking
-                      contract, click here to{" "}
+                      {stakeState?.amount > 0
+                        ? "If you have staked $NYKO in the NYKO subscribe staking contract, "
+                        : ""}
+                      Click here to{" "}
                       <span
                         className="underline cursor-pointer"
                         onClick={unstakeAndClaimHandle}
