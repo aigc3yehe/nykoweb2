@@ -25,3 +25,9 @@ export const formattedBalance = (balance: bigint, decimal = 18) => {
   const trimmed = fracPart.slice(0, 5).replace(/0+$/, "");
   return trimmed ? `${intPart}.${trimmed}` : intPart;
 };
+
+// 格式化钱包地址，显示前4位和后4位
+export const formatAddress = (address: string | undefined) => {
+  if (!address || address.length < 10) return address || "";
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};

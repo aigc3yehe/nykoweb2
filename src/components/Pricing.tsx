@@ -84,11 +84,15 @@ const Pricing: React.FC = () => {
     return wallets.find((wallet) => wallet.walletClientType === "privy");
   }, [wallets]);
 
-  const eoaWallet = useMemo(() => {
-    return wallets.find((wallet) => wallet.walletClientType != "privy");
-  }, [wallets]);
+  // const eoaWallet = useMemo(() => {
+  //   return wallets.find((wallet) => wallet.walletClientType != "privy");
+  // }, [wallets]);
 
-  console.debug("Connect Wallet:", privyWallet?.address, eoaWallet?.address);
+  console.debug(
+    "Connect Wallet:",
+    privyWallet?.address,
+    accountState?.linked_wallet
+  );
 
   useEffect(() => {
     if (privyWallet) {
@@ -100,13 +104,13 @@ const Pricing: React.FC = () => {
   }, [fetchStakedInfo, stakeConfig, privyWallet]);
 
   useEffect(() => {
-    if (eoaWallet) {
+    if (accountState?.linked_wallet) {
       fetchVirutalsStakedInfo({
         contract: stakeConfig.virtualsStakedAddress as `0x${string}`,
-        user: eoaWallet?.address as `0x${string}`,
+        user: accountState?.linked_wallet as `0x${string}`,
       });
     }
-  }, [fetchVirutalsStakedInfo, stakeConfig, eoaWallet]);
+  }, [fetchVirutalsStakedInfo, stakeConfig, accountState]);
 
   useEffect(() => {
     if (stakeState?.amount + stakeState?.virtuals_amount < plans[1].staked) {
