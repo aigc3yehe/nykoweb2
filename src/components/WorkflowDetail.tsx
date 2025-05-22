@@ -14,6 +14,7 @@ import ModelCarousel from './ModelCarousel';
 import StatePrompt from './StatePrompt';
 import TokenizationPanel from './TokenizationPanel';
 import {accountAtom} from "../store/accountStore.ts";
+import WorkflowInfoPanel from "./WorkflowInfoPanel.tsx";
 
 interface WorkflowDetailProps {
   workflowId: number;
@@ -114,13 +115,13 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
   // 定期检查 token 化状态
   useEffect(() => {
     // 首次加载时获取状态
-    fetchState({ workflow_id: workflowId, workflow_tokenization_id: workflowDetailState?.currentWorkflow?.model_tokenization?.id || 0 })
-  }, [fetchState, workflowId, workflowDetailState?.currentWorkflow?.model_tokenization?.id]);
+    fetchState({ workflow_id: workflowId, workflow_tokenization_id: workflowDetailState?.currentWorkflow?.workflow_tokenization?.id || 0 })
+  }, [fetchState, workflowId, workflowDetailState?.currentWorkflow?.workflow_tokenization?.id]);
 
   useEffect(() => {
     // 修改 renderTokenizationStatus 函数中的完成状态部分
 
-    const hasCommunityTokens = (currentWorkflow?.model_community_tokenization?.length || 0) > 0;
+    const hasCommunityTokens = (currentWorkflow?.workflow_community_tokenization?.length || 0) > 0;
 
     if (data || hasCommunityTokens) {
       setShowBuyToken(true);
@@ -134,7 +135,7 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
       setActiveTab('description');
       setShowBuyToken(false);
     };
-  }, [data, setShowBuyToken, setActiveTab, currentWorkflow?.model_community_tokenization?.length]);
+  }, [data, setShowBuyToken, setActiveTab, currentWorkflow?.workflow_community_tokenization?.length]);
 
   // 监听当前模型变化，更新聊天存储中的当前模型(模型Ready的时候才更新)
   useEffect(() => {
@@ -264,7 +265,7 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
         />
 
         {/* 右侧信息面板 - 使用新的设计 */}
-        {/*<ModelInfoPanel workflow={currentWorkflow} />*/}
+        <WorkflowInfoPanel workflow={currentWorkflow} />
       </div>
 
       {/* 2. Tab 部分 */}

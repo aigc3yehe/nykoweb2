@@ -6,7 +6,7 @@ import { ModelDetail } from './modelStore';
 import { fetchImages } from './imageStore';
 import { fetchModelDetail } from './modelStore.ts'
 import {fetchTokenizationState} from "./tokenStore.ts";
-import {WorkflowDetail} from "./workflowStore.ts";
+import {fetchWorkflowDetail, WorkflowDetail} from "./workflowStore.ts";
 
 // 添加宽高比相关接口
 export interface AspectRatio {
@@ -581,6 +581,9 @@ export const sendMessage = atom(
 
       const workflow_id = chatState.currentWorkflow?.id
       const current_workflow_name = chatState.currentWorkflow?.name
+      const workflow_cover = chatState.currentWorkflow?.cover;
+      const workflow_description = chatState.currentWorkflow?.description;
+      const workflow_creator = chatState.currentWorkflow?.creator;
 
       // 构建完整的API URL
       const API_URL = `${apiPrefix}/chat`;
@@ -618,6 +621,9 @@ export const sendMessage = atom(
           current_task_status,
           workflow_id,
           workflow_name: current_workflow_name,
+          workflow_cover,
+          workflow_description,
+          workflow_creator
         }),
       });
 
@@ -786,6 +792,12 @@ export const sendMessage = atom(
         console.log('reset model images，model id:', chatState.currentModel.id);
         set(fetchTokenizationState, { modelId: chatState.currentModel.id, model_tokenization_id: chatState.currentModel?.model_tokenization?.id || 0})
         set(fetchModelDetail, chatState.currentModel.id , false)
+      }
+      if (status === 'tokenization' && chatState.currentWorkflow?.id) {
+        // 使用 fetchTokenizationState 重新加载Token状态
+        console.log('reset workflow detailed，workflow id:', chatState.currentWorkflow.id);
+        set(fetchTokenizationState, { workflow_id: chatState.currentWorkflow.id, workflow_tokenization_id: chatState.currentWorkflow?.workflow_tokenization?.id || 0})
+        set(fetchWorkflowDetail, chatState.currentWorkflow.id , false)
       }
     } catch (error) {
       console.error('Send Message Failed:', error);

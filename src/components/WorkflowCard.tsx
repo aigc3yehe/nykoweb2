@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import styles from './WorkflowCard.module.css';
-import {fetchToggleView, Workflow} from '../store/workflowStore';
+import {fetchToggleWorkflowView, Workflow} from '../store/workflowStore';
 import avatarSvg from '../assets/Avatar.svg';
 import usageSvg from '../assets/usage.svg';
 import showSvg from '../assets/show.svg';
@@ -17,7 +17,7 @@ interface WorkflowCardProps {
 
 const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
   const [accountState] = useAtom(accountAtom);
-  const [, toggleView] = useAtom(fetchToggleView);
+  const [, toggleView] = useAtom(fetchToggleWorkflowView);
   const showDialog = useSetAtom(showDialogAtom);
   const showToast = useSetAtom(showToastAtom);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -41,7 +41,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
   // 检查是否在训练中
   const isTraining = false
   // isTokenization
-  const isTokenization = localWorkflow.model_tokenization && localWorkflow.model_tokenization?.metadata?.symbol;
+  const isTokenization = localWorkflow.workflow_tokenization && localWorkflow.workflow_tokenization?.metadata?.symbol;
 
   // 获取Twitter显示名称
   const getDisplayName = () => {
@@ -212,7 +212,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
 
           {isTokenization && (
             <>
-              <div className={styles.completedTag}>${localWorkflow.model_tokenization?.metadata?.symbol}</div>
+              <div className={styles.completedTag}>${localWorkflow.workflow_tokenization?.metadata?.symbol}</div>
             </>
           )}
         </div>

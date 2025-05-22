@@ -47,8 +47,8 @@ export interface Workflow {
   usage: number;
   flag: string | null;
   public?: number; // 1 为可视, 0为由所有者设置为不可视，-1则是系统管理员设置的不可见，级别最高
-  model_tokenization: WorkflowToken | null;
-  model_community_tokenization: CommunityWorkflowToken[] | null;
+  workflow_tokenization: WorkflowToken | null;
+  workflow_community_tokenization: CommunityWorkflowToken[] | null;
   model_tran: {
     version: number;
     train_state: number; // 0: 未开始, 1: 训练中, 2: 训练完成，-1: 训练失败
@@ -218,7 +218,7 @@ export async function toggleViewRequest(type: string, id: number, view_value: bo
 }
 
 // 获取模型列表
-export const fetchToggleView = atom(
+export const fetchToggleWorkflowView = atom(
     null,
     async (get, _set, type: string, id: number, public_value: boolean) => {
       const accountState = get(accountAtom);
@@ -392,7 +392,7 @@ export async function editCoverRequest(workflow_id: number, url: string, did?: s
 }
 
 // 获取模型列表
-export const fetchEditCover = atom(
+export const fetchWorkflowEditCover = atom(
     null,
     async (get, set, workflow_id: number, url: string) => {
       const accountState = get(accountAtom);

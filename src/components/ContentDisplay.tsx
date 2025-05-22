@@ -21,6 +21,7 @@ const ContentDisplay: React.FC = () => {
   const [viewingWorkflowId, setViewingWorkflowId] = useState<number | null>(null);
   const [viewingWorkflowName, setViewingWorkflowName] = useState<string | null>(null);
   const [modelDetailState] = useAtom(modelDetailAtom);
+  const [workflowDetailState] = useAtom(workflowDetailAtom);
   const clearDetail = useSetAtom(clearModelDetail);
   const clearWorkflow = useSetAtom(clearWorkflowDetail);
   const [modelIdAndName] = useAtom(modelIdAndNameAtom);
@@ -151,7 +152,7 @@ const ContentDisplay: React.FC = () => {
                     sortOption={sortOption}
                     setSortOption={setSortOption}
                     isWorkflowDetailMode={true}
-                    modelName={modelDetailState.currentModel?.name || viewingWorkflowName || 'Loading...'}
+                    modelName={workflowDetailState.currentWorkflow?.name || viewingWorkflowName || 'Loading...'}
                     onBackClick={handleBackToList}
                 />
               </div>

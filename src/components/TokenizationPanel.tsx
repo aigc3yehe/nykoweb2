@@ -67,7 +67,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
   const status = getTrainingStatus();
 
-  const community_tokens = model?.model_community_tokenization ?? workflow?.model_community_tokenization;
+  const community_tokens = model?.model_community_tokenization ?? workflow?.workflow_community_tokenization;
   const has_community_tokens = community_tokens && community_tokens.length > 0;
 
   // 获取Twitter显示名称
@@ -106,13 +106,13 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
   // 判断是否只显示 community tokens
   useEffect(() => {
      const data = tokenizationState.data;
-     const model_community_tokenization = model?.model_community_tokenization ?? workflow?.model_community_tokenization
+     const model_community_tokenization = model?.model_community_tokenization ?? workflow?.workflow_community_tokenization
      if (!data || model?.model_tokenization?.launchpad == TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS) {
          setOnlyCommunityTokens((model_community_tokenization?.length || 0) > 0);
      } else {
          setOnlyCommunityTokens(false);
      }
-  }, [tokenizationState, model?.model_community_tokenization, model?.model_tokenization?.launchpad, workflow?.model_community_tokenization]);
+  }, [tokenizationState, model?.model_community_tokenization, model?.model_tokenization?.launchpad, workflow?.workflow_community_tokenization]);
 
   const formatAddress = (address: string) => {
     if (!address) return '';
