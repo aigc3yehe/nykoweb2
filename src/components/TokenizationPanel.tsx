@@ -5,7 +5,6 @@ import {
     fetchTokenizationState,
     FlaunchLaunchTokenResponse,
     FlaunchStatusResponse,
-    setModelFlag,
     tokenizationStateAtom,
 } from '../store/tokenStore';
 import StatePrompt from './StatePrompt';
@@ -16,7 +15,6 @@ import {accountAtom} from "../store/accountStore.ts";
 import {ModelDetail, TOKENIZATION_LAUNCHPAD_TYPE} from '../store/modelStore';
 import {showToastAtom} from "../store/imagesStore.ts";
 import SwapWidgetCustom from './SwapWidgetCustom.tsx';
-import { usePrivy } from '@privy-io/react-auth';
 import {setModelStatus} from "../store/chatStore.ts";
 import {Link} from "react-router-dom";
 import {Tooltip} from "@mui/material";
@@ -36,12 +34,9 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
   const showToast = useSetAtom(showToastAtom);
   const [tokenizationState] = useAtom(tokenizationStateAtom);
   const fetchState = useSetAtom(fetchTokenizationState);
-  const setTokenizationFlag = useSetAtom(setModelFlag);
 
   const setModelStatusInChat = useSetAtom(setModelStatus);
   const [onlyCommunityTokens, setOnlyCommunityTokens] = useState<boolean>(false);
-  const [isInitiating, setIsInitiating] = useState(false);
-  const { user } = usePrivy();
 
   let isFlag = false
   if (model && model.flag !== null && model.flag !== "") {
@@ -69,6 +64,7 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
 
   const community_tokens = model?.model_community_tokenization ?? workflow?.workflow_community_tokenization;
   const has_community_tokens = community_tokens && community_tokens.length > 0;
+  const tokenization = model?.model_tokenization ?? workflow?.workflow_tokenization;
 
   // 获取Twitter显示名称
   const getDisplayName = () => {
@@ -126,27 +122,6 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
             severity: 'success'
         });
     });
-  };
-
-  // 处理 token 化请求
-  const handleTokenize = async () => {
-    try {
-      if (!model) {
-          return;
-      }
-      setIsInitiating(true);
-      // 发起 token 化请求
-      const flag = 'tokenization'
-      const modelId = model.id
-      await setTokenizationFlag({ modelId, flag, user: user?.id || '' });
-
-      // 立即获取最新状态
-      await fetchState({modelId, model_tokenization_id: model.model_tokenization?.id || 0, refreshState: true});
-    } catch (error) {
-      console.error('Failed to initiate tokenization:', error);
-    } finally {
-      setIsInitiating(false);
-    }
   };
 
   // 渲染community tokens
@@ -213,7 +188,10 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
           message={`Error: ${error}`}
           action={{
             text: 'Retry',
-            onClick: () => fetchState({ modelId: model?.id, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true })
+            onClick: () => fetchState({ modelId: model?.id, model_tokenization_id: model?.model_tokenization?.id || 0,
+                workflow_id: workflow?.id,
+                workflow_tokenization_id: workflow?.workflow_tokenization?.id || 0,
+                refreshState: true })
           }}
         />
       );
@@ -239,13 +217,6 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
         return (
             <div className={styles.emptyState}>
               <p>This model has not been tokenized yet.</p>
-              <button
-                  className={styles.tokenizeButton}
-                  onClick={handleTokenize}
-                  disabled={isInitiating}
-              >
-                {isInitiating ? 'Initiating...' : 'Tokenize Model'}
-              </button>
             </div>
         );
       }
@@ -352,12 +323,12 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
                 <div className={styles.tokenInfoDivider}></div>
 
                 {
-                  model?.model_tokenization?.deployer && (
+                    tokenization?.deployer && (
                     <>
                     <div className={styles.tokenInfoItem}>
                       <span className={styles.tokenInfoLabel}>Deployer</span>
                       <div className={styles.addressContainer}>
-                        <span className={styles.tokenInfoValue}>{model?.model_tokenization?.deployer}</span>
+                        <span className={styles.tokenInfoValue}>{tokenization.deployer}</span>
                       </div>
                     </div>
 
@@ -448,7 +419,10 @@ const TokenizationPanel: React.FC<TokenizationPanelProps> = memo(({
         <p>Tokenization status: Unknown</p>
         <button
           className={styles.refreshButton}
-          onClick={() => fetchState({ modelId: model?.id, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true })}
+          onClick={() => fetchState({ modelId: model?.id, model_tokenization_id: model?.model_tokenization?.id || 0,
+              workflow_id: workflow?.id,
+              workflow_tokenization_id: workflow?.workflow_tokenization?.id || 0,
+              refreshState: true })}
         >
           Refresh Status
         </button>

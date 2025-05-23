@@ -6,6 +6,7 @@ import PlanPlusIcon from "../assets/plan_plus.svg";
 import KeyIcon from "../assets/key.svg";
 import LogoutIcon from "../assets/logout.svg";
 import CopyIcon from "../assets/copy_address.svg";
+import CreditIcon from "../assets/credit.svg";
 import CloseIcon from "../assets/close_account.svg";
 import RocketIcon from "../assets/bxs_rocket.svg";
 import WalletAssets from "./WalletAssets";
@@ -269,10 +270,8 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
           }}
         >
           <div className={styles.actionRow}>
-            <span className={styles.creditsLabel}>Credits</span>
-            <span className={styles.creditsValue}>
-              {formatNumber(credits || 0)}
-            </span>
+            <img src={CreditIcon} alt="credit" width="16" height="16" />
+            <span className={styles.creditsLabel}>Credits: {formatNumber(credits || 0)}</span>
           </div>
         </div>
 

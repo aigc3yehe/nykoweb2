@@ -356,16 +356,5 @@
   letter-spacing: 0;
   vertical-align: middle;
   text-transform: capitalize;
-  color: #FACC15; /* 黄色，与Plan文本相同 */
-  margin-right: 0.25rem; /* 4px */
-}
-
-.creditsValue {
-  font-family: 'Jura', sans-serif;
-  font-weight: 700;
-  font-size: 1rem; /* 16px */
-  line-height: 100%;
-  letter-spacing: 0;
-  vertical-align: middle;
   color: #4ADE80; /* 绿色 */
 }
