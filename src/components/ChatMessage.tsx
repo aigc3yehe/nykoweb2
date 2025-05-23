@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "./ChatMessage.module.css";
 import imageIcon from "../assets/image.svg";
 import closeIcon from "../assets/close.svg";
@@ -32,7 +32,8 @@ export interface ChatMessageProps {
     | "tokenization_agreement"
     | "create_workflow"
     | "run_workflow"
-    | "workflow_generate_result";
+    | "workflow_generate_result"
+    | "create_workflow_details";
   imageUploadState?: ImageUploadState;
   uploadedFiles?: Array<{ name: string; url: string }>;
   modelParam?: {
@@ -45,6 +46,7 @@ export interface ChatMessageProps {
   imageHeight?: number;
   request_id?: string;
   workflow_name?: string;
+  workflow_description?: string;
   workflow_prompt?: string;
   workflow_input?: string;
   workflow_output?: string;
@@ -67,6 +69,14 @@ export interface ChatMessageProps {
   onRunWorkflow?: () => void;
   isConfirmedWorkflow?: boolean;
   onNavigateToWorkflow?: (workflowName: string) => void;
+  workflowReferenceImage?: {
+    isUploading: boolean;
+    uploadedUrl: string;
+    fileName: string;
+    error?: string;
+  };
+  onUploadReferenceImage?: () => void;
+  onRemoveReferenceImage?: () => void;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -87,6 +97,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   imageHeight = 256,
   request_id = "",
   workflow_name = "",
+  workflow_description = "",
   workflow_prompt = "",
   workflow_model = "",
   onAddImage,
@@ -106,6 +117,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   onRunWorkflow,
   isConfirmedWorkflow = false,
   onNavigateToWorkflow,
+  workflowReferenceImage,
+  onUploadReferenceImage,
+  onRemoveReferenceImage,
 }) => {
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
@@ -368,11 +382,94 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
+  // 添加workflow_config渲染逻辑
+  const renderWorkflowConfigComponent = () => {
+    return (
+      <div className={styles.modelConfigContainer}>
+        <div className={styles.modelConfigItem}>
+          <span className={styles.modelConfigLabel}>Workflow name: </span>
+          <span className={styles.modelConfigValue}>
+            {workflow_name || "?"}
+          </span>
+        </div>
+        <div className={styles.modelConfigItem}>
+          <span className={styles.modelConfigLabel}>Description: </span>
+          <span className={styles.modelConfigValue}>
+            {workflow_description || "?"}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   // 添加状态跟踪输入内容和是否聚焦
   const [isFocused, setIsFocused] = useState(false);
 
   // 在组件内部添加状态来跟踪下拉菜单是否显示
   const [showModelDropdown, setShowModelDropdown] = useState(false);
+
+  // 添加滚动条相关状态
+  const [scrollHeight, setScrollHeight] = useState(0);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [clientHeight, setClientHeight] = useState(0);
+
+  const promptTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const promptScrollbarRef = useRef<HTMLDivElement>(null);
+
+  // 监听textarea的滚动事件
+  const handlePromptTextareaScroll = () => {
+    if (promptTextareaRef.current) {
+      setScrollTop(promptTextareaRef.current.scrollTop);
+    }
+  };
+
+  // 处理自定义滚动条拖动
+  const handlePromptScrollThumbDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    const startY = e.clientY;
+    const startScrollTop = scrollTop;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (promptTextareaRef.current) {
+        const deltaY = moveEvent.clientY - startY;
+        const scrollRatio = deltaY / clientHeight;
+        promptTextareaRef.current.scrollTop = startScrollTop + scrollRatio * scrollHeight;
+        setScrollTop(promptTextareaRef.current.scrollTop);
+      }
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // 计算滚动条高度和位置
+  const getPromptScrollThumbHeight = () => {
+    if (scrollHeight <= clientHeight) return 0;
+    return Math.max(30, (clientHeight / scrollHeight) * clientHeight);
+  };
+
+  const getPromptScrollThumbTop = () => {
+    if (scrollHeight <= clientHeight) return 0;
+    return (scrollTop / (scrollHeight - clientHeight)) * (clientHeight - getPromptScrollThumbHeight());
+  };
+
+  // 显示自定义滚动条的条件
+  const showPromptCustomScrollbar = scrollHeight > clientHeight;
+
+  // 监听textarea内容变化，更新滚动状态
+  useEffect(() => {
+    if (promptTextareaRef.current) {
+      setScrollHeight(promptTextareaRef.current.scrollHeight);
+      setClientHeight(promptTextareaRef.current.clientHeight);
+      setScrollTop(promptTextareaRef.current.scrollTop);
+    }
+  }, [workflow_prompt]);
 
   // 添加模型选项列表
   const modelOptions = [
@@ -425,9 +522,76 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
+  // 添加渲染 Reference Image 部分的函数
+  const renderReferenceImageSection = () => {
+    const hasUploadedImage = workflowReferenceImage?.uploadedUrl;
+    const isUploading = workflowReferenceImage?.isUploading;
+
+    return (
+      <div className={styles.workflowSection}>
+        <div className={styles.sectionLabel}>Reference Image (Optional):</div>
+        
+        {!hasUploadedImage && !isUploading ? (
+          // 未上传图片状态 - 显示上传按钮
+          <button
+            className={styles.uploadButton}
+            onClick={onUploadReferenceImage}
+            disabled={isCreatingWorkflow}
+          >
+            <img
+              src={uploadIcon}
+              alt="Upload"
+              className={styles.uploadIcon}
+            />
+            <span>Upload</span>
+          </button>
+        ) : (
+          // 已上传图片或上传中状态
+          <div className={styles.referenceImageContainer}>
+            {isUploading ? (
+              // 上传中状态
+              <div className={styles.referenceImageUploading}>
+                <img
+                  src={uploadingIcon}
+                  alt="Uploading"
+                  className={styles.uploadingIcon}
+                />
+                <span className={styles.uploadingText}>
+                  Uploading {workflowReferenceImage?.fileName}...
+                </span>
+              </div>
+            ) : (
+              // 上传完成状态
+              <div className={styles.referenceImagePreview}>
+                <div className={styles.referenceImageItem}>
+                  <img
+                    src={imageIcon}
+                    alt="Reference"
+                    className={styles.referenceImageIcon}
+                  />
+                  <span className={styles.referenceImageName}>
+                    {formatFileName(workflowReferenceImage?.fileName || '')}
+                  </span>
+                  {!isCreatingWorkflow && (
+                    <img
+                      src={closeIcon}
+                      alt="Remove"
+                      className={styles.removeReferenceIcon}
+                      onClick={onRemoveReferenceImage}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // 修改工作流组件，创建成功后隐藏标题
   const renderCreateWorkflowComponent = () => {
-    const isPromptTooLong = workflow_prompt.length > 500;
+    const isPromptTooLong = workflow_prompt.length > 800;
 
     return (
       <>
@@ -480,38 +644,44 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               <div className={styles.workflowSection}>
                 <div className={styles.sectionLabel}>Prompt:</div>
                 <div className={`${styles.promptInputContainer} ${isFocused ? styles.focused : ''}`}>
-                  <textarea
-                    className={styles.promptInput}
-                    value={workflow_prompt}
-                    onChange={(e) => onUpdatePrompt && onUpdatePrompt(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    placeholder="Enter your prompt here"
-                    maxLength={500}
-                    disabled={isCreatingWorkflow}
-                  />
+                  <div className={styles.promptTextareaWrapper}>
+                    <textarea
+                      ref={promptTextareaRef}
+                      className={styles.promptInput}
+                      value={workflow_prompt}
+                      onChange={(e) => onUpdatePrompt && onUpdatePrompt(e.target.value)}
+                      onFocus={() => setIsFocused(true)}
+                      onBlur={() => setIsFocused(false)}
+                      onScroll={handlePromptTextareaScroll}
+                      placeholder="Enter your prompt here"
+                      maxLength={800}
+                      disabled={isCreatingWorkflow}
+                    />
+
+                    {/* 自定义滚动条 */}
+                    {showPromptCustomScrollbar && (
+                      <div className={styles.promptCustomScrollbarTrack}>
+                        <div
+                          ref={promptScrollbarRef}
+                          className={styles.promptCustomScrollbarThumb}
+                          style={{
+                            height: `${getPromptScrollThumbHeight()}px`,
+                            top: `${getPromptScrollThumbTop()}px`
+                          }}
+                          onMouseDown={handlePromptScrollThumbDrag}
+                        />
+                      </div>
+                    )}
+                  </div>
+
                   <div className={`${styles.charCount} ${isPromptTooLong ? styles.charCountError : ''}`}>
-                    Max 500 char
+                    Max 800 char
                   </div>
                 </div>
               </div>
 
               {/* Reference Image上传部分 */}
-              <div className={styles.workflowSection}>
-                <div className={styles.sectionLabel}>Reference Image:</div>
-                <button
-                  className={styles.uploadButton}
-                  onClick={onAddImage}
-                  disabled={isCreatingWorkflow}
-                >
-                  <img
-                    src={uploadIcon}
-                    alt="Upload"
-                    className={styles.uploadIcon}
-                  />
-                  <span>Upload</span>
-                </button>
-              </div>
+              {renderReferenceImageSection()}
 
               {/* Input类型选择部分 */}
               <div className={styles.workflowSection}>
@@ -718,6 +888,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       {role === "assistant" &&
         type === "model_config" &&
         renderModelConfigComponent()}
+      {role === "assistant" &&
+        type === "create_workflow_details" &&
+          renderWorkflowConfigComponent()}
       {role === "assistant" &&
         type === "generate_result" &&
         renderGenerateResultComponent(GENERATE_IMAGE_SERVICE_CONFIG.cu)}
