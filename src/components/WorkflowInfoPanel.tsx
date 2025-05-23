@@ -1,24 +1,19 @@
 import React from "react";
 import { useAtom } from "jotai";
-import { accountAtom } from "../store/accountStore";
 import styles from "./WorkflowInfoPanel.module.css";
 import avatarSvg from "../assets/Avatar.svg";
 import twitterSvg from "../assets/twitter.svg";
 import createSvg from "../assets/create.svg";
 import shareSvg from "../assets/share.svg";
-import coinsSvg from "../assets/coins.svg";
 import dexSvg from "../assets/dex.svg";
 import virtualsIcon from "../assets/virtuals.svg";
 import flaunchIcon from "../assets/flaunch.png";
 import codeSvg from "../assets/code.svg";
 import { WorkflowDetail, TOKENIZATION_LAUNCHPAD_TYPE } from "../store/workflowStore";
 import {
-  //fetchTokenizationState,
-  //setModelFlag,
   tokenizationStateAtom,
   FlaunchStatusResponse,
 } from "../store/tokenStore";
-//import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "react-router-dom";
 import {RUN_WORKFLOW_SERVICE_CONFIG} from "../utils/plan";
 import {sendMessage} from "../store/chatStore.ts";
@@ -28,18 +23,9 @@ interface WorkflowInfoPanelProps {
 }
 
 const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
-  const [accountState] = useAtom(accountAtom);
-  //const showGeneratePopup = useSetAtom(showGeneratePopupAtom);
-  //const setTokenizationFlag = useSetAtom(setModelFlag);
-  //const fetchState = useSetAtom(fetchTokenizationState);
   const [tokenizationState] = useAtom(tokenizationStateAtom);
   const { data } = tokenizationState;
   const [, sendMessageAction] = useAtom(sendMessage);
-  //const { user } = usePrivy();
-
-  // 检查当前用户是否是模型创建者
-  const isFlag = workflow.flag !== null && workflow.flag !== "";
-  const isShowToken = accountState.did === workflow.creator && !isFlag;
 
   // 获取Twitter显示名称
   const getDisplayName = () => {
@@ -142,17 +128,6 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
     window.open(twitterUrl, "_blank", "noopener,noreferrer");
   };
 
-  const handleToken = async () => {
-    // 发起 token 化请求
-    const flag = "tokenization";
-    const workflowId = workflow.id;
-    console.log("flag workflowId", flag, workflowId);
-    // await setTokenizationFlag({ workflowId, flag, user: user?.id || "" });
-
-    // 立即获取最新状态
-    // await fetchState({ workflowId, workflow_tokenization_id: workflow?.model_tokenization?.id || 0, refreshState: true });
-  };
-
   const handleTwitterClick = () => {
     console.log("Twitter clicked");
     // 实现Twitter点击功能
@@ -253,13 +228,6 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
             <button className={styles.shareButton} onClick={handleShare}>
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
-
-            {/* Token按钮 - 仅当用户是模型创建者时显示 */}
-            {isShowToken && (
-              <button className={styles.mintButton} onClick={handleToken}>
-                <img src={coinsSvg} alt="Token" className={styles.buttonIcon} />
-              </button>
-            )}
 
             {/* Token按钮 - Dexscreener 跳转 */}
             {workflow?.workflow_tokenization?.meme_token && (

@@ -319,19 +319,19 @@ const ChatWindow: React.FC = () => {
                   <p className={styles.welcomeText}>You can train models and generate images simply by chatting with Niyoko.</p>
                   <div className={styles.quickOptions}>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('launch a token for this model.')}>
-                      🪙 launch a token for this model.
+                      💎 launch a token
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to FINETUNE a model.')}>
-                      🧠 I want to FINETUNE a model.(Cost 7,500 Credits)
+                      🧠 Finetune a model (7,500 Credits)
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to create a workflow.')}>
-                      🧠 I want to create a workflow.(cost 500 Credits)
+                      ⏳ Create a workflow (800 Credits)
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to generate an image.')}>
-                      🌄 I want to generate an image.(Cost 5 Credits)
+                      🌄 Generate an image (5 Credits)
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to use this workflow.')}>
-                      🌄 I want to use this workflow.(Cost 50 Credits)
+                      ✨ Use this workflow (50 Credits)
                     </button>
                   </div>
                 </div>
