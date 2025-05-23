@@ -20,7 +20,8 @@ import {
 } from "../store/tokenStore";
 //import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "react-router-dom";
-import { GENERATE_IMAGE_SERVICE_CONFIG } from "../utils/plan";
+import {RUN_WORKFLOW_SERVICE_CONFIG} from "../utils/plan";
+import {sendMessage} from "../store/chatStore.ts";
 
 interface WorkflowInfoPanelProps {
   workflow: WorkflowDetail;
@@ -33,6 +34,7 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
   //const fetchState = useSetAtom(fetchTokenizationState);
   const [tokenizationState] = useAtom(tokenizationStateAtom);
   const { data } = tokenizationState;
+  const [, sendMessageAction] = useAtom(sendMessage);
   //const { user } = usePrivy();
 
   // 检查当前用户是否是模型创建者
@@ -80,8 +82,8 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
   };
 
   // 获取LoraName
-  const getLoraName = () => {
-    return "Unknown";
+  const getModelName = () => {
+    return workflow.model || "Unknown";
   };
 
   // 获取训练状态
@@ -93,7 +95,9 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
 
   const handleGenerate = () => {
     // 打开生成弹窗，传入模型信息
-    // showGeneratePopup(accountState.did, workflow);
+    sendMessageAction("I want to use this workflow.").then(() => {
+      console.log("run this workflow");
+    })
   };
 
   // 点击分享按钮触发x的分享
@@ -194,13 +198,13 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
         {/* Type */}
         <div className={styles.detailRow}>
           <span className={styles.detailLabel}>Type</span>
-          <span className={styles.detailValue}>Lora</span>
+          <span className={styles.detailValue}>Workflow</span>
         </div>
 
         {/* Keyword (Lora Name) */}
         <div className={styles.detailRow}>
-          <span className={styles.detailLabel}>Keyword</span>
-          <span className={styles.detailValue}>{getLoraName()}</span>
+          <span className={styles.detailLabel}>Model</span>
+          <span className={styles.detailValue}>{getModelName()}</span>
         </div>
 
         {/* Used */}
@@ -240,7 +244,7 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
               <div className="flex items-end gap-[1px]">
                 <span>Generate</span>
                 <span className="!text-xs">
-                  ({GENERATE_IMAGE_SERVICE_CONFIG.cu} Credits)
+                  ({RUN_WORKFLOW_SERVICE_CONFIG.cu} Credits)
                 </span>
               </div>
             </button>

@@ -225,6 +225,16 @@ const ChatWindow: React.FC = () => {
     };
   }, [chatState.connection?.inQueue, chatState.connection?.isActive, chatState.heartbeatId, startHeartbeatAction, stopHeartbeatAction]);
 
+  // 修改工作流跳转处理函数
+  const handleNavigateToWorkflow = (workflowName: string) => {
+    // 从 chatState 中获取 workflowId
+    const workflowId = chatState.workflowCreation.workflowId;
+    if (workflowId) {
+      // 跳转到主页面并带上工作流参数
+      navigate(`/?workflow_id=${workflowId}&workflow_name=${encodeURIComponent(workflowName)}`);
+    }
+  };
+
   return (
     <div className={styles.chatWindow}>
       {/* 活动title */}
@@ -304,7 +314,7 @@ const ChatWindow: React.FC = () => {
                       🌄 I want to generate an image.(Cost 5 Credits)
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to use this workflow.')}>
-                      🌄 I want to use this workflow.(Cost 5 Credits)
+                      🌄 I want to use this workflow.(Cost 50 Credits)
                     </button>
                   </div>
                 </div>
@@ -372,6 +382,7 @@ const ChatWindow: React.FC = () => {
                 isConfirmedWorkflow={chatState.workflowRunning.isSuccess}
                 onSelectWorkflowImage={(url, file) => setWorkflowImageAction({ url, file })}
                 onRunWorkflow={runWorkflowAction}
+                onNavigateToWorkflow={handleNavigateToWorkflow}
               />
             ))
           )}

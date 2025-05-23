@@ -852,8 +852,8 @@
   gap: 0.25rem; /* 4px */
   border-radius: 0.25rem; /* 4px */
   padding: 0.375rem 0.625rem; /* 6px 10px */
-  background: #FF3C3D;
-  border: 0.0625rem solid #FF3C3D; /* 1px solid #FF3C3D */
+  background: transparent;
+  border: 0.0625rem solid rgba(55, 65, 81, 0.3); /* 1px solid #3741514D */
   cursor: pointer;
 }
 
@@ -880,4 +880,33 @@
   border: 0.0625rem solid rgba(55, 65, 81, 0.3); /* 1px solid #3741514D */
   color: rgba(255, 255, 255, 0.15); /* #FFFFFF26 */
   cursor: not-allowed;
+}
+
+/* 可点击的工作流标题 */
+.workflowTitleClickable {
+  text-decoration: underline;
+  cursor: pointer;
+  color: #6366F1;
+}
+
+.workflowTitleClickable:hover {
+  color: #7C3AED;
+}
+
+/* 成功文本容器 */
+.successTextContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem; /* 4px */
+}
+
+/* Check workflow文本 */
+.checkWorkflowText {
+  margin-left: 0.5rem;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem; /* 12px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #88A4C2;
 }

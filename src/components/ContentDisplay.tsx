@@ -70,7 +70,7 @@ const ContentDisplay: React.FC = () => {
 
   // 从URL参数中获取model_id和model_name
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
+    const searchParams = new URLSearchParams(location.search);
     const modelId = searchParams.get('model_id');
     const modelName = searchParams.get('model_name');
 
@@ -81,9 +81,9 @@ const ContentDisplay: React.FC = () => {
     const workflowId = searchParams.get('workflow_id');
     const workflowName = searchParams.get('workflow_name');
     if (workflowId && workflowName) {
-      handleViewWorkflowDetail(parseInt(workflowId), workflowName)
+      handleViewWorkflowDetail(parseInt(workflowId), workflowName);
     }
-  }, []);
+  }, [location.search]);
 
   useEffect(() => {
     if (modelIdAndName.modelId && modelIdAndName.modelName) {

@@ -44,7 +44,7 @@ export interface Message {
   role: string;
   content: string;
   type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image' | 'tokenization_agreement' | "create_workflow"
-      | "run_workflow";
+      | "run_workflow" | "workflow_generate_result";
   imageUploadState?: {
     totalCount: number;
     uploadedCount: number;
@@ -105,6 +105,7 @@ export interface ChatState {
   currentWorkflow: WorkflowDetail | null;
   workflowStatus: string | null;
   workflow_name: string;
+  workflow_description: string;
   workflow_prompt: string;
   workflow_input: string;
   workflow_output: string;
@@ -149,6 +150,7 @@ const initialState: ChatState = {
   currentWorkflow: null,
   workflowStatus: null,
   workflow_name: "",
+  workflow_description: "",
   workflow_prompt: "",
   workflow_input: "image",
   workflow_output: "image",
@@ -306,7 +308,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             const resultMessage: Message = {
               role: 'assistant',
               content: 'Image generation completed',
-              type: 'generate_result',
+              type: isWorkflow ? 'workflow_generate_result' : 'generate_result',
               images: generatedImages,
               request_id: taskId,
               imageInfo: {
@@ -778,7 +780,8 @@ export const sendMessage = atom(
         task_value: task_value,
         modelParam: updatedModelParam,
         workflow_name: workflow_name || undefined,
-        workflow_prompt: generated_prompt || workflow_goal || undefined,
+        workflow_description: workflow_goal || undefined,
+        workflow_prompt: generated_prompt || undefined,
       });
 
       // 如果 request_id 不为空，则代表创建生成图片任务完成
@@ -1402,7 +1405,6 @@ export enum WORKFLOW_PROVIDER {
 // GPT模型枚举 - 修改为正确的值
 export enum WORKFLOW_GPT_MODEL {
   GPT_IMAGE_1 = 'gpt-image-1',
-  GPT_IMAGE_1_VIP = 'gpt-image-1-vip',
 }
 
 // 将输入类型字符串转换为API需要的枚举类型 - 修改映射逻辑
@@ -1492,13 +1494,13 @@ export const createWorkflow = atom(
       // 准备API参数
       const params: CreateWorkflowParams = {
         name: chatState.workflow_name || 'New Workflow',
-        description: '', // 可以添加描述输入框或使用其他字段
+        description: chatState.workflow_description || '', // 可以添加描述输入框或使用其他字段
         creator: chatState.did || '',
         prompt: chatState.workflow_prompt,
         input_type: mapInputOutputType(chatState.workflow_input),
         output_type: mapInputOutputType(chatState.workflow_output),
         provider: WORKFLOW_PROVIDER.GPT_4o, // 使用正确的枚举值
-        model: WORKFLOW_GPT_MODEL.GPT_IMAGE_1_VIP, // 使用正确的枚举值
+        model: WORKFLOW_GPT_MODEL.GPT_IMAGE_1, // 使用正确的枚举值
         reference_images: chatState.urls.map(url => url.url) // 使用已上传的图片
       };
 
