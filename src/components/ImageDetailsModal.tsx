@@ -5,8 +5,7 @@ import avatarSvg from '../assets/Avatar.svg';
 import twitterSvg from '../assets/twitter.svg';
 import goSvg from '../assets/go.svg';
 import closeImgSvg from '../assets/close_img.svg';
-import { useSetAtom } from 'jotai';
-import { setModelIdAndName } from '../store/modelStore';
+import {useNavigate} from "react-router-dom";
 
 interface ImageDetailsModalProps {
   image: Image;
@@ -25,7 +24,7 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
 }) => {
   // 使用内部状态来确保组件重新渲染
   const [localImageDetail, setLocalImageDetail] = useState<ImageDetail | null>(imageDetail);
-  const setModelIdAndNameAction = useSetAtom(setModelIdAndName);
+  const navigate = useNavigate();
   // 当外部imageDetail变化时更新内部状态
   useEffect(() => {
     if (imageDetail) {
@@ -117,16 +116,16 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
 
   const handleGoClick = () => {
     // 获取模型ID，优先使用imageDetail中的数据
-    const modelId = localImageDetail?.source_info?.id || image.model_id;
-    // 获取模型名称
-    const modelName = getModelName();
-
     // 首先关闭当前模态框
     onClose();
-
-    // 如果提供了导航函数且有有效的模型ID，则导航到模型详情
-    if (modelId) {
-      setModelIdAndNameAction({ modelId, modelName });
+    if (image.model_id) {
+      const modelId = image.model_id;
+      const modelName = localImageDetail?.source_info?.name || "";
+      navigate(`/?model_id=${modelId}&model_name=${encodeURIComponent(modelName)}`);
+    } else if (image.workflow_id) {
+      const workflowId = image.workflow_id;
+      const workflowName = localImageDetail?.source_info?.name || "";
+      navigate(`/?workflow_id=${workflowId}&workflow_name=${encodeURIComponent(workflowName)}`);
     }
   };
 
@@ -147,9 +146,15 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
 
   // 获取模型名称
   const getModelName = () => {
+    let defaultName = ""
+    if (image.model_id) {
+      defaultName = `AI Model #${image.model_id}`
+    } else if (image.workflow_id) {
+      defaultName = `AI Workflow #${image.workflow_id}`
+    }
     return localImageDetail?.source_info?.name
       ? localImageDetail.source_info.name
-      : `AI Model #${image.model_id}`;
+      : defaultName;
   };
 
   // 阻止事件冒泡，避免点击内容区域时关闭模态框
@@ -184,7 +189,7 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
             <div className={styles.authorInfo}>
               <img
                 src={getAvatarUrl()}
-                alt="作者头像"
+                alt="authorAvatar"
                 className={styles.authorAvatar}
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = avatarSvg;
@@ -206,7 +211,7 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
             <div className={styles.modelInfoContent}>
               <span className={styles.modelName}>{getModelName()}</span>
               <img src={goSvg} alt="Go" className={styles.goIcon} onClick={handleGoClick}/>
-              {error && <div className={styles.errorIndicator} title={`加载失败: ${error}`}>!</div>}
+              {error && <div className={styles.errorIndicator} title={`loading failed: ${error}`}>!</div>}
             </div>
           </div>
         </div>
