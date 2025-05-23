@@ -7,19 +7,15 @@ import avatarSvg from "../assets/Avatar.svg";
 import twitterSvg from "../assets/twitter.svg";
 import createSvg from "../assets/create.svg";
 import shareSvg from "../assets/share.svg";
-import coinsSvg from "../assets/coins.svg";
 import dexSvg from "../assets/dex.svg";
 import virtualsIcon from "../assets/virtuals.svg";
 import flaunchIcon from "../assets/flaunch.png";
 import codeSvg from "../assets/code.svg";
 import { ModelDetail, TOKENIZATION_LAUNCHPAD_TYPE } from "../store/modelStore";
 import {
-  fetchTokenizationState,
-  setModelFlag,
   tokenizationStateAtom,
   FlaunchStatusResponse,
 } from "../store/tokenStore";
-import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "react-router-dom";
 import { GENERATE_IMAGE_SERVICE_CONFIG } from "../utils/plan";
 
@@ -30,15 +26,8 @@ interface ModelInfoPanelProps {
 const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   const [accountState] = useAtom(accountAtom);
   const showGeneratePopup = useSetAtom(showGeneratePopupAtom);
-  const setTokenizationFlag = useSetAtom(setModelFlag);
-  const fetchState = useSetAtom(fetchTokenizationState);
   const [tokenizationState] = useAtom(tokenizationStateAtom);
   const { data } = tokenizationState;
-  const { user } = usePrivy();
-
-  // 检查当前用户是否是模型创建者
-  const isFlag = model.flag !== null && model.flag !== "";
-  const isShowToken = accountState.did === model.creator && !isFlag;
 
   // 获取Twitter显示名称
   const getDisplayName = () => {
@@ -183,16 +172,6 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
     window.open(twitterUrl, "_blank", "noopener,noreferrer");
   };
 
-  const handleToken = async () => {
-    // 发起 token 化请求
-    const flag = "tokenization";
-    const modelId = model.id;
-    await setTokenizationFlag({ modelId, flag, user: user?.id || "" });
-
-    // 立即获取最新状态
-    await fetchState({ modelId, model_tokenization_id: model?.model_tokenization?.id || 0, refreshState: true });
-  };
-
   const handleTwitterClick = () => {
     console.log("Twitter clicked");
     // 实现Twitter点击功能
@@ -293,13 +272,6 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
             <button className={styles.shareButton} onClick={handleShare}>
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
-
-            {/* Token按钮 - 仅当用户是模型创建者时显示 */}
-            {isShowToken && (
-              <button className={styles.mintButton} onClick={handleToken}>
-                <img src={coinsSvg} alt="Token" className={styles.buttonIcon} />
-              </button>
-            )}
 
             {/* Token按钮 - Dexscreener 跳转 */}
             {model?.model_tokenization?.meme_token && (
