@@ -536,16 +536,24 @@
   border: 0.0625rem solid rgba(55, 65, 81, 0.5); /* 1px solid #37415180 */
   padding: 0.5rem 0.875rem; /* 8px 14px */
   background: transparent;
+  position: relative;
 }
 
 .promptInputContainer.focused {
   border: 0.0625rem solid #6366F1; /* 1px solid #6366F1 */
 }
 
+/* Prompt文本区域包装器 */
+.promptTextareaWrapper {
+  position: relative;
+  width: 100%;
+  height: 6.25rem; /* 100px */
+}
+
 /* Prompt输入框 */
 .promptInput {
   width: 100%; /* 354px */
-  height: 6.25rem; /* 100px */
+  height: 100%;
   font-family: 'Jura', sans-serif;
   font-weight: 500;
   font-size: 0.875rem; /* 14px */
@@ -556,6 +564,39 @@
   border: none;
   resize: none;
   outline: none;
+  overflow-y: auto;
+}
+
+/* 隐藏原生滚动条 */
+.promptInput::-webkit-scrollbar {
+  display: none;
+}
+
+.promptInput {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* 自定义滚动条轨道 */
+.promptCustomScrollbarTrack {
+  position: absolute;
+  right: 6px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 100px;
+  background: transparent;
+  z-index: 10;
+}
+
+/* 自定义滚动条滑块 */
+.promptCustomScrollbarThumb {
+  position: absolute;
+  width: 4px;
+  border-radius: 100px;
+  background: #37415199;
+  cursor: pointer;
+  right: 0;
 }
 
 /* 字符计数 */

@@ -371,6 +371,7 @@ const ChatWindow: React.FC = () => {
                 request_id={message.request_id}
                 agree={message.agree}
                 workflow_name={chatState.workflow_name}
+                workflow_description={chatState.workflow_description}
                 workflow_prompt={chatState.workflow_prompt}
                 workflow_input={chatState.workflow_input}
                 workflow_output={chatState.workflow_output}

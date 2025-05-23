@@ -44,7 +44,7 @@ export interface Message {
   role: string;
   content: string;
   type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image' | 'tokenization_agreement' | "create_workflow"
-      | "run_workflow" | "workflow_generate_result";
+      | "run_workflow" | "workflow_generate_result" | "create_workflow_details";
   imageUploadState?: {
     totalCount: number;
     uploadedCount: number;
@@ -725,6 +725,10 @@ export const sendMessage = atom(
         messageType = 'create_workflow';
       }
 
+      if (status === "AICC_COLLECTING_DETAILS" && task_type === 'create_workflow') {
+        messageType = 'create_workflow_details'; // 收集工作流信息
+      }
+
       if (status === "AWAITING_WORKFLOW_INPUTS" && task_type === "use_workflow") {
         messageType = 'run_workflow';
       }
@@ -733,7 +737,7 @@ export const sendMessage = atom(
         role: 'assistant',
         content: content,
         type: messageType as 'text' | 'upload_image' | 'generating_image' | 'generate_result' | 'tokenization_agreement' | "create_workflow"
-            | "run_workflow",
+            | "run_workflow" | "workflow_generate_result" | "create_workflow_details",
         imageUploadState: messageType === 'upload_image'
           ? { totalCount: 0, uploadedCount: 0, isUploading: false, finishUpload: false }
           : undefined,
