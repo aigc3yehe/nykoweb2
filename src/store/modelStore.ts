@@ -361,8 +361,8 @@ export const getModelIdAndName = atom(
   (get) => get(modelIdAndNameAtom)
 );
 
-export async function editCoverRequest(model_id: number, url: string, did?: string) {
-  const API_URL = "/studio-api/model/edit_cover";
+export async function editCoverRequest(source: string, model_id: number, url: string, did?: string) {
+  const API_URL = `/studio-api/${source}/edit_cover`;
 
   try {
     const privyToken = await getAccessToken();
@@ -394,12 +394,14 @@ export async function editCoverRequest(model_id: number, url: string, did?: stri
 // 获取模型列表
 export const fetchEditCover = atom(
     null,
-    async (get, set, model_id: number, url: string) => {
+    async (get, set, source: string, id?: number, url?: string) => {
       const accountState = get(accountAtom);
-
+      if(!id || !url) {
+        throw new Error("Model id or image url is required");
+      }
       try {
         const did = accountState.did || undefined;
-        const response = await editCoverRequest(model_id, url, did);
+        const response = await editCoverRequest(source, id, url, did);
         console.log('result', response);
         const result = response;
         console.log("result", result);

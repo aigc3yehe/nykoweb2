@@ -19,16 +19,15 @@ export const getAmountWithSlippage = (
 
 export const formattedBalance = (balance: bigint, decimal = 18) => {
   if (!balance) return "0";
-  const val = Number(formatUnits(balance, decimal));
-  const str = val.toString();
-  if (str.includes(".")) {
-    const decimalPart = str.split(".")[1];
-    if (decimalPart.length > 5) {
-      return val.toFixed(5);
-    } else {
-      return str;
-    }
-  } else {
-    return str;
-  }
+  const full = formatUnits(balance, decimal);
+  const [intPart, fracPart = ""] = full.split(".");
+  if (!fracPart) return intPart;
+  const trimmed = fracPart.slice(0, 5).replace(/0+$/, "");
+  return trimmed ? `${intPart}.${trimmed}` : intPart;
+};
+
+// 格式化钱包地址，显示前4位和后4位
+export const formatAddress = (address: string | undefined) => {
+  if (!address || address.length < 10) return address || "";
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };

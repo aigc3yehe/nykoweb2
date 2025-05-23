@@ -29,13 +29,15 @@ export interface QueryUserResponse {
     avatar?: string;
     permission?: UserPermission;
     role?: string; // 'user' or 'adimn'
+    linked_wallet?: string;
+    geni?: number;
   };
 }
 
 export enum PLAN_TYPE {
-  FREE = 'free',
-  PREMIUM = 'premium',
-  PREMIUM_PLUS = 'premium_plus',
+  FREE = "free",
+  PREMIUM = "premium",
+  PREMIUM_PLUS = "premium_plus",
 }
 
 // 查询用户响应接口
@@ -205,13 +207,13 @@ export const queryUserPlan = async (params: {
     const privyToken = await getAccessToken();
 
     const response = await fetch(
-        `/studio-api/users/plan?${queryParams.toString()}`,
-        {
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-            [PRIVY_TOKEN_HEADER]: privyToken || "",
-          },
-        }
+      `/studio-api/users/plan?${queryParams.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          [PRIVY_TOKEN_HEADER]: privyToken || "",
+        },
+      }
     );
 
     if (!response.ok) {
@@ -230,5 +232,45 @@ export const queryUserPlan = async (params: {
         next_refresh_at: new Date(),
       },
     };
-  } 
-}
+  }
+};
+
+export const refreshUserPlan = async (params: {
+  did: string;
+}): Promise<QueryPlanResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+
+    queryParams.append("user", params.did);
+    queryParams.append("refreshState", "true");
+
+    const privyToken = await getAccessToken();
+
+    const response = await fetch(
+      `/studio-api/users/plan/update?${queryParams.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          [PRIVY_TOKEN_HEADER]: privyToken || "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Query user staked token failed.");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Query user staked token failed:", error);
+    return {
+      message: "Query user plan failed",
+      data: {
+        sub_balance: 0,
+        paid_balance: 0,
+        plan_type: PLAN_TYPE.FREE,
+        next_refresh_at: new Date(),
+      },
+    };
+  }
+};
