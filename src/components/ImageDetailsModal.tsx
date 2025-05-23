@@ -5,8 +5,7 @@ import avatarSvg from '../assets/Avatar.svg';
 import twitterSvg from '../assets/twitter.svg';
 import goSvg from '../assets/go.svg';
 import closeImgSvg from '../assets/close_img.svg';
-import { useSetAtom } from 'jotai';
-import { setModelIdAndName } from '../store/modelStore';
+import {useNavigate} from "react-router-dom";
 
 interface ImageDetailsModalProps {
   image: Image;
@@ -25,7 +24,8 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
 }) => {
   // 使用内部状态来确保组件重新渲染
   const [localImageDetail, setLocalImageDetail] = useState<ImageDetail | null>(imageDetail);
-  const setModelIdAndNameAction = useSetAtom(setModelIdAndName);
+  // const setModelIdAndNameAction = useSetAtom(setModelIdAndName);
+  const navigate = useNavigate();
   // 当外部imageDetail变化时更新内部状态
   useEffect(() => {
     if (imageDetail) {
@@ -126,7 +126,8 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
 
     // 如果提供了导航函数且有有效的模型ID，则导航到模型详情
     if (modelId) {
-      setModelIdAndNameAction({ modelId, modelName });
+      // setModelIdAndNameAction({ modelId, modelName });
+      navigate(`/?model_id=${modelId}&model_name=${encodeURIComponent(modelName)}`);
     }
   };
 

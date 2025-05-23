@@ -6,7 +6,7 @@ import ImagesContent from './ImagesContent';
 import ModelDetail from './ModelDetail';
 import FeatureCard from './FeatureCard';
 import { useAtom, useSetAtom } from 'jotai';
-import { clearModelDetail, modelDetailAtom, modelIdAndNameAtom } from '../store/modelStore';
+import { clearModelDetail, modelDetailAtom } from '../store/modelStore';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const ContentDisplay: React.FC = () => {
@@ -17,7 +17,6 @@ const ContentDisplay: React.FC = () => {
   const [viewingModelName, setViewingModelName] = useState<string | null>(null);
   const [modelDetailState] = useAtom(modelDetailAtom);
   const clearDetail = useSetAtom(clearModelDetail);
-  const [modelIdAndName] = useAtom(modelIdAndNameAtom);
   const navigate = useNavigate();
   const location = useLocation();
 
