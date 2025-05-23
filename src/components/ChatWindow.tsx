@@ -30,6 +30,7 @@ import {
 import {showDialogAtom} from '../store/dialogStore';
 import {useLogin, usePrivy} from '@privy-io/react-auth';
 import {useNavigate} from "react-router-dom";
+import {fetchWorkflows} from '../store/workflowStore';
 
 
 const ChatWindow: React.FC = () => {
@@ -54,6 +55,7 @@ const ChatWindow: React.FC = () => {
   const [, updateWorkflowModelAction] = useAtom(updateWorkflowModel);
   const [, setWorkflowImageAction] = useAtom(setWorkflowImage);
   const [, runWorkflowAction] = useAtom(runWorkflow);
+  const [, fetchWorkflowsAction] = useAtom(fetchWorkflows);
 
   // 添加滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -88,6 +90,14 @@ const ChatWindow: React.FC = () => {
     const did = accountState.did || undefined;
     setUserInfoAction({ uuid, did, wallet_address });
   }, [accountState, setUserInfoAction]);
+
+  // 监听工作流创建成功状态，刷新工作流列表
+  useEffect(() => {
+    if (chatState.workflowCreation.isSuccess && chatState.workflowCreation.workflowId) {
+      // 刷新工作流列表
+      fetchWorkflowsAction({ reset: true });
+    }
+  }, [chatState.workflowCreation.isSuccess, chatState.workflowCreation.workflowId, fetchWorkflowsAction]);
 
   // 更新滚动状态
   useEffect(() => {

@@ -34,5 +34,5 @@ export const RUN_WORKFLOW_SERVICE_CONFIG: ServiceConfig = {
 
 export const CREATE_WORKFLOW_SERVICE_CONFIG: ServiceConfig = {
   name: SERVICE_TYPE.CREATE_WORKFLOW,
-  cu: 500,
+  cu: 800,
 };

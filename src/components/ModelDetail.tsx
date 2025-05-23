@@ -121,7 +121,8 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     // 修改 renderTokenizationStatus 函数中的完成状态部分
 
     const hasCommunityTokens = (currentModel?.model_community_tokenization?.length || 0) > 0;
-
+    console.log('hasCommunityTokens', hasCommunityTokens);
+    console.log('data', data);
     if (data || hasCommunityTokens) {
       setShowBuyToken(true);
       setActiveTab('tokenization')
