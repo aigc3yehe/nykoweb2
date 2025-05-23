@@ -165,13 +165,13 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <button className={styles.closeButton} onClick={onClose}>
-        <img src={closeImgSvg} alt="关闭" />
+        <img src={closeImgSvg} alt="close" />
       </button>
 
       <div className={styles.modalContent} onClick={handleContentClick}>
         <div className={styles.imageContainer} style={{ height: `${calculateImageHeight()}rem` }}>
           {getImageUrl() ? (
-            <img src={getImageUrl()} alt={`图片 ${image.id}`} className={styles.image} />
+            <img src={getImageUrl()} alt={`image ${image.id}`} className={styles.image} />
           ) : (
             <div className={styles.placeholderImage}>
               {image.state === -1 ? 'Failed to generate' : 'Generating...'}
@@ -207,7 +207,7 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
           </div>
 
           <div className={styles.modelInfo}>
-            <div className={styles.modelInfoHeader}>Using Model</div>
+            <div className={styles.modelInfoHeader}>Using AICC</div>
             <div className={styles.modelInfoContent}>
               <span className={styles.modelName}>{getModelName()}</span>
               <img src={goSvg} alt="Go" className={styles.goIcon} onClick={handleGoClick}/>
