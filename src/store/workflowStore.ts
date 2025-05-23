@@ -49,14 +49,9 @@ export interface Workflow {
   public?: number; // 1 为可视, 0为由所有者设置为不可视，-1则是系统管理员设置的不可见，级别最高
   workflow_tokenization: WorkflowToken | null;
   workflow_community_tokenization: CommunityWorkflowToken[] | null;
-  model_tran: {
-    version: number;
-    train_state: number; // 0: 未开始, 1: 训练中, 2: 训练完成，-1: 训练失败
-    task_id: string | null; // 任务ID
-    lora_name: string | null; // Lora名称
-    base_workflow: string | null; // 基础模型
-    base_workflow_hash: string | null; // 基础模型哈希
-  }[];
+  prompt: string | null;
+  output_type: string | null;
+  model: string | null;
   users: {
     twitter: Twitter | null;
     address: string | null;

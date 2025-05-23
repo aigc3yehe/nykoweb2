@@ -11,7 +11,7 @@ import uploadIcon from "../assets/upload.svg";
 import createWorkflowIcon from "../assets/create_workflow.svg";
 import deleteIcon from "../assets/delete.svg";
 import deleteDisableIcon from "../assets/delete_disable.svg";
-import { GENERATE_IMAGE_SERVICE_CONFIG, TRAIN_MODEL_SERVICE_CONFIG } from "../utils/plan";
+import { GENERATE_IMAGE_SERVICE_CONFIG, TRAIN_MODEL_SERVICE_CONFIG, RUN_WORKFLOW_SERVICE_CONFIG } from "../utils/plan";
 
 interface ImageUploadState {
   totalCount: number;
@@ -31,7 +31,8 @@ export interface ChatMessageProps {
     | "generating_image"
     | "tokenization_agreement"
     | "create_workflow"
-    | "run_workflow";
+    | "run_workflow"
+    | "workflow_generate_result";
   imageUploadState?: ImageUploadState;
   uploadedFiles?: Array<{ name: string; url: string }>;
   modelParam?: {
@@ -65,6 +66,7 @@ export interface ChatMessageProps {
   onSelectWorkflowImage?: (imageUrl: string, file: File | null) => void;
   onRunWorkflow?: () => void;
   isConfirmedWorkflow?: boolean;
+  onNavigateToWorkflow?: (workflowName: string) => void;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -103,6 +105,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   onSelectWorkflowImage,
   onRunWorkflow,
   isConfirmedWorkflow = false,
+  onNavigateToWorkflow,
 }) => {
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
@@ -183,7 +186,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
-  const renderGenerateResultComponent = () => {
+  const renderGenerateResultComponent = (cu: number) => {
     // 计算图片展示尺寸，保持原始宽高比，短边固定为 12.5rem (200px)
     let displayWidth = 12.5; // 默认宽度 12.5rem (200px)
     let displayHeight = 12.5; // 默认高度 12.5rem (200px)
@@ -223,7 +226,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           )}
         </div>
         <div className="text-[0.625rem] leading-[0.625rem] font-medium text-[#88A4C2] text-start font-['Jura']">
-          {GENERATE_IMAGE_SERVICE_CONFIG.cu} Credits
+          {cu} Credits
         </div>
       </div>
     );
@@ -373,8 +376,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
   // 添加模型选项列表
   const modelOptions = [
-    { value: 'gpt-4o', label: 'GPT-4o' }
+    { value: 'gpt-4o', label: 'GPT-image' }
   ];
+
+  const getModelLabel = (model: string) => {
+    if (model === "gpt-4o") {
+      return 'GPT-image';
+    }
+    return 'GPT-image';
+  }
 
   // 添加创建工作流中的状态UI
   const renderCreatingWorkflowComponent = () => {
@@ -401,9 +411,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           alt="Done"
           className={styles.statusIcon}
         />
-        <span className={styles.statusText}>
-          Save workflow success!
-        </span>
+        <div className={styles.successTextContainer}>
+          <span className={styles.statusText}>
+            Save workflow success! <span className={styles.checkWorkflowText}>
+            Check {workflow_name}
+          </span>
+          </span>
+        </div>
       </div>
     );
   };
@@ -416,148 +430,165 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       <>
         <div className={styles.workflowContainer}>
           <div className={styles.workflowTitle}>
-            {workflow_name} - Workflow
-          </div>
-
-          {/* Model选择部分 */}
-          <div className={styles.workflowSection}>
-            <div className={styles.sectionLabel}>Model:</div>
-            <div className={styles.modelSelectContainer}>
-              <button
-                className={styles.modelSelectButton}
-                onClick={() => !isCreatingWorkflow && setShowModelDropdown(!showModelDropdown)}
-                disabled={isCreatingWorkflow}
-                type="button"
-              >
-                <span className={styles.buttonText}>
-                  {workflow_model || "GPT-4o"}
+            {creationSuccess && onNavigateToWorkflow ? (
+              <>
+                <span
+                  className={styles.workflowTitleClickable}
+                  onClick={() => onNavigateToWorkflow(workflow_name)}
+                >
+                  {workflow_name}
                 </span>
-                <img
-                  src={selectModelIcon}
-                  alt="Select"
-                  className={styles.selectModelIcon}
-                />
-              </button>
+                <span> - Workflow</span>
+              </>
+            ) : (
+              `${workflow_name} - Workflow`
+            )}
+          </div>
 
-              {/* 下拉菜单 */}
-              {showModelDropdown && (
-                <div className={styles.modelDropdown}>
-                  {modelOptions.map((option) => (
-                    <div
-                      key={option.value}
-                      className={`${styles.modelOption} ${workflow_model === option.value ? styles.modelOptionSelected : ''}`}
-                      onClick={() => {
-                        if (onSelectModel) onSelectModel(option.value);
-                        setShowModelDropdown(false);
-                      }}
-                    >
-                      {option.label}
+          {/* 只有在未创建成功时才显示表单内容 */}
+          {!creationSuccess && (
+            <>
+              {/* Model选择部分 */}
+              <div className={styles.workflowSection}>
+                <div className={styles.sectionLabel}>Model:</div>
+                <div className={styles.modelSelectContainer}>
+                  <button
+                    className={styles.modelSelectButton}
+                    onClick={() => !isCreatingWorkflow && setShowModelDropdown(!showModelDropdown)}
+                    disabled={isCreatingWorkflow}
+                    type="button"
+                  >
+                    <span className={styles.buttonText}>
+                      {getModelLabel(workflow_model || "GPT-4o")}
+                    </span>
+                    <img
+                      src={selectModelIcon}
+                      alt="Select"
+                      className={styles.selectModelIcon}
+                    />
+                  </button>
+
+                  {/* 下拉菜单 */}
+                  {showModelDropdown && (
+                    <div className={styles.modelDropdown}>
+                      {modelOptions.map((option) => (
+                        <div
+                          key={option.value}
+                          className={`${styles.modelOption} ${workflow_model === option.value ? styles.modelOptionSelected : ''}`}
+                          onClick={() => {
+                            if (onSelectModel) onSelectModel(option.value);
+                            setShowModelDropdown(false);
+                          }}
+                        >
+                          {option.label}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* Prompt输入部分 */}
-          <div className={styles.workflowSection}>
-            <div className={styles.sectionLabel}>Prompt:</div>
-            <div className={`${styles.promptInputContainer} ${isFocused ? styles.focused : ''}`}>
-              <textarea
-                className={styles.promptInput}
-                value={workflow_prompt}
-                onChange={(e) => onUpdatePrompt && onUpdatePrompt(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                placeholder="Enter your prompt here"
-                maxLength={500}
-                disabled={isCreatingWorkflow}
-              />
-              <div className={`${styles.charCount} ${isPromptTooLong ? styles.charCountError : ''}`}>
-                Max 500 char
               </div>
-            </div>
-          </div>
 
-          {/* Reference Image上传部分 */}
-          <div className={styles.workflowSection}>
-            <div className={styles.sectionLabel}>Reference Image:</div>
-            <button
-              className={styles.uploadButton}
-              onClick={onAddImage}
-              disabled={isCreatingWorkflow}
-            >
-              <img
-                src={uploadIcon}
-                alt="Upload"
-                className={styles.uploadIcon}
-              />
-              <span>Upload</span>
-            </button>
-          </div>
+              {/* Prompt输入部分 */}
+              <div className={styles.workflowSection}>
+                <div className={styles.sectionLabel}>Prompt:</div>
+                <div className={`${styles.promptInputContainer} ${isFocused ? styles.focused : ''}`}>
+                  <textarea
+                    className={styles.promptInput}
+                    value={workflow_prompt}
+                    onChange={(e) => onUpdatePrompt && onUpdatePrompt(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    placeholder="Enter your prompt here"
+                    maxLength={500}
+                    disabled={isCreatingWorkflow}
+                  />
+                  <div className={`${styles.charCount} ${isPromptTooLong ? styles.charCountError : ''}`}>
+                    Max 500 char
+                  </div>
+                </div>
+              </div>
 
-          {/* Input类型选择部分 - 修改为只能选择Image选项 */}
-          <div className={styles.workflowSection}>
-            <div className={styles.sectionLabel}>Input:</div>
-            <div className={styles.optionsContainer}>
-              <button
-                className={`${styles.optionButton} ${styles.optionSelected}`}
-                onClick={() => onChangeInput && onChangeInput("Image")}
-                disabled={isCreatingWorkflow}
-              >
-                Image
-              </button>
-              <button
-                className={`${styles.optionButton} ${styles.disabled}`}
-                disabled={true}
-              >
-                Text
-              </button>
-              <button
-                className={`${styles.optionButton} ${styles.disabled}`}
-                disabled={true}
-              >
-                Image + Text
-              </button>
-            </div>
-          </div>
+              {/* Reference Image上传部分 */}
+              <div className={styles.workflowSection}>
+                <div className={styles.sectionLabel}>Reference Image:</div>
+                <button
+                  className={styles.uploadButton}
+                  onClick={onAddImage}
+                  disabled={isCreatingWorkflow}
+                >
+                  <img
+                    src={uploadIcon}
+                    alt="Upload"
+                    className={styles.uploadIcon}
+                  />
+                  <span>Upload</span>
+                </button>
+              </div>
 
-          {/* Output类型选择部分 - 修改为只能选择Image选项 */}
-          <div className={styles.workflowSection}>
-            <div className={styles.sectionLabel}>Output:</div>
-            <div className={styles.optionsContainer}>
-              <button
-                className={`${styles.optionButton} ${styles.optionSelected}`}
-                onClick={() => onChangeOutput && onChangeOutput("Image")}
-                disabled={isCreatingWorkflow}
-              >
-                Image
-              </button>
-              <button
-                className={`${styles.optionButton} ${styles.disabled}`}
-                disabled={true}
-              >
-                Text
-              </button>
-              <button
-                className={`${styles.optionButton} ${styles.disabled}`}
-                disabled={true}
-              >
-                Image + Text
-              </button>
-            </div>
-          </div>
+              {/* Input类型选择部分 */}
+              <div className={styles.workflowSection}>
+                <div className={styles.sectionLabel}>Input:</div>
+                <div className={styles.optionsContainer}>
+                  <button
+                    className={`${styles.optionButton} ${styles.optionSelected}`}
+                    onClick={() => onChangeInput && onChangeInput("Image")}
+                    disabled={isCreatingWorkflow}
+                  >
+                    Image
+                  </button>
+                  <button
+                    className={`${styles.optionButton} ${styles.disabled}`}
+                    disabled={true}
+                  >
+                    Text
+                  </button>
+                  <button
+                    className={`${styles.optionButton} ${styles.disabled}`}
+                    disabled={true}
+                  >
+                    Image + Text
+                  </button>
+                </div>
+              </div>
 
-          {/* 确认按钮 */}
-          <div className={styles.confirmWorkflowButtonContainer}>
-            <button
-              className={styles.confirmWorkflowButton}
-              onClick={onCreateWorkflow}
-              disabled={isCreatingWorkflow}
-            >
-              Confirm
-            </button>
-          </div>
+              {/* Output类型选择部分 */}
+              <div className={styles.workflowSection}>
+                <div className={styles.sectionLabel}>Output:</div>
+                <div className={styles.optionsContainer}>
+                  <button
+                    className={`${styles.optionButton} ${styles.optionSelected}`}
+                    onClick={() => onChangeOutput && onChangeOutput("Image")}
+                    disabled={isCreatingWorkflow}
+                  >
+                    Image
+                  </button>
+                  <button
+                    className={`${styles.optionButton} ${styles.disabled}`}
+                    disabled={true}
+                  >
+                    Text
+                  </button>
+                  <button
+                    className={`${styles.optionButton} ${styles.disabled}`}
+                    disabled={true}
+                  >
+                    Image + Text
+                  </button>
+                </div>
+              </div>
+
+              {/* 确认按钮 */}
+              <div className={styles.confirmWorkflowButtonContainer}>
+                <button
+                  className={styles.confirmWorkflowButton}
+                  onClick={onCreateWorkflow}
+                  disabled={isCreatingWorkflow}
+                >
+                  Confirm
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* 创建中状态 */}
@@ -574,10 +605,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     // 如果有store中的workflowImageValue，优先显示它
     const displayImageUrl = workflowImageValue;
     const hasSelectedImage = !!displayImageUrl;
-    
+
     // 按钮状态判断 - 当运行中或已确认时都禁用
     const isButtonDisabled = isRunningWorkflow || isConfirmedWorkflow;
-    
+
     // 获取确认按钮文本 - 根据状态显示不同文本
     const getConfirmButtonText = () => {
       if (isConfirmedWorkflow) return "Confirmed";
@@ -645,14 +676,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 }}
                 disabled={isButtonDisabled}
               >
-                <img 
-                  src={isButtonDisabled ? deleteDisableIcon : deleteIcon} 
-                  alt="Delete" 
-                  width={20} 
-                  height={20} 
+                <img
+                  src={isButtonDisabled ? deleteDisableIcon : deleteIcon}
+                  alt="Delete"
+                  width={20}
+                  height={20}
                 />
               </button>
-              
+
               <button
                 className={styles.confirmWorkflowButton}
                 onClick={() => {
@@ -677,7 +708,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               className={styles.creatingWorkflowIcon}
             />
             <span className={styles.creatingWorkflowText}>
-              Running workflow, please wait...
+              Running workflow, please wait...(ETA 200 sec)
             </span>
           </div>
         )}
@@ -703,7 +734,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         renderModelConfigComponent()}
       {role === "assistant" &&
         type === "generate_result" &&
-        renderGenerateResultComponent()}
+        renderGenerateResultComponent(GENERATE_IMAGE_SERVICE_CONFIG.cu)}
+      {role === "assistant" &&
+        type === "workflow_generate_result" &&
+        renderGenerateResultComponent(RUN_WORKFLOW_SERVICE_CONFIG.cu)}
       {role === "assistant" &&
         type === "generating_image" &&
         renderGeneratingImageComponent()}
