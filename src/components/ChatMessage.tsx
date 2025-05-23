@@ -69,6 +69,14 @@ export interface ChatMessageProps {
   onRunWorkflow?: () => void;
   isConfirmedWorkflow?: boolean;
   onNavigateToWorkflow?: (workflowName: string) => void;
+  workflowReferenceImage?: {
+    isUploading: boolean;
+    uploadedUrl: string;
+    fileName: string;
+    error?: string;
+  };
+  onUploadReferenceImage?: () => void;
+  onRemoveReferenceImage?: () => void;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -109,6 +117,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   onRunWorkflow,
   isConfirmedWorkflow = false,
   onNavigateToWorkflow,
+  workflowReferenceImage,
+  onUploadReferenceImage,
+  onRemoveReferenceImage,
 }) => {
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
@@ -511,6 +522,73 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
+  // 添加渲染 Reference Image 部分的函数
+  const renderReferenceImageSection = () => {
+    const hasUploadedImage = workflowReferenceImage?.uploadedUrl;
+    const isUploading = workflowReferenceImage?.isUploading;
+
+    return (
+      <div className={styles.workflowSection}>
+        <div className={styles.sectionLabel}>Reference Image (Optional):</div>
+        
+        {!hasUploadedImage && !isUploading ? (
+          // 未上传图片状态 - 显示上传按钮
+          <button
+            className={styles.uploadButton}
+            onClick={onUploadReferenceImage}
+            disabled={isCreatingWorkflow}
+          >
+            <img
+              src={uploadIcon}
+              alt="Upload"
+              className={styles.uploadIcon}
+            />
+            <span>Upload</span>
+          </button>
+        ) : (
+          // 已上传图片或上传中状态
+          <div className={styles.referenceImageContainer}>
+            {isUploading ? (
+              // 上传中状态
+              <div className={styles.referenceImageUploading}>
+                <img
+                  src={uploadingIcon}
+                  alt="Uploading"
+                  className={styles.uploadingIcon}
+                />
+                <span className={styles.uploadingText}>
+                  Uploading {workflowReferenceImage?.fileName}...
+                </span>
+              </div>
+            ) : (
+              // 上传完成状态
+              <div className={styles.referenceImagePreview}>
+                <div className={styles.referenceImageItem}>
+                  <img
+                    src={imageIcon}
+                    alt="Reference"
+                    className={styles.referenceImageIcon}
+                  />
+                  <span className={styles.referenceImageName}>
+                    {formatFileName(workflowReferenceImage?.fileName || '')}
+                  </span>
+                  {!isCreatingWorkflow && (
+                    <img
+                      src={closeIcon}
+                      alt="Remove"
+                      className={styles.removeReferenceIcon}
+                      onClick={onRemoveReferenceImage}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // 修改工作流组件，创建成功后隐藏标题
   const renderCreateWorkflowComponent = () => {
     const isPromptTooLong = workflow_prompt.length > 800;
@@ -603,21 +681,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               </div>
 
               {/* Reference Image上传部分 */}
-              <div className={styles.workflowSection}>
-                <div className={styles.sectionLabel}>Reference Image:</div>
-                <button
-                  className={styles.uploadButton}
-                  onClick={onAddImage}
-                  disabled={isCreatingWorkflow}
-                >
-                  <img
-                    src={uploadIcon}
-                    alt="Upload"
-                    className={styles.uploadIcon}
-                  />
-                  <span>Upload</span>
-                </button>
-              </div>
+              {renderReferenceImageSection()}
 
               {/* Input类型选择部分 */}
               <div className={styles.workflowSection}>

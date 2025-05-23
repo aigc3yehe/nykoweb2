@@ -25,7 +25,9 @@ import {
   updateWorkflowOutput,
   updateWorkflowModel,
   setWorkflowImage,
-  runWorkflow
+  runWorkflow,
+  uploadWorkflowReferenceImage,
+  removeWorkflowReferenceImage
 } from '../store/chatStore';
 import {showDialogAtom} from '../store/dialogStore';
 import {useLogin, usePrivy} from '@privy-io/react-auth';
@@ -56,6 +58,8 @@ const ChatWindow: React.FC = () => {
   const [, setWorkflowImageAction] = useAtom(setWorkflowImage);
   const [, runWorkflowAction] = useAtom(runWorkflow);
   const [, fetchWorkflowsAction] = useAtom(fetchWorkflows);
+  const [, uploadWorkflowReferenceImageAction] = useAtom(uploadWorkflowReferenceImage);
+  const [, removeWorkflowReferenceImageAction] = useAtom(removeWorkflowReferenceImage);
 
   // 添加滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -394,6 +398,9 @@ const ChatWindow: React.FC = () => {
                 onSelectWorkflowImage={(url, file) => setWorkflowImageAction({ url, file })}
                 onRunWorkflow={runWorkflowAction}
                 onNavigateToWorkflow={handleNavigateToWorkflow}
+                workflowReferenceImage={chatState.workflowReferenceImage}
+                onUploadReferenceImage={uploadWorkflowReferenceImageAction}
+                onRemoveReferenceImage={removeWorkflowReferenceImageAction}
               />
             ))
           )}

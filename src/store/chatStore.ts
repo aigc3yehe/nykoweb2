@@ -119,6 +119,13 @@ export interface ChatState {
     workflowId?: number;
     error?: string;
   };
+  // 添加 Reference Image 相关状态
+  workflowReferenceImage: {
+    isUploading: boolean;
+    uploadedUrl: string;
+    fileName: string;
+    error?: string;
+  };
 }
 
 // 3. 更新初始状态
@@ -164,6 +171,13 @@ const initialState: ChatState = {
   workflowRunning: {
     isRunning: false,
     isSuccess: false
+  },
+  // 初始化 Reference Image 状态
+  workflowReferenceImage: {
+    isUploading: false,
+    uploadedUrl: "",
+    fileName: "",
+    error: undefined
   }
 };
 
@@ -1497,6 +1511,10 @@ export const createWorkflow = atom(
 
     try {
       // 准备API参数
+      const reference_images = []
+      if (chatState.workflowReferenceImage.uploadedUrl) {
+        reference_images.push(chatState.workflowReferenceImage.uploadedUrl);
+      }
       const params: CreateWorkflowParams = {
         name: chatState.workflow_name || 'New Workflow',
         description: chatState.workflow_description || '', // 可以添加描述输入框或使用其他字段
@@ -1506,7 +1524,7 @@ export const createWorkflow = atom(
         output_type: mapInputOutputType(chatState.workflow_output),
         provider: WORKFLOW_PROVIDER.GPT_4o, // 使用正确的枚举值
         model: WORKFLOW_GPT_MODEL.GPT_IMAGE_1_VIP, // 使用正确的枚举值
-        reference_images: chatState.urls.map(url => url.url) // 使用已上传的图片
+        reference_images: reference_images
       };
 
       // 调用API
@@ -1728,12 +1746,6 @@ export const runWorkflow = atom(
         });
       }
 
-      // 显示成功提示
-      // set(showToastAtom, {
-      //   message: 'Workflow started successfully',
-      //   severity: 'success'
-      // });
-
     } catch (error) {
       // 设置错误状态
       set(chatAtom, {
@@ -1791,4 +1803,108 @@ export const clearWorkflowStatus = atom(
         workflowStatus: null
       });
     }
+);
+
+// 添加上传单张 Reference Image 的操作
+export const uploadWorkflowReferenceImage = atom(
+  null,
+  async (get, set) => {
+    // 创建一个文件选择对话框
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = false; // 只允许选择一张图片
+
+    input.onchange = async (event) => {
+      const target = event.target as HTMLInputElement;
+      const file = target.files?.[0];
+
+      if (!file) {
+        target.value = '';
+        return;
+      }
+
+      const chatState = get(chatAtom);
+
+      try {
+        // 设置上传状态
+        set(chatAtom, {
+          ...chatState,
+          workflowReferenceImage: {
+            isUploading: true,
+            uploadedUrl: "",
+            fileName: file.name,
+            error: undefined
+          }
+        });
+
+        // 导入上传函数
+        const { uploadFileToS3 } = await import('./imagesStore');
+
+        // 上传图片到S3
+        const uploadedUrl = await uploadFileToS3(file);
+
+        // 上传成功，更新状态
+        const updatedChatState = get(chatAtom);
+        set(chatAtom, {
+          ...updatedChatState,
+          workflowReferenceImage: {
+            isUploading: false,
+            uploadedUrl: uploadedUrl,
+            fileName: file.name,
+            error: undefined
+          }
+        });
+
+        // 显示成功通知
+        const { showToastAtom } = await import('./imagesStore');
+        set(showToastAtom, {
+          message: 'Reference image uploaded successfully',
+          severity: 'success'
+        });
+
+      } catch (error) {
+        console.error('Error uploading reference image:', error);
+
+        // 上传失败，更新错误状态
+        const errorChatState = get(chatAtom);
+        set(chatAtom, {
+          ...errorChatState,
+          workflowReferenceImage: {
+            isUploading: false,
+            uploadedUrl: "",
+            fileName: "",
+            error: error instanceof Error ? error.message : 'Upload failed'
+          }
+        });
+
+        // 显示错误通知
+        const { showToastAtom } = await import('./imagesStore');
+        set(showToastAtom, {
+          message: 'Failed to upload reference image',
+          severity: 'error'
+        });
+      }
+    };
+
+    input.click();
+  }
+);
+
+// 删除 Reference Image 的操作
+export const removeWorkflowReferenceImage = atom(
+  null,
+  (get, set) => {
+    const chatState = get(chatAtom);
+
+    set(chatAtom, {
+      ...chatState,
+      workflowReferenceImage: {
+        isUploading: false,
+        uploadedUrl: "",
+        fileName: "",
+        error: undefined
+      }
+    });
+  }
 );

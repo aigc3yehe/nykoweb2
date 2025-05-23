@@ -10,7 +10,6 @@ import {
 } from '../store/tokenStore';
 import ImageCard from './ImageCard';
 import ModelCarousel from './ModelCarousel';
-// import ModelInfoPanel from './ModelInfoPanel';
 import StatePrompt from './StatePrompt';
 import TokenizationPanel from './TokenizationPanel';
 import {accountAtom} from "../store/accountStore.ts";
