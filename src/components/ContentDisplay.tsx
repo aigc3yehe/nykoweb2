@@ -34,10 +34,7 @@ const ContentDisplay: React.FC = () => {
 
   // 处理查看模型详情
   const handleViewModelDetail = (modelId: number, modelName: string) => {
-    setViewingModelId(modelId);
-    setViewingModelName(modelName);
-
-    // 使用React Router导航，不刷新页面
+    // 只负责更新URL，状态由useEffect根据URL更新
     navigate(`${location.pathname}?model_id=${modelId}&model_name=${encodeURIComponent(modelName)}`);
   };
 
@@ -52,20 +49,21 @@ const ContentDisplay: React.FC = () => {
 
   // 从URL参数中获取model_id和model_name
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
+    const searchParams = new URLSearchParams(location.search);
     const modelId = searchParams.get('model_id');
     const modelName = searchParams.get('model_name');
 
     if (modelId && modelName) {
-      handleViewModelDetail(parseInt(modelId), modelName);
+      // 进入模型详情页
+      setViewingModelId(parseInt(modelId));
+      setViewingModelName(modelName);
+    } else {
+      // URL参数为空时，回到列表视图
+      setViewingModelId(null);
+      setViewingModelName(null);
+      clearDetail();
     }
-  }, []);
-
-  useEffect(() => {
-    if (modelIdAndName.modelId && modelIdAndName.modelName) {
-      handleViewModelDetail(modelIdAndName.modelId, modelIdAndName.modelName);
-    }
-  }, [modelIdAndName]);
+  }, [location.search]);
 
   // 新增滚动监听逻辑
   useEffect(() => {
