@@ -1405,6 +1405,7 @@ export enum WORKFLOW_PROVIDER {
 // GPT模型枚举 - 修改为正确的值
 export enum WORKFLOW_GPT_MODEL {
   GPT_IMAGE_1 = 'gpt-image-1',
+  GPT_IMAGE_1_VIP = 'gpt-image-1-vip',
 }
 
 // 将输入类型字符串转换为API需要的枚举类型 - 修改映射逻辑
@@ -1500,7 +1501,7 @@ export const createWorkflow = atom(
         input_type: mapInputOutputType(chatState.workflow_input),
         output_type: mapInputOutputType(chatState.workflow_output),
         provider: WORKFLOW_PROVIDER.GPT_4o, // 使用正确的枚举值
-        model: WORKFLOW_GPT_MODEL.GPT_IMAGE_1, // 使用正确的枚举值
+        model: WORKFLOW_GPT_MODEL.GPT_IMAGE_1_VIP, // 使用正确的枚举值
         reference_images: chatState.urls.map(url => url.url) // 使用已上传的图片
       };
 

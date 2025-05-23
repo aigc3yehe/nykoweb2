@@ -908,5 +908,11 @@
   font-size: 0.75rem; /* 12px */
   line-height: 100%;
   letter-spacing: 0%;
-  color: #88A4C2;
+  color: #6366F1;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.checkWorkflowText:hover {
+  color: #7C3AED;
 }

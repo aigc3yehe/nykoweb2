@@ -402,7 +402,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
-  // 添加工作流创建成功UI
+  // 修改工作流创建成功UI
   const renderWorkflowSuccessComponent = () => {
     return (
       <div className={styles.progressIndicator}>
@@ -413,43 +413,31 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         />
         <div className={styles.successTextContainer}>
           <span className={styles.statusText}>
-            Save workflow success! <span className={styles.checkWorkflowText}>
-            Check {workflow_name}
-          </span>
+            Save workflow success! Check <span
+              className={styles.checkWorkflowText}
+              onClick={() => onNavigateToWorkflow && onNavigateToWorkflow(workflow_name)}
+            >
+              {workflow_name}
+            </span>
           </span>
         </div>
       </div>
     );
   };
 
-  // 修改工作流组件，增加创建工作流功能
+  // 修改工作流组件，创建成功后隐藏标题
   const renderCreateWorkflowComponent = () => {
     const isPromptTooLong = workflow_prompt.length > 500;
 
     return (
       <>
-        <div className={styles.workflowContainer}>
-          <div className={styles.workflowTitle}>
-            {creationSuccess && onNavigateToWorkflow ? (
-              <>
-                <span
-                  className={styles.workflowTitleClickable}
-                  onClick={() => onNavigateToWorkflow(workflow_name)}
-                >
-                  {workflow_name}
-                </span>
-                <span> - Workflow</span>
-              </>
-            ) : (
-              `${workflow_name} - Workflow`
-            )}
-          </div>
-
-          {/* 只有在未创建成功时才显示表单内容 */}
-          {!creationSuccess && (
-            <>
-              {/* Model选择部分 */}
-              <div className={styles.workflowSection}>
+      {!creationSuccess && (<div className={styles.workflowContainer}>
+        {/* 只有在未创建成功时才显示标题 */}
+        <div className={styles.workflowTitle}>
+          {workflow_name} - Workflow
+        </div>
+         {/* Model选择部分 */}
+         <div className={styles.workflowSection}>
                 <div className={styles.sectionLabel}>Model:</div>
                 <div className={styles.modelSelectContainer}>
                   <button
@@ -587,9 +575,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                   Confirm
                 </button>
               </div>
-            </>
-          )}
-        </div>
+        </div>)}
 
         {/* 创建中状态 */}
         {isCreatingWorkflow && renderCreatingWorkflowComponent()}

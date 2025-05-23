@@ -127,7 +127,12 @@ export const fetchTokenizationState = atom(
 
     try {
       if(!model_tokenization_id && !workflow_tokenization_id) {
-        throw new Error('tokenization id is required');
+        set(tokenizationStateAtom, {
+          data: null,
+          isLoading: false,
+          error: null
+        });
+        return false;
       }
       let response: Response | null = null;
       if (workflow_id && workflow_tokenization_id) {
