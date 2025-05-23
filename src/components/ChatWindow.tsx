@@ -18,11 +18,21 @@ import {
   startHeartbeat,
   stopHeartbeat,
   toggleBetaMode,
-  agree
+  agree,
+  createWorkflow,
+  updateWorkflowPrompt,
+  updateWorkflowInput,
+  updateWorkflowOutput,
+  updateWorkflowModel,
+  setWorkflowImage,
+  runWorkflow,
+  uploadWorkflowReferenceImage,
+  removeWorkflowReferenceImage
 } from '../store/chatStore';
 import {showDialogAtom} from '../store/dialogStore';
 import {useLogin, usePrivy} from '@privy-io/react-auth';
 import {useNavigate} from "react-router-dom";
+import {fetchWorkflows} from '../store/workflowStore';
 
 
 const ChatWindow: React.FC = () => {
@@ -40,6 +50,16 @@ const ChatWindow: React.FC = () => {
   const [, stopHeartbeatAction] = useAtom(stopHeartbeat);
   const [, sendMessageAction] = useAtom(sendMessage);
   const [, toggleBetaModeAction] = useAtom(toggleBetaMode);
+  const [, createWorkflowAction] = useAtom(createWorkflow);
+  const [, updateWorkflowPromptAction] = useAtom(updateWorkflowPrompt);
+  const [, updateWorkflowInputAction] = useAtom(updateWorkflowInput);
+  const [, updateWorkflowOutputAction] = useAtom(updateWorkflowOutput);
+  const [, updateWorkflowModelAction] = useAtom(updateWorkflowModel);
+  const [, setWorkflowImageAction] = useAtom(setWorkflowImage);
+  const [, runWorkflowAction] = useAtom(runWorkflow);
+  const [, fetchWorkflowsAction] = useAtom(fetchWorkflows);
+  const [, uploadWorkflowReferenceImageAction] = useAtom(uploadWorkflowReferenceImage);
+  const [, removeWorkflowReferenceImageAction] = useAtom(removeWorkflowReferenceImage);
 
   // 添加滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -74,6 +94,14 @@ const ChatWindow: React.FC = () => {
     const did = accountState.did || undefined;
     setUserInfoAction({ uuid, did, wallet_address });
   }, [accountState, setUserInfoAction]);
+
+  // 监听工作流创建成功状态，刷新工作流列表
+  useEffect(() => {
+    if (chatState.workflowCreation.isSuccess && chatState.workflowCreation.workflowId) {
+      // 刷新工作流列表
+      fetchWorkflowsAction({ reset: true });
+    }
+  }, [chatState.workflowCreation.isSuccess, chatState.workflowCreation.workflowId, fetchWorkflowsAction]);
 
   // 更新滚动状态
   useEffect(() => {
@@ -211,6 +239,16 @@ const ChatWindow: React.FC = () => {
     };
   }, [chatState.connection?.inQueue, chatState.connection?.isActive, chatState.heartbeatId, startHeartbeatAction, stopHeartbeatAction]);
 
+  // 修改工作流跳转处理函数
+  const handleNavigateToWorkflow = (workflowName: string) => {
+    // 从 chatState 中获取 workflowId
+    const workflowId = chatState.workflowCreation.workflowId;
+    if (workflowId) {
+      // 跳转到主页面并带上工作流参数
+      navigate(`/?workflow_id=${workflowId}&workflow_name=${encodeURIComponent(workflowName)}`);
+    }
+  };
+
   return (
     <div className={styles.chatWindow}>
       {/* 活动title */}
@@ -281,13 +319,19 @@ const ChatWindow: React.FC = () => {
                   <p className={styles.welcomeText}>You can train models and generate images simply by chatting with Niyoko.</p>
                   <div className={styles.quickOptions}>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('launch a token for this model.')}>
-                      🪙 launch a token for this model.
+                      💎 launch a token
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to FINETUNE a model.')}>
-                      🧠 I want to FINETUNE a model.(Cost 7,500 Credits)
+                      🧠 Finetune a model (7,500 Credits)
+                    </button>
+                    <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to create a workflow.')}>
+                      ⏳ Create a workflow (800 Credits)
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to generate an image.')}>
-                      🌄 I want to generate an image.(Cost 5 Credits)
+                      🌄 Generate an image (5 Credits)
+                    </button>
+                    <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to use this workflow.')}>
+                      ✨ Use this workflow (50 Credits)
                     </button>
                   </div>
                 </div>
@@ -333,10 +377,33 @@ const ChatWindow: React.FC = () => {
                 imageHeight={message.imageInfo?.height || 256}
                 request_id={message.request_id}
                 agree={message.agree}
+                workflow_name={chatState.workflow_name}
+                workflow_description={chatState.workflow_description}
+                workflow_prompt={chatState.workflow_prompt}
+                workflow_input={chatState.workflow_input}
+                workflow_output={chatState.workflow_output}
+                workflow_model={chatState.workflow_model || "gpt-4o"}
+                isCreatingWorkflow={chatState.workflowCreation.isCreating}
+                creationSuccess={chatState.workflowCreation.isSuccess}
                 onAddImage={() => addImageAction(index, 30 - (message.uploadedFiles?.length || 0))}
                 onConfirmImages={() => finishUploadImagesAction(index)}
                 onRemoveImage={(url) => removeImageAction({ messageIndex: index, fileUrl: url })}
                 onAgree={() => agreeAction(index)}
+                onUpdatePrompt={(text) => updateWorkflowPromptAction(text)}
+                onChangeInput={(type) => updateWorkflowInputAction(type)}
+                onChangeOutput={(type) => updateWorkflowOutputAction(type)}
+                onSelectModel={(model) => updateWorkflowModelAction(model)}
+                onCreateWorkflow={createWorkflowAction}
+                workflowId={message.type === 'run_workflow' ? chatState.workflowCreation.workflowId : undefined}
+                workflowImageValue={chatState.workflowImageValue}
+                isRunningWorkflow={chatState.workflowRunning.isRunning}
+                isConfirmedWorkflow={chatState.workflowRunning.isSuccess}
+                onSelectWorkflowImage={(url, file) => setWorkflowImageAction({ url, file })}
+                onRunWorkflow={runWorkflowAction}
+                onNavigateToWorkflow={handleNavigateToWorkflow}
+                workflowReferenceImage={chatState.workflowReferenceImage}
+                onUploadReferenceImage={uploadWorkflowReferenceImageAction}
+                onRemoveReferenceImage={removeWorkflowReferenceImageAction}
               />
             ))
           )}

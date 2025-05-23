@@ -1,43 +1,43 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import styles from './ModelDetail.module.css';
+import styles from './WorkflowDetail.module.css';
 import { useAtom, useSetAtom } from 'jotai';
-import { fetchModelDetail, modelDetailAtom, clearModelDetail } from '../store/modelStore';
+import { fetchWorkflowDetail, workflowDetailAtom, clearWorkflowDetail } from '../store/workflowStore';
 import { fetchImages, imageListAtom } from '../store/imageStore';
-import {setCurrentModel, clearCurrentModel, clearModelStatus} from '../store/chatStore';
+import {setCurrentWorkflow, clearCurrentWorkflow, clearWorkflowStatus} from '../store/chatStore';
 import {
   fetchTokenizationState,
   tokenizationStateAtom,
 } from '../store/tokenStore';
 import ImageCard from './ImageCard';
 import ModelCarousel from './ModelCarousel';
-import ModelInfoPanel from './ModelInfoPanel';
 import StatePrompt from './StatePrompt';
 import TokenizationPanel from './TokenizationPanel';
 import {accountAtom} from "../store/accountStore.ts";
+import WorkflowInfoPanel from "./WorkflowInfoPanel.tsx";
 
-interface ModelDetailProps {
-  modelId: number;
+interface WorkflowDetailProps {
+  workflowId: number;
 }
 
-const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
-  const [modelDetailState] = useAtom(modelDetailAtom);
+const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
+  const [workflowDetailState] = useAtom(workflowDetailAtom);
   const [imageListState] = useAtom(imageListAtom);
   const [accountState] = useAtom(accountAtom);
-  const fetchDetail = useSetAtom(fetchModelDetail);
+  const fetchDetail = useSetAtom(fetchWorkflowDetail);
   const fetchImagesList = useSetAtom(fetchImages);
-  const clearDetail = useSetAtom(clearModelDetail);
+  const clearDetail = useSetAtom(clearWorkflowDetail);
   const [tokenizationState] = useAtom(tokenizationStateAtom);
   const { data } = tokenizationState;
   const fetchState = useSetAtom(fetchTokenizationState);
-  const setCurrentModelInChat = useSetAtom(setCurrentModel);
-  const clearCurrentModelInChat = useSetAtom(clearCurrentModel);
-  const clearModelStatusInChat = useSetAtom(clearModelStatus);
+  const setCurrentWorkflowInChat = useSetAtom(setCurrentWorkflow);
+  const clearCurrentWorkflowInChat = useSetAtom(clearCurrentWorkflow);
+  const clearWorkflowStatusInChat = useSetAtom(clearWorkflowStatus);
   const [showBuyToken, setShowBuyToken] = useState(false);
   const [showEditCover, setShowEditCover] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'description' | 'tokenization'>('description');
 
-  const { currentModel, isLoading, error } = modelDetailState;
+  const { currentWorkflow, isLoading, error } = workflowDetailState;
   const { images: originalImages = [], isLoading: imagesLoading, error: imagesError, hasMore } = imageListState;
 
   // 过滤重复ID的图片
@@ -66,27 +66,27 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   const galleryContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (accountState.role === 'admin' || accountState.did === currentModel?.creator) {
+    if (accountState.role === 'admin' || accountState.did === currentWorkflow?.creator) {
       setShowEditCover(true)
     } else {
       setShowEditCover(false)
     }
-  }, [accountState.did, accountState.role, currentModel?.creator]);
+  }, [accountState.did, accountState.role, currentWorkflow?.creator]);
 
   useEffect(() => {
     // 加载模型详情
-    fetchDetail(modelId, true);
+    fetchDetail(workflowId, true);
 
     // 加载与模型相关的图片
-    fetchImagesList({ reset: true, model_id: modelId, view: viewParam });
+    fetchImagesList({ reset: true, workflow_id: workflowId, view: viewParam });
 
     // 组件卸载时清除详情
     return () => {
       clearDetail();
-      clearCurrentModelInChat();
-      clearModelStatusInChat();
+      clearCurrentWorkflowInChat();
+      clearWorkflowStatusInChat();
     };
-  }, [modelId, fetchDetail, fetchImagesList, clearDetail, clearCurrentModelInChat, clearModelStatusInChat, viewParam]);
+  }, [workflowId, fetchDetail, fetchImagesList, clearDetail, clearCurrentWorkflowInChat, clearWorkflowStatusInChat, viewParam]);
 
   useEffect(() => {
     const element = galleryContainerRef.current;
@@ -114,15 +114,14 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   // 定期检查 token 化状态
   useEffect(() => {
     // 首次加载时获取状态
-    fetchState({ modelId, model_tokenization_id: modelDetailState?.currentModel?.model_tokenization?.id || 0 })
-  }, [fetchState, modelId, modelDetailState?.currentModel?.model_tokenization?.id]);
+    fetchState({ workflow_id: workflowId, workflow_tokenization_id: workflowDetailState?.currentWorkflow?.workflow_tokenization?.id || 0 })
+  }, [fetchState, workflowId, workflowDetailState?.currentWorkflow?.workflow_tokenization?.id]);
 
   useEffect(() => {
     // 修改 renderTokenizationStatus 函数中的完成状态部分
 
-    const hasCommunityTokens = (currentModel?.model_community_tokenization?.length || 0) > 0;
-    console.log('hasCommunityTokens', hasCommunityTokens);
-    console.log('data', data);
+    const hasCommunityTokens = (currentWorkflow?.workflow_community_tokenization?.length || 0) > 0;
+
     if (data || hasCommunityTokens) {
       setShowBuyToken(true);
       setActiveTab('tokenization')
@@ -135,14 +134,14 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
       setActiveTab('description');
       setShowBuyToken(false);
     };
-  }, [data, setShowBuyToken, setActiveTab, currentModel?.model_community_tokenization?.length]);
+  }, [data, setShowBuyToken, setActiveTab, currentWorkflow?.workflow_community_tokenization?.length]);
 
   // 监听当前模型变化，更新聊天存储中的当前模型(模型Ready的时候才更新)
   useEffect(() => {
-    if (currentModel && currentModel.model_tran?.[0]?.train_state === 2) {
-      setCurrentModelInChat(currentModel);
+    if (currentWorkflow) {
+      setCurrentWorkflowInChat(currentWorkflow);
     }
-  }, [currentModel, setCurrentModelInChat]);
+  }, [currentWorkflow, setCurrentWorkflowInChat]);
 
   // 计算瀑布流布局
   useEffect(() => {
@@ -196,7 +195,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
 
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMore) {
-        fetchImagesList({ reset: false, model_id: modelId, view: viewParam });
+        fetchImagesList({ reset: false, workflow_id: workflowId, view: viewParam });
       }
     }, {
       root: null, // 使用viewport作为root
@@ -205,7 +204,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     });
 
     if (node) observer.current.observe(node);
-  }, [imagesLoading, hasMore, fetchImagesList, modelId, viewParam]);
+  }, [imagesLoading, hasMore, fetchImagesList, workflowId, viewParam]);
 
   // 添加一个新的useEffect来监听滚动事件
   useEffect(() => {
@@ -216,56 +215,56 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       // 当滚动到距离底部200px时加载更多
       if (scrollHeight - scrollTop - clientHeight < 200 && hasMore && !imagesLoading) {
-        fetchImagesList({ reset: false, model_id: modelId, view: viewParam });
+        fetchImagesList({ reset: false, workflow_id: workflowId, view: viewParam });
       }
     };
 
     scrollContainer.addEventListener('scroll', handleScroll);
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
-  }, [hasMore, imagesLoading, fetchImagesList, modelId, viewParam]);
+  }, [hasMore, imagesLoading, fetchImagesList, workflowId, viewParam]);
 
   if (isLoading) {
     return (
-      <div className={styles.modelDetail} ref={scrollContainerRef}>
-        <StatePrompt message="Loading Model Details..." />
+      <div className={styles.workflowDetail} ref={scrollContainerRef}>
+        <StatePrompt message="Loading Workflow Details..." />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.modelDetail} ref={scrollContainerRef}>
+      <div className={styles.workflowDetail} ref={scrollContainerRef}>
         <StatePrompt
-          message="Failed to Load Model"
+          message="Failed to Load Workflow"
           action={{
             text: 'Retry',
-            onClick: () => fetchDetail(modelId, true)
+            onClick: () => fetchDetail(workflowId, true)
           }}
         />
       </div>
     );
   }
 
-  if (!currentModel) {
+  if (!currentWorkflow) {
     return (
-      <div className={styles.modelDetail} ref={scrollContainerRef}>
-        <StatePrompt message="Model Not Found" />
+      <div className={styles.workflowDetail} ref={scrollContainerRef}>
+        <StatePrompt message="Workflow Not Found" />
       </div>
     );
   }
 
   return (
-    <div className={styles.modelDetail} ref={scrollContainerRef}>
+    <div className={styles.workflowDetail} ref={scrollContainerRef}>
       {/* 1. 模型信息部分 - 使用新的布局 */}
       <div className={styles.infoSection}>
         {/* 左侧轮播图组件 */}
         <ModelCarousel
-          images={currentModel.carousel || []}
-          coverImage={currentModel.cover}
+          images={currentWorkflow.carousel || []}
+          coverImage={currentWorkflow.cover}
         />
 
         {/* 右侧信息面板 - 使用新的设计 */}
-        <ModelInfoPanel model={currentModel} />
+        <WorkflowInfoPanel workflow={currentWorkflow} />
       </div>
 
       {/* 2. Tab 部分 */}
@@ -292,14 +291,14 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
             className={styles.descriptionContent}
             style={{ display: activeTab === 'description' ? 'block' : 'none' }}
           >
-            <p>{currentModel.description || 'empty description'}</p>
+            <p>{currentWorkflow.description || 'empty description'}</p>
           </div>
 
           <div
             className={styles.tokenizationContent}
             style={{ display: activeTab === 'tokenization' && showBuyToken ? 'block' : 'none' }}
           >
-            <TokenizationPanel model={currentModel}/>
+            <TokenizationPanel workflow={currentWorkflow}/>
           </div>
         </div>
       </div>
@@ -374,7 +373,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
             message="Failed to Load Images"
             action={{
               text: 'Retry',
-              onClick: () => fetchImagesList({ reset: false, model_id: modelId, view: viewParam })
+              onClick: () => fetchImagesList({ reset: false, workflow_id: workflowId, view: viewParam })
             }}
           />
         )}
@@ -383,4 +382,4 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   );
 };
 
-export default ModelDetail;
+export default WorkflowDetail;

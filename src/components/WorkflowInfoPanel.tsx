@@ -1,8 +1,6 @@
 import React from "react";
-import { useAtom, useSetAtom } from "jotai";
-import { accountAtom } from "../store/accountStore";
-import { showGeneratePopupAtom } from "../store/generatePopupStore";
-import styles from "./ModelInfoPanel.module.css";
+import { useAtom } from "jotai";
+import styles from "./WorkflowInfoPanel.module.css";
 import avatarSvg from "../assets/Avatar.svg";
 import twitterSvg from "../assets/twitter.svg";
 import createSvg from "../assets/create.svg";
@@ -11,47 +9,47 @@ import dexSvg from "../assets/dex.svg";
 import virtualsIcon from "../assets/virtuals.svg";
 import flaunchIcon from "../assets/flaunch.png";
 import codeSvg from "../assets/code.svg";
-import { ModelDetail, TOKENIZATION_LAUNCHPAD_TYPE } from "../store/modelStore";
+import { WorkflowDetail, TOKENIZATION_LAUNCHPAD_TYPE } from "../store/workflowStore";
 import {
   tokenizationStateAtom,
   FlaunchStatusResponse,
 } from "../store/tokenStore";
 import { Link } from "react-router-dom";
-import { GENERATE_IMAGE_SERVICE_CONFIG } from "../utils/plan";
+import {RUN_WORKFLOW_SERVICE_CONFIG} from "../utils/plan";
+import {sendMessage} from "../store/chatStore.ts";
 
-interface ModelInfoPanelProps {
-  model: ModelDetail;
+interface WorkflowInfoPanelProps {
+  workflow: WorkflowDetail;
 }
 
-const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
-  const [accountState] = useAtom(accountAtom);
-  const showGeneratePopup = useSetAtom(showGeneratePopupAtom);
+const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
   const [tokenizationState] = useAtom(tokenizationStateAtom);
   const { data } = tokenizationState;
+  const [, sendMessageAction] = useAtom(sendMessage);
 
   // 获取Twitter显示名称
   const getDisplayName = () => {
-    if (model.users.twitter?.name) {
-      return model.users.twitter.name;
-    } else if (model.users.twitter?.username) {
-      return model.users.twitter.username;
+    if (workflow.users.twitter?.name) {
+      return workflow.users.twitter.name;
+    } else if (workflow.users.twitter?.username) {
+      return workflow.users.twitter.username;
     } else {
       // 如果没有Twitter信息，显示缩略的钱包地址
       return (
-        model.creator.substring(0, 6) +
+        workflow.creator.substring(0, 6) +
         "..." +
-        model.creator.substring(model.creator.length - 4)
+        workflow.creator.substring(workflow.creator.length - 4)
       );
     }
   };
 
   // 获取头像URL
   const getAvatarUrl = () => {
-    if (model.users.twitter?.profilePictureUrl) {
-      return model.users.twitter.profilePictureUrl;
-    } else if (model.users.twitter?.username) {
+    if (workflow.users.twitter?.profilePictureUrl) {
+      return workflow.users.twitter.profilePictureUrl;
+    } else if (workflow.users.twitter?.username) {
       // 备用方案
-      return `https://unavatar.io/twitter/${model.users.twitter.username}`;
+      return `https://unavatar.io/twitter/${workflow.users.twitter.username}`;
     } else {
       return avatarSvg;
     }
@@ -70,77 +68,35 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   };
 
   // 获取LoraName
-  const getLoraName = () => {
-    return model.model_tran?.[0]?.lora_name || "Unknown";
+  const getModelName = () => {
+    return workflow.model || "Unknown";
   };
 
   // 获取训练状态
   const getTrainingStatus = () => {
-    const trainState = model.model_tran?.[0]?.train_state;
-    if (trainState === 2) {
-      return { text: "Ready", className: styles.statusReady, isReady: true };
-    } else {
-      // 计算训练已经进行的时间（小时）
-      const submittedTime = new Date(model.created_at);
-      const currentTime = new Date();
-      const elapsedHours =
-        (currentTime.getTime() - submittedTime.getTime()) / (1000 * 60 * 60);
-
-      // 根据已用时间确定训练阶段
-      let statusText = "";
-      if (elapsedHours <= 0.5) {
-        statusText = "Processing training materials";
-      } else if (elapsedHours <= 1) {
-        statusText = "Generating parameter tags";
-      } else {
-        statusText = "Training in progress";
-      }
-
-      // 计算预估剩余时间
-      const totalTrainingHours = 5; // 总训练时间为5小时
-      const remainingHours = totalTrainingHours - elapsedHours;
-      let etaText = "";
-
-      if (remainingHours <= 0) {
-        etaText = "(finishing)";
-      } else {
-        // 使用4舍5入来显示小时数
-        const roundedHours = Math.round(remainingHours);
-
-        if (roundedHours === 0) {
-          etaText = "(finishing)";
-        } else {
-          etaText = `(ETA ${roundedHours} hour${roundedHours > 1 ? "s" : ""})`;
-        }
-      }
-
-      return {
-        text: statusText,
-        eta: etaText,
-        className: styles.statusTrain,
-        isReady: false,
-      };
-    }
+    return { text: "Ready", className: styles.statusReady, isReady: true };
   };
 
   const status = getTrainingStatus();
 
   const handleGenerate = () => {
     // 打开生成弹窗，传入模型信息
-    showGeneratePopup(accountState.did, model);
+    sendMessageAction("I want to use this workflow.").then(() => {
+      console.log("run this workflow");
+    })
   };
 
   // 点击分享按钮触发x的分享
   const handleShare = () => {
     // 1. 获取当前页面URL并构建设模型链接
     const currentUrl = window.location.href;
-    const modelLinkUrl = new URL(currentUrl);
+    const workflowLinkUrl = new URL(currentUrl);
     // 确保分享链接是模型详情页的基础链接，不包含其他可能存在的查询参数，然后添加模型ID和名称
-    const baseUrl = `${modelLinkUrl.protocol}//${modelLinkUrl.host}${modelLinkUrl.pathname}`;
+    const baseUrl = `${workflowLinkUrl.protocol}//${workflowLinkUrl.host}${workflowLinkUrl.pathname}`;
     const shareUrl = new URL(baseUrl);
-    shareUrl.searchParams.set("model_id", model.id.toString());
-    shareUrl.searchParams.set("model_name", model.name);
-    const modelLink = shareUrl.toString();
+    shareUrl.searchParams.set("workflow_id", workflow.id.toString());
+    shareUrl.searchParams.set("workflow_name", workflow.name);
+    const workflowLink = shareUrl.toString();
 
     // 修改 renderTokenizationStatus 函数中的完成状态部分
     let symbol = "";
@@ -156,12 +112,12 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
 
     // 2. 根据是否有代币确定分享文本
     let tweetText = "";
-    const modelName = model.name;
+    const workflowName = workflow.name;
 
     if (symbol) {
-      tweetText = `This style is insane!\n${modelName} is an amazing AI model I found on @niyoko_agent \nit even has its own token $${symbol}\nCome create and trade with me!\n${modelLink}`;
+      tweetText = `This style is insane!\n${workflowName} is an amazing AI workflow I found on @niyoko_agent \nit even has its own token $${symbol}\nCome create and trade with me!\n${workflowLink}`;
     } else {
-      tweetText = `This style is insane!\n${modelName} is an amazing AI model I found on @niyoko_agent \nCome create and mine with me!\n${modelLink}`;
+      tweetText = `This style is insane!\n${workflowName} is an amazing AI workflow I found on @niyoko_agent \nCome create and mine with me!\n${workflowLink}`;
     }
 
     // 3. 构建 Twitter Intent URL
@@ -175,9 +131,9 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   const handleTwitterClick = () => {
     console.log("Twitter clicked");
     // 实现Twitter点击功能
-    if (model.users.twitter?.username) {
+    if (workflow.users.twitter?.username) {
       window.open(
-        `https://twitter.com/${model.users.twitter?.username}`,
+        `https://twitter.com/${workflow.users.twitter?.username}`,
         "_blank"
       );
     } else {
@@ -201,7 +157,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
           <span className={styles.creatorName}>{getDisplayName()}</span>
         </div>
 
-        {model.users.twitter && (
+        {workflow.users.twitter && (
           <button className={styles.twitterButton} onClick={handleTwitterClick}>
             <img
               src={twitterSvg}
@@ -213,30 +169,30 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
       </div>
 
       {/* 第二行: 模型详细信息 */}
-      <div className={styles.modelDetailsContainer}>
+      <div className={styles.workflowDetailsContainer}>
         {/* Type */}
         <div className={styles.detailRow}>
           <span className={styles.detailLabel}>Type</span>
-          <span className={styles.detailValue}>Lora</span>
+          <span className={styles.detailValue}>Workflow</span>
         </div>
 
         {/* Keyword (Lora Name) */}
         <div className={styles.detailRow}>
-          <span className={styles.detailLabel}>Keyword</span>
-          <span className={styles.detailValue}>{getLoraName()}</span>
+          <span className={styles.detailLabel}>Model</span>
+          <span className={styles.detailValue}>{getModelName()}</span>
         </div>
 
         {/* Used */}
         <div className={styles.detailRow}>
           <span className={styles.detailLabel}>Used</span>
-          <span className={styles.detailValue}>{model.usage}</span>
+          <span className={styles.detailValue}>{workflow.usage}</span>
         </div>
 
         {/* Published */}
         <div className={styles.detailRow}>
           <span className={styles.detailLabel}>Published</span>
           <span className={styles.detailValue}>
-            {formatCreationTime(model.created_at)}
+            {formatCreationTime(workflow.created_at)}
           </span>
         </div>
 
@@ -263,7 +219,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
               <div className="flex items-end gap-[1px]">
                 <span>Generate</span>
                 <span className="!text-xs">
-                  ({GENERATE_IMAGE_SERVICE_CONFIG.cu} Credits)
+                  ({RUN_WORKFLOW_SERVICE_CONFIG.cu} Credits)
                 </span>
               </div>
             </button>
@@ -274,10 +230,10 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
             </button>
 
             {/* Token按钮 - Dexscreener 跳转 */}
-            {model?.model_tokenization?.meme_token && (
+            {workflow?.workflow_tokenization?.meme_token && (
               <Link
                 target="_blank"
-                to={`https://dexscreener.com/base/${model.model_tokenization.meme_token}`}
+                to={`https://dexscreener.com/base/${workflow.workflow_tokenization.meme_token}`}
               >
                 <button className={styles.dexButton}>
                   <img
@@ -289,19 +245,19 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
               </Link>
             )}
             {/* Token按钮 - Flaunch 跳转 */}
-            {model?.model_tokenization?.meme_token && (
+            {workflow?.workflow_tokenization?.meme_token && (
               <Link
                 target="_blank"
                 to={
-                  model?.model_tokenization?.launchpad ==
+                  workflow?.workflow_tokenization?.launchpad ==
                   TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
-                    ? `https://app.virtuals.io/virtuals/${model.model_tokenization.metadata?.virtuals_id}`
-                    : `https://flaunch.gg/base/coin/${model.model_tokenization.meme_token}`
+                    ? `https://app.virtuals.io/virtuals/${workflow.workflow_tokenization.metadata?.virtuals_id}`
+                    : `https://flaunch.gg/base/coin/${workflow.workflow_tokenization.meme_token}`
                 }
               >
                 <button
                   className={
-                    model?.model_tokenization?.launchpad ==
+                    workflow?.workflow_tokenization?.launchpad ==
                     TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
                       ? styles.virtualsButton
                       : styles.flaunchButton
@@ -309,7 +265,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
                 >
                   <img
                     src={
-                      model?.model_tokenization?.launchpad ==
+                      workflow?.workflow_tokenization?.launchpad ==
                       TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
                         ? virtualsIcon
                         : flaunchIcon
@@ -326,7 +282,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
             {/* 训练中状态按钮 */}
             <button className={styles.trainingButton} disabled>
               <img src={codeSvg} alt="Code" className={styles.buttonIcon} />
-              <span>Training... {status.eta}</span>
+              <span>Training...</span>
             </button>
 
             {/* 分享按钮 */}
@@ -340,4 +296,4 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
   );
 };
 
-export default ModelInfoPanel;
+export default WorkflowInfoPanel;

@@ -22,7 +22,7 @@ export default defineConfig({
     port: 8001,
     proxy: {
       '/api': {
-        target: 'http://43.153.57.123:8085',
+        target: 'http://43.153.57.123:8086',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       },
@@ -32,7 +32,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/beta-api/, '')
       },
       '/studio-api': {
-        target: 'https://api.nyko.cool',
+        target: 'http://170.106.196.194:5576',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/studio-api/, '')
       }

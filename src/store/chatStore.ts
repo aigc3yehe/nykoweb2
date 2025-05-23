@@ -6,6 +6,9 @@ import { ModelDetail } from './modelStore';
 import { fetchImages } from './imageStore';
 import { fetchModelDetail } from './modelStore.ts'
 import {fetchTokenizationState} from "./tokenStore.ts";
+import {fetchWorkflowDetail, WorkflowDetail} from "./workflowStore.ts";
+import { PRIVY_TOKEN_HEADER } from '../utils/constants.ts';
+import { getAccessToken } from '@privy-io/react-auth';
 
 // 添加宽高比相关接口
 export interface AspectRatio {
@@ -40,7 +43,8 @@ export interface TaskInfo {
 export interface Message {
   role: string;
   content: string;
-  type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image' | 'tokenization_agreement';
+  type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image' | 'tokenization_agreement' | "create_workflow"
+      | "run_workflow" | "workflow_generate_result" | "create_workflow_details";
   imageUploadState?: {
     totalCount: number;
     uploadedCount: number;
@@ -84,6 +88,7 @@ export interface ChatState {
   urls: Array<{name: string, url: string}>;
   task_type?: string;
   task_value?: string;
+  current_status?: string; // 当前对话任务状态
   modelParam?: {
     modelName?: string;
     description?: string;
@@ -97,6 +102,30 @@ export interface ChatState {
   heartbeatId?: number; // 存储心跳计时器ID
   loraWeight?: number;
   betaMode: boolean; // 添加Beta模式开关
+  currentWorkflow: WorkflowDetail | null;
+  workflowStatus: string | null;
+  workflow_name: string;
+  workflow_description: string;
+  workflow_prompt: string;
+  workflow_input: string;
+  workflow_output: string;
+  workflow_model: string;
+  workflowCreation: WorkflowCreationState;
+  workflowImageValue: string; // 临时URL或S3 URL
+  workflowImageFile: File | null; // 保存File对象用于上传
+  workflowRunning: {
+    isRunning: boolean;
+    isSuccess: boolean;
+    workflowId?: number;
+    error?: string;
+  };
+  // 添加 Reference Image 相关状态
+  workflowReferenceImage: {
+    isUploading: boolean;
+    uploadedUrl: string;
+    fileName: string;
+    error?: string;
+  };
 }
 
 // 3. 更新初始状态
@@ -110,6 +139,7 @@ const initialState: ChatState = {
   wallet_address: undefined,
   urls: [],
   task_type: 'chat',
+  current_status: 'init',
   task_value: 'chat',
   modelParam: undefined,
   currentModel: null,
@@ -123,7 +153,32 @@ const initialState: ChatState = {
   },
   heartbeatId: undefined,
   loraWeight: 0.5,
-  betaMode: false // 初始化为false
+  betaMode: false, // 初始化为false
+  currentWorkflow: null,
+  workflowStatus: null,
+  workflow_name: "",
+  workflow_description: "",
+  workflow_prompt: "",
+  workflow_input: "image",
+  workflow_output: "image",
+  workflow_model: "gpt-4o",
+  workflowCreation: {
+    isCreating: false,
+    isSuccess: false
+  },
+  workflowImageValue: "",
+  workflowImageFile: null,
+  workflowRunning: {
+    isRunning: false,
+    isSuccess: false
+  },
+  // 初始化 Reference Image 状态
+  workflowReferenceImage: {
+    isUploading: false,
+    uploadedUrl: "",
+    fileName: "",
+    error: undefined
+  }
 };
 
 // 创建原子状态
@@ -140,11 +195,12 @@ export type CheckStatsResponse = {
 };
 
 // 查询图片生成状态的API
-export async function checkImageGenerationStatus(request_id: string): Promise<CheckStatsResponse> {
+export async function checkImageGenerationStatus(request_id: string, isWorkflow: boolean): Promise<CheckStatsResponse> {
   try {
-    const response = await fetch(`/studio-api/model/aigc/state?task_id=${request_id}&refreshState=true`, {
+    const status_url = isWorkflow ? `/studio-api/workflow/aigc/state?task_id=${request_id}` : `/studio-api/model/aigc/state?task_id=${request_id}&refreshState=true`
+    const response = await fetch(status_url, {
       headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
       }
     });
 
@@ -178,7 +234,7 @@ export function hasSystemMessage(messages: Message[]): boolean {
 }
 
 // 简化的轮询函数 - 使用 for 循环
-export async function pollImageGenerationTask(taskId: string, set: any, get: any): Promise<void> {
+export async function pollImageGenerationTask(taskId: string, set: any, get: any, isWorkflow: boolean=false): Promise<void> {
   console.log('Start poll image generation task:', taskId);
 
   // 最大轮询次数和间隔时间
@@ -195,7 +251,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
       }
 
       // 查询任务状态
-      const statusResponse = await checkImageGenerationStatus(taskId);
+      const statusResponse = await checkImageGenerationStatus(taskId, isWorkflow);
       console.log('task status:', statusResponse);
 
       // 获取当前状态
@@ -266,7 +322,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             const resultMessage: Message = {
               role: 'assistant',
               content: 'Image generation completed',
-              type: 'generate_result',
+              type: isWorkflow ? 'workflow_generate_result' : 'generate_result',
               images: generatedImages,
               request_id: taskId,
               imageInfo: {
@@ -276,11 +332,25 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             };
 
             // 添加消息到列表
-            set(chatAtom, {
-              ...chatState,
-              messages: [...filterSystemMessages(chatState.messages), resultMessage],
-              isGenerating: false
-            });
+            // 任务完成，退出轮询
+            if (isWorkflow) {
+              set(chatAtom, {
+                ...get(chatAtom),
+                messages: [...filterSystemMessages(chatState.messages), resultMessage],
+                workflowRunning: {
+                  isRunning: false,
+                  isSuccess: true
+                },
+                isGenerating: false,
+                workflowImageFile: null // 清除文件对象
+              });
+            } else {
+              set(chatAtom, {
+                ...chatState,
+                messages: [...filterSystemMessages(chatState.messages), resultMessage],
+                isGenerating: false
+              });
+            }
           }
 
           // 显示成功通知
@@ -295,9 +365,12 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             // 使用 fetchImages 重新加载图片
             set(fetchImages, { reset: true, model_id: chatState.currentModel.id });
           }
+          if (isWorkflow && chatState.currentWorkflow?.id) {
+            console.log('reset model images，workflow id:', chatState.currentWorkflow.id);
+            // 使用 fetchImages 重新加载图片
+            set(fetchImages, { reset: true, workflow_id: chatState.currentWorkflow.id });
+          }
         }
-
-        // 任务完成，退出轮询
         console.log('task finished，exit');
         return;
       } else if (status === 'failed' || status === 'error') {
@@ -324,7 +397,12 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
           set(chatAtom, {
             ...chatState,
             messages: updatedMessages,
-            isGenerating: false
+            workflowRunning: {
+              isRunning: false,
+              isSuccess: true
+            },
+            isGenerating: false,
+            workflowImageFile: null // 清除文件对象
           });
         } else {
           console.log('not found message，create new failed message');
@@ -335,7 +413,13 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
               role: 'system',
               content: 'image generation failed',
               request_id: taskId
-            }]
+            }],
+            workflowRunning: {
+              isRunning: false,
+              isSuccess: true
+            },
+            isGenerating: false,
+            workflowImageFile: null // 清除文件对象
           });
         }
 
@@ -509,6 +593,16 @@ export const sendMessage = atom(
 
       const wallet_address = chatState.wallet_address
 
+      const current_task_type = chatState.task_type
+
+      const current_task_status = chatState.current_status
+
+      const workflow_id = chatState.currentWorkflow?.id
+      const current_workflow_name = chatState.currentWorkflow?.name
+      const workflow_cover = chatState.currentWorkflow?.cover;
+      const workflow_description = chatState.currentWorkflow?.description;
+      const workflow_creator = chatState.currentWorkflow?.creator;
+
       // 构建完整的API URL
       const API_URL = `${apiPrefix}/chat`;
 
@@ -541,6 +635,13 @@ export const sendMessage = atom(
           wallet_address,
           model_status,
           agree,
+          task_type: current_task_type,
+          current_task_status,
+          workflow_id,
+          workflow_name: current_workflow_name,
+          workflow_cover,
+          workflow_description,
+          workflow_creator
         }),
       });
 
@@ -558,6 +659,10 @@ export const sendMessage = atom(
       const task_type = responseData.task_type;
       const model = responseData.model;
       const request_id = responseData.request_id;
+
+      const workflow_name = responseData.workflow_name;
+      const workflow_goal = responseData.workflow_goal;
+      const generated_prompt = responseData.generated_prompt;
 
       let task_value = task_type;
       if (task_type === 'finetuing') {
@@ -630,10 +735,23 @@ export const sendMessage = atom(
         messageType = 'tokenization_agreement';
       }
 
+      if (status === "AICC_DETAILS_PROVIDED" && task_type === 'create_workflow') {
+        messageType = 'create_workflow';
+      }
+
+      if (status === "AICC_COLLECTING_DETAILS" && task_type === 'create_workflow') {
+        messageType = 'create_workflow_details'; // 收集工作流信息
+      }
+
+      if (status === "AWAITING_WORKFLOW_INPUTS" && task_type === "use_workflow") {
+        messageType = 'run_workflow';
+      }
+
       const receivedMessage: Message = {
         role: 'assistant',
         content: content,
-        type: messageType as 'text' | 'upload_image' | 'generating_image' | 'generate_result' | 'tokenization_agreement',
+        type: messageType as 'text' | 'upload_image' | 'generating_image' | 'generate_result' | 'tokenization_agreement' | "create_workflow"
+            | "run_workflow" | "workflow_generate_result" | "create_workflow_details",
         imageUploadState: messageType === 'upload_image'
           ? { totalCount: 0, uploadedCount: 0, isUploading: false, finishUpload: false }
           : undefined,
@@ -676,8 +794,12 @@ export const sendMessage = atom(
         isLoading: false,
         isGenerating: isGenerating,
         task_type: task_type,
+        current_status: status,
         task_value: task_value,
-        modelParam: updatedModelParam
+        modelParam: updatedModelParam,
+        workflow_name: workflow_name || undefined,
+        workflow_description: workflow_goal || undefined,
+        workflow_prompt: generated_prompt || undefined,
       });
 
       // 如果 request_id 不为空，则代表创建生成图片任务完成
@@ -693,6 +815,12 @@ export const sendMessage = atom(
         console.log('reset model images，model id:', chatState.currentModel.id);
         set(fetchTokenizationState, { modelId: chatState.currentModel.id, model_tokenization_id: chatState.currentModel?.model_tokenization?.id || 0})
         set(fetchModelDetail, chatState.currentModel.id , false)
+      }
+      if (status === 'tokenization' && chatState.currentWorkflow?.id) {
+        // 使用 fetchTokenizationState 重新加载Token状态
+        console.log('reset workflow detailed，workflow id:', chatState.currentWorkflow.id);
+        set(fetchTokenizationState, { workflow_id: chatState.currentWorkflow.id, workflow_tokenization_id: chatState.currentWorkflow?.workflow_tokenization?.id || 0})
+        set(fetchWorkflowDetail, chatState.currentWorkflow.id , false)
       }
     } catch (error) {
       console.error('Send Message Failed:', error);
@@ -971,6 +1099,16 @@ export const clearChat = atom(
       urls: [],
       task_type: 'chat',
       modelParam: undefined,
+      workflowCreation: {
+        isCreating: false,
+        isSuccess: false
+      },
+      workflowImageValue: "",
+      workflowImageFile: null,
+      workflowRunning: {
+        isRunning: false,
+        isSuccess: false
+      }
     });
   }
 );
@@ -1267,6 +1405,506 @@ export const toggleBetaMode = atom(
     set(chatAtom, {
       ...chatState,
       betaMode: !chatState.betaMode
+    });
+  }
+);
+
+// 工作流值类型枚举 - 修改为正确的值
+export enum WORKFLOW_VALUE_TYPE {
+  IMAGE = 'image',
+  TEXT = 'text',
+}
+
+// 工作流提供商枚举 - 修改为正确的值
+export enum WORKFLOW_PROVIDER {
+  GPT_4o = 'gpt-4o',
+}
+
+// GPT模型枚举 - 修改为正确的值
+export enum WORKFLOW_GPT_MODEL {
+  GPT_IMAGE_1 = 'gpt-image-1',
+  GPT_IMAGE_1_VIP = 'gpt-image-1-vip',
+}
+
+// 将输入类型字符串转换为API需要的枚举类型 - 修改映射逻辑
+function mapInputOutputType(type: string): WORKFLOW_VALUE_TYPE[] {
+  switch (type) {
+    case 'Image':
+      return [WORKFLOW_VALUE_TYPE.IMAGE];
+    case 'Text':
+      return [WORKFLOW_VALUE_TYPE.TEXT];
+    default:
+      return [WORKFLOW_VALUE_TYPE.IMAGE];
+  }
+}
+
+// 创建工作流接口
+interface CreateWorkflowParams {
+  name: string;
+  description?: string;
+  creator: string;
+  prompt?: string;
+  input_type?: WORKFLOW_VALUE_TYPE[];
+  output_type?: WORKFLOW_VALUE_TYPE[];
+  provider: WORKFLOW_PROVIDER;
+  model: WORKFLOW_GPT_MODEL;
+  reference_images?: string[];
+}
+
+// 创建工作流响应
+interface CreateWorkflowResponse {
+  message: string;
+  data: {
+    workflow_id: number;
+  }
+}
+
+
+// 创建工作流API函数
+export async function createWorkflowAPI(params: CreateWorkflowParams): Promise<CreateWorkflowResponse> {
+  try {
+    const privyToken = await getAccessToken();
+    const response = await fetch('/studio-api/workflow/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      },
+      body: JSON.stringify(params)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Create workflow failed with status code ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Create Workflow Failed:', error);
+    throw error;
+  }
+}
+
+// 创建工作流状态
+interface WorkflowCreationState {
+  isCreating: boolean;
+  isSuccess: boolean;
+  workflowId?: number;
+  error?: string;
+}
+
+// 创建工作流操作 - 修改API参数
+export const createWorkflow = atom(
+  null,
+  async (get, set) => {
+    const chatState = get(chatAtom);
+
+    // 设置创建中状态
+    set(chatAtom, {
+      ...chatState,
+      workflowCreation: {
+        isCreating: true,
+        isSuccess: false,
+        error: undefined
+      }
+    });
+
+    try {
+      // 准备API参数
+      const reference_images = []
+      if (chatState.workflowReferenceImage.uploadedUrl) {
+        reference_images.push(chatState.workflowReferenceImage.uploadedUrl);
+      }
+      const params: CreateWorkflowParams = {
+        name: chatState.workflow_name || 'New Workflow',
+        description: chatState.workflow_description || '', // 可以添加描述输入框或使用其他字段
+        creator: chatState.did || '',
+        prompt: chatState.workflow_prompt,
+        input_type: mapInputOutputType(chatState.workflow_input),
+        output_type: mapInputOutputType(chatState.workflow_output),
+        provider: WORKFLOW_PROVIDER.GPT_4o, // 使用正确的枚举值
+        model: WORKFLOW_GPT_MODEL.GPT_IMAGE_1_VIP, // 使用正确的枚举值
+        reference_images: reference_images
+      };
+
+      // 调用API
+      const response = await createWorkflowAPI(params);
+
+      // 设置成功状态
+      set(chatAtom, {
+        ...get(chatAtom), // 重新获取最新状态
+        workflowCreation: {
+          isCreating: false,
+          isSuccess: true,
+          workflowId: response.data.workflow_id
+        }
+      });
+
+      // 显示成功提示
+      set(showToastAtom, {
+        message: 'Workflow created successfully',
+        severity: 'success'
+      });
+
+    } catch (error) {
+      // 设置错误状态
+      set(chatAtom, {
+        ...get(chatAtom),
+        workflowCreation: {
+          isCreating: false,
+          isSuccess: false,
+          error: error instanceof Error ? error.message : 'Failed to create workflow'
+        }
+      });
+
+      // 显示错误提示
+      set(showToastAtom, {
+        message: error instanceof Error ? error.message : 'Failed to create workflow',
+        severity: 'error'
+      });
+    }
+  }
+);
+
+// 更新工作流提示文本
+export const updateWorkflowPrompt = atom(
+  null,
+  (get, set, prompt: string) => {
+    const chatState = get(chatAtom);
+
+    set(chatAtom, {
+      ...chatState,
+      workflow_prompt: prompt
+    });
+  }
+);
+
+// 更新工作流输入类型
+export const updateWorkflowInput = atom(
+  null,
+  (get, set, inputType: string) => {
+    const chatState = get(chatAtom);
+
+    set(chatAtom, {
+      ...chatState,
+      workflow_input: inputType
+    });
+  }
+);
+
+// 更新工作流输出类型
+export const updateWorkflowOutput = atom(
+  null,
+  (get, set, outputType: string) => {
+    const chatState = get(chatAtom);
+
+    set(chatAtom, {
+      ...chatState,
+      workflow_output: outputType
+    });
+  }
+);
+
+// 更新工作流模型
+export const updateWorkflowModel = atom(
+  null,
+  (get, set, model: string) => {
+    const chatState = get(chatAtom);
+
+    set(chatAtom, {
+      ...chatState,
+      workflow_model: model
+    });
+  }
+);
+
+// 运行工作流接口
+interface RunWorkflowParams {
+  workflow_id: number;
+  creator: string;
+  text_value?: string;
+  image_value?: string;
+  width?: number;
+  height?: number;
+}
+
+// 运行工作流响应
+interface AigcResponse {
+  message: string;
+  data: {
+    image_id?: number; // 图片id
+    task_id?: string; // 任务id
+  };
+}
+
+// 运行工作流API函数
+export async function runWorkflowAPI(params: RunWorkflowParams): Promise<AigcResponse> {
+  try {
+    const privyToken = await getAccessToken();
+    const response = await fetch('/studio-api/workflow/aigc', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      },
+      body: JSON.stringify(params)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Run workflow failed with status code ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Run Workflow Failed:', error);
+    throw error;
+  }
+}
+
+// 设置工作流图片 - 修改为同时保存临时URL和File
+export const setWorkflowImage = atom(
+  null,
+  (get, set, params: { url: string, file: File | null }) => {
+    const { url, file } = params;
+    const chatState = get(chatAtom);
+
+    set(chatAtom, {
+      ...chatState,
+      workflowImageValue: url,
+      workflowImageFile: file
+    });
+  }
+);
+
+// 运行工作流操作 - 修改为先上传图片
+export const runWorkflow = atom(
+  null,
+  async (get, set) => {
+    const chatState = get(chatAtom);
+
+    // 设置执行中状态
+    set(chatAtom, {
+      ...chatState,
+      workflowRunning: {
+        isRunning: true,
+        isSuccess: false,
+        error: undefined
+      }
+    });
+
+    try {
+      let imageValue = chatState.workflowImageValue;
+
+      // 如果有图片文件需要上传
+      if (chatState.workflowImageFile && !imageValue.startsWith('http')) {
+        try {
+          // 导入上传函数
+          const { uploadFileToS3 } = await import('./imagesStore');
+
+          // 上传图片到S3
+          imageValue = await uploadFileToS3(chatState.workflowImageFile);
+
+          // 更新S3 URL到状态
+          set(chatAtom, {
+            ...get(chatAtom),
+            workflowImageValue: imageValue
+          });
+
+        } catch (error) {
+          console.error('Failed to upload image:', error);
+          throw new Error('Failed to upload image. Please try again.');
+        }
+      }
+
+      const workflowId = chatState.currentWorkflow?.id
+      // 准备API参数，使用上传后的图片URL
+      const params: RunWorkflowParams = {
+        workflow_id: workflowId || 0,
+        creator: chatState.did || '',
+        image_value: imageValue || undefined,
+        width: chatState.selectedAspectRatio?.width || 1024,
+        height: chatState.selectedAspectRatio?.height || 1024
+      };
+
+      // 调用API
+      const response = await runWorkflowAPI(params);
+
+      // 如果有生成的任务ID，启动轮询
+      if (response.data.task_id) {
+        pollImageGenerationTask(response.data.task_id, set, get, true).catch(err => {
+          console.error('Poll Image Generation Task Failed:', err);
+        });
+      } else {
+        set(chatAtom, {
+          ...get(chatAtom),
+          workflowRunning: {
+            isRunning: false,
+            isSuccess: true
+          },
+          workflowImageFile: null // 清除文件对象
+        });
+      }
+
+    } catch (error) {
+      // 设置错误状态
+      set(chatAtom, {
+        ...get(chatAtom),
+        workflowRunning: {
+          isRunning: false,
+          isSuccess: false,
+          error: error instanceof Error ? error.message : 'Failed to run workflow'
+        }
+      });
+
+      // 显示错误提示
+      set(showToastAtom, {
+        message: error instanceof Error ? error.message : 'Failed to run workflow',
+        severity: 'error'
+      });
+    }
+  }
+);
+
+// 设置当前正在查看的工作流详情
+export const setCurrentWorkflow = atom(
+    null,
+    (get, set, workflow: WorkflowDetail | null) => {
+      const chatState = get(chatAtom);
+
+      set(chatAtom, {
+        ...chatState,
+        currentWorkflow: workflow
+      });
+    }
+);
+
+// 清除当前工作流详情（退出工作流详情页时调用）
+export const clearCurrentWorkflow = atom(
+    null,
+    (get, set) => {
+      const chatState = get(chatAtom);
+
+      set(chatAtom, {
+        ...chatState,
+        currentWorkflow: null
+      });
+    }
+);
+
+// 清除当前模型详情（退出模型详情页时调用）
+export const clearWorkflowStatus = atom(
+    null,
+    (get, set) => {
+      const chatState = get(chatAtom);
+
+      set(chatAtom, {
+        ...chatState,
+        workflowStatus: null
+      });
+    }
+);
+
+// 添加上传单张 Reference Image 的操作
+export const uploadWorkflowReferenceImage = atom(
+  null,
+  async (get, set) => {
+    // 创建一个文件选择对话框
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = false; // 只允许选择一张图片
+
+    input.onchange = async (event) => {
+      const target = event.target as HTMLInputElement;
+      const file = target.files?.[0];
+
+      if (!file) {
+        target.value = '';
+        return;
+      }
+
+      const chatState = get(chatAtom);
+
+      try {
+        // 设置上传状态
+        set(chatAtom, {
+          ...chatState,
+          workflowReferenceImage: {
+            isUploading: true,
+            uploadedUrl: "",
+            fileName: file.name,
+            error: undefined
+          }
+        });
+
+        // 导入上传函数
+        const { uploadFileToS3 } = await import('./imagesStore');
+
+        // 上传图片到S3
+        const uploadedUrl = await uploadFileToS3(file);
+
+        // 上传成功，更新状态
+        const updatedChatState = get(chatAtom);
+        set(chatAtom, {
+          ...updatedChatState,
+          workflowReferenceImage: {
+            isUploading: false,
+            uploadedUrl: uploadedUrl,
+            fileName: file.name,
+            error: undefined
+          }
+        });
+
+        // 显示成功通知
+        const { showToastAtom } = await import('./imagesStore');
+        set(showToastAtom, {
+          message: 'Reference image uploaded successfully',
+          severity: 'success'
+        });
+
+      } catch (error) {
+        console.error('Error uploading reference image:', error);
+
+        // 上传失败，更新错误状态
+        const errorChatState = get(chatAtom);
+        set(chatAtom, {
+          ...errorChatState,
+          workflowReferenceImage: {
+            isUploading: false,
+            uploadedUrl: "",
+            fileName: "",
+            error: error instanceof Error ? error.message : 'Upload failed'
+          }
+        });
+
+        // 显示错误通知
+        const { showToastAtom } = await import('./imagesStore');
+        set(showToastAtom, {
+          message: 'Failed to upload reference image',
+          severity: 'error'
+        });
+      }
+    };
+
+    input.click();
+  }
+);
+
+// 删除 Reference Image 的操作
+export const removeWorkflowReferenceImage = atom(
+  null,
+  (get, set) => {
+    const chatState = get(chatAtom);
+
+    set(chatAtom, {
+      ...chatState,
+      workflowReferenceImage: {
+        isUploading: false,
+        uploadedUrl: "",
+        fileName: "",
+        error: undefined
+      }
     });
   }
 );

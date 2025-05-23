@@ -6,13 +6,14 @@ import checkboxNormal from '../assets/checkbox_normal.svg';
 import checkboxSelected from '../assets/checkbox_selected.svg';
 
 interface ContentHeaderProps {
-  activeTab: 'models' | 'images';
-  setActiveTab: (tab: 'models' | 'images') => void;
+  activeTab: 'models' | 'workflows' |'images';
+  setActiveTab: (tab: 'models' | 'workflows' | 'images') => void;
   ownedOnly: boolean;
   setOwnedOnly: (owned: boolean) => void;
   sortOption: 'New Model' | 'Popular';
   setSortOption: (option: 'New Model' | 'Popular') => void;
-  isDetailMode?: boolean;
+  isModelDetailMode?: boolean;
+  isWorkflowDetailMode?: boolean;
   modelName?: string;
   onBackClick?: () => void;
 }
@@ -24,7 +25,8 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   setOwnedOnly,
   sortOption,
   setSortOption,
-  isDetailMode = false,
+  isModelDetailMode = false,
+  isWorkflowDetailMode = false,
   modelName = '',
   onBackClick
 }) => {
@@ -45,12 +47,12 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   }, []);
 
   // 如果是详情模式，显示返回导航
-  if (isDetailMode) {
+  if (isModelDetailMode || isWorkflowDetailMode) {
     return (
       <div className={styles.contentHeader}>
         <div className={styles.detailNavigation} >
           <img src={backIcon} alt="Back" className={styles.backIcon} onClick={onBackClick}/>
-          <span className={styles.modelsLabel}>Models</span>
+          <span className={styles.modelsLabel}>{isModelDetailMode ? 'Models' : 'Workflows'}</span>
           <div className={styles.divider}></div>
           <span className={styles.modelName}>{modelName}</span>
         </div>
@@ -62,48 +64,54 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   return (
     <div className={styles.contentHeader}>
       <div className={styles.tabGroup}>
-        <div 
+        <div
           className={`${styles.tab} ${activeTab === 'models' ? styles.active : styles.inactive}`}
           onClick={() => setActiveTab('models')}
         >
           Models
         </div>
-        <div 
+        <div
+            className={`${styles.tab} ${activeTab === 'workflows' ? styles.active : styles.inactive}`}
+            onClick={() => setActiveTab('workflows')}
+        >
+          Workflows
+        </div>
+        <div
           className={`${styles.tab} ${activeTab === 'images' ? styles.active : styles.inactive}`}
           onClick={() => setActiveTab('images')}
         >
           Images
         </div>
       </div>
-      
+
       <div className={styles.controlsGroup}>
-        <div 
-          className={styles.checkboxContainer} 
+        <div
+          className={styles.checkboxContainer}
           onClick={() => setOwnedOnly(!ownedOnly)}
         >
           <div className={styles.checkboxIcon}>
-            <img 
-              src={ownedOnly ? checkboxSelected : checkboxNormal} 
-              alt="checkbox" 
+            <img
+              src={ownedOnly ? checkboxSelected : checkboxNormal}
+              alt="checkbox"
             />
           </div>
           <span className={styles.checkboxLabel}>Owned</span>
         </div>
-        
-        {activeTab === 'models' && (
+
+        {(activeTab === 'models' || activeTab === 'workflows') && (
           <div className={styles.dropdownContainer} ref={dropdownRef}>
-            <button 
+            <button
               className={styles.dropdown}
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
               {sortOption} <img src={dropdownIcon} alt="dropdown" width={16} height={16} />
             </button>
-            
+
             {dropdownOpen && (
               <div className={styles.dropdownMenu}>
                 {['New Model', 'Popular'].map((option) => (
-                  <div 
-                    key={option} 
+                  <div
+                    key={option}
                     className={styles.dropdownItem}
                     onClick={() => {
                       setSortOption(option as 'New Model' | 'Popular');
@@ -122,4 +130,4 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   );
 };
 
-export default ContentHeader; 
+export default ContentHeader;

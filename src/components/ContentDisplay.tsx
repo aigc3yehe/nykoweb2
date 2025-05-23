@@ -7,16 +7,25 @@ import ModelDetail from './ModelDetail';
 import FeatureCard from './FeatureCard';
 import { useAtom, useSetAtom } from 'jotai';
 import { clearModelDetail, modelDetailAtom } from '../store/modelStore';
+import { clearModelDetail, modelDetailAtom, modelIdAndNameAtom } from '../store/modelStore';
+import { clearWorkflowDetail, workflowDetailAtom } from '../store/workflowStore';
 import { useNavigate, useLocation } from 'react-router-dom';
+import WorkflowsContent from "./WorkflowsContent.tsx";
+import WorkflowDetail from "./WorkflowDetail.tsx";
 
 const ContentDisplay: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'models' | 'images'>('models');
+  const [activeTab, setActiveTab] = useState<'models' | 'workflows' | 'images'>('models');
   const [ownedOnly, setOwnedOnly] = useState(false);
   const [sortOption, setSortOption] = useState<'New Model' | 'Popular'>('Popular');
   const [viewingModelId, setViewingModelId] = useState<number | null>(null);
   const [viewingModelName, setViewingModelName] = useState<string | null>(null);
+  const [viewingWorkflowId, setViewingWorkflowId] = useState<number | null>(null);
+  const [viewingWorkflowName, setViewingWorkflowName] = useState<string | null>(null);
   const [modelDetailState] = useAtom(modelDetailAtom);
+  const [workflowDetailState] = useAtom(workflowDetailAtom);
   const clearDetail = useSetAtom(clearModelDetail);
+  const clearWorkflow = useSetAtom(clearWorkflowDetail);
+  const [modelIdAndName] = useAtom(modelIdAndNameAtom);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -37,32 +46,58 @@ const ContentDisplay: React.FC = () => {
     navigate(`${location.pathname}?model_id=${modelId}&model_name=${encodeURIComponent(modelName)}`);
   };
 
+  // 处理查看工作流详情
+  const handleViewWorkflowDetail = (workflowId: number, workflowName: string) => {
+    // 只负责更新URL，状态由useEffect根据URL更新
+    navigate(`${location.pathname}?workflow_id=${workflowId}&workflow_name=${encodeURIComponent(workflowName)}`);
+  };
+
   // 处理返回到模型列表
   const handleBackToList = () => {
-    setViewingModelId(null);
-    clearDetail();
-
-    // 使用React Router导航，清除URL参数
+    // 只负责更新URL，状态由useEffect根据URL更新
     navigate(location.pathname);
   };
 
-  // 从URL参数中获取model_id和model_name
+  // 从URL参数中获取参数并同步状态
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const modelId = searchParams.get('model_id');
     const modelName = searchParams.get('model_name');
+    const workflowId = searchParams.get('workflow_id');
+    const workflowName = searchParams.get('workflow_name');
 
     if (modelId && modelName) {
       // 进入模型详情页
       setViewingModelId(parseInt(modelId));
       setViewingModelName(modelName);
+      // 清除工作流状态
+      setViewingWorkflowId(null);
+      setViewingWorkflowName(null);
+      clearWorkflow();
+    } else if (workflowId && workflowName) {
+      // 进入工作流详情页
+      setViewingWorkflowId(parseInt(workflowId));
+      setViewingWorkflowName(workflowName);
+      // 清除模型状态
+      setViewingModelId(null);
+      setViewingModelName(null);
+      clearDetail();
     } else {
       // URL参数为空时，回到列表视图
       setViewingModelId(null);
       setViewingModelName(null);
+      setViewingWorkflowId(null);
+      setViewingWorkflowName(null);
       clearDetail();
+      clearWorkflow();
     }
   }, [location.search]);
+
+  useEffect(() => {
+    if (modelIdAndName.modelId && modelIdAndName.modelName) {
+      handleViewModelDetail(modelIdAndName.modelId, modelIdAndName.modelName);
+    }
+  }, [modelIdAndName]);
 
   // 新增滚动监听逻辑
   useEffect(() => {
@@ -90,7 +125,7 @@ const ContentDisplay: React.FC = () => {
   return (
     <div className={`${styles.contentDisplay} ${styles.hideScrollbar}`} ref={contentDisplayRef} onWheel={handleWheel}>
       {/* 特性展示卡片 */}
-      { !viewingModelId && <div ref={featureCardRef}>
+      { !viewingModelId && !viewingWorkflowId && <div ref={featureCardRef}>
         <FeatureCard />
       </div> }
       <div className={`${styles.contentContainer} ${isHeaderSticky ? styles.stickyHeader : ''}`}>
@@ -104,7 +139,7 @@ const ContentDisplay: React.FC = () => {
                 setOwnedOnly={setOwnedOnly}
                 sortOption={sortOption}
                 setSortOption={setSortOption}
-                isDetailMode={true}
+                isModelDetailMode={true}
                 modelName={modelDetailState.currentModel?.name || viewingModelName || 'Loading...'}
                 onBackClick={handleBackToList}
               />
@@ -114,6 +149,26 @@ const ContentDisplay: React.FC = () => {
               <ModelDetail modelId={viewingModelId} />
             </div>
           </>
+        ) : viewingWorkflowId ? (
+            <>
+              <div className={styles.headerWrapper}>
+                <ContentHeader
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    ownedOnly={ownedOnly}
+                    setOwnedOnly={setOwnedOnly}
+                    sortOption={sortOption}
+                    setSortOption={setSortOption}
+                    isWorkflowDetailMode={true}
+                    modelName={workflowDetailState.currentWorkflow?.name || viewingWorkflowName || 'Loading...'}
+                    onBackClick={handleBackToList}
+                />
+              </div>
+
+              <div className={styles.contentBody} onWheel={handleWheel}>
+                <WorkflowDetail workflowId={viewingWorkflowId} />
+              </div>
+            </>
         ) : (
           <>
             <div className={styles.headerWrapper}>
@@ -134,7 +189,13 @@ const ContentDisplay: React.FC = () => {
                   sortOption={sortOption}
                   onModelClick={handleViewModelDetail}
                 />
-              ) : (
+              ) : activeTab === 'workflows' ? (
+                  <WorkflowsContent
+                      ownedOnly={ownedOnly}
+                      sortOption={sortOption}
+                      onWorkflowClick={handleViewWorkflowDetail}
+                  />
+              ): (
                 <ImagesContent ownedOnly={ownedOnly} />
               )}
             </div>

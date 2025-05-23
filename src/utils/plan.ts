@@ -8,6 +8,8 @@ export enum SERVICE_TYPE {
   GENERATE_IMAGE = "generate_image",
   TRAIN_MODEL = "train_model",
   MODEL_TOKENIZATION = "model_tokenization",
+  RUN_WORKFLOW = "run_workflow",
+  CREATE_WORKFLOW = "create_workflow",
 }
 
 export type ServiceConfig = {
@@ -23,4 +25,14 @@ export const GENERATE_IMAGE_SERVICE_CONFIG: ServiceConfig = {
 export const TRAIN_MODEL_SERVICE_CONFIG: ServiceConfig = {
   name: SERVICE_TYPE.TRAIN_MODEL,
   cu: 7_500,
+};
+
+export const RUN_WORKFLOW_SERVICE_CONFIG: ServiceConfig = {
+  name: SERVICE_TYPE.RUN_WORKFLOW,
+  cu: 50,
+};
+
+export const CREATE_WORKFLOW_SERVICE_CONFIG: ServiceConfig = {
+  name: SERVICE_TYPE.CREATE_WORKFLOW,
+  cu: 800,
 };
