@@ -6,7 +6,6 @@ import ImagesContent from './ImagesContent';
 import ModelDetail from './ModelDetail';
 import FeatureCard from './FeatureCard';
 import { useAtom, useSetAtom } from 'jotai';
-import { clearModelDetail, modelDetailAtom } from '../store/modelStore';
 import { clearModelDetail, modelDetailAtom, modelIdAndNameAtom } from '../store/modelStore';
 import { clearWorkflowDetail, workflowDetailAtom } from '../store/workflowStore';
 import { useNavigate, useLocation } from 'react-router-dom';
