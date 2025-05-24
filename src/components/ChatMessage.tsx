@@ -776,12 +776,29 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       // 创建文件选择对话框
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = 'image/*';
+      input.accept = 'image/jpeg,image/jpg,image/png,image/webp'; // 限制文件格式
 
       input.onchange = (event) => {
         const target = event.target as HTMLInputElement;
         if (target.files && target.files.length > 0) {
           const file = target.files[0];
+          
+          // 验证文件格式
+          const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+          if (!allowedTypes.includes(file.type)) {
+            alert('Only JPG, JPEG, PNG, and WebP formats are allowed');
+            target.value = '';
+            return;
+          }
+
+          // 验证文件大小 (4MB = 4 * 1024 * 1024 bytes)
+          const maxSize = 4 * 1024 * 1024; // 4MB
+          if (file.size > maxSize) {
+            alert('File size must be less than 4MB');
+            target.value = '';
+            return;
+          }
+
           // 创建本地临时URL用于预览
           const tempUrl = URL.createObjectURL(file);
           // 保存文件到全局状态以便后续上传

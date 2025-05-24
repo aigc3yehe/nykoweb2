@@ -896,7 +896,7 @@ export const addImage = atom(
     // 创建一个文件选择对话框
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*';
+    input.accept = 'image/jpeg,image/jpg,image/png,image/webp'; // 限制文件格式
     input.multiple = true;
 
     input.onchange = async (event) => {
@@ -910,6 +910,46 @@ export const addImage = atom(
 
       const originalFileCount = currentFiles.length;
       let filesToUpload = Array.from(currentFiles);
+
+      // 验证文件格式和大小
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const maxFileSize = 4 * 1024 * 1024; // 4MB
+      const invalidFiles: string[] = [];
+      const oversizedFiles: string[] = [];
+
+      // 过滤出有效的文件
+      filesToUpload = filesToUpload.filter(file => {
+        if (!allowedTypes.includes(file.type)) {
+          invalidFiles.push(file.name);
+          return false;
+        }
+        if (file.size > maxFileSize) {
+          oversizedFiles.push(file.name);
+          return false;
+        }
+        return true;
+      });
+
+      // 显示验证错误信息
+      if (invalidFiles.length > 0) {
+        set(showToastAtom, {
+          message: `Unsupported format: ${invalidFiles.join(', ')}. Only JPG, JPEG, PNG, and WebP are allowed`,
+          severity: 'error'
+        });
+      }
+
+      if (oversizedFiles.length > 0) {
+        set(showToastAtom, {
+          message: `Files too large: ${oversizedFiles.join(', ')}. Maximum size is 4MB`,
+          severity: 'error'
+        });
+      }
+
+      // 如果没有有效文件，直接返回
+      if (filesToUpload.length === 0) {
+        target.value = '';
+        return;
+      }
 
       if (originalFileCount > maxSize) {
         filesToUpload = filesToUpload.slice(0, maxSize);
@@ -1812,7 +1852,7 @@ export const uploadWorkflowReferenceImage = atom(
     // 创建一个文件选择对话框
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*';
+    input.accept = 'image/jpeg,image/jpg,image/png,image/webp'; // 限制文件格式
     input.multiple = false; // 只允许选择一张图片
 
     input.onchange = async (event) => {
@@ -1820,6 +1860,32 @@ export const uploadWorkflowReferenceImage = atom(
       const file = target.files?.[0];
 
       if (!file) {
+        target.value = '';
+        return;
+      }
+
+      // 验证文件格式
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        // 显示错误通知
+        const { showToastAtom } = await import('./imagesStore');
+        set(showToastAtom, {
+          message: 'Only JPG, JPEG, PNG, and WebP formats are allowed',
+          severity: 'error'
+        });
+        target.value = '';
+        return;
+      }
+
+      // 验证文件大小 (4MB = 4 * 1024 * 1024 bytes)
+      const maxSize = 4 * 1024 * 1024; // 4MB
+      if (file.size > maxSize) {
+        // 显示错误通知
+        const { showToastAtom } = await import('./imagesStore');
+        set(showToastAtom, {
+          message: 'File size must be less than 4MB',
+          severity: 'error'
+        });
         target.value = '';
         return;
       }
