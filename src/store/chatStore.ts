@@ -126,6 +126,7 @@ export interface ChatState {
     fileName: string;
     error?: string;
   };
+  workflow_extra_prompt: string; // 新增字段
 }
 
 // 3. 更新初始状态
@@ -178,7 +179,8 @@ const initialState: ChatState = {
     uploadedUrl: "",
     fileName: "",
     error: undefined
-  }
+  },
+  workflow_extra_prompt: "", // 新增字段
 };
 
 // 创建原子状态
@@ -1658,6 +1660,18 @@ export const updateWorkflowModel = atom(
   }
 );
 
+// 新增：更新附加提示词
+export const updateWorkflowExtraPrompt = atom(
+  null,
+  (get, set, extraPrompt: string) => {
+    const chatState = get(chatAtom);
+    set(chatAtom, {
+      ...chatState,
+      workflow_extra_prompt: extraPrompt
+    });
+  }
+);
+
 // 运行工作流接口
 interface RunWorkflowParams {
   workflow_id: number;
@@ -1763,6 +1777,7 @@ export const runWorkflow = atom(
         workflow_id: workflowId || 0,
         creator: chatState.did || '',
         image_value: imageValue || undefined,
+        text_value: chatState.workflow_extra_prompt || undefined,
         width: chatState.selectedAspectRatio?.width || 1024,
         height: chatState.selectedAspectRatio?.height || 1024
       };
