@@ -6,12 +6,12 @@ import sendActiveIcon from '../assets/send_activating.svg';
 import closeIcon from '../assets/close.svg';
 import imageIcon from '../assets/image.svg';
 import downIcon from '../assets/down.svg';
-import {AspectRatio, aspectRatios, chatAtom, sendMessage, setAspectRatio, setLoraWeight} from '../store/chatStore';
+import {AspectRatio, workflowAspectRatios, aspectRatios, chatAtom, sendMessage, setAspectRatio, setWorkflowAspectRatio, setLoraWeight} from '../store/chatStore';
 
 interface Tag {
   id: string;
   text: string;
-  type: 'normal' | 'closeable' | 'imageRatio' | 'lora' | 'lora_weight';
+  type: 'normal' | 'closeable' | 'imageRatio' | 'lora' | 'lora_weight' | 'workflow_image_ratio';
   value?: string;
   ratio?: string;
   weight?: number;
@@ -28,6 +28,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   const [, sendMessageAction] = useAtom(sendMessage);
   const [, setAspectRatioAction] = useAtom(setAspectRatio);
   const [, setLoraWeightAction] = useAtom(setLoraWeight);
+  const [, setWorkflowAspectRatioAction] = useAtom(setWorkflowAspectRatio);
 
   const [activeTags, setActiveTags] = useState<Tag[]>([]);
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -35,6 +36,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   const [clientHeight, setClientHeight] = useState(0);
   const [showRatioDropdown, setShowRatioDropdown] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [showWorkflowRatioDropdown, setShowWorkflowRatioDropdown] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const customScrollbarRef = useRef<HTMLDivElement>(null);
@@ -124,24 +126,16 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
 
     if (chatState.currentWorkflow && chatState.task_type === "use_workflow") {
       baseTags.push({
-        id: 'image_ratio',
+        id: 'workflow_image_ratio',
         text: 'image',
-        type: 'imageRatio',
-        ratio: chatState.selectedAspectRatio?.value || '1:1'
+        type: 'workflow_image_ratio',
+        ratio: chatState.selectedWorkflowAspectRatio?.value || '1:1'
       })
     }
 
     // 如果当前进入到模型详情，则添加Base Model 和 LoraName标签
     if (chatState.currentModel && chatState.task_type === 'generation') {
       const models = chatState.currentModel?.model_tran || []
-      // if (models.length > 0 && models[0].base_model_hash){
-      //   baseTags.push({
-      //     id: 'base_model',
-      //     text: 'Base Model',
-      //     type: 'normal',
-      //     value: models[0].base_model_hash || undefined
-      //   })
-      // }
       if (models.length > 0 && models[0].lora_name && chatState.task_type === 'generation'){
         baseTags.push({
           id: 'lora_name',
@@ -167,7 +161,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
     }
 
     setActiveTags(baseTags);
-  }, [chatState.task_value, chatState.task_type, chatState.currentModel, chatState.selectedAspectRatio, chatState.loraWeight, chatState.currentWorkflow]);
+  }, [chatState.task_value, chatState.task_type, chatState.currentModel, chatState.selectedAspectRatio, chatState.selectedWorkflowAspectRatio, chatState.loraWeight, chatState.currentWorkflow]);
 
   // 监听textarea的滚动事件
   const handleTextareaScroll = () => {
@@ -209,6 +203,15 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   // 处理宽高比标签点击
   const handleRatioTagClick = () => {
     setShowRatioDropdown(prev => !prev);
+  };
+
+  const handleWorkflowRatioTagClick = () => {
+    setShowWorkflowRatioDropdown(prev => !prev);
+  };
+
+  const handleWorkflowRatioSelect = (ratio: AspectRatio) => {
+    setWorkflowAspectRatioAction(ratio);
+    setShowWorkflowRatioDropdown(false);
   };
 
   // 处理自定义滚动条拖动
@@ -291,6 +294,37 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
                           onClick={(e) => {
                             e.stopPropagation();
                             handleAspectRatioSelect(ratio);
+                          }}
+                        >
+                          {ratio.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            } else if (tag.type === 'workflow_image_ratio') {
+              return (
+                <div
+                  key={tag.id}
+                  className={styles.imageRatioTag}
+                  onClick={handleWorkflowRatioTagClick}
+                  ref={ratioDropdownRef}
+                >
+                  <img src={imageIcon} alt="Image" className={styles.leftIcon} />
+                  <span className={styles.ratioText}>{tag.ratio}</span>
+                  <img src={downIcon} alt="Down" className={styles.rightIcon} />
+
+                  {/* 宽高比下拉菜单 */}
+                  {showWorkflowRatioDropdown && (
+                    <div className={styles.ratioDropdown}>
+                      {workflowAspectRatios.map((ratio) => (
+                        <div
+                          key={ratio.value}
+                          className={`${styles.ratioItem} ${chatState.selectedWorkflowAspectRatio?.value === ratio.value ? styles.ratioItemSelected : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleWorkflowRatioSelect(ratio);
                           }}
                         >
                           {ratio.label}

@@ -28,6 +28,13 @@ export const aspectRatios: AspectRatio[] = [
   //{ label: '16:9', value: '16:9', width: 1920, height: 1080 },
 ];
 
+export const workflowAspectRatios: AspectRatio[] = [
+  { label: '1:1', value: '1:1', width: 1024, height: 1024 },
+  { label: '2:3', value: '2:3', width: 1024, height: 1536 },
+  { label: '3:2', value: '3:2', width: 1536, height: 1024 },
+  { label: 'auto', value: 'auto', width: 0, height: 0 },
+];
+
 // 任务状态类型
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
 
@@ -97,6 +104,7 @@ export interface ChatState {
   modelStatus: string | null;
   agree: boolean;
   selectedAspectRatio?: AspectRatio;
+  selectedWorkflowAspectRatio?: AspectRatio;
   activeTasks: Record<string, TaskInfo>;
   connection: ConnectionStatus; // 添加连接状态
   heartbeatId?: number; // 存储心跳计时器ID
@@ -147,6 +155,7 @@ const initialState: ChatState = {
   modelStatus: null,
   agree: false,
   selectedAspectRatio: aspectRatios[0], // 默认选择1:1
+  selectedWorkflowAspectRatio: workflowAspectRatios[0], // 默认选择1:1
   activeTasks: {},
   connection: {
     isActive: false,
@@ -1426,6 +1435,19 @@ export const setAspectRatio = atom(
   }
 );
 
+// 添加设置宽高比的操作
+export const setWorkflowAspectRatio = atom(
+  null,
+  (get, set, aspectRatio: AspectRatio) => {
+    const chatState = get(chatAtom);
+
+    set(chatAtom, {
+      ...chatState,
+      selectedWorkflowAspectRatio: aspectRatio
+    });
+  }
+);
+
 // 添加到导出列表中
 export const setLoraWeight = atom(
   null,
@@ -1772,15 +1794,20 @@ export const runWorkflow = atom(
       }
 
       const workflowId = chatState.currentWorkflow?.id
+      const workflowRatio = chatState.selectedWorkflowAspectRatio
+      
       // 准备API参数，使用上传后的图片URL
       const params: RunWorkflowParams = {
         workflow_id: workflowId || 0,
         creator: chatState.did || '',
         image_value: imageValue || undefined,
         text_value: chatState.workflow_extra_prompt || undefined,
-        width: chatState.selectedAspectRatio?.width || 1024,
-        height: chatState.selectedAspectRatio?.height || 1024
       };
+
+      if (workflowRatio !== undefined && workflowRatio.value !== 'auto') {
+        params.width = workflowRatio.width
+        params.height = workflowRatio.height
+      }
 
       // 调用API
       const response = await runWorkflowAPI(params);
