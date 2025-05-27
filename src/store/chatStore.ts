@@ -28,6 +28,13 @@ export const aspectRatios: AspectRatio[] = [
   //{ label: '16:9', value: '16:9', width: 1920, height: 1080 },
 ];
 
+export const workflowAspectRatios: AspectRatio[] = [
+  { label: '1:1', value: '1:1', width: 1024, height: 1024 },
+  { label: '2:3', value: '2:3', width: 1024, height: 1536 },
+  { label: '3:2', value: '3:2', width: 1536, height: 1024 },
+  { label: 'auto', value: 'auto', width: 0, height: 0 },
+];
+
 // 任务状态类型
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
 
@@ -97,6 +104,7 @@ export interface ChatState {
   modelStatus: string | null;
   agree: boolean;
   selectedAspectRatio?: AspectRatio;
+  selectedWorkflowAspectRatio?: AspectRatio;
   activeTasks: Record<string, TaskInfo>;
   connection: ConnectionStatus; // 添加连接状态
   heartbeatId?: number; // 存储心跳计时器ID
@@ -126,6 +134,7 @@ export interface ChatState {
     fileName: string;
     error?: string;
   };
+  workflow_extra_prompt: string; // 新增字段
 }
 
 // 3. 更新初始状态
@@ -146,6 +155,7 @@ const initialState: ChatState = {
   modelStatus: null,
   agree: false,
   selectedAspectRatio: aspectRatios[0], // 默认选择1:1
+  selectedWorkflowAspectRatio: workflowAspectRatios[0], // 默认选择1:1
   activeTasks: {},
   connection: {
     isActive: false,
@@ -178,7 +188,8 @@ const initialState: ChatState = {
     uploadedUrl: "",
     fileName: "",
     error: undefined
-  }
+  },
+  workflow_extra_prompt: "", // 新增字段
 };
 
 // 创建原子状态
@@ -896,7 +907,7 @@ export const addImage = atom(
     // 创建一个文件选择对话框
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*';
+    input.accept = 'image/jpeg,image/jpg,image/png,image/webp'; // 限制文件格式
     input.multiple = true;
 
     input.onchange = async (event) => {
@@ -910,6 +921,46 @@ export const addImage = atom(
 
       const originalFileCount = currentFiles.length;
       let filesToUpload = Array.from(currentFiles);
+
+      // 验证文件格式和大小
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const maxFileSize = 4 * 1024 * 1024; // 4MB
+      const invalidFiles: string[] = [];
+      const oversizedFiles: string[] = [];
+
+      // 过滤出有效的文件
+      filesToUpload = filesToUpload.filter(file => {
+        if (!allowedTypes.includes(file.type)) {
+          invalidFiles.push(file.name);
+          return false;
+        }
+        if (file.size > maxFileSize) {
+          oversizedFiles.push(file.name);
+          return false;
+        }
+        return true;
+      });
+
+      // 显示验证错误信息
+      if (invalidFiles.length > 0) {
+        set(showToastAtom, {
+          message: `Unsupported format: ${invalidFiles.join(', ')}. Only JPG, JPEG, PNG, and WebP are allowed`,
+          severity: 'error'
+        });
+      }
+
+      if (oversizedFiles.length > 0) {
+        set(showToastAtom, {
+          message: `Files too large: ${oversizedFiles.join(', ')}. Maximum size is 4MB`,
+          severity: 'error'
+        });
+      }
+
+      // 如果没有有效文件，直接返回
+      if (filesToUpload.length === 0) {
+        target.value = '';
+        return;
+      }
 
       if (originalFileCount > maxSize) {
         filesToUpload = filesToUpload.slice(0, maxSize);
@@ -1384,6 +1435,19 @@ export const setAspectRatio = atom(
   }
 );
 
+// 添加设置宽高比的操作
+export const setWorkflowAspectRatio = atom(
+  null,
+  (get, set, aspectRatio: AspectRatio) => {
+    const chatState = get(chatAtom);
+
+    set(chatAtom, {
+      ...chatState,
+      selectedWorkflowAspectRatio: aspectRatio
+    });
+  }
+);
+
 // 添加到导出列表中
 export const setLoraWeight = atom(
   null,
@@ -1618,6 +1682,18 @@ export const updateWorkflowModel = atom(
   }
 );
 
+// 新增：更新附加提示词
+export const updateWorkflowExtraPrompt = atom(
+  null,
+  (get, set, extraPrompt: string) => {
+    const chatState = get(chatAtom);
+    set(chatAtom, {
+      ...chatState,
+      workflow_extra_prompt: extraPrompt
+    });
+  }
+);
+
 // 运行工作流接口
 interface RunWorkflowParams {
   workflow_id: number;
@@ -1718,14 +1794,20 @@ export const runWorkflow = atom(
       }
 
       const workflowId = chatState.currentWorkflow?.id
+      const workflowRatio = chatState.selectedWorkflowAspectRatio
+      
       // 准备API参数，使用上传后的图片URL
       const params: RunWorkflowParams = {
         workflow_id: workflowId || 0,
         creator: chatState.did || '',
         image_value: imageValue || undefined,
-        width: chatState.selectedAspectRatio?.width || 1024,
-        height: chatState.selectedAspectRatio?.height || 1024
+        text_value: chatState.workflow_extra_prompt || undefined,
       };
+
+      if (workflowRatio !== undefined && workflowRatio.value !== 'auto') {
+        params.width = workflowRatio.width
+        params.height = workflowRatio.height
+      }
 
       // 调用API
       const response = await runWorkflowAPI(params);
@@ -1812,7 +1894,7 @@ export const uploadWorkflowReferenceImage = atom(
     // 创建一个文件选择对话框
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*';
+    input.accept = 'image/jpeg,image/jpg,image/png,image/webp'; // 限制文件格式
     input.multiple = false; // 只允许选择一张图片
 
     input.onchange = async (event) => {
@@ -1820,6 +1902,32 @@ export const uploadWorkflowReferenceImage = atom(
       const file = target.files?.[0];
 
       if (!file) {
+        target.value = '';
+        return;
+      }
+
+      // 验证文件格式
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        // 显示错误通知
+        const { showToastAtom } = await import('./imagesStore');
+        set(showToastAtom, {
+          message: 'Only JPG, JPEG, PNG, and WebP formats are allowed',
+          severity: 'error'
+        });
+        target.value = '';
+        return;
+      }
+
+      // 验证文件大小 (4MB = 4 * 1024 * 1024 bytes)
+      const maxSize = 4 * 1024 * 1024; // 4MB
+      if (file.size > maxSize) {
+        // 显示错误通知
+        const { showToastAtom } = await import('./imagesStore');
+        set(showToastAtom, {
+          message: 'File size must be less than 4MB',
+          severity: 'error'
+        });
         target.value = '';
         return;
       }

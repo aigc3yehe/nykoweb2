@@ -77,6 +77,8 @@ export interface ChatMessageProps {
   };
   onUploadReferenceImage?: () => void;
   onRemoveReferenceImage?: () => void;
+  workflow_extra_prompt?: string;
+  onUpdateWorkflowExtraPrompt?: (prompt: string) => void;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -120,6 +122,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   workflowReferenceImage,
   onUploadReferenceImage,
   onRemoveReferenceImage,
+  workflow_extra_prompt,
+  onUpdateWorkflowExtraPrompt,
 }) => {
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
@@ -591,7 +595,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
   // 修改工作流组件，创建成功后隐藏标题
   const renderCreateWorkflowComponent = () => {
-    const isPromptTooLong = workflow_prompt.length > 800;
+    const isPromptTooLong = workflow_prompt.length > 300;
 
     return (
       <>
@@ -654,7 +658,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                       onBlur={() => setIsFocused(false)}
                       onScroll={handlePromptTextareaScroll}
                       placeholder="Enter your prompt here"
-                      maxLength={800}
+                      maxLength={300}
                       disabled={isCreatingWorkflow}
                     />
 
@@ -675,7 +679,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                   </div>
 
                   <div className={`${styles.charCount} ${isPromptTooLong ? styles.charCountError : ''}`}>
-                    Max 800 char
+                    Max 300 Chars
                   </div>
                 </div>
               </div>
@@ -776,12 +780,29 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       // 创建文件选择对话框
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = 'image/*';
+      input.accept = 'image/jpeg,image/jpg,image/png,image/webp'; // 限制文件格式
 
       input.onchange = (event) => {
         const target = event.target as HTMLInputElement;
         if (target.files && target.files.length > 0) {
           const file = target.files[0];
+          
+          // 验证文件格式
+          const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+          if (!allowedTypes.includes(file.type)) {
+            alert('Only JPG, JPEG, PNG, and WebP formats are allowed');
+            target.value = '';
+            return;
+          }
+
+          // 验证文件大小 (4MB = 4 * 1024 * 1024 bytes)
+          const maxSize = 4 * 1024 * 1024; // 4MB
+          if (file.size > maxSize) {
+            alert('File size must be less than 4MB');
+            target.value = '';
+            return;
+          }
+
           // 创建本地临时URL用于预览
           const tempUrl = URL.createObjectURL(file);
           // 保存文件到全局状态以便后续上传
@@ -797,6 +818,29 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     return (
       <div className={styles.workflowRunContainer}>
         <div className={styles.workflowRunTitle}>Upload Your Image</div>
+
+        {/* 附加提示词输入框 */}
+        <div className={styles.workflowSection}>
+          <div className={styles.sectionLabel} style={{marginTop: '1rem'}}>Additional Info (Optional)</div>
+          <div className={`${styles.promptInputContainer} ${isFocused ? styles.focused : ''}`}>
+            <div className={styles.promptTextareaWrapper}>
+              <textarea
+                className={styles.promptInput}
+                placeholder="Additional requirements for generated image."
+                value={workflow_extra_prompt || ''}
+                onChange={e => onUpdateWorkflowExtraPrompt && onUpdateWorkflowExtraPrompt(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                maxLength={300}
+                disabled={isButtonDisabled}
+                style={{height: '60px'}}
+              />
+            </div>
+            <div className={styles.charCount}>
+              Max 300 Chars
+            </div>
+          </div>
+        </div>
 
         {!hasSelectedImage ? (
           // 未选择图片状态

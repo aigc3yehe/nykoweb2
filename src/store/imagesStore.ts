@@ -43,6 +43,31 @@ export const toastAtom = atom<ToastNotification>({
   open: false
 });
 
+// 添加文件名清理函数
+const sanitizeFileName = (fileName: string): string => {
+  // 获取文件扩展名
+  const lastDotIndex = fileName.lastIndexOf('.');
+  const name = lastDotIndex !== -1 ? fileName.slice(0, lastDotIndex) : fileName;
+  const extension = lastDotIndex !== -1 ? fileName.slice(lastDotIndex) : '';
+  
+  // 清理文件名：移除或替换特殊字符
+  const cleanName = name
+    // 移除或替换常见的特殊字符
+    .replace(/[,\s]+/g, '_')           // 逗号和空格替换为下划线
+    .replace(/[^\w\-_.]/g, '')         // 只保留字母数字、下划线、连字符和点
+    .replace(/_{2,}/g, '_')            // 多个连续下划线替换为单个
+    .replace(/^_+|_+$/g, '')          // 移除开头和结尾的下划线
+    .toLowerCase();                    // 转为小写
+  
+  // 如果清理后的名称为空，使用默认名称
+  const finalName = cleanName || 'image';
+  
+  // 限制文件名长度（S3建议最大1024字符，我们设置更保守的100字符）
+  const truncatedName = finalName.length > 100 ? finalName.slice(0, 100) : finalName;
+  
+  return truncatedName + extension.toLowerCase();
+};
+
 // 上传单个文件到 S3
 export const uploadFileToS3 = async (file: File): Promise<string> => {
   console.log('📝 Preparing file for upload:', file.name);
@@ -58,17 +83,20 @@ export const uploadFileToS3 = async (file: File): Promise<string> => {
     const arrayBuffer = await response.arrayBuffer();
     const fileContent = new Uint8Array(arrayBuffer);
     
-    const fileName = `images_${Date.now()}-${file.name}`;
+    // 使用清理后的文件名
+    const sanitizedFileName = sanitizeFileName(file.name);
+    const fileName = `images_${Date.now()}-${sanitizedFileName}`;
     const key = `images/chat/${fileName}`;
     
     const command = new PutObjectCommand({
       Bucket: S3_CONFIG.bucketName,
       Key: key,
-      Body: fileContent,  // 使用 Buffer 来处理二进制数据
+      Body: fileContent,
       ContentType: file.type
     });
 
     console.log('🚀 Starting upload to S3:', key);
+    console.log('📝 Original filename:', file.name, '→ Sanitized:', sanitizedFileName);
     const result = await s3Client.send(command);
     console.log("✨ Upload completed:", result);
 
