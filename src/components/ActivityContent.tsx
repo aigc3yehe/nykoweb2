@@ -106,7 +106,7 @@ const ActivityContent: React.FC = () => {
     if (activeTab === 'leaderboard' && !leaderboardLoaded) {
       fetchLeaderboard();
     }
-  }, [activeTab, leaderboardLoaded]);
+  }, [activeTab, fetchLeaderboard, leaderboardLoaded]);
 
   // 格式化用户名显示
   const formatUserName = (item: LeaderboardItem) => {
