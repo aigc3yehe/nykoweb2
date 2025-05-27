@@ -102,7 +102,6 @@
 
 /* 用户信息行 */
 .userInfoRow {
-  width: 6rem; /* 96px */
   height: 1.25rem; /* 20px */
   display: flex;
   align-items: center;
