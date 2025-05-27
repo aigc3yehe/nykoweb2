@@ -5,6 +5,7 @@ import clearIcon from '../assets/clear.svg';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import GoldIcon from "../assets/gold.svg";
+import WarningIcon from "../assets/warning.svg";
 import {accountAtom} from "../store/accountStore";
 import {
   addImage,
@@ -251,18 +252,34 @@ const ChatWindow: React.FC = () => {
     }
   };
 
+  const maintenance = false; // TODO: 维护状态，请设置为true
+
   return (
     <div className={styles.chatWindow}>
-      {/* 活动title */}
-      <div className={styles.activityBanner}>
-        <div className={styles.activityInfo}>
-          <img src={GoldIcon} alt="Gold" className={styles.goldIcon} />
-          <span className={styles.activityText}>stake $NYKO. go premium. share 30M in rewards!</span>
-        </div>
-        <button className={styles.stakeButton} onClick={handleStake}>
-          Stake
-        </button>
-      </div>
+      {maintenance ? (
+        <>
+          {/* 维护title */}
+          <div className={styles.maintenanceBanner}>
+            <div className={styles.maintenanceInfo}>
+              <img src={WarningIcon} alt="Warning" className={styles.warningIcon} />
+              <span className={styles.maintenanceText}>Maintenance in progress. We'll be back soon!</span>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* 活动title */}
+          <div className={styles.activityBanner}>
+            <div className={styles.activityInfo}>
+              <img src={GoldIcon} alt="Gold" className={styles.goldIcon} />
+              <span className={styles.activityText}>stake $NYKO. go premium. share 30M in rewards!</span>
+            </div>
+            <button className={styles.stakeButton} onClick={handleStake}>
+              Stake
+            </button>
+          </div>
+        </>
+      )}
       {/* 聊天标题栏 */}
       <div className={styles.chatHeader}>
         <div className={styles.headerTitle}>

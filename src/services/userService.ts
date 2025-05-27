@@ -51,6 +51,19 @@ export interface QueryPlanResponse {
   };
 }
 
+// 查询用户积分信息响应接口
+export interface QueryPointsResponse {
+  message: string;
+  data: {
+    points: number; // 用户在当前赛季的分数
+    total_points: number; // 用户历史总分数
+    geni: number;
+    ef: number;
+    cd: number;
+    current_season_total_points: number; // 当前赛季的总分
+  };
+}
+
 // 创建用户
 export const createUser = async (userData: {
   did: string;
@@ -272,5 +285,35 @@ export const refreshUserPlan = async (params: {
         next_refresh_at: new Date(),
       },
     };
+  }
+};
+
+// 查询用户积分信息
+export const queryUserPoints = async (params: {
+  user: string; // 用户的did
+}): Promise<QueryPointsResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+    queryParams.append("user", params.user);
+
+    const privyToken = await getAccessToken();
+    const response = await fetch(
+      `/studio-api/points?${queryParams.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          [PRIVY_TOKEN_HEADER]: privyToken || "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Query user points failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Query user points failed:", error);
+    throw error;
   }
 };

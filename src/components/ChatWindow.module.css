@@ -675,3 +675,35 @@
 .stakeButton:hover {
   opacity: 0.9;
 }
+
+.maintenanceBanner {
+  width: 100%;
+  height: 2.5rem; /* 40px */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.625rem 1.5rem; /* 10px 24px */
+  background: #FF5253;
+}
+
+.maintenanceInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* 4px */
+}
+
+.warningIcon {
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+}
+
+.maintenanceText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem; /* 20px */
+  letter-spacing: 0;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
+}
