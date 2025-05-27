@@ -395,3 +395,20 @@
     width: calc(100% - 3.25rem); /* 减去头像宽度和间距 */
   }
 }
+
+/* GENI 特殊样式 */
+.geniKeyTitle {
+  background: linear-gradient(90deg, #E8C4EA 43%, #39EDFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.geniValueText {
+  background: linear-gradient(90deg, #E8C4EA 43%, #39EDFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}

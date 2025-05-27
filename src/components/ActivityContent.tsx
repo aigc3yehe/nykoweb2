@@ -2,7 +2,14 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import styles from './ActivityContent.module.css';
 import BackIcon from '../assets/back.svg';
+import InfoTabIcon from '../assets/info_tab.svg';
+import InfoTabSelectedIcon from '../assets/info_tab_selected.svg';
+import LeaderboardTabIcon from '../assets/leaderboard_tab.svg';
+import GoldRankIcon from '../assets/gold_rank.svg';
+import SilverRankIcon from '../assets/silver.svg';
+import BronzeRankIcon from '../assets/bronze.svg';
 import ReactMarkdown from 'react-markdown';
+import { getLeaderboard, LeaderboardItem } from '../services/userService';
 
 // 示例 Markdown 内容
 const markdownContent = `
@@ -42,8 +49,14 @@ Mindshare Points = GENI × IF × Cooldown_X x Virtuality
 - Virtuality: 3 if your creation is related to Virtuals native culture, like Vader, Luna, AIXBT, otherwise 1.
 `;
 
+type TabType = 'information' | 'leaderboard';
+
 const ActivityContent: React.FC = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<TabType>('information');
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardItem[]>([]);
+  const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
+  const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
 
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -56,6 +69,81 @@ const ActivityContent: React.FC = () => {
   // 返回首页
   const handleBack = () => {
     navigate('/');
+  };
+
+  // 格式化数字显示
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+  };
+
+  // 获取排行榜数据
+  const fetchLeaderboard = async () => {
+    if (leaderboardLoaded) return; // 如果已经加载过，不重复请求
+
+    setIsLoadingLeaderboard(true);
+    try {
+      const response = await getLeaderboard({
+        page: 1,
+        pageSize: 20, // 获取前20名
+      });
+      setLeaderboardData(response.data);
+      setLeaderboardLoaded(true);
+    } catch (error) {
+      console.error('Failed to fetch leaderboard:', error);
+      setLeaderboardData([]);
+    } finally {
+      setIsLoadingLeaderboard(false);
+    }
+  };
+
+  // 当切换到排行榜 tab 时获取数据（仅第一次）
+  useEffect(() => {
+    if (activeTab === 'leaderboard' && !leaderboardLoaded) {
+      fetchLeaderboard();
+    }
+  }, [activeTab, leaderboardLoaded]);
+
+  // 格式化用户名显示
+  const formatUserName = (item: LeaderboardItem) => {
+    if (item.twitter?.name) return item.twitter.name;
+    if (item.twitter?.username) return `@${item.twitter.username}`;
+    return item.user.slice(0, 8) + '...';
+  };
+
+  // 获取排名图标和样式
+  const getRankDisplay = (index: number) => {
+    const rank = index + 1;
+
+    if (rank === 1) {
+      return {
+        icon: GoldRankIcon,
+        textColor: '#871800',
+        itemClass: styles.goldRank
+      };
+    } else if (rank === 2) {
+      return {
+        icon: SilverRankIcon,
+        textColor: '#1F222A',
+        itemClass: styles.silverRank
+      };
+    } else if (rank === 3) {
+      return {
+        icon: BronzeRankIcon,
+        textColor: '#442B14',
+        itemClass: styles.bronzeRank
+      };
+    }
+
+    return {
+      icon: null,
+      textColor: '#FFFFFF',
+      itemClass: ''
+    };
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -77,7 +165,7 @@ const ActivityContent: React.FC = () => {
   };
 
   // 根据条件确定要显示的周信息
-  const weekInfo = { week: 'Week 3 (5.20-5.26)', rewards: '2,500,000' }
+  const weekInfo = { week: 'Week 4 (5.27-6.2)', rewards: '2,500,000' }
 
   // 更新滚动状态
   useEffect(() => {
@@ -144,6 +232,83 @@ const ActivityContent: React.FC = () => {
   // 显示自定义滚动条的条件
   const showCustomScrollbar = scrollHeight > clientHeight;
 
+  // 渲染排行榜内容
+  const renderLeaderboard = () => {
+    if (isLoadingLeaderboard) {
+      return <div className={styles.loadingState}>Loading leaderboard...</div>;
+    }
+
+    if (leaderboardData.length === 0) {
+      return <div className={styles.emptyState}>No leaderboard data available</div>;
+    }
+
+    return (
+      <div className={styles.leaderboardContainer}>
+        <div className={styles.leaderboardHeader}>
+          <div className={styles.headerRank}>Rank</div>
+          <div className={styles.headerUser}>User</div>
+          <div className={styles.headerPoints}>Weekly Points</div>
+        </div>
+        <div className={styles.leaderboardList}>
+          {leaderboardData.map((item, index) => {
+            const rankDisplay = getRankDisplay(index);
+            const isOdd = index % 2 === 0; // 奇数行（从0开始计数）
+
+            return (
+              <div
+                key={item.user}
+                className={`${styles.leaderboardItem} ${rankDisplay.itemClass} ${isOdd ? styles.oddRow : styles.evenRow}`}
+              >
+                <div className={styles.rankColumn}>
+                  {rankDisplay.icon ? (
+                    <div className={styles.rankIconContainer}>
+                      <img
+                        src={rankDisplay.icon}
+                        alt={`Rank ${index + 1}`}
+                        className={styles.rankIcon}
+                      />
+                      <span
+                        className={styles.rankText}
+                        style={{ color: rankDisplay.textColor }}
+                      >
+                        {index + 1}
+                      </span>
+                    </div>
+                  ) : (
+                    <span
+                      className={styles.rankNumber}
+                      style={{ color: rankDisplay.textColor }}
+                    >
+                      {index + 1}
+                    </span>
+                  )}
+                </div>
+
+                <div className={styles.userColumn}>
+                  <div className={styles.userAvatarContainer}>
+                    <img
+                      src={item.twitter?.profilePictureUrl || '/default-avatar.png'}
+                      alt="User Avatar"
+                      className={styles.userAvatar}
+                    />
+                    <div className={styles.geniBadge}>
+                      <span className={styles.geniValue}>{item.geni}</span>
+                    </div>
+                  </div>
+                  <span className={styles.userName}>{formatUserName(item)}</span>
+                </div>
+
+                <div className={styles.pointsColumn}>
+                  <span className={styles.pointsValue}>{formatNumber(item.points)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={styles.activityContent}>
       <div className={styles.contentScrollArea}>
@@ -173,13 +338,48 @@ const ActivityContent: React.FC = () => {
               </div>
             </div>
 
-            {/* 内容区域 */}
-            <div className={styles.markdownContent}>
+            {/* Tab 导航 */}
+            <div className={styles.tabContainer}>
+              <button
+                className={`${styles.tabButton} ${styles.infoTab} ${
+                  activeTab === 'information' ? styles.active : ''
+                }`}
+                onClick={() => setActiveTab('information')}
+              >
+                <img
+                  src={activeTab === 'information' ? InfoTabSelectedIcon : InfoTabIcon}
+                  alt="Information"
+                  className={styles.tabIcon}
+                />
+                <span className={styles.tabText}>Information</span>
+              </button>
+
+              <button
+                className={`${styles.tabButton} ${styles.leaderboardTab} ${
+                  activeTab === 'leaderboard' ? styles.active : ''
+                }`}
+                onClick={() => setActiveTab('leaderboard')}
+              >
+                <img
+                  src={LeaderboardTabIcon}
+                  alt="Leaderboard"
+                  className={styles.tabIcon}
+                />
+                <span className={styles.tabText}>Leaderboard</span>
+              </button>
+            </div>
+
+            {/* 内容区域 - 使用隐藏显示而不是条件渲染 */}
+            <div className={`${styles.markdownContent} ${activeTab !== 'information' ? styles.hidden : ''}`}>
               <ReactMarkdown components={{
                 a: CustomLink,
               }}>
                 {markdownContent}
               </ReactMarkdown>
+            </div>
+
+            <div className={`${styles.leaderboardWrapper} ${activeTab !== 'leaderboard' ? styles.hidden : ''}`}>
+              {renderLeaderboard()}
             </div>
           </div>
         </div>

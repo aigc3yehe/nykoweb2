@@ -6,6 +6,15 @@
   overflow: hidden;
 }
 
+.contentArea {
+  flex: 1;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #0A0F1B; /* 添加背景色作为后备 */
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .activityContainer {

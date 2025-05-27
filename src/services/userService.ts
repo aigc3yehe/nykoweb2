@@ -64,6 +64,20 @@ export interface QueryPointsResponse {
   };
 }
 
+// 排行榜项目类型
+export interface LeaderboardItem {
+  user: string; // did
+  points: number; // 当前赛季的分数
+  twitter: Twitter;
+  geni: number; // geni 分数
+}
+
+// 排行榜响应接口
+export interface LeaderboardResponse {
+  message: string;
+  data: LeaderboardItem[];
+}
+
 // 创建用户
 export const createUser = async (userData: {
   did: string;
@@ -314,6 +328,47 @@ export const queryUserPoints = async (params: {
     return await response.json();
   } catch (error) {
     console.error("Query user points failed:", error);
+    throw error;
+  }
+};
+
+// 获取排行榜数据
+export const getLeaderboard = async (params: {
+  page?: number;
+  pageSize?: number;
+  season?: number;
+}): Promise<LeaderboardResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    if (params.page) {
+      queryParams.append("page", params.page.toString());
+    }
+    if (params.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
+    if (params.season) {
+      queryParams.append("season", params.season.toString());
+    }
+
+    const privyToken = await getAccessToken();
+    const response = await fetch(
+      `/studio-api/points/leaderboard?${queryParams.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          [PRIVY_TOKEN_HEADER]: privyToken || "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Get leaderboard failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Get leaderboard failed:", error);
     throw error;
   }
 };

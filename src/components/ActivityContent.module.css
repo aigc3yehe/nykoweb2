@@ -1,5 +1,4 @@
 .activityContent {
-  flex: 1;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -171,11 +170,11 @@
   width: 100%;
 }
 
-.markdownContent h1, 
-.markdownContent h2, 
-.markdownContent h3, 
-.markdownContent h4, 
-.markdownContent h5, 
+.markdownContent h1,
+.markdownContent h2,
+.markdownContent h3,
+.markdownContent h4,
+.markdownContent h5,
 .markdownContent h6 {
   font-family: 'Jura', sans-serif;
   font-weight: 700;
@@ -196,8 +195,8 @@
   font-size: 1.5rem; /* 24px */
 }
 
-.markdownContent p, 
-.markdownContent li, 
+.markdownContent p,
+.markdownContent li,
 .markdownContent a {
   font-family: 'Jura', sans-serif;
   font-weight: 400;
@@ -374,27 +373,392 @@
     width: 100%;
     height: auto;
   }
-  
+
   .activityCard {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .joinButton {
     margin-top: 1rem;
     width: 100%;
   }
-  
+
   .activityMeta {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .tagsGroup {
     flex-wrap: wrap;
   }
-  
+
   .scrollContainer {
     padding: 0.75rem 1rem;
   }
+}
+
+/* Tab 容器 */
+.tabContainer {
+  height: 2.75rem; /* 44px */
+  display: flex;
+  gap: 2.5rem; /* 40px */
+  margin-bottom: 1.5rem;
+}
+
+/* Tab 按钮基础样式 */
+.tabButton {
+  height: 2.75rem; /* 44px */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* 8px */
+  padding: 0.625rem 0; /* 10px 0 */
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tabIcon {
+  width: 1.5rem; /* 24px */
+  height: 1.5rem; /* 24px */
+}
+
+.tabText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem; /* 20px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+}
+
+/* Information Tab 样式 */
+.infoTab .tabText {
+  color: #FFFFFF;
+}
+
+.infoTab.active {
+  border-bottom: 2px solid #6366F1;
+}
+
+.infoTab.active .tabText {
+  color: #6366F1;
+}
+
+/* Leaderboard Tab 样式 */
+.leaderboardTab .tabText {
+  color: #FFFFFF;
+  background: linear-gradient(90deg, #FF6A00 0%, #FFFFFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.leaderboardTab.active {
+  border-bottom: 2px solid;
+  border-image: linear-gradient(90deg, #FF6A00 0%, #FFFFFF 100%) 1;
+}
+
+/* 排行榜包装器 */
+.leaderboardWrapper {
+  width: 100%;
+}
+
+/* 排行榜容器 */
+.leaderboardContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 排行榜表头 */
+.leaderboardHeader {
+  width: 100%;
+  height: 2.75rem; /* 44px */
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.headerRank {
+  width: 5.4375rem; /* 87px */
+  height: 2.75rem; /* 44px */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 居中对齐 */
+  padding: 0.75rem 1rem; /* 12px 16px */
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.2rem; /* 19.2px */
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #FFFFFF;
+}
+
+.headerUser {
+  flex: 1; /* 填充剩余宽度 */
+  height: 2.75rem; /* 44px */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 左对齐 */
+  gap: 1.25rem; /* 20px */
+  padding: 0.75rem 1rem; /* 12px 16px */
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.2rem; /* 19.2px */
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #FFFFFF;
+}
+
+.headerPoints {
+  width: 8.125rem; /* 130px */
+  height: 2.75rem; /* 44px */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 左对齐 */
+  padding: 0.75rem 1rem; /* 12px 16px */
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.2rem; /* 19.2px */
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #FFFFFF;
+}
+
+/* 排行榜列表 */
+.leaderboardList {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 排行榜项目基础样式 */
+.leaderboardItem {
+  width: 100%;
+  height: 3.375rem; /* 54px */
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* 奇偶行背景 */
+.oddRow {
+  background: rgba(255, 255, 255, 0.02); /* #FFFFFF05 */
+}
+
+.evenRow {
+  background: transparent;
+}
+
+/* 前三名特殊背景 */
+.goldRank {
+  background: linear-gradient(180deg, rgba(255, 106, 0, 0) 0%, rgba(255, 106, 0, 0.1) 100%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.silverRank {
+  background: linear-gradient(180deg, rgba(137, 147, 164, 0) 0%, rgba(137, 147, 164, 0.1) 100%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.bronzeRank {
+  background: linear-gradient(180deg, rgba(232, 153, 97, 0) 0%, rgba(232, 153, 97, 0.1) 100%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+/* 排名列 */
+.rankColumn {
+  width: 5.4375rem; /* 87px */
+  height: 3.375rem; /* 54px */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 居中对齐 */
+  padding: 0.75rem 1rem; /* 12px 16px */
+}
+
+.rankIconContainer {
+  position: relative;
+  width: 1.6875rem; /* 27px */
+  height: 1.6875rem; /* 27px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rankIcon {
+  width: 1.6875rem; /* 27px */
+  height: 1.6875rem; /* 27px */
+}
+
+.rankText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.rankNumber {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+/* 用户列 */
+.userColumn {
+  flex: 1; /* 填充剩余宽度 */
+  height: 3.375rem; /* 54px */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 左对齐 */
+  gap: 1.25rem; /* 20px */
+  padding: 0.75rem 1rem; /* 12px 16px */
+}
+
+.userAvatarContainer {
+  position: relative;
+  width: 1.875rem; /* 30px */
+  height: 1.875rem; /* 30px */
+}
+
+.userAvatar {
+  width: 1.875rem; /* 30px */
+  height: 1.875rem; /* 30px */
+  border-radius: 6.25rem; /* 100px */
+  border: 1.5px solid transparent;
+  background: 
+    linear-gradient(rgba(55, 65, 81, 0.5), rgba(55, 65, 81, 0.5)) padding-box,
+    linear-gradient(90deg, #E8C4EA 43%, #39EDFF 100%) border-box;
+  object-fit: cover;
+}
+
+.geniBadge {
+  position: absolute;
+  top: -0.125rem; /* -2px */
+  right: -0.125rem; /* -2px */
+  width: 1rem; /* 16px */
+  height: 0.875rem; /* 14px */
+  border-top-left-radius: 0.25rem; /* 4px */
+  border-top-right-radius: 0.25rem; /* 4px */
+  border-bottom-right-radius: 0.25rem; /* 4px */
+  background: linear-gradient(90deg, #E8C4EA 43%, #39EDFF 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.geniValue {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 0.625rem; /* 10px */
+  line-height: 100%;
+  letter-spacing: 0px;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
+}
+
+.userName {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.2rem; /* 19.2px */
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #FFFFFF;
+}
+
+/* 积分列 */
+.pointsColumn {
+  width: 8.125rem; /* 130px */
+  height: 3.375rem; /* 54px */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 左对齐 */
+  padding: 0.75rem 1rem; /* 12px 16px */
+}
+
+.pointsValue {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  color: #FFFFFF;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .leaderboardContainer {
+    width: 100%;
+  }
+
+  .leaderboardHeader,
+  .leaderboardItem {
+    width: 100%;
+    padding: 0 0.5rem;
+  }
+
+  .headerRank,
+  .rankColumn {
+    width: 4rem;
+  }
+
+  .headerPoints,
+  .pointsColumn {
+    width: 6rem;
+  }
+
+  .userAvatar {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .geniBadge {
+    width: 0.875rem;
+    height: 0.75rem;
+  }
+
+  .geniValue {
+    font-size: 0.5rem;
+  }
+
+  .userName {
+    font-size: 0.75rem;
+  }
+
+  .pointsValue {
+    font-size: 0.75rem;
+  }
+
+  .rankIcon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .rankText {
+    font-size: 0.75rem;
+  }
+}
+
+/* 隐藏内容的样式 */
+.hidden {
+  display: none !important;
 }

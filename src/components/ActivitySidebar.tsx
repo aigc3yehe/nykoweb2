@@ -211,8 +211,8 @@ const ActivitySidebar: React.FC = () => {
                   {/* 模型使用情况卡片 */}
                   <div className={styles.listCard}>
                     <div className={styles.keyValuePair}>
-                      <span className={styles.keyTitle}>GENI</span>
-                      <span className={styles.valueText}>
+                      <span className={`${styles.keyTitle} ${styles.geniKeyTitle}`}>GENI</span>
+                      <span className={`${styles.valueText} ${styles.geniValueText}`}>
                         x{activityState.currentPoints?.geni || 0}
                       </span>
                     </div>
