@@ -338,32 +338,17 @@
   gap: 1.25rem; /* 20px */
   overflow: hidden;
   position: relative;
-  cursor: grab;
-}
-
-.marqueeWrapper:active {
-  cursor: grabbing;
 }
 
 .marqueeContent {
   display: flex;
   gap: 1.25rem; /* 20px */
-  animation: marqueeScroll 30s linear infinite; /* 从60s改为30s，速度快一倍 */
   white-space: nowrap;
-}
-
-/* 添加暂停动画效果 */
-.paused {
-  animation-play-state: paused;
-}
-
-@keyframes marqueeScroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+  /* 防止文字选中 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* Feature 卡片样式 - 重新定义以避免与上面的冲突 */
@@ -378,8 +363,12 @@
   border: 0.0625rem solid #3741514D; /* 1px */
   flex-shrink: 0;
   position: relative;
-  cursor: pointer;
-  /* 移除卡片的 hover 放大效果 */
+  cursor: pointer; /* 统一使用 pointer 样式 */
+  /* 防止文字选中 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .featureCardContent {
@@ -393,6 +382,11 @@
   flex-direction: column;
   justify-content: flex-end;
   overflow: hidden; /* 确保图片放大时不会超出容器 */
+  /* 防止文字选中 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* 封面图片 */
@@ -408,11 +402,17 @@
   border-radius: 0.375rem; /* 6px */
   z-index: 1;
   transition: transform 0.3s ease;
+  /* 防止图片被选中和拖拽 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
 }
 
 /* 只放大图片，不改变卡片大小 */
 .marqueeContent .featureCard:hover .featureCoverImage {
-  transform: scale(1.15); /* 稍微增加放大倍数以获得更明显的效果 */
+  transform: scale(1.15);
 }
 
 /* 蒙板 */
@@ -437,6 +437,11 @@
   justify-content: space-between;
   position: relative;
   z-index: 3;
+  /* 防止文字选中 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* Tags 样式 */
@@ -447,6 +452,11 @@
   display: flex;
   flex-wrap: nowrap;
   overflow: hidden;
+  /* 防止文字选中 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .featureTag {
@@ -469,6 +479,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   flex-shrink: 0;
+  /* 防止文字选中 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* Feature 名称样式 */
@@ -484,6 +499,11 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* 防止文字选中 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* 加载和错误状态 */
@@ -504,7 +524,7 @@
 
 /* 当数据不足时禁用跑马灯动画 */
 .noMarquee {
-  animation: none !important;
+  /* 移除动画相关样式，因为不再有自动滚动 */
   justify-content: flex-start;
 }
 
