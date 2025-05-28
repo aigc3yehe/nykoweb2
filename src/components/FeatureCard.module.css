@@ -30,6 +30,8 @@
   backdrop-filter: blur(1.25rem); /* 20px */
   background-size: cover;
   background-position: center;
+  box-sizing: border-box; /* 确保padding不会导致溢出 */
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 .featureCard:first-child {
@@ -100,39 +102,53 @@
 
 /* 用户资产容器 */
 .userAssetsContainer {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.625rem; /* 10px */
-  height: 100%;
-  justify-content: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  overflow: hidden; /* 防止内容溢出 */
 }
 
-/* 用户信息行 */
-.userInfoRow {
-  height: 1.25rem; /* 20px */
+/* 用户基本信息容器 */
+.userBasicInfo {
   display: flex;
   align-items: center;
-  gap: 0.375rem; /* 6px */
+  gap: 0.5rem; /* 减少间距 */
+  flex-shrink: 0;
+}
+
+/* 用户信息行 - 调整为左右布局 */
+.userInfoRow {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem; /* 下边距翻倍 */
+  flex-shrink: 0;
 }
 
 .userAvatar {
-  width: 1.25rem; /* 20px */
-  height: 1.25rem; /* 20px */
-  border-radius: 6.25rem; /* 100px */
+  width: 1.125rem; /* 稍微减小头像尺寸 */
+  height: 1.125rem;
+  border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.5);
   background: #374151;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .userName {
   font-family: 'Jura', sans-serif;
   font-weight: 400;
-  font-size: 0.875rem; /* 14px */
-  line-height: 100%;
-  letter-spacing: 0%;
-  vertical-align: middle;
-  text-transform: capitalize;
+  font-size: 0.8rem; /* 稍微减小字体 */
+  line-height: 1.2;
   color: #FFFFFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 8rem; /* 限制用户名最大宽度 */
 }
 
 /* 资产信息行 */
@@ -143,7 +159,7 @@
   gap: 0.75rem; /* 12px */
 }
 
-/* GENI卡片 */
+/* GENI卡片 - 原始垂直布局（保留以防需要） */
 .geniCard {
   width: 4.5625rem; /* 73px */
   height: 3.375rem; /* 54px */
@@ -156,68 +172,108 @@
   backdrop-filter: blur(1.25rem); /* 20px */
 }
 
+/* GENI 横排卡片 */
+.geniCardHorizontal {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+}
+
 .geniLabel {
-  border-radius: 0.125rem; /* 2px */
-  padding: 0 0.125rem; /* 0 2px */
+  border-radius: 0.125rem;
+  padding: 0.125rem 0.25rem; /* 调整内边距 */
   background: linear-gradient(90deg, #E8C4EA 43%, #39EDFF 100%);
   font-family: 'Jura', sans-serif;
   font-weight: 700;
-  font-size: 0.875rem; /* 14px */
-  line-height: 100%;
-  letter-spacing: 0px;
-  vertical-align: middle;
-  text-transform: capitalize;
+  font-size: 0.75rem; /* 减小字体 */
+  line-height: 1;
   color: #000000;
   text-align: center;
+  white-space: nowrap;
 }
 
 .geniValue {
   font-family: 'Orbitron', sans-serif;
   font-weight: 600;
-  font-size: 1rem; /* 16px */
-  line-height: 100%;
-  letter-spacing: 0px;
-  vertical-align: middle;
-  text-transform: lowercase;
+  font-size: 0.875rem; /* 减小字体 */
+  line-height: 1;
   background: linear-gradient(90deg, #E8C4EA 43%, #39EDFF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  white-space: nowrap;
+}
+
+/* 积分信息行 */
+.pointsRow {
+  width: 100%;
+  display: flex;
+  gap: 0.375rem;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+}
+
+/* 积分列容器 - 不再需要，因为改为三列平铺 */
+.pointsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  flex: 1;
+  min-height: 0;
+  max-width: 50%;
 }
 
 /* 积分卡片 */
 .pointsCard {
-  width: 9.5rem; /* 152px */
-  height: 3.375rem; /* 54px */
-  border-radius: 0.25rem; /* 4px */
+  min-width: 0;
+  flex: 1 1 0%;
+  min-height: 2rem;
+  border-radius: 0.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* 4px */
-  padding: 0.625rem 1.125rem; /* 10px 18px */
+  justify-content: center;
+  align-items: center;
+  gap: 0.125rem;
   background: linear-gradient(119.95deg, rgba(102, 102, 102, 0.3) 44.16%, rgba(0, 0, 0, 0.3) 44.18%);
-  backdrop-filter: blur(1.25rem); /* 20px */
+  backdrop-filter: blur(1.25rem);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.pointsCard:last-child {
+  flex: 1.5 1 0%; /* staking points更宽 */
+  background: linear-gradient(90deg, rgba(64, 224, 208, 0.18) 0%, rgba(255, 183, 94, 0.18) 100%); /* 浅teal到橘色，低饱和度 */
+}
+
+.pointsCard:not(:last-child) {
+  flex: 0.85 1 0%; /* weekly/total更窄 */
 }
 
 .pointsLabel {
   font-family: 'Jura', sans-serif;
   font-weight: 400;
-  font-size: 0.875rem; /* 14px */
-  line-height: 100%;
-  letter-spacing: 0px;
-  vertical-align: middle;
-  text-transform: capitalize;
+  font-size: 0.85rem; /* 增大字体 */
+  line-height: 1.2;
   color: #FFFFFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
 }
 
 .pointsValue {
   font-family: 'Orbitron', sans-serif;
   font-weight: 600;
-  font-size: 1rem; /* 16px */
-  line-height: 100%;
-  letter-spacing: 0px;
-  vertical-align: middle;
-  text-transform: capitalize;
+  font-size: 1.1rem; /* 增大字体 */
+  line-height: 1.2;
   color: #FFFFFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
 }
 
 /* Features 跑马灯样式 */

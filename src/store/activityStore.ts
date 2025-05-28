@@ -9,6 +9,7 @@ export interface SeasonPoints {
   ef: number;
   cd: number;
   current_season_total_points: number;
+  staked_points: number;
 }
 
 export interface PointsHistory {
