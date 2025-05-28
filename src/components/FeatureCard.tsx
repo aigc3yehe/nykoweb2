@@ -91,23 +91,23 @@ const FeatureCard: React.FC = () => {
   // 处理鼠标拖拽滑动
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!marqueeRef.current) return;
-    
+
     setIsDragging(true);
     setStartX(e.pageX - marqueeRef.current.offsetLeft);
     setScrollLeft(marqueeRef.current.scrollLeft);
     setDragDistance(0);
-    
+
     e.preventDefault();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !marqueeRef.current) return;
-    
+
     e.preventDefault();
     const x = e.pageX - marqueeRef.current.offsetLeft;
     const walk = (x - startX) * 2;
     const newScrollLeft = scrollLeft - walk;
-    
+
     setDragDistance(Math.abs(walk));
     marqueeRef.current.scrollLeft = newScrollLeft;
   };
@@ -124,7 +124,7 @@ const FeatureCard: React.FC = () => {
   // 处理触摸事件（移动端）
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!marqueeRef.current) return;
-    
+
     setIsDragging(true);
     const touch = e.touches[0];
     setStartX(touch.pageX - marqueeRef.current.offsetLeft);
@@ -134,20 +134,20 @@ const FeatureCard: React.FC = () => {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || !marqueeRef.current) return;
-    
+
     const touch = e.touches[0];
     const x = touch.pageX - marqueeRef.current.offsetLeft;
     const walk = (x - startX) * 2;
     const newScrollLeft = scrollLeft - walk;
-    
+
     setDragDistance(Math.abs(walk));
     marqueeRef.current.scrollLeft = newScrollLeft;
-    
+
     // 防止页面滚动
     e.preventDefault();
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleTouchEnd = () => {
     setIsDragging(false);
   };
 
