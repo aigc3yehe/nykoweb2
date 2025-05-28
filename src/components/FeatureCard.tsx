@@ -88,30 +88,27 @@ const FeatureCard: React.FC = () => {
     fetchData();
   }, [getFeatures, featureState.features.length, needsRefresh]);
 
-  // 处理鼠标拖拽滑动 - 统一处理所有鼠标事件
+  // 处理鼠标拖拽滑动
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!marqueeRef.current) return;
-
+    
     setIsDragging(true);
     setStartX(e.pageX - marqueeRef.current.offsetLeft);
     setScrollLeft(marqueeRef.current.scrollLeft);
     setDragDistance(0);
-
-    // 防止默认的文字选择行为
+    
     e.preventDefault();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !marqueeRef.current) return;
-
+    
     e.preventDefault();
     const x = e.pageX - marqueeRef.current.offsetLeft;
     const walk = (x - startX) * 2;
     const newScrollLeft = scrollLeft - walk;
-
-    // 更新拖拽距离
+    
     setDragDistance(Math.abs(walk));
-
     marqueeRef.current.scrollLeft = newScrollLeft;
   };
 
@@ -124,8 +121,38 @@ const FeatureCard: React.FC = () => {
     setIsDragging(false);
   };
 
+  // 处理触摸事件（移动端）
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!marqueeRef.current) return;
+    
+    setIsDragging(true);
+    const touch = e.touches[0];
+    setStartX(touch.pageX - marqueeRef.current.offsetLeft);
+    setScrollLeft(marqueeRef.current.scrollLeft);
+    setDragDistance(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !marqueeRef.current) return;
+    
+    const touch = e.touches[0];
+    const x = touch.pageX - marqueeRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    const newScrollLeft = scrollLeft - walk;
+    
+    setDragDistance(Math.abs(walk));
+    marqueeRef.current.scrollLeft = newScrollLeft;
+    
+    // 防止页面滚动
+    e.preventDefault();
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    setIsDragging(false);
+  };
+
   // 处理 Feature 点击 - 只在没有拖拽时触发
-  const handleFeatureClick = (feature: FeaturedItem, e: React.MouseEvent) => {
+  const handleFeatureClick = (feature: FeaturedItem, e: React.MouseEvent | React.TouchEvent) => {
     // 如果拖拽距离超过阈值，则不触发点击
     if (dragDistance > 5) {
       e.preventDefault();
@@ -294,10 +321,15 @@ const FeatureCard: React.FC = () => {
         <div
           className={styles.marqueeWrapper}
           ref={marqueeRef}
+          // 鼠标事件
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
+          // 触摸事件
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {featureState.isLoading && featureState.features.length === 0 ? (
             <div className={styles.loadingText}>Loading features...</div>

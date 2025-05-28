@@ -349,6 +349,9 @@
   gap: 1.25rem; /* 20px */
   overflow: hidden;
   position: relative;
+  /* 移动端触摸优化 */
+  touch-action: pan-x; /* 只允许水平滑动 */
+  -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
 }
 
 .marqueeContent {
@@ -360,9 +363,11 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  /* 移动端触摸优化 */
+  -webkit-touch-callout: none; /* 禁用iOS长按菜单 */
 }
 
-/* Feature 卡片样式 - 重新定义以避免与上面的冲突 */
+/* Feature 卡片样式 */
 .marqueeContent .featureCard {
   width: 11.625rem; /* 186px */
   height: 14.375rem; /* 230px */
@@ -374,12 +379,15 @@
   border: 0.0625rem solid #3741514D; /* 1px */
   flex-shrink: 0;
   position: relative;
-  cursor: pointer; /* 统一使用 pointer 样式 */
+  cursor: pointer;
   /* 防止文字选中 */
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  /* 移动端触摸优化 */
+  -webkit-touch-callout: none; /* 禁用iOS长按菜单 */
+  -webkit-tap-highlight-color: transparent; /* 移除点击高亮 */
 }
 
 .featureCardContent {
