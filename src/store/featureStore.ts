@@ -1,6 +1,7 @@
 import { atom } from 'jotai';
-import { modelListAtom, Model } from './modelStore';
-import { workflowListAtom, Workflow } from './workflowStore';
+import { modelListAtom } from './modelStore';
+import { workflowListAtom } from './workflowStore';
+import {Twitter} from "./imageStore.ts";
 
 // 定义 Feature 接口，聚合 Model 和 Workflow
 export interface Feature {
@@ -13,7 +14,7 @@ export interface Feature {
   type: 'model' | 'workflow'; // 区分类型
   creator: string;
   users: {
-    twitter: any;
+    twitter: Twitter | null;
     address: string | null;
   };
 }

@@ -5,6 +5,7 @@ import BackIcon from '../assets/back.svg';
 import InfoTabIcon from '../assets/info_tab.svg';
 import InfoTabSelectedIcon from '../assets/info_tab_selected.svg';
 import LeaderboardTabIcon from '../assets/leaderboard_tab.svg';
+import InfoIcon from '../assets/circle_info.svg';
 import GoldRankIcon from '../assets/gold_rank.svg';
 import SilverRankIcon from '../assets/silver.svg';
 import BronzeRankIcon from '../assets/bronze.svg';
@@ -58,6 +59,9 @@ const ActivityContent: React.FC = () => {
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
   const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
 
+  // Tooltip 相关状态
+  const [showTooltip, setShowTooltip] = useState(false);
+
   // 滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
@@ -69,6 +73,15 @@ const ActivityContent: React.FC = () => {
   // 返回首页
   const handleBack = () => {
     navigate('/');
+  };
+
+  // Tooltip 处理函数
+  const handleTooltipShow = () => {
+    setShowTooltip(true);
+  };
+
+  const handleTooltipHide = () => {
+    setShowTooltip(false);
   };
 
   // 格式化数字显示
@@ -165,7 +178,7 @@ const ActivityContent: React.FC = () => {
   };
 
   // 根据条件确定要显示的周信息
-  const weekInfo = { week: 'Week 4 (5.27-6.2)', rewards: '2,500,000' }
+  const weekInfo = { week: 'Week 4 (5.27-6.2)', rewards: '2,500,000', mindshare_points: 'X3' }
 
   // 更新滚动状态
   useEffect(() => {
@@ -335,6 +348,33 @@ const ActivityContent: React.FC = () => {
               <div className={styles.tagsGroup}>
                 <div className={styles.tagItem}>{weekInfo.week}</div>
                 <div className={styles.tagItem}>Rewards: {weekInfo.rewards} $NYKO</div>
+                <div className={styles.tagItemWithTooltip}>
+                  <div className={styles.tagItem}>
+                    <span 
+                      onClick={handleTooltipShow}
+                      className={styles.clickableText}
+                    >
+                      Mindshare Points: {weekInfo.mindshare_points} (Virtuality)
+                    </span>
+                    <img
+                      src={InfoIcon}
+                      alt="Information"
+                      className={styles.tabInfo}
+                      onMouseEnter={handleTooltipShow}
+                      onMouseLeave={handleTooltipHide}
+                    />
+                  </div>
+                  {showTooltip && (
+                    <div className={styles.tooltip}>
+                      <div className={styles.tooltipTitle}>
+                        Mindshare Points = GENI × IF × Cooldown_X × Virtuality
+                      </div>
+                      <div className={styles.tooltipContent}>
+                        *Virtuality: 3 if your twitter content relates to native Virtuals culture (Vader, Luna, AIXBT, etc.), otherwise 1.
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
