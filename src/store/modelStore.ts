@@ -427,6 +427,9 @@ export const fetchCommunityTokenizationState = atom(
     async (_get, set, { modelId, model_tokenization_id }: { modelId: number, model_tokenization_id: number }) => {
 
       try {
+        if(!modelId || !model_tokenization_id) {
+          throw new Error("Model id or model tokenization id is required");
+        }
         const params = new URLSearchParams({
           model_id: modelId.toString(),
           refreshState: 'true',

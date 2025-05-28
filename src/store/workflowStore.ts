@@ -418,7 +418,9 @@ export const fetchWorkflowEditCover = atom(
 export const fetchCommunityTokenizationState = atom(
     null,
     async (_get, set, { workflowId, workflow_tokenization_id }: { workflowId: number, workflow_tokenization_id: number }) => {
-
+      if(!workflowId || !workflow_tokenization_id) {
+        throw new Error("Workflow id or workflow tokenization id is required");
+      }
       try {
         const params = new URLSearchParams({
           workflow_id: workflowId.toString(),
