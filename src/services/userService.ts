@@ -61,6 +61,7 @@ export interface QueryPointsResponse {
     ef: number;
     cd: number;
     current_season_total_points: number; // 当前赛季的总分
+    staked_points: number; // 用户质押的积分
   };
 }
 

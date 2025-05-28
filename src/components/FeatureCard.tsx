@@ -109,39 +109,49 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
   // 渲染用户资产信息
   const renderUserAssets = () => {
     if (!pointsData) return null;
+    // 打印 staked_points 数值
+    console.log('Staked Points:', pointsData.staked_points);
 
     return (
       <div className={styles.userAssetsContainer}>
-        {/* 用户信息行 */}
+        {/* 用户信息行 - 包含头像、用户名和GENI */}
         <div className={styles.userInfoRow}>
-          <img
-            src={accountState.twitter?.profilePictureUrl || ""}
-            alt="User Avatar"
-            className={styles.userAvatar}
-          />
-          <span className={styles.userName}>
-            {formatName(accountState.twitter, accountState.walletAddress)}
-          </span>
+          <div className={styles.userBasicInfo}>
+            <img
+              src={accountState.twitter?.profilePictureUrl || ""}
+              alt="User Avatar"
+              className={styles.userAvatar}
+            />
+            <span className={styles.userName}>
+              {formatName(accountState.twitter, accountState.walletAddress)}
+            </span>
+          </div>
+          
+          {/* GENI 移到右侧 */}
+          <div className={styles.geniCardHorizontal}>
+            <div className={styles.geniLabel}>GENI</div>
+            <div className={styles.geniValue}>{formatNumber(pointsData.geni || 0)}</div>
+          </div>
         </div>
 
-        {/* 资产信息行 */}
-        <div className={styles.assetsRow}>
-          {/* GENI */}
-          <div className={styles.geniCard}>
-            <div className={styles.geniLabel}>GENI</div>
-            <div className={styles.geniValue}>x{formatNumber(pointsData.geni || 0)}</div>
-          </div>
-
+        {/* 积分信息行 - 三列布局 */}
+        <div className={styles.pointsRow}>
           {/* Weekly Points */}
           <div className={styles.pointsCard}>
-            <div className={styles.pointsLabel}>Weekly Points</div>
+            <div className={styles.pointsLabel}>Weekly</div>
             <div className={styles.pointsValue}>{formatNumber(pointsData.points || 0)}</div>
           </div>
 
           {/* Total Points */}
           <div className={styles.pointsCard}>
-            <div className={styles.pointsLabel}>Total Points</div>
+            <div className={styles.pointsLabel}>Total</div>
             <div className={styles.pointsValue}>{formatNumber(pointsData.total_points || 0)}</div>
+          </div>
+
+          {/* Staking Points */}
+          <div className={styles.pointsCard}>
+            <div className={styles.pointsLabel}>Staking Points</div>
+            <div className={styles.pointsValue}>{formatNumber(pointsData.staked_points || 0)}</div>
           </div>
         </div>
       </div>
