@@ -65,16 +65,16 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
     <div className={styles.contentHeader}>
       <div className={styles.tabGroup}>
         <div
-          className={`${styles.tab} ${activeTab === 'models' ? styles.active : styles.inactive}`}
-          onClick={() => setActiveTab('models')}
-        >
-          Models
-        </div>
-        <div
             className={`${styles.tab} ${activeTab === 'workflows' ? styles.active : styles.inactive}`}
             onClick={() => setActiveTab('workflows')}
         >
           Workflows
+        </div>
+        <div
+            className={`${styles.tab} ${activeTab === 'models' ? styles.active : styles.inactive}`}
+            onClick={() => setActiveTab('models')}
+        >
+          Models
         </div>
         <div
           className={`${styles.tab} ${activeTab === 'images' ? styles.active : styles.inactive}`}

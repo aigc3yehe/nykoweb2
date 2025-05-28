@@ -1,4 +1,11 @@
 /* 特性卡片容器样式 */
+.featureContainer {
+  width: 57.625rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .featureCardContainer {
   width: 57.625rem;  /* 922px，与contentContainer相同宽度 */
   display: flex;
@@ -211,4 +218,208 @@
   vertical-align: middle;
   text-transform: capitalize;
   color: #FFFFFF;
+}
+
+/* Features 跑马灯样式 */
+.featuresMarquee {
+  width: 100%;
+  height: 16.5rem; /* 264px */
+  gap: 0.875rem; /* 14px */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 标题样式 */
+.featuresTitle {
+  height: 1.25rem; /* 20px */
+  gap: 0.375rem; /* 6px */
+  display: flex;
+  align-items: center;
+}
+
+.featureIcon {
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+}
+
+.featuresTitleText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 1rem; /* 16px */
+  line-height: 1.25rem; /* 20px */
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: white;
+}
+
+/* 跑马灯容器 */
+.marqueeWrapper {
+  width: 100%;
+  height: 14.375rem; /* 230px */
+  gap: 1.25rem; /* 20px */
+  overflow: hidden;
+  position: relative;
+  cursor: grab;
+}
+
+.marqueeWrapper:active {
+  cursor: grabbing;
+}
+
+.marqueeContent {
+  display: flex;
+  gap: 1.25rem; /* 20px */
+  animation: marqueeScroll 30s linear infinite; /* 从60s改为30s，速度快一倍 */
+  white-space: nowrap;
+}
+
+/* 添加暂停动画效果 */
+.paused {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Feature 卡片样式 - 重新定义以避免与上面的冲突 */
+.marqueeContent .featureCard {
+  width: 11.625rem; /* 186px */
+  height: 14.375rem; /* 230px */
+  border-radius: 0.5rem; /* 8px */
+  border-width: 0.0625rem; /* 1px */
+  gap: 0.625rem; /* 10px */
+  padding: 0.375rem; /* 6px */
+  background: linear-gradient(135.58deg, rgba(99, 102, 241, 0.4) 15.46%, rgba(99, 102, 241, 0.05) 40.45%, rgba(99, 102, 241, 0.05) 73.77%, rgba(99, 102, 241, 0.4) 98.76%);
+  border: 0.0625rem solid #3741514D; /* 1px */
+  flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+  /* 移除卡片的 hover 放大效果 */
+}
+
+.featureCardContent {
+  width: 10.875rem; /* 174px */
+  height: 13.625rem; /* 218px */
+  border-radius: 0.375rem; /* 6px */
+  gap: 1.5rem; /* 24px */
+  padding: 1rem 0.75rem; /* 16px 12px */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden; /* 确保图片放大时不会超出容器 */
+}
+
+/* 封面图片 */
+.featureCoverImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.375rem; /* 6px */
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+/* 只放大图片，不改变卡片大小 */
+.marqueeContent .featureCard:hover .featureCoverImage {
+  transform: scale(1.15); /* 稍微增加放大倍数以获得更明显的效果 */
+}
+
+/* 蒙板 */
+.featureOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 22.88%, #6366F1 100%);
+  border-radius: 0.375rem; /* 6px */
+  z-index: 2;
+}
+
+/* Feature 信息区域 */
+.featureInfo {
+  width: 9.375rem; /* 150px */
+  height: 2.625rem; /* 42px */
+  border-radius: 0.25rem; /* 4px */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 3;
+}
+
+/* Tags 样式 */
+.featureTags {
+  width: 9.375rem; /* 150px */
+  height: 1.125rem; /* 18px */
+  gap: 0.25rem; /* 4px */
+  display: flex;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.featureTag {
+  width: 3.125rem; /* 50px */
+  height: 1.125rem; /* 18px */
+  border-radius: 62.4375rem; /* 9999px */
+  gap: 0.5rem; /* 8px */
+  padding: 0.25rem 0.375rem; /* 4px 6px */
+  background: #0000004D;
+  backdrop-filter: blur(1.25rem); /* 20px */
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.625rem; /* 10px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: white;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+/* Feature 名称样式 */
+.featureName {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1.125rem; /* 18px */
+  line-height: 130%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 加载和错误状态 */
+.loadingText,
+.errorText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: white;
+  font-family: 'Jura', sans-serif;
+  font-size: 0.875rem; /* 14px */
+}
+
+.errorText {
+  color: #EF4444;
 }

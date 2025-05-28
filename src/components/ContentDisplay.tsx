@@ -13,7 +13,7 @@ import WorkflowsContent from "./WorkflowsContent.tsx";
 import WorkflowDetail from "./WorkflowDetail.tsx";
 
 const ContentDisplay: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'models' | 'workflows' | 'images'>('models');
+  const [activeTab, setActiveTab] = useState<'models' | 'workflows' | 'images'>('workflows');
   const [ownedOnly, setOwnedOnly] = useState(false);
   const [sortOption, setSortOption] = useState<'New Model' | 'Popular'>('Popular');
   const [viewingModelId, setViewingModelId] = useState<number | null>(null);

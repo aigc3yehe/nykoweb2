@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from './FeatureCard.module.css';
 import {useAtom, useSetAtom} from 'jotai';
 import {
@@ -8,11 +8,11 @@ import {showToastAtom} from "../store/imagesStore.ts";
 import {usePrivy} from "@privy-io/react-auth";
 import { accountAtom } from '../store/accountStore';
 import { queryUserPoints, QueryPointsResponse } from '../services/userService';
-
-// @ts-ignore
-interface FeatureCardProps {
-  // 可以根据需要添加属性
-}
+import { fetchFeatures, featureListAtom, Feature } from '../store/featureStore';
+import { fetchModels } from '../store/modelStore';
+import { fetchWorkflows } from '../store/workflowStore';
+import { useNavigate } from 'react-router-dom';
+import FeatureIcon from '../assets/feature.svg';
 
 // 格式化数字显示
 const formatNumber = (num: number): string => {
@@ -38,12 +38,26 @@ const formatAddress = (address: string | null) => {
   return `${address.slice(0, 4)}...${address.slice(-4)}`;
 };
 
-const FeatureCard: React.FC<FeatureCardProps> = () => {
+const FeatureCard: React.FC = () => {
   const [, sendMessageAction] = useAtom(sendMessage);
   const showToast = useSetAtom(showToastAtom);
   const { authenticated } = usePrivy();
   const [accountState] = useAtom(accountAtom);
   const [pointsData, setPointsData] = useState<QueryPointsResponse['data'] | null>(null);
+
+  // 添加 Features 相关状态
+  const [featureState] = useAtom(featureListAtom);
+  const [, getFeatures] = useAtom(fetchFeatures);
+  const [, getModels] = useAtom(fetchModels);
+  const [, getWorkflows] = useAtom(fetchWorkflows);
+
+  // 跑马灯交互状态
+  const [isHovered, setIsHovered] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const marqueeRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // 获取用户积分信息
   useEffect(() => {
@@ -60,6 +74,61 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
 
     fetchPoints();
   }, [authenticated, accountState.did]);
+
+  // 获取 Features 数据
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 先获取 models 和 workflows 数据
+        await Promise.all([
+          getModels({ reset: true, view: true }),
+          getWorkflows({ reset: true, view: true })
+        ]);
+        // 然后聚合为 features
+        await getFeatures();
+      } catch (error) {
+        console.error('Failed to fetch features:', error);
+      }
+    };
+
+    fetchData();
+  }, [getModels, getWorkflows, getFeatures]);
+
+  // 处理鼠标拖拽滑动
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!marqueeRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - marqueeRef.current.offsetLeft);
+    setScrollLeft(marqueeRef.current.scrollLeft);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !marqueeRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - marqueeRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // 滑动速度
+    marqueeRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    setIsHovered(false);
+  };
+
+  // 处理 Feature 点击
+  const handleFeatureClick = (feature: Feature) => {
+    if (isDragging) return; // 如果正在拖拽，不触发点击
+
+    if (feature.type === 'model') {
+      navigate(`/?model_id=${feature.id}&model_name=${encodeURIComponent(feature.name)}`);
+    } else if (feature.type === 'workflow') {
+      navigate(`/?workflow_id=${feature.id}&workflow_name=${encodeURIComponent(feature.name)}`);
+    }
+  };
 
   const handleGenerateClick = async () => {
     if (!authenticated) {
@@ -106,6 +175,10 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
     window.open('https://discord.com/channels/1368843355362164786/1368986279319961600', '_blank');
   };
 
+  const getScaledImageUrl = (url: string) => {
+    return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-261,q-90`
+  }
+
   // 渲染用户资产信息
   const renderUserAssets = () => {
     if (!pointsData) return null;
@@ -148,8 +221,8 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
     );
   };
 
-  return (
-    <div className={styles.featureCardContainer}>
+  const renderFeatureCards = () => {
+    return (<div className={styles.featureCardContainer}>
       <div className={styles.featureCards}>
         <div className={styles.featureCard}>
           <div className={styles.cardContent}>
@@ -179,7 +252,86 @@ const FeatureCard: React.FC<FeatureCardProps> = () => {
             </div>
         )}
       </div>
-    </div>
+    </div>);
+  };
+
+  // 渲染 Features 跑马灯
+  const renderFeaturesMarquee = () => {
+    return (
+      <div className={styles.featuresMarquee}>
+        {/* 标题部分 */}
+        <div className={styles.featuresTitle}>
+          <img src={FeatureIcon} alt="Features" className={styles.featureIcon} />
+          <span className={styles.featuresTitleText}>Features</span>
+        </div>
+
+        {/* 跑马灯容器 */}
+        <div
+          className={styles.marqueeWrapper}
+          ref={marqueeRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          onMouseEnter={() => setIsHovered(true)}
+        >
+          {featureState.isLoading ? (
+            <div className={styles.loadingText}>Loading features...</div>
+          ) : featureState.error ? (
+            <div className={styles.errorText}>Failed to load features</div>
+          ) : (
+            <div
+              className={`${styles.marqueeContent} ${isHovered || isDragging ? styles.paused : ''}`}
+            >
+              {/* 复制一份数据以实现无缝循环 */}
+              {[...featureState.features, ...featureState.features].map((feature, index) => (
+                <div
+                  key={`${feature.type}-${feature.id}-${index}`}
+                  className={styles.featureCard}
+                  onClick={() => handleFeatureClick(feature)}
+                >
+                  <div className={styles.featureCardContent}>
+                    {/* 封面图片 */}
+                    <img
+                      src={getScaledImageUrl(feature.cover)}
+                      alt={feature.name}
+                      className={styles.featureCoverImage}
+                      draggable={false}
+                    />
+
+                    {/* 蒙板 */}
+                    <div className={styles.featureOverlay} />
+
+                    {/* 信息区域 */}
+                    <div className={styles.featureInfo}>
+                      {/* Tags */}
+                      <div className={styles.featureTags}>
+                        {feature.tags.slice(0, 3).map((tag, tagIndex) => (
+                          <span key={tagIndex} className={styles.featureTag}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      {/* Name */}
+                      <div className={styles.featureName}>
+                        {feature.name}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+      <div className={styles.featureContainer}>
+        {renderFeatureCards()}
+        {renderFeaturesMarquee()}
+      </div>
   );
 };
 
