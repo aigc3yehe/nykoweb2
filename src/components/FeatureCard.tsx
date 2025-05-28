@@ -283,7 +283,7 @@ const FeatureCard: React.FC = () => {
         {/* 标题部分 */}
         <div className={styles.featuresTitle}>
           <img src={FeatureIcon} alt="Features" className={styles.featureIcon} />
-          <span className={styles.featuresTitleText}>Features</span>
+          <span className={styles.featuresTitleText}>Featured</span>
           {featureState.isRefreshing && (
             <div className={styles.refreshIndicator}>
               <div className={styles.refreshSpinner}></div>
