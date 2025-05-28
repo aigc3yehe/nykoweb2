@@ -8,11 +8,10 @@ import {showToastAtom} from "../store/imagesStore.ts";
 import {usePrivy} from "@privy-io/react-auth";
 import { accountAtom } from '../store/accountStore';
 import { queryUserPoints, QueryPointsResponse } from '../services/userService';
-import { fetchFeatures, featureListAtom, Feature } from '../store/featureStore';
-import { fetchModels } from '../store/modelStore';
-import { fetchWorkflows } from '../store/workflowStore';
+import { fetchFeatures, featureListAtom, FeaturedItem, shouldRefreshFeatures } from '../store/featureStore';
 import { useNavigate } from 'react-router-dom';
 import FeatureIcon from '../assets/feature.svg';
+import { SOURCE_TYPE } from '../types/api.type';
 
 // 格式化数字显示
 const formatNumber = (num: number): string => {
@@ -48,8 +47,7 @@ const FeatureCard: React.FC = () => {
   // 添加 Features 相关状态
   const [featureState] = useAtom(featureListAtom);
   const [, getFeatures] = useAtom(fetchFeatures);
-  const [, getModels] = useAtom(fetchModels);
-  const [, getWorkflows] = useAtom(fetchWorkflows);
+  const [needsRefresh] = useAtom(shouldRefreshFeatures);
 
   // 跑马灯交互状态
   const [isHovered, setIsHovered] = useState(false);
@@ -79,20 +77,17 @@ const FeatureCard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 先获取 models 和 workflows 数据
-        await Promise.all([
-          getModels({ reset: true, view: true }),
-          getWorkflows({ reset: true, view: true })
-        ]);
-        // 然后聚合为 features
-        await getFeatures();
+        // 如果没有数据或需要刷新，则获取数据
+        if (featureState.features.length === 0 || needsRefresh) {
+          await getFeatures();
+        }
       } catch (error) {
         console.error('Failed to fetch features:', error);
       }
     };
 
     fetchData();
-  }, [getModels, getWorkflows, getFeatures]);
+  }, [getFeatures, featureState.features.length, needsRefresh]);
 
   // 处理鼠标拖拽滑动
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -120,12 +115,12 @@ const FeatureCard: React.FC = () => {
   };
 
   // 处理 Feature 点击
-  const handleFeatureClick = (feature: Feature) => {
+  const handleFeatureClick = (feature: FeaturedItem) => {
     if (isDragging) return; // 如果正在拖拽，不触发点击
 
-    if (feature.type === 'model') {
+    if (feature.source === SOURCE_TYPE.MODEL) {
       navigate(`/?model_id=${feature.id}&model_name=${encodeURIComponent(feature.name)}`);
-    } else if (feature.type === 'workflow') {
+    } else if (feature.source === SOURCE_TYPE.WORKFLOW) {
       navigate(`/?workflow_id=${feature.id}&workflow_name=${encodeURIComponent(feature.name)}`);
     }
   };
@@ -267,36 +262,49 @@ const FeatureCard: React.FC = () => {
 
   // 渲染 Features 跑马灯
   const renderFeaturesMarquee = () => {
+    const hasEnoughItems = featureState.features.length >= 5;
+    
     return (
       <div className={styles.featuresMarquee}>
         {/* 标题部分 */}
         <div className={styles.featuresTitle}>
           <img src={FeatureIcon} alt="Features" className={styles.featureIcon} />
           <span className={styles.featuresTitleText}>Features</span>
+          {/* 显示刷新状态指示器 */}
+          {featureState.isRefreshing && (
+            <div className={styles.refreshIndicator}>
+              <div className={styles.refreshSpinner}></div>
+            </div>
+          )}
         </div>
 
         {/* 跑马灯容器 */}
         <div
           className={styles.marqueeWrapper}
           ref={marqueeRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
-          onMouseEnter={() => setIsHovered(true)}
+          onMouseDown={hasEnoughItems ? handleMouseDown : undefined}
+          onMouseMove={hasEnoughItems ? handleMouseMove : undefined}
+          onMouseUp={hasEnoughItems ? handleMouseUp : undefined}
+          onMouseLeave={hasEnoughItems ? handleMouseLeave : undefined}
+          onMouseEnter={hasEnoughItems ? () => setIsHovered(true) : undefined}
         >
-          {featureState.isLoading ? (
+          {featureState.isLoading && featureState.features.length === 0 ? (
             <div className={styles.loadingText}>Loading features...</div>
-          ) : featureState.error ? (
+          ) : featureState.error && featureState.features.length === 0 ? (
             <div className={styles.errorText}>Failed to load features</div>
           ) : (
             <div
-              className={`${styles.marqueeContent} ${isHovered || isDragging ? styles.paused : ''}`}
+              className={`${styles.marqueeContent} ${
+                hasEnoughItems && (isHovered || isDragging) ? styles.paused : ''
+              } ${!hasEnoughItems ? styles.noMarquee : ''}`}
             >
-              {/* 复制一份数据以实现无缝循环 */}
-              {[...featureState.features, ...featureState.features].map((feature, index) => (
+              {/* 如果数据足够多，复制一份以实现无缝循环；否则只显示原始数据 */}
+              {(hasEnoughItems 
+                ? [...featureState.features, ...featureState.features] 
+                : featureState.features
+              ).map((feature, index) => (
                 <div
-                  key={`${feature.type}-${feature.id}-${index}`}
+                  key={`${feature.source}-${feature.id}-${index}`}
                   className={styles.featureCard}
                   onClick={() => handleFeatureClick(feature)}
                 >

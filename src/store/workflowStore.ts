@@ -399,7 +399,7 @@ export const fetchWorkflowEditCover = atom(
         const result = response;
         console.log("result", result);
         if (result.data) {
-          console.log('result 设置成功', result);
+          console.log('result success', result);
           const oldWorkflowDetail = get(workflowDetailAtom)
           if (oldWorkflowDetail && oldWorkflowDetail.currentWorkflow) {
             oldWorkflowDetail.currentWorkflow.cover = url

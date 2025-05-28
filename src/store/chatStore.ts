@@ -1539,7 +1539,11 @@ export async function createWorkflowAPI(params: CreateWorkflowParams): Promise<C
     });
 
     if (!response.ok) {
-      throw new Error(`Create workflow failed with status code ${response.status}`);
+      if (response.status === 409) {
+        throw new Error('Failed to create workflow. The name already exists.');
+      } else {
+        throw new Error(`Create workflow failed with status code ${response.status}`);
+      }
     }
 
     return await response.json();

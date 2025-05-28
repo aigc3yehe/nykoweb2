@@ -291,6 +291,7 @@
   gap: 0.375rem; /* 6px */
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 .featureIcon {
@@ -307,6 +308,27 @@
   vertical-align: middle;
   text-transform: capitalize;
   color: white;
+}
+
+/* 刷新指示器 */
+.refreshIndicator {
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.refreshSpinner {
+  width: 0.75rem; /* 12px */
+  height: 0.75rem; /* 12px */
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-top: 1.5px solid #6366F1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* 跑马灯容器 */
@@ -478,4 +500,19 @@
 
 .errorText {
   color: #EF4444;
+}
+
+/* 当数据不足时禁用跑马灯动画 */
+.noMarquee {
+  animation: none !important;
+  justify-content: flex-start;
+}
+
+/* 当数据不足时，调整容器样式 */
+.noMarquee .featureCard {
+  margin-right: 1.25rem; /* 20px，保持与gap一致的间距 */
+}
+
+.noMarquee .featureCard:last-child {
+  margin-right: 0;
 }
