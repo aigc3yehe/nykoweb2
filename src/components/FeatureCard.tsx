@@ -10,7 +10,6 @@ import { accountAtom } from '../store/accountStore';
 import { queryUserPoints, QueryPointsResponse } from '../services/userService';
 import { fetchFeatures, featureListAtom, FeaturedItem, shouldRefreshFeatures } from '../store/featureStore';
 import { useNavigate } from 'react-router-dom';
-import FeatureIcon from '../assets/feature.svg';
 import { SOURCE_TYPE } from '../types/api.type';
 
 // 格式化数字显示
@@ -282,7 +281,7 @@ const FeatureCard: React.FC = () => {
       <div className={styles.featuresMarquee}>
         {/* 标题部分 */}
         <div className={styles.featuresTitle}>
-          <img src={FeatureIcon} alt="Features" className={styles.featureIcon} />
+          <span className={styles.featureEmoji}>⭐️</span>
           <span className={styles.featuresTitleText}>Featured</span>
           {featureState.isRefreshing && (
             <div className={styles.refreshIndicator}>
@@ -329,7 +328,7 @@ const FeatureCard: React.FC = () => {
                       {/* Tags */}
                       <div className={styles.featureTags}>
                         {feature.tags.slice(0, 3).map((tag, tagIndex) => (
-                          <span key={tagIndex} className={styles.featureTag} style={{display: 'none'}}>
+                          <span key={tagIndex} className={styles.featureTag}>
                             {tag}
                           </span>
                         ))}

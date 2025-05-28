@@ -294,6 +294,17 @@
   position: relative;
 }
 
+.featureEmoji {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem; /* 20px */
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: white;
+}
+
 .featureIcon {
   width: 1rem; /* 16px */
   height: 1rem; /* 16px */
