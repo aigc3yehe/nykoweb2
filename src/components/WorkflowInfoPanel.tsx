@@ -17,6 +17,7 @@ import {
 import { Link } from "react-router-dom";
 import {RUN_WORKFLOW_SERVICE_CONFIG} from "../utils/plan";
 import {sendMessage} from "../store/chatStore.ts";
+import {formatNumber} from "../utils/format.ts"
 
 interface WorkflowInfoPanelProps {
   workflow: WorkflowDetail;
@@ -182,10 +183,10 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
           <span className={styles.detailValue}>{getModelName()}</span>
         </div>
 
-        {/* Used */}
+        {/* Credit */}
         <div className={styles.detailRow}>
-          <span className={styles.detailLabel}>Used</span>
-          <span className={styles.detailValue}>{workflow.usage}</span>
+          <span className={styles.detailLabel}>Credit</span>
+          <span className={styles.detailValue}>{formatNumber(workflow.usage * 50)}</span>
         </div>
 
         {/* Published */}

@@ -10,6 +10,7 @@ import {useAtom, useSetAtom} from 'jotai';
 import {showDialogAtom} from '../store/dialogStore';
 import {accountAtom} from '../store/accountStore';
 import {showToastAtom} from "../store/imagesStore";
+import {formatNumber} from "../utils/format.ts";
 
 interface WorkflowCardProps {
   workflow: Workflow;
@@ -34,9 +35,9 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
     (accountState.did && accountState.did === localWorkflow.creator);
 
   // 格式化数字，每三位添加逗号
-  const formatNumber = (num: number) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
+  // const formatNumber = (num: number) => {
+  //   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  // };
 
   // 检查是否在训练中
   const isTraining = false
@@ -238,7 +239,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
 
           <div className={styles.usageInfo}>
             <img src={usageSvg} alt="Usage" className={styles.usageIcon} />
-            <span className={styles.usageCount}>{formatNumber(localWorkflow.usage)}</span>
+            <span className={styles.usageCount}>{formatNumber(localWorkflow.usage * 50)}</span>
           </div>
         </div>
       </div>

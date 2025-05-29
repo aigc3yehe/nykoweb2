@@ -18,6 +18,7 @@ import {
 } from "../store/tokenStore";
 import { Link } from "react-router-dom";
 import { GENERATE_IMAGE_SERVICE_CONFIG } from "../utils/plan";
+import { formatNumber } from "../utils/format";
 
 interface ModelInfoPanelProps {
   model: ModelDetail;
@@ -226,10 +227,10 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
           <span className={styles.detailValue}>{getLoraName()}</span>
         </div>
 
-        {/* Used */}
+        {/* Credit */}
         <div className={styles.detailRow}>
-          <span className={styles.detailLabel}>Used</span>
-          <span className={styles.detailValue}>{model.usage}</span>
+          <span className={styles.detailLabel}>Credit</span>
+          <span className={styles.detailValue}>{formatNumber(model.usage * 5)}</span>
         </div>
 
         {/* Published */}

@@ -9,6 +9,7 @@ import {useAtom, useSetAtom} from 'jotai';
 import {showDialogAtom} from '../store/dialogStore';
 import {accountAtom} from '../store/accountStore';
 import {showToastAtom} from "../store/imagesStore";
+import {formatNumber} from "../utils/format.ts";
 
 interface ModelCardProps {
   model: Model;
@@ -33,9 +34,9 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
     (accountState.did && accountState.did === localModel.creator);
 
   // 格式化数字，每三位添加逗号
-  const formatNumber = (num: number) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
+  // const formatNumber = (num: number) => {
+  //   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  // };
 
   // 检查是否在训练中
   const isTraining = localModel.model_tran[0]?.train_state === 0 || localModel.model_tran[0]?.train_state === 1;
@@ -226,8 +227,8 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
           </div>
 
           <div className={styles.usageInfo}>
-            <img src={usageSvg} alt="Usage" className={styles.usageIcon} />
-            <span className={styles.usageCount}>{formatNumber(localModel.usage)}</span>
+            <img src={usageSvg} alt="Credit" className={styles.usageIcon} />
+            <span className={styles.usageCount}>{formatNumber(localModel.usage * 5)}</span>
           </div>
         </div>
       </div>
