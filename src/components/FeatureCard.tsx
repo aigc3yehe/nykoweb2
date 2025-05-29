@@ -11,16 +11,7 @@ import { queryUserPoints, QueryPointsResponse } from '../services/userService';
 import { fetchFeatures, featureListAtom, FeaturedItem, shouldRefreshFeatures } from '../store/featureStore';
 import { useNavigate } from 'react-router-dom';
 import { SOURCE_TYPE } from '../types/api.type';
-
-// 格式化数字显示
-const formatNumber = (num: number): string => {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
-  } else if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
-  }
-  return num.toString();
-};
+import {formatNumber} from "../utils/format.ts";
 
 // 获取用户显示名称的逻辑（参考LoginButton）
 const formatName = (twitter: any, address: string | null) => {

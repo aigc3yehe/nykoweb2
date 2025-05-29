@@ -441,7 +441,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 22.88%, #6366F1 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0, #000000 90%);
   border-radius: 0.375rem; /* 6px */
   z-index: 2;
 }

@@ -8,30 +8,35 @@
   backdrop-filter: blur(1.875rem); /* 30px */
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease;
   cursor: pointer;
-}
-
-.modelCard:hover {
-  transform: translateY(-0.25rem);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+  position: relative;
 }
 
 .modelCover {
   width: 13.9375rem; /* 223px */
   height: 14.3125rem; /* 229px */
+  border-radius: 0.5rem 0.5rem 0.5rem 1.875rem;
   position: relative;
+  overflow: hidden; /* 确保图片放大时不会超出容器 */
 }
 
 .modelCover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* 8px */
-  /* 8px */
-  /* 8px */
-  /* 30px */
   border-radius: 0.5rem 0.5rem 0.5rem 1.875rem;
+  transition: transform 0.3s ease;
+  /* 防止图片被选中和拖拽 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
+}
+
+/* 只放大图片，不改变卡片大小 */
+.modelCard:hover .modelCover img {
+  transform: scale(1.15);
 }
 
 .tagsContainer {
