@@ -161,19 +161,19 @@
   max-width: 6.25rem; /* 100px */
 }
 
-.usageInfo {
+.creditInfo {
   height: 1.0625rem; /* 17px */
   display: flex;
   align-items: center;
   gap: 0.25rem; /* 4px */
 }
 
-.usageIcon {
-  width: 1rem; /* 16px */
+.creditIcon {
+  width: 0.875rem; /* 14px */
   height: 1rem; /* 16px */
 }
 
-.usageCount {
+.creditCount {
   font-family: 'Jura', sans-serif;
   font-weight: 500;
   font-size: 0.875rem; /* 14px */

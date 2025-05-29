@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import styles from './ModelCard.module.css';
 import {fetchToggleView, Model} from '../store/modelStore';
 import avatarSvg from '../assets/Avatar.svg';
-import usageSvg from '../assets/usage.svg';
+import costCreditSvg from '../assets/cost_credit.svg';
 import showSvg from '../assets/show.svg';
 import hideSvg from '../assets/hidden.svg';
 import {useAtom, useSetAtom} from 'jotai';
@@ -226,9 +226,9 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
             </span>
           </div>
 
-          <div className={styles.usageInfo}>
-            <img src={usageSvg} alt="Credit" className={styles.usageIcon} />
-            <span className={styles.usageCount}>{formatNumber(localModel.usage * 5)}</span>
+          <div className={styles.creditInfo}>
+            <img src={costCreditSvg} alt="Credit" className={styles.creditIcon} />
+            <span className={styles.creditCount}>{formatNumber(localModel.usage * 5)}</span>
           </div>
         </div>
       </div>

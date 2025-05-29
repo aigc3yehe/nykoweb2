@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import styles from './WorkflowCard.module.css';
 import {fetchToggleWorkflowView, Workflow} from '../store/workflowStore';
 import avatarSvg from '../assets/Avatar.svg';
-import usageSvg from '../assets/usage.svg';
+import costCreditSvg from '../assets/cost_credit.svg';
 import showSvg from '../assets/show.svg';
 import hideSvg from '../assets/hidden.svg';
 import emptyCoverIcon from "../assets/empty_cover.png";
@@ -237,9 +237,9 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
             </span>
           </div>
 
-          <div className={styles.usageInfo}>
-            <img src={usageSvg} alt="Usage" className={styles.usageIcon} />
-            <span className={styles.usageCount}>{formatNumber(localWorkflow.usage * 50)}</span>
+          <div className={styles.creditInfo}>
+            <img src={costCreditSvg} alt="Credit" className={styles.creditIcon} />
+            <span className={styles.creditCount}>{formatNumber(localWorkflow.usage * 50)}</span>
           </div>
         </div>
       </div>
