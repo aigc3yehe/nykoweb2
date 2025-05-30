@@ -231,7 +231,7 @@ const FeatureCard: React.FC = () => {
           {/* GENI 移到右侧 */}
           <div className={styles.geniCardHorizontal}>
             <div className={styles.geniLabel}>GENI</div>
-            <div className={styles.geniValue}>{formatNumber(pointsData.geni || 0)}</div>
+            <div className={styles.geni}><span className={styles.geniValue}>{formatNumber(pointsData.geni || 0)}</span></div>
           </div>
         </div>
 
