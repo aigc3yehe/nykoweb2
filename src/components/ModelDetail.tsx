@@ -78,7 +78,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     fetchDetail(modelId, true);
 
     // 加载与模型相关的图片
-    fetchImagesList({ reset: true, model_id: modelId, view: viewParam });
+    fetchImagesList({ reset: true, model_id: modelId, view: viewParam, order: 'like_count' });
 
     // 组件卸载时清除详情
     return () => {
@@ -125,7 +125,6 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     console.log('data', data);
     if (data || hasCommunityTokens) {
       setShowBuyToken(true);
-      setActiveTab('tokenization')
     } else{
       setShowBuyToken(false);
       setActiveTab('description');
@@ -196,7 +195,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
 
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMore) {
-        fetchImagesList({ reset: false, model_id: modelId, view: viewParam });
+        fetchImagesList({ reset: false, model_id: modelId, view: viewParam, order: 'like_count' });
       }
     }, {
       root: null, // 使用viewport作为root
@@ -216,7 +215,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       // 当滚动到距离底部200px时加载更多
       if (scrollHeight - scrollTop - clientHeight < 200 && hasMore && !imagesLoading) {
-        fetchImagesList({ reset: false, model_id: modelId, view: viewParam });
+        fetchImagesList({ reset: false, model_id: modelId, view: viewParam, order: 'like_count' });
       }
     };
 
@@ -271,6 +270,12 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
       {/* 2. Tab 部分 */}
       <div className={styles.tabSection}>
         <div className={styles.tabHeader}>
+          <button
+            className={`${styles.tabButton} ${activeTab === 'description' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('description')}
+          >
+            Description
+          </button>
           {showBuyToken && (
               <button
                   className={`${styles.tabButton} ${activeTab === 'tokenization' ? styles.activeTab : ''}`}
@@ -279,12 +284,6 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
                 Buy Token
               </button>
           )}
-          <button
-            className={`${styles.tabButton} ${activeTab === 'description' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('description')}
-          >
-            Description
-          </button>
         </div>
 
         <div className={styles.tabContent}>
@@ -374,7 +373,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
             message="Failed to Load Images"
             action={{
               text: 'Retry',
-              onClick: () => fetchImagesList({ reset: false, model_id: modelId, view: viewParam })
+              onClick: () => fetchImagesList({ reset: false, model_id: modelId, view: viewParam, order: 'like_count' })
             }}
           />
         )}

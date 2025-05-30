@@ -78,7 +78,7 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
     fetchDetail(workflowId, true);
 
     // 加载与模型相关的图片
-    fetchImagesList({ reset: true, workflow_id: workflowId, view: viewParam });
+    fetchImagesList({ reset: true, workflow_id: workflowId, view: viewParam, order: 'like_count' });
 
     // 组件卸载时清除详情
     return () => {
@@ -124,7 +124,6 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
 
     if (data || hasCommunityTokens) {
       setShowBuyToken(true);
-      setActiveTab('tokenization')
     } else{
       setShowBuyToken(false);
       setActiveTab('description');
@@ -195,7 +194,7 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
 
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMore) {
-        fetchImagesList({ reset: false, workflow_id: workflowId, view: viewParam });
+        fetchImagesList({ reset: false, workflow_id: workflowId, view: viewParam, order: 'like_count' });
       }
     }, {
       root: null, // 使用viewport作为root
@@ -215,7 +214,7 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       // 当滚动到距离底部200px时加载更多
       if (scrollHeight - scrollTop - clientHeight < 200 && hasMore && !imagesLoading) {
-        fetchImagesList({ reset: false, workflow_id: workflowId, view: viewParam });
+        fetchImagesList({ reset: false, workflow_id: workflowId, view: viewParam, order: 'like_count' });
       }
     };
 
@@ -270,6 +269,12 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
       {/* 2. Tab 部分 */}
       <div className={styles.tabSection}>
         <div className={styles.tabHeader}>
+          <button
+            className={`${styles.tabButton} ${activeTab === 'description' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('description')}
+          >
+            Description
+          </button>
           {showBuyToken && (
               <button
                   className={`${styles.tabButton} ${activeTab === 'tokenization' ? styles.activeTab : ''}`}
@@ -278,12 +283,6 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
                 Buy Token
               </button>
           )}
-          <button
-            className={`${styles.tabButton} ${activeTab === 'description' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('description')}
-          >
-            Description
-          </button>
         </div>
 
         <div className={styles.tabContent}>
@@ -373,7 +372,7 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
             message="Failed to Load Images"
             action={{
               text: 'Retry',
-              onClick: () => fetchImagesList({ reset: false, workflow_id: workflowId, view: viewParam })
+              onClick: () => fetchImagesList({ reset: false, workflow_id: workflowId, view: viewParam, order: 'like_count' })
             }}
           />
         )}

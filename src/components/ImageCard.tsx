@@ -5,6 +5,8 @@ import avatarSvg from '../assets/Avatar.svg';
 import showSvg from '../assets/show.svg';
 import hideSvg from '../assets/hidden.svg';
 import coverSvg from '../assets/cover.svg';
+import heart01Svg from '../assets/heart_01.svg'; // 未点赞图标
+import heart02Svg from '../assets/heart_02.svg'; // 点赞图标
 import { useSetAtom, useAtom } from 'jotai';
 import { openImageDetails } from '../store/modalStore';
 import { fetchToggleView, fetchEditCover } from '../store/modelStore';
@@ -12,7 +14,8 @@ import { showDialogAtom } from '../store/dialogStore';
 import { accountAtom } from '../store/accountStore';
 import { showToastAtom } from "../store/imagesStore";
 import { fetchToggleWorkflowView, fetchWorkflowEditCover } from "../store/workflowStore.ts";
-import {SOURCE_TYPE} from "../types/api.type.ts";
+import { SOURCE_TYPE } from "../types/api.type.ts";
+import { likeImageAtom } from '../store/imageStore';
 
 interface ImageCardProps {
   image: Image;
@@ -26,10 +29,12 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
   const [, editCover] = useAtom(fetchEditCover);
   const [, toggleWorkflowView] = useAtom(fetchToggleWorkflowView);
   const [, editWorkflowCover] = useAtom(fetchWorkflowEditCover);
+  const [, likeImage] = useAtom(likeImageAtom);
   const showDialog = useSetAtom(showDialogAtom);
   const [accountState] = useAtom(accountAtom);
   const showToast = useSetAtom(showToastAtom);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
   const [localImage, setLocalImage] = useState(image);
 
   // 检查是否处理中
@@ -47,6 +52,47 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
     accountState.role === 'admin' ||
     (accountState.did && accountState.did === localImage.creator)
     //(accountState.did && modelOwnerDid && accountState.did === modelOwnerDid);
+
+  // 处理点赞
+  const handleLikeClick = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止事件冒泡
+
+    if (isLiking || !accountState.did) return; // 如果正在处理中或用户未登录，不响应点击
+
+    setIsLiking(true);
+
+    try {
+      const currentIsLiked = localImage.is_liked || false;
+      const newIsLiked = !currentIsLiked;
+
+      // 调用点赞API
+      await likeImage(localImage.id, newIsLiked);
+
+      // 更新本地状态
+      const updatedImage = {
+        ...localImage,
+        is_liked: newIsLiked
+      };
+
+      setLocalImage(updatedImage);
+
+      // 如果提供了回调，通知父组件图片已更新
+      if (onVisibilityChange) {
+        onVisibilityChange(updatedImage);
+      }
+
+    } catch (error) {
+      console.error('Failed to toggle like:', error);
+      // 静默失败，不显示toast通知
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  // 获取点赞图标
+  const getLikeIcon = () => {
+    return localImage.is_liked ? heart02Svg : heart01Svg;
+  };
 
   // 获取Twitter显示名称
   const getDisplayName = () => {
@@ -361,35 +407,52 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
 
         {/* 悬停时显示的半透明黑色遮罩和作者信息 */}
         <div className={styles.overlay}>
-          {/* 可见性按钮 - 仅对有权限的用户显示 */}
-          {(canToggleVisibility || showEditCover)&& (
+          {/* 按钮区域 - 点赞按钮始终显示，其他按钮仅对有权限的用户显示 */}
+          {(accountState.did || canToggleVisibility || showEditCover) && (
             <div className={styles.imagePublicStatus}>
-              {isProcessing ? (
-                <div className={styles.processingIndicator}>
-                  <div className={styles.typingIndicator}>
-                    <span></span><span></span><span></span>
-                  </div>
+              {/* 左侧点赞按钮 */}
+              {accountState.did && (
+                <div className={styles.likeButtonContainer}>
+                  <img
+                    src={getLikeIcon()}
+                    alt={localImage.is_liked ? "Liked" : "Not liked"}
+                    className={styles.likeButton}
+                    onClick={handleLikeClick}
+                    style={{ opacity: isLiking ? 0.6 : 1 }}
+                  />
                 </div>
-              ) : (
-                <>
-                  {showEditCover && (
-                      <img
+              )}
+
+              {/* 右侧按钮容器 */}
+              {(canToggleVisibility || showEditCover) && (
+                <div className={styles.rightButtonContainer}>
+                  {isProcessing ? (
+                    <div className={styles.processingIndicator}>
+                      <div className={styles.typingIndicator}>
+                        <span></span><span></span><span></span>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {showEditCover && (
+                        <img
                           src={coverSvg}
                           alt="cover"
-                          className="w-7 h-7 mr-2.5"
+                          className="w-7 h-7"
                           onClick={handleCoverClick}
-                      />
+                        />
+                      )}
+                      {canToggleVisibility && (
+                        <img
+                          src={getImagePublicUrl()}
+                          alt={isPublic ? "Visible" : "Hidden"}
+                          className={styles.imagePublic}
+                          onClick={handleToggleViewClick}
+                        />
+                      )}
+                    </>
                   )}
-                  {canToggleVisibility && (
-                    <img
-                      src={getImagePublicUrl()}
-                      alt={isPublic ? "Visible" : "Hidden"}
-                      className={styles.imagePublic}
-                      onClick={handleToggleViewClick}
-                    />
-                  )}
-                </>
-
+                </div>
               )}
             </div>
           )}

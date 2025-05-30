@@ -27,6 +27,7 @@ export interface Image {
   height: number;
   state: number; // -1: 失败, 0: 待处理, 1: 成功
   public: number; // 1 为可见的 0是相关人员关闭了的
+  is_liked?: boolean; // 当前用户是否点赞了这张图片
   users: {
     twitter: Twitter | null;
     address: string | null;
@@ -34,7 +35,7 @@ export interface Image {
 }
 
 // 定义排序参数类型
-export type ImageOrderType = 'created_at' | 'updated_at' | 'id';
+export type ImageOrderType = 'created_at' | 'updated_at' | 'id' | 'like_count';
 export type OrderDirection = 'desc' | 'asc';
 export type ImageState = 'success' | 'pending';
 
@@ -83,14 +84,16 @@ export const fetchImages = atom(
     model_id,
     workflow_id,
     state,
-    view
+    view,
+    order
   }: {
     reset?: boolean,
     ownedOnly?: boolean,
     model_id?: number,
     workflow_id?: number,
     state?: ImageState,
-    view?: boolean
+    view?: boolean,
+    order?: ImageOrderType
   } = {}) => {
     const imageState = get(imageListAtom);
     const accountState = get(accountAtom);
@@ -108,7 +111,9 @@ export const fetchImages = atom(
           page: 1,
           // 更新过滤条件
           model_id,
-          state
+          state,
+          // 更新排序参数
+          order: order || imageState.order
         });
       } else {
         // 设置为加载中
@@ -120,7 +125,9 @@ export const fetchImages = atom(
           page: reset ? 1 : imageState.page,
           // 更新过滤条件
           model_id,
-          state
+          state,
+          // 更新排序参数
+          order: order || imageState.order
         });
       }
 
@@ -130,7 +137,7 @@ export const fetchImages = atom(
         const params = new URLSearchParams({
           page: reset ? '1' : imageState.page.toString(),
           pageSize: imageState.pageSize.toString(),
-          order: imageState.order,
+          order: order || imageState.order,
           desc: imageState.desc
         });
 
@@ -318,3 +325,52 @@ export const fetchImageDetail = async (imageId: number): Promise<ImageDetail> =>
     throw error;
   }
 };
+
+// 点赞API函数
+export const likeImageAPI = async (contentId: number, isLiked: boolean, userDid: string): Promise<{data: boolean, message: string}> => {
+  try {
+    const privyToken = await getAccessToken();
+    const response = await fetch('/studio-api/aigc/like', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || '',
+      },
+      body: JSON.stringify({
+        user: userDid,
+        content_id: contentId,
+        is_liked: isLiked
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Like image failed: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Like image failed:', error);
+    throw error;
+  }
+};
+
+// 点赞操作atom
+export const likeImageAtom = atom(
+  null,
+  async (get, _set, contentId: number, isLiked: boolean) => {
+    const accountState = get(accountAtom);
+    
+    if (!accountState.did) {
+      throw new Error('User not authenticated');
+    }
+
+    try {
+      const response = await likeImageAPI(contentId, isLiked, accountState.did);
+      return response;
+    } catch (error) {
+      console.error('Like image failed:', error);
+      throw error;
+    }
+  }
+);
