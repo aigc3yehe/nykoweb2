@@ -2,6 +2,8 @@
 import { atom } from 'jotai';
 import { accountAtom } from './accountStore';
 import { SOURCE_TYPE } from '../types/api.type';
+import { getAccessToken } from '@privy-io/react-auth';
+import { PRIVY_TOKEN_HEADER } from '../utils/constants';
 
 // 定义Twitter接口
 export interface Twitter {
@@ -158,10 +160,13 @@ export const fetchImages = atom(
           params.append('view', 'true');
         }
 
+        const privyToken = await getAccessToken();
+
         // 发送请求
         const response = await fetch(`/studio-api/aigc/gallery?${params.toString()}`, {
           headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
+            'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+            [PRIVY_TOKEN_HEADER]: privyToken || '',
           }
         });
 
