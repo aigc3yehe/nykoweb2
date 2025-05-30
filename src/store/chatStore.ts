@@ -1159,7 +1159,8 @@ export const clearChat = atom(
       workflowRunning: {
         isRunning: false,
         isSuccess: false
-      }
+      },
+      workflow_extra_prompt: "", // 清空附加信息
     });
   }
 );
@@ -1497,6 +1498,8 @@ function mapInputOutputType(type: string): WORKFLOW_VALUE_TYPE[] {
       return [WORKFLOW_VALUE_TYPE.IMAGE];
     case 'Text':
       return [WORKFLOW_VALUE_TYPE.TEXT];
+    case 'Image + Text':
+      return [WORKFLOW_VALUE_TYPE.IMAGE, WORKFLOW_VALUE_TYPE.TEXT];
     default:
       return [WORKFLOW_VALUE_TYPE.IMAGE];
   }

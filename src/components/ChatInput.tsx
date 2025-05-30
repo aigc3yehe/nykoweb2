@@ -124,6 +124,16 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
       });
     }
 
+    // 如果是使用工作流任务，并且有当前工作流，则添加Workflow名称标签
+    if (chatState.task_type === "use_workflow" && chatState.currentWorkflow) {
+      baseTags.push({
+        id: 'workflow_name',
+        text: 'Workflow',
+        type: 'normal',
+        value: chatState.currentWorkflow.name
+      });
+    }
+
     if (chatState.currentWorkflow && chatState.task_type === "use_workflow") {
       baseTags.push({
         id: 'workflow_image_ratio',

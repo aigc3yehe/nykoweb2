@@ -400,7 +400,6 @@ const ChatWindow: React.FC = () => {
                 workflow_description={chatState.workflow_description}
                 workflow_prompt={chatState.workflow_prompt}
                 workflow_input={chatState.workflow_input}
-                workflow_output={chatState.workflow_output}
                 workflow_model={chatState.workflow_model || "gpt-4o"}
                 isCreatingWorkflow={chatState.workflowCreation.isCreating}
                 creationSuccess={chatState.workflowCreation.isSuccess}
@@ -425,6 +424,7 @@ const ChatWindow: React.FC = () => {
                 onRemoveReferenceImage={removeWorkflowReferenceImageAction}
                 workflow_extra_prompt={chatState.workflow_extra_prompt}
                 onUpdateWorkflowExtraPrompt={updateWorkflowExtraPromptAction}
+                currentWorkflow={chatState.currentWorkflow}
               />
             ))
           )}

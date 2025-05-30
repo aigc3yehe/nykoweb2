@@ -12,6 +12,7 @@ import createWorkflowIcon from "../assets/create_workflow.svg";
 import deleteIcon from "../assets/delete.svg";
 import deleteDisableIcon from "../assets/delete_disable.svg";
 import { GENERATE_IMAGE_SERVICE_CONFIG, TRAIN_MODEL_SERVICE_CONFIG, RUN_WORKFLOW_SERVICE_CONFIG } from "../utils/plan";
+import { WorkflowDetail } from '../store/workflowStore';
 
 interface ImageUploadState {
   totalCount: number;
@@ -49,7 +50,6 @@ export interface ChatMessageProps {
   workflow_description?: string;
   workflow_prompt?: string;
   workflow_input?: string;
-  workflow_output?: string;
   workflow_model?: string;
   onAddImage?: () => void;
   onConfirmImages?: () => void;
@@ -79,6 +79,7 @@ export interface ChatMessageProps {
   onRemoveReferenceImage?: () => void;
   workflow_extra_prompt?: string;
   onUpdateWorkflowExtraPrompt?: (prompt: string) => void;
+  currentWorkflow?: WorkflowDetail | null;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -101,6 +102,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   workflow_name = "",
   workflow_description = "",
   workflow_prompt = "",
+  workflow_input = "",
   workflow_model = "",
   onAddImage,
   onConfirmImages,
@@ -124,6 +126,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   onRemoveReferenceImage,
   workflow_extra_prompt,
   onUpdateWorkflowExtraPrompt,
+  currentWorkflow,
 }) => {
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
@@ -692,7 +695,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 <div className={styles.sectionLabel}>Input:</div>
                 <div className={styles.optionsContainer}>
                   <button
-                    className={`${styles.optionButton} ${styles.optionSelected}`}
+                    className={`${styles.optionButton} ${workflow_input === "Image" ? styles.optionSelected : ''}`}
                     onClick={() => onChangeInput && onChangeInput("Image")}
                     disabled={isCreatingWorkflow}
                   >
@@ -705,8 +708,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     Text
                   </button>
                   <button
-                    className={`${styles.optionButton} ${styles.disabled}`}
-                    disabled={true}
+                    className={`${styles.optionButton} ${workflow_input === "Image + Text" ? styles.optionSelected : ''}`}
+                    onClick={() => onChangeInput && onChangeInput("Image + Text")}
+                    disabled={isCreatingWorkflow}
                   >
                     Image + Text
                   </button>
@@ -775,6 +779,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       return "Confirm";
     };
 
+    // 检查是否应该显示附加信息输入框
+    // 只有当 input_type 包含 "text" 或者是 "image + text" 时才显示
+    const shouldShowAdditionalInfo = currentWorkflow?.input_type?.toLowerCase().includes('text') || 
+                                   currentWorkflow?.input_type?.toLowerCase().includes('image + text');
+
     // 文件选择处理函数
     const handleSelectFile = () => {
       // 创建文件选择对话框
@@ -819,28 +828,30 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       <div className={styles.workflowRunContainer}>
         <div className={styles.workflowRunTitle}>Upload Your Image</div>
 
-        {/* 附加提示词输入框 */}
-        <div className={styles.workflowSection}>
-          <div className={styles.sectionLabel} style={{marginTop: '1rem'}}>Additional Info (Optional)</div>
-          <div className={`${styles.promptInputContainer} ${isFocused ? styles.focused : ''}`}>
-            <div className={styles.promptTextareaWrapper}>
-              <textarea
-                className={styles.promptInput}
-                placeholder="Additional requirements for generated image."
-                value={workflow_extra_prompt || ''}
-                onChange={e => onUpdateWorkflowExtraPrompt && onUpdateWorkflowExtraPrompt(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                maxLength={300}
-                disabled={isButtonDisabled}
-                style={{height: '60px'}}
-              />
-            </div>
-            <div className={styles.charCount}>
-              Max 300 Chars
+        {/* 附加提示词输入框 - 只有当 input_type 包含 text 时才显示 */}
+        {shouldShowAdditionalInfo && (
+          <div className={styles.workflowSection}>
+            <div className={styles.sectionLabel} style={{marginTop: '1rem'}}>Additional Info (Optional)</div>
+            <div className={`${styles.promptInputContainer} ${isFocused ? styles.focused : ''}`}>
+              <div className={styles.promptTextareaWrapper}>
+                <textarea
+                  className={styles.promptInput}
+                  placeholder="Additional requirements for generated image."
+                  value={workflow_extra_prompt || ''}
+                  onChange={e => onUpdateWorkflowExtraPrompt && onUpdateWorkflowExtraPrompt(e.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  maxLength={300}
+                  disabled={isButtonDisabled}
+                  style={{height: '60px'}}
+                />
+              </div>
+              <div className={styles.charCount}>
+                Max 300 Chars
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {!hasSelectedImage ? (
           // 未选择图片状态

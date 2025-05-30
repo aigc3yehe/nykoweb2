@@ -51,6 +51,7 @@ export interface Workflow {
   workflow_community_tokenization: CommunityWorkflowToken[] | null;
   prompt: string | null;
   output_type: string | null;
+  input_type: string | null;
   model: string | null;
   users: {
     twitter: Twitter | null;
