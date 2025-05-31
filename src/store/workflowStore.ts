@@ -57,6 +57,7 @@ export interface Workflow {
     twitter: Twitter | null;
     address: string | null;
   };
+  reference_images: string[];
 }
 
 // 定义排序参数类型
@@ -470,6 +471,91 @@ export const fetchCommunityTokenizationState = atom(
     }
 );
 
+// 编辑工作流请求接口
+export interface EditWorkflowRequest {
+  user: string;
+  workflow_id: number;
+  name?: string;
+  description?: string;
+  tags?: string[];
+  token?: {
+    address: string;
+    launchpad: 'virtuals' | 'flaunch' | 'others';
+  };
+  input_type?: string[];
+  output_type?: string[];
+  reference_images?: string[];
+}
+
+// 编辑工作流响应接口
+export interface EditWorkflowResponse {
+  message: string;
+  data: boolean;
+}
+
+// 编辑工作流函数
+export async function editWorkflowRequest(params: EditWorkflowRequest): Promise<EditWorkflowResponse> {
+  const API_URL = "/studio-api/workflow/edit";
+
+  try {
+    const privyToken = await getAccessToken();
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      },
+      body: JSON.stringify(params)
+    });
+
+    if (!res.ok) {
+      throw new Error(`API returned error status ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+// 编辑工作流的原子操作
+export const fetchEditWorkflow = atom(
+  null,
+  async (get, set, params: Omit<EditWorkflowRequest, 'user'>) => {
+    const accountState = get(accountAtom);
+
+    try {
+      const did = accountState.did;
+      if (!did) {
+        throw new Error("User DID is required");
+      }
+
+      const response = await editWorkflowRequest({
+        ...params,
+        user: did
+      });
+
+      console.log('Edit workflow result:', response);
+
+      if (response.data) {
+        console.log('Workflow edited successfully', response);
+
+        // 如果编辑成功，重新获取工作流详情
+        if (params.workflow_id) {
+          set(fetchWorkflowDetail, params.workflow_id, false);
+        }
+      }
+
+      return response;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);
+
 export async function editWorkflowCarouselRequest(workflow_id: number, url: string, did?: string) {
   const API_URL = "/studio-api/workflow/edit_carousel";
 
@@ -521,7 +607,7 @@ export const fetchWorkflowEditCarousel = atom(
             // 更新carousel数组
             const currentCarousel = oldWorkflowDetail.currentWorkflow.carousel || [];
             let newCarousel: string[];
-            
+
             if (currentCarousel.includes(url)) {
               // 如果已存在，则删除
               newCarousel = currentCarousel.filter(item => item !== url);
@@ -529,7 +615,7 @@ export const fetchWorkflowEditCarousel = atom(
               // 如果不存在，则添加
               newCarousel = [...currentCarousel, url];
             }
-            
+
             oldWorkflowDetail.currentWorkflow.carousel = newCarousel;
             set(workflowDetailAtom, oldWorkflowDetail);
           }

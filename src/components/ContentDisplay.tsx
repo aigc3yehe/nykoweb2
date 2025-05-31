@@ -11,6 +11,8 @@ import { clearWorkflowDetail, workflowDetailAtom } from '../store/workflowStore'
 import { useNavigate, useLocation } from 'react-router-dom';
 import WorkflowsContent from "./WorkflowsContent.tsx";
 import WorkflowDetail from "./WorkflowDetail.tsx";
+import {showEditModelAtom, showEditWorkflowAtom} from "../store/editStore.ts";
+import {FlaunchStatusResponse, tokenizationStateAtom} from "../store/tokenStore.ts";
 
 const ContentDisplay: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'models' | 'workflows' | 'images'>('workflows');
@@ -27,6 +29,11 @@ const ContentDisplay: React.FC = () => {
   const [modelIdAndName] = useAtom(modelIdAndNameAtom);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const showEditModel = useSetAtom(showEditModelAtom);
+  const showEditWorkflow = useSetAtom(showEditWorkflowAtom);
+  const [tokenizationState] = useAtom(tokenizationStateAtom);
+  const { data } = tokenizationState;
 
   // 新增吸顶状态
   const [isHeaderSticky, setIsHeaderSticky] = useState(false);
@@ -56,6 +63,111 @@ const ContentDisplay: React.FC = () => {
     // 只负责更新URL，状态由useEffect根据URL更新
     navigate(location.pathname);
   };
+
+  // 点击分享按钮触发x的分享
+  const handleShareModelDetail = () => {
+    const model = modelDetailState.currentModel
+    if (!model) {
+      return;
+    }
+    // 1. 获取当前页面URL并构建设模型链接
+    const currentUrl = window.location.href;
+    const modelLinkUrl = new URL(currentUrl);
+    // 确保分享链接是模型详情页的基础链接，不包含其他可能存在的查询参数，然后添加模型ID和名称
+    const baseUrl = `${modelLinkUrl.protocol}//${modelLinkUrl.host}${modelLinkUrl.pathname}`;
+    const shareUrl = new URL(baseUrl);
+    shareUrl.searchParams.set("model_id", model.id.toString());
+    shareUrl.searchParams.set("model_name", model.name);
+    const modelLink = shareUrl.toString();
+
+    // 修改 renderTokenizationStatus 函数中的完成状态部分
+    let symbol = "";
+    if (data && "success" in data && "state" in data) {
+      // 如果是 FlaunchStatusResponse
+      const statusData = data as FlaunchStatusResponse;
+      if (statusData.state === "completed" && statusData.collectionToken) {
+        symbol = statusData.collectionToken.symbol;
+      }
+    }
+
+    console.log(symbol);
+
+    // 2. 根据是否有代币确定分享文本
+    let tweetText = "";
+    const modelName = model.name;
+
+    if (symbol) {
+      tweetText = `This style is insane!\n${modelName} is an amazing AI model I found on @niyoko_agent \nit even has its own token $${symbol}\nCome create and trade with me!\n${modelLink}`;
+    } else {
+      tweetText = `This style is insane!\n${modelName} is an amazing AI model I found on @niyoko_agent \nCome create and mine with me!\n${modelLink}`;
+    }
+
+    // 3. 构建 Twitter Intent URL
+    const encodedTweetText = encodeURIComponent(tweetText);
+    const twitterUrl = `https://x.com/intent/post?text=${encodedTweetText}`;
+
+    // 4. 在新标签页中打开 Twitter 分享链接
+    window.open(twitterUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const handleEditModelDetail = () => {
+    if (modelDetailState.currentModel) {
+      showEditModel(modelDetailState.currentModel);
+    }
+  }
+
+  // 点击分享按钮触发x的分享
+  const handleShareWorkflowDetail = () => {
+    const workflow = workflowDetailState.currentWorkflow
+    if (!workflow) {
+      return;
+    }
+    // 1. 获取当前页面URL并构建设模型链接
+    const currentUrl = window.location.href;
+    const workflowLinkUrl = new URL(currentUrl);
+    // 确保分享链接是模型详情页的基础链接，不包含其他可能存在的查询参数，然后添加模型ID和名称
+    const baseUrl = `${workflowLinkUrl.protocol}//${workflowLinkUrl.host}${workflowLinkUrl.pathname}`;
+    const shareUrl = new URL(baseUrl);
+    shareUrl.searchParams.set("workflow_id", workflow.id.toString());
+    shareUrl.searchParams.set("workflow_name", workflow.name);
+    const workflowLink = shareUrl.toString();
+
+    // 修改 renderTokenizationStatus 函数中的完成状态部分
+    let symbol = "";
+    if (data && "success" in data && "state" in data) {
+      // 如果是 FlaunchStatusResponse
+      const statusData = data as FlaunchStatusResponse;
+      if (statusData.state === "completed" && statusData.collectionToken) {
+        symbol = statusData.collectionToken.symbol;
+      }
+    }
+
+    console.log(symbol);
+
+    // 2. 根据是否有代币确定分享文本
+    let tweetText = "";
+    const workflowName = workflow.name;
+
+    if (symbol) {
+      tweetText = `This style is insane!\n${workflowName} is an amazing AI workflow I found on @niyoko_agent \nit even has its own token $${symbol}\nCome create and trade with me!\n${workflowLink}`;
+    } else {
+      tweetText = `This style is insane!\n${workflowName} is an amazing AI workflow I found on @niyoko_agent \nCome create and mine with me!\n${workflowLink}`;
+    }
+
+    // 3. 构建 Twitter Intent URL
+    const encodedTweetText = encodeURIComponent(tweetText);
+    const twitterUrl = `https://x.com/intent/post?text=${encodedTweetText}`;
+
+    // 4. 在新标签页中打开 Twitter 分享链接
+    window.open(twitterUrl, "_blank", "noopener,noreferrer");
+  };
+
+
+  const handleEditWorkflowDetail = () => {
+    if (workflowDetailState.currentWorkflow) {
+      showEditWorkflow(workflowDetailState.currentWorkflow);
+    }
+  }
 
   // 从URL参数中获取参数并同步状态
   useEffect(() => {
@@ -141,6 +253,9 @@ const ContentDisplay: React.FC = () => {
                 isModelDetailMode={true}
                 modelName={modelDetailState.currentModel?.name || viewingModelName || 'Loading...'}
                 onBackClick={handleBackToList}
+                tags={modelDetailState.currentModel?.tags}
+                onShareClick={handleShareModelDetail}
+                onEditClick={handleEditModelDetail}
               />
             </div>
 
@@ -161,6 +276,9 @@ const ContentDisplay: React.FC = () => {
                     isWorkflowDetailMode={true}
                     modelName={workflowDetailState.currentWorkflow?.name || viewingWorkflowName || 'Loading...'}
                     onBackClick={handleBackToList}
+                    tags={workflowDetailState.currentWorkflow?.tags}
+                    onShareClick={handleShareWorkflowDetail}
+                    onEditClick={handleEditWorkflowDetail}
                 />
               </div>
 
