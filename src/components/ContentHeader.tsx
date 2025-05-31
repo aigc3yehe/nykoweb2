@@ -6,6 +6,10 @@ import checkboxNormal from '../assets/checkbox_normal.svg';
 import checkboxSelected from '../assets/checkbox_selected.svg';
 import shareIcon from '../assets/share_2.svg';
 import editIcon from '../assets/edit.svg';
+import { useAtom } from 'jotai';
+import { accountAtom } from '../store/accountStore';
+import { modelDetailAtom } from '../store/modelStore';
+import { workflowDetailAtom } from '../store/workflowStore';
 
 interface ContentHeaderProps {
   activeTab: 'models' | 'workflows' |'images';
@@ -40,6 +44,24 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [modelDetailState] = useAtom(modelDetailAtom);
+  const [workflowDetailState] = useAtom(workflowDetailAtom);
+
+  const [accountState] = useAtom(accountAtom);
+  const [canEdit, setCanEdit] = useState(false);
+
+  useEffect(() => {
+    console.log('isModelDetailMode', isModelDetailMode);
+    console.log('isWorkflowDetailMode', isWorkflowDetailMode);
+    console.log('modelDetailState.currentModel', modelDetailState.currentModel);
+    console.log('workflowDetailState.currentWorkflow', workflowDetailState.currentWorkflow);
+    console.log('accountState', accountState);
+    if (isModelDetailMode) {
+      setCanEdit(accountState.role === 'admin' || accountState.did === modelDetailState.currentModel?.creator);
+    } else if (isWorkflowDetailMode) {
+      setCanEdit(accountState.role === 'admin' || accountState.did === workflowDetailState.currentWorkflow?.creator);
+    }
+  }, [isModelDetailMode, isWorkflowDetailMode, modelDetailState.currentModel, workflowDetailState.currentWorkflow]);
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
@@ -80,9 +102,11 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
             <button className={styles.actionButton} onClick={onShareClick}>
               <img src={shareIcon} alt="Share" className={styles.actionIcon} />
             </button>
-            <button className={styles.actionButton} onClick={onEditClick}>
-              <img src={editIcon} alt="Edit" className={styles.actionIcon} />
-            </button>
+            {canEdit && (
+              <button className={styles.actionButton} onClick={onEditClick}>
+                <img src={editIcon} alt="Edit" className={styles.actionIcon} />
+              </button>
+            )}
           </div>
         </div>
       </div>
