@@ -1,115 +1,217 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import styles from './ModelCarousel.module.css';
 import leftArrow from '../assets/left.svg';
 import rightArrow from '../assets/right.svg';
 import emptyCoverIcon from "../assets/empty_cover.png";
+import { useAtom, useSetAtom } from 'jotai';
+import { fetchEditCarousel } from '../store/modelStore';
+import { fetchWorkflowEditCarousel } from '../store/workflowStore';
+import { showDialogAtom } from '../store/dialogStore';
+import { showToastAtom } from "../store/imagesStore";
+import delCarouselIcon from '../assets/del_carousel.svg';
 
 interface ModelCarouselProps {
   images: string[];
-  coverImage?: string;
+  cover?: string;
+  modelId?: number;
+  workflowId?: number;
+  showDeleteButton?: boolean;
+  onImageChange?: (index: number) => void;
 }
 
-const ModelCarousel: React.FC<ModelCarouselProps> = ({ images, coverImage }) => {
+export default function ModelCarousel({ 
+  images, 
+  cover, 
+  modelId, 
+  workflowId, 
+  showDeleteButton = false,
+  onImageChange 
+}: ModelCarouselProps) {
   // 合并封面图和轮播图
-  const allImages = coverImage
-    ? [coverImage, ...images]
-    : images.length > 0
-      ? images
-      : [emptyCoverIcon]; // 如果没有图片，使用占位图
-
-  const emptyCover = images.length == 0 && !coverImage;
+  const allImages = cover ? [cover, ...images] : images;
+  const emptyCover = !cover || cover.trim() === '';
 
   // 当前显示的起始索引
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [processDeleteIndex, setProcessDeleteIndex] = useState<number | null>(null);
+
+  // Atoms
+  const [, editCarousel] = useAtom(fetchEditCarousel);
+  const [, editWorkflowCarousel] = useAtom(fetchWorkflowEditCarousel);
+  const showDialog = useSetAtom(showDialogAtom);
+  const showToast = useSetAtom(showToastAtom);
 
   // 计算总页数
   const totalPages = Math.ceil(allImages.length / 2);
 
-  // 处理前一页
-  const handlePrevious = () => {
-    setCurrentIndex(prev => (prev > 0 ? prev - 2 : Math.max(0, allImages.length - 2)));
-  };
-
-  // 处理下一页
-  const handleNext = () => {
-    setCurrentIndex(prev => (prev + 2 < allImages.length ? prev + 2 : 0));
-  };
-
-  // 获取当前显示的图片
+  // 获取当前显示的两张图片
   const currentImages = allImages.slice(currentIndex, currentIndex + 2);
 
-  // 如果只有一张图片，添加一个空占位符
-  if (currentImages.length === 1) {
-    currentImages.push('');
-  }
-
-  const getScaleImageUrl = (url: string) => {
-    if (emptyCover) {
-      return url;
+  // 处理左右箭头点击
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      onImageChange?.(currentIndex - 1);
     }
-    return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-560,h-640,q-95`
-  }
+  };
+
+  const handleNext = () => {
+    if (currentIndex < allImages.length - 2) {
+      setCurrentIndex(currentIndex + 1);
+      onImageChange?.(currentIndex + 1);
+    }
+  };
+
+  // 处理分页点击
+  const handlePageClick = (pageIndex: number) => {
+    const newIndex = pageIndex * 2;
+    if (newIndex < allImages.length) {
+      setCurrentIndex(newIndex);
+      onImageChange?.(newIndex);
+    }
+  };
+
+  // 处理删除carousel图片
+  const handleDeleteCarousel = (imageUrl: string, globalIndex: number) => {
+    if (processDeleteIndex === globalIndex) return; // 如果正在处理删除操作，忽略重复点击
+
+    showDialog({
+      open: true,
+      message: 'Are you sure you want to remove this image from the carousel?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: () => {
+        setProcessDeleteIndex(globalIndex);
+
+        // 根据类型调用对应的API
+        const carouselPromise = modelId 
+          ? editCarousel(modelId, imageUrl)
+          : editWorkflowCarousel(workflowId!, imageUrl);
+
+        carouselPromise
+          .then(() => {
+            showToast({
+              message: 'Image removed from carousel successfully',
+              severity: 'success'
+            });
+          })
+          .catch(() => {
+            showToast({
+              message: 'Failed to remove image from carousel',
+              severity: 'error'
+            });
+          })
+          .finally(() => {
+            setProcessDeleteIndex(null);
+          });
+      },
+      onCancel: () => {
+        // 取消操作，不需要做任何事
+      },
+      confirmButtonColor: '#FF3C3D',
+      cancelButtonColor: '#6366F1'
+    });
+  };
 
   return (
     <div className={styles.carouselContainer}>
-      {/* 翻页按钮 */}
-      {allImages.length > 2 && (
-        <>
-          <button
-            className={styles.arrowButton}
-            onClick={handlePrevious}
-            style={{ left: '0.625rem', top: '8.75rem' }} // 10px, 140px
-          >
-            <img src={leftArrow} alt="Previous" width="40" height="40" />
-          </button>
-
-          <button
-            className={styles.arrowButton}
-            onClick={handleNext}
-            style={{ right: '0.625rem', top: '8.75rem' }} // 10px, 140px
-          >
-            <img src={rightArrow} alt="Next" width="40" height="40" />
-          </button>
-        </>
-      )}
-
-      {/* 图片容器 */}
       <div className={styles.imagesContainer}>
-        <div className={styles.imageWrapper}>
-          {currentImages[0] && (
-            <img
-              src={getScaleImageUrl(currentImages[0])}
-              alt="Model image 1"
-              className={styles.carouselImage}
-            />
-          )}
-        </div>
-
-        <div className={styles.imageWrapper}>
-          {currentImages[1] && (
-            <img
-              src={getScaleImageUrl(currentImages[1])}
-              alt="Model image 2"
-              className={styles.carouselImage}
-            />
-          )}
-        </div>
+        {currentImages.map((image, index) => (
+          <div key={index} className={styles.imageWrapper}>
+            <div className={styles.imageContainer}>
+              <img 
+                src={image || emptyCoverIcon} 
+                alt={`Carousel ${currentIndex + index}`}
+                className={styles.carouselImage}
+              />
+              
+              {/* 第一张图的删除按钮 */}
+              {index === 0 && (
+                <>
+                  {showDeleteButton && currentIndex > 0 && !emptyCover && (
+                    <div className={styles.deleteButtonContainer}>
+                      {processDeleteIndex === currentIndex ? (
+                        <div className={styles.processingIndicator}>
+                          <div className={styles.typingIndicator}>
+                            <span></span><span></span><span></span>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          className={styles.deleteButton}
+                          onClick={() => handleDeleteCarousel(currentImages[0], currentIndex)}
+                          title="Remove from carousel"
+                        >
+                          <img src={delCarouselIcon} alt="Delete" className={styles.deleteIcon} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+              
+              {/* 第二张图的删除按钮 */}
+              {index === 1 && (
+                <>
+                  {showDeleteButton && currentIndex + 1 < allImages.length && (currentIndex + 1) > 0 && !emptyCover && (
+                    <div className={styles.deleteButtonContainer}>
+                      {processDeleteIndex === (currentIndex + 1) ? (
+                        <div className={styles.processingIndicator}>
+                          <div className={styles.typingIndicator}>
+                            <span></span><span></span><span></span>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          className={styles.deleteButton}
+                          onClick={() => handleDeleteCarousel(currentImages[1], currentIndex + 1)}
+                          title="Remove from carousel"
+                        >
+                          <img src={delCarouselIcon} alt="Delete" className={styles.deleteIcon} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* 页码指示器 */}
+      {/* 左右箭头 */}
+      {currentIndex > 0 && (
+        <button 
+          className={`${styles.arrowButton} ${styles.leftArrow}`}
+          onClick={handlePrev}
+        >
+          <img src={leftArrow} alt="Previous" />
+        </button>
+      )}
+      
+      {currentIndex < allImages.length - 2 && (
+        <button 
+          className={`${styles.arrowButton} ${styles.rightArrow}`}
+          onClick={handleNext}
+        >
+          <img src={rightArrow} alt="Next" />
+        </button>
+      )}
+
+      {/* 分页指示器 */}
       {totalPages > 1 && (
         <div className={styles.pagination}>
-          {Array.from({ length: totalPages }).map((_, index) => (
+          {Array.from({ length: totalPages }, (_, i) => (
             <button
-              key={index}
-              className={`${styles.paginationDot} ${Math.floor(currentIndex / 2) === index ? styles.activeDot : ''}`}
-              onClick={() => setCurrentIndex(index * 2)}
+              key={i}
+              className={`${styles.paginationDot} ${
+                Math.floor(currentIndex / 2) === i ? styles.active : ''
+              }`}
+              onClick={() => handlePageClick(i)}
             />
           ))}
         </div>
       )}
     </div>
   );
-};
-
-export default ModelCarousel;
+}
