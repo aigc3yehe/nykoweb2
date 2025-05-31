@@ -468,6 +468,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
                     className={styles.likeButton}
                     onClick={handleLikeClick}
                     style={{ opacity: isLiking ? 0.6 : 1 }}
+                    title={localImage.is_liked ? "Unlike" : "Like"}
                   />
                 </div>
               )}
@@ -489,6 +490,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
                           alt="cover"
                           className="w-7 h-7"
                           onClick={handleCoverClick}
+                          title="Change cover"
                         />
                       )}
                       {showCarousel && (
@@ -497,6 +499,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
                           alt="carousel"
                           className="w-7 h-7"
                           onClick={handleCarouselClick}
+                          title="Add/Remove featured image"
                         />
                       )}
                       {canToggleVisibility && (
@@ -505,6 +508,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
                           alt={isPublic ? "Visible" : "Hidden"}
                           className={styles.imagePublic}
                           onClick={handleToggleViewClick}
+                          title={isPublic ? "Hide" : "Show"}
                         />
                       )}
                     </>
