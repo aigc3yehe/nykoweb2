@@ -57,6 +57,7 @@ export interface Workflow {
     twitter: Twitter | null;
     address: string | null;
   };
+  reference_images: string[];
 }
 
 // 定义排序参数类型
@@ -483,6 +484,7 @@ export interface EditWorkflowRequest {
   };
   input_type?: string[];
   output_type?: string[];
+  reference_images?: string[];
 }
 
 // 编辑工作流响应接口

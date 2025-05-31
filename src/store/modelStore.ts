@@ -4,7 +4,7 @@ import { Twitter } from './imageStore'; // 导入Twitter接口
 import { PRIVY_TOKEN_HEADER } from '../utils/constants';
 import { getAccessToken } from '@privy-io/react-auth';
 import {FlaunchStatusResponse, ModelTokenizationStateResponse} from './tokenStore';
-import { EditModelRequest, EditModelResponse, editModelRequest } from '../services/userService';
+import { EditModelRequest, editModelRequest } from '../services/userService';
 
 export enum TOKENIZATION_LAUNCHPAD_TYPE {
   FLAUNCH = 'flaunch',
@@ -496,16 +496,16 @@ export const fetchEditModel = atom(
       });
 
       console.log('Edit model result:', response);
-      
+
       if (response.data) {
         console.log('Model edited successfully', response);
-        
+
         // 如果编辑成功，重新获取模型详情
         if (params.model_id) {
           set(fetchModelDetail, params.model_id, false);
         }
       }
-      
+
       return response;
     } catch (error) {
       console.log(error);

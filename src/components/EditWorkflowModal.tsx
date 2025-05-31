@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './EditWorkflowModal.module.css';
-import { WorkflowDetail, TOKENIZATION_LAUNCHPAD_TYPE, fetchEditWorkflow } from '../store/workflowStore';
+import { WorkflowDetail, fetchEditWorkflow } from '../store/workflowStore';
 import { useSetAtom } from 'jotai';
 import { showToastAtom } from '../store/imagesStore';
 import CloseIcon from '../assets/close_account.svg';
@@ -47,6 +47,18 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
     isUploading: false
   });
 
+  // 存储初始值用于比较
+  const [initialValues, setInitialValues] = useState({
+    name: '',
+    description: '',
+    prompt: '',
+    topics: '',
+    tokenInput: '',
+    selectedTokenAssociation: 'flaunch' as TokenAssociation,
+    hasReferenceImage: false,
+    initialReferenceImageUrl: null as string | null // 新增：存储初始的参考图片URL
+  });
+
   const tokenInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editWorkflow = useSetAtom(fetchEditWorkflow);
@@ -55,32 +67,93 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
   // 判断Token Association是否可编辑
   const isTokenAssociationEditable = !workflow.workflow_tokenization?.meme_token;
 
+  // 新增：图片预览状态
+  const [showImagePreview, setShowImagePreview] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
   // 根据现有tokenization设置初始状态
   useEffect(() => {
     if (isOpen) {
-      setName(workflow.name || '');
-      setDescription(workflow.description || '');
-      setPrompt(workflow.prompt || '');
-      setTopics(workflow.tags?.join(' #') ? '#' + workflow.tags.join(' #') : '');
-      
-      // 根据现有tokenization设置token association和输入值
-      if (workflow.workflow_tokenization?.launchpad) {
-        setSelectedTokenAssociation(workflow.workflow_tokenization.launchpad as TokenAssociation);
-        setTokenInput(workflow.workflow_tokenization.meme_token || '');
+      const initialName = workflow.name || '';
+      const initialDescription = workflow.description || '';
+      const initialPrompt = workflow.prompt || '';
+      const initialTopics = workflow.tags?.join(' #') ? '#' + workflow.tags.join(' #') : '';
+      const initialTokenInput = workflow.workflow_tokenization?.meme_token || '';
+      const initialTokenAssociation = (workflow.workflow_tokenization?.launchpad as TokenAssociation) || 'flaunch';
+      const initialReferenceImageUrl = workflow.reference_images?.[0] || null;
+
+      setName(initialName);
+      setDescription(initialDescription);
+      setPrompt(initialPrompt);
+      setTopics(initialTopics);
+      setTokenInput(initialTokenInput);
+      setSelectedTokenAssociation(initialTokenAssociation);
+
+      // 设置参考图片状态
+      if (initialReferenceImageUrl) {
+        console.log('Setting initial reference image:', initialReferenceImageUrl);
+        // 从URL中提取文件名，或者使用默认名称
+        const fileName = initialReferenceImageUrl.split('/').pop() || 'reference_image';
+        setReferenceImage({
+          file: null,
+          uploadedUrl: initialReferenceImageUrl,
+          fileName: fileName,
+          isUploading: false
+        });
       } else {
-        setSelectedTokenAssociation('flaunch');
-        setTokenInput('');
+        // 只有在没有初始参考图片时才重置
+        setReferenceImage({
+          file: null,
+          uploadedUrl: null,
+          fileName: null,
+          isUploading: false
+        });
       }
-      
-      // 重置reference image状态
-      setReferenceImage({
-        file: null,
-        uploadedUrl: null,
-        fileName: null,
-        isUploading: false
+
+      // 存储初始值
+      setInitialValues({
+        name: initialName,
+        description: initialDescription,
+        prompt: initialPrompt,
+        topics: initialTopics,
+        tokenInput: initialTokenInput,
+        selectedTokenAssociation: initialTokenAssociation,
+        hasReferenceImage: !!initialReferenceImageUrl,
+        initialReferenceImageUrl: initialReferenceImageUrl
       });
     }
   }, [isOpen, workflow]);
+
+  // 检测是否为移动端
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // 处理图片预览
+  const handleImagePreviewToggle = () => {
+    if (isMobile) {
+      setShowImagePreview(!showImagePreview);
+    }
+  };
+
+  const handleMouseEnter = () => {
+    if (!isMobile) {
+      setShowImagePreview(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isMobile) {
+      setShowImagePreview(false);
+    }
+  };
 
   // 普通的topic输入处理
   const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +175,26 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // 验证文件格式
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      showToast({
+        message: 'Only JPG, JPEG, PNG, and WebP formats are allowed',
+        severity: 'error'
+      });
+      return;
+    }
+
+    // 验证文件大小 (4MB)
+    const maxSize = 4 * 1024 * 1024;
+    if (file.size > maxSize) {
+      showToast({
+        message: 'File size must be less than 4MB',
+        severity: 'error'
+      });
+      return;
+    }
+
     setReferenceImage(prev => ({
       ...prev,
       file,
@@ -110,17 +203,23 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
     }));
 
     try {
-      // 模拟上传过程
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // 这里应该调用实际的上传API
-      const uploadedUrl = URL.createObjectURL(file);
-      
+      // 导入上传函数
+      const { uploadFileToS3 } = await import('../store/imagesStore');
+
+      // 上传图片到S3
+      const uploadedUrl = await uploadFileToS3(file);
+
       setReferenceImage(prev => ({
         ...prev,
         uploadedUrl,
         isUploading: false
       }));
+
+      showToast({
+        message: 'Reference image uploaded successfully',
+        severity: 'success'
+      });
+
     } catch (error) {
       console.error('Upload failed:', error);
       setReferenceImage(prev => ({
@@ -129,6 +228,11 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
         file: null,
         fileName: null
       }));
+
+      showToast({
+        message: 'Failed to upload reference image',
+        severity: 'error'
+      });
     }
   };
 
@@ -148,50 +252,126 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
     return `${name.substring(0, 15)}...${ext}`;
   };
 
+  // 检查是否有修改
+  const hasChanges = () => {
+    const currentName = name.trim();
+    const currentDescription = description.trim();
+    const currentPrompt = prompt.trim();
+    const currentTopics = topics;
+    const currentTokenInput = tokenInput.trim();
+
+    // 比较基本字段
+    if (currentName !== initialValues.name.trim()) return true;
+    if (currentDescription !== initialValues.description.trim()) return true;
+    if (currentPrompt !== initialValues.prompt.trim()) return true;
+    if (currentTopics !== initialValues.topics) return true;
+
+    // 检查参考图片的变化
+    const currentHasReferenceImage = !!referenceImage.uploadedUrl;
+    const initialHasReferenceImage = !!initialValues.initialReferenceImageUrl;
+
+    // 如果参考图片状态发生变化（从无到有，或从有到无，或URL发生变化）
+    if (currentHasReferenceImage !== initialHasReferenceImage) return true;
+    if (currentHasReferenceImage && referenceImage.uploadedUrl !== initialValues.initialReferenceImageUrl) return true;
+
+    // 比较token相关字段（只有在可编辑时才考虑）
+    if (isTokenAssociationEditable) {
+      if (currentTokenInput !== initialValues.tokenInput.trim()) return true;
+      if (selectedTokenAssociation !== initialValues.selectedTokenAssociation) return true;
+    }
+
+    return false;
+  };
+
   const handleSave = async () => {
-    if (isSaving) return;
+    if (isSaving || !hasChanges()) return;
 
     setIsSaving(true);
-    
-    try {
-      // 解析topics为tags数组
-      const tagsArray = topics
-        .split(' ')
-        .filter(tag => tag.startsWith('#') && tag.length > 1)
-        .map(tag => tag.substring(1)); // 移除#前缀
 
+    try {
       const editParams: any = {
-        workflow_id: workflow.id,
-        name: name.trim(),
-        description: description.trim(),
-        tags: tagsArray
+        workflow_id: workflow.id
       };
 
-      // 只有当token输入有值且可编辑时才添加token参数
-      if (isTokenAssociationEditable && tokenInput.trim()) {
-        editParams.token = {
-          address: tokenInput.trim(),
-          launchpad: selectedTokenAssociation
-        };
+      // 只添加修改过的字段
+      const currentName = name.trim();
+      const currentDescription = description.trim();
+      const currentPrompt = prompt.trim();
+
+      if (currentName !== initialValues.name.trim()) {
+        editParams.name = currentName;
+      }
+
+      if (currentDescription !== initialValues.description.trim()) {
+        editParams.description = currentDescription;
+      }
+
+      if (currentPrompt !== initialValues.prompt.trim()) {
+        editParams.prompt = currentPrompt;
+      }
+
+      // 检查tags是否有修改 - 修改标签提取逻辑
+      if (topics !== initialValues.topics) {
+        // 使用正则表达式提取支持空格的标签
+        const tagsRegex = /#([^#]+)/g;
+        const matches = Array.from(topics.matchAll(tagsRegex));
+        const tagsArray = matches
+          .map(match => match[1].trim()) // 提取标签内容并去除首尾空格
+          .filter(tag => tag.length > 0); // 过滤空标签
+
+        editParams.tags = tagsArray;
+      }
+
+      // 检查参考图片变化
+      const currentHasReferenceImage = !!referenceImage.uploadedUrl;
+      const initialHasReferenceImage = !!initialValues.initialReferenceImageUrl;
+
+      // 如果参考图片状态发生变化，或者URL发生变化
+      if (currentHasReferenceImage !== initialHasReferenceImage ||
+          (currentHasReferenceImage && referenceImage.uploadedUrl !== initialValues.initialReferenceImageUrl)) {
+
+        if (referenceImage.uploadedUrl) {
+          // 有新的参考图片
+          editParams.reference_images = [referenceImage.uploadedUrl];
+        } else {
+          // 参考图片被删除，传递空数组
+          editParams.reference_images = [];
+        }
+      }
+
+      // 检查token相关修改（只有在可编辑时）
+      if (isTokenAssociationEditable) {
+        const currentTokenInput = tokenInput.trim();
+        const tokenChanged = currentTokenInput !== initialValues.tokenInput.trim();
+        const associationChanged = selectedTokenAssociation !== initialValues.selectedTokenAssociation;
+
+        if (tokenChanged || associationChanged) {
+          if (currentTokenInput) {
+            editParams.token = {
+              address: currentTokenInput,
+              launchpad: selectedTokenAssociation
+            };
+          }
+        }
       }
 
       // 调用编辑API
       const response = await editWorkflow(editParams);
-      
+
       if (response.data) {
         showToast({
           message: 'Workflow updated successfully',
           severity: 'success'
         });
-        
+
         // 调用外部的onSave回调（如果有）
         onSave?.({
-          name: name.trim(),
-          description: description.trim(),
-          prompt: prompt.trim(),
-          tags: tagsArray
+          name: currentName,
+          description: currentDescription,
+          prompt: currentPrompt,
+          tags: editParams.tags
         });
-        
+
         onClose();
       } else {
         throw new Error('Failed to update workflow');
@@ -211,7 +391,7 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
     if (!isTokenAssociationEditable && workflow.workflow_tokenization?.meme_token) {
       return workflow.workflow_tokenization.meme_token;
     }
-    
+
     return tokenInput || '';
   };
 
@@ -219,7 +399,7 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
     return 'Input hash';
   };
 
-  // 渲染Reference Image部分
+  // 修改渲染Reference Image部分
   const renderReferenceImageSection = () => {
     const hasUploadedImage = referenceImage.uploadedUrl;
     const isUploading = referenceImage.isUploading;
@@ -227,7 +407,7 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
     return (
       <div className={styles.fieldContainer}>
         <label className={styles.fieldLabel}>Reference Image (Optional):</label>
-        
+
         {!hasUploadedImage && !isUploading ? (
           // 未上传图片状态 - 显示上传按钮
           <button
@@ -258,26 +438,51 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
                 </span>
               </div>
             ) : (
-              // 上传完成状态
-              <div className={styles.referenceImagePreview}>
-                <div className={styles.referenceImageItem}>
-                  <img
-                    src={imageIcon}
-                    alt="Reference"
-                    className={styles.referenceImageIcon}
-                  />
-                  <span className={styles.referenceImageName}>
-                    {formatFileName(referenceImage.fileName || '')}
-                  </span>
-                  {!isSaving && (
+              // 上传完成状态 - 添加预览功能
+              <div className={styles.referenceImageWrapper}>
+                <div
+                  className={styles.referenceImagePreview}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                  onClick={handleImagePreviewToggle}
+                >
+                  <div className={styles.referenceImageItem}>
                     <img
-                      src={closeIcon}
-                      alt="Remove"
-                      className={styles.removeReferenceIcon}
-                      onClick={handleRemoveReferenceImage}
+                      src={imageIcon}
+                      alt="Reference"
+                      className={styles.referenceImageIcon}
                     />
-                  )}
+                    <span className={styles.referenceImageName}>
+                      {formatFileName(referenceImage.fileName || '')}
+                    </span>
+                    {!isSaving && (
+                      <img
+                        src={closeIcon}
+                        alt="Remove"
+                        className={styles.removeReferenceIcon}
+                        onClick={(e) => {
+                          e.stopPropagation(); // 防止触发预览
+                          handleRemoveReferenceImage();
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
+
+                {/* 图片预览弹出层 */}
+                {showImagePreview && referenceImage.uploadedUrl && (
+                  <div className={styles.imagePreviewTooltip}>
+                    <img
+                      src={referenceImage.uploadedUrl}
+                      alt="Preview"
+                      className={styles.previewImage}
+                      onError={() => {
+                        // 如果图片加载失败，隐藏预览
+                        setShowImagePreview(false);
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -369,7 +574,7 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
           {/* Reference Image 部分 */}
           {renderReferenceImageSection()}
 
-          {/* Topic输入框 - 改回普通input */}
+          {/* Topic输入框 */}
           <div className={`${styles.fieldContainer} ${styles.topicFieldContainer}`}>
             <label className={styles.fieldLabel}>#Topic:</label>
             <input
@@ -449,7 +654,7 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
             <button
               className={styles.confirmButton}
               onClick={handleSave}
-              disabled={isSaving}
+              disabled={isSaving || !hasChanges()}
             >
               <span className={styles.confirmButtonText}>
                 {isSaving ? 'Saving...' : 'Confirm'}

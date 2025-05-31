@@ -25,7 +25,7 @@ export const hideEditModalAtom = atom(
 
 export const showEditModelAtom = atom(
   null,
-  (get, set, model: ModelDetail) => {
+  (_, set, model: ModelDetail) => {
     set(editModalAtom, {
       open: true,
       type: 'model',
@@ -36,11 +36,11 @@ export const showEditModelAtom = atom(
 
 export const showEditWorkflowAtom = atom(
   null,
-  (get, set, workflow: WorkflowDetail) => {
+  (_, set, workflow: WorkflowDetail) => {
     set(editModalAtom, {
       open: true,
       type: 'workflow',
       data: workflow
     });
   }
-); 
+);
