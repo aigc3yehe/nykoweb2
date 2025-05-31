@@ -469,3 +469,75 @@ export const fetchCommunityTokenizationState = atom(
       }
     }
 );
+
+export async function editWorkflowCarouselRequest(workflow_id: number, url: string, did?: string) {
+  const API_URL = "/studio-api/workflow/edit_carousel";
+
+  try {
+    const privyToken = await getAccessToken();
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      },
+      body: JSON.stringify({
+        workflow_id,
+        url,
+        user: did,
+      })
+    })
+
+    if (!res.ok) {
+      throw new Error(`API returned error status ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+// 获取工作流轮播图编辑
+export const fetchWorkflowEditCarousel = atom(
+    null,
+    async (get, set, workflow_id: number, url: string) => {
+      const accountState = get(accountAtom);
+      if(!workflow_id || !url) {
+        throw new Error("Workflow id and image url are required");
+      }
+      try {
+        const did = accountState.did || undefined;
+        const response = await editWorkflowCarouselRequest(workflow_id, url, did);
+        console.log('workflow carousel result', response);
+        const result = response;
+        console.log("workflow carousel result", result);
+        if (result.data) {
+          console.log('workflow carousel 设置成功', result);
+          const oldWorkflowDetail = get(workflowDetailAtom)
+          if (oldWorkflowDetail && oldWorkflowDetail.currentWorkflow) {
+            // 更新carousel数组
+            const currentCarousel = oldWorkflowDetail.currentWorkflow.carousel || [];
+            let newCarousel: string[];
+            
+            if (currentCarousel.includes(url)) {
+              // 如果已存在，则删除
+              newCarousel = currentCarousel.filter(item => item !== url);
+            } else {
+              // 如果不存在，则添加
+              newCarousel = [...currentCarousel, url];
+            }
+            
+            oldWorkflowDetail.currentWorkflow.carousel = newCarousel;
+            set(workflowDetailAtom, oldWorkflowDetail);
+          }
+        }
+        return response; // 返回结果，以便在组件中使用Promise链
+      } catch (error) {
+        console.log(error);
+        throw error; // 抛出错误以便在组件中捕获
+      }
+    }
+);

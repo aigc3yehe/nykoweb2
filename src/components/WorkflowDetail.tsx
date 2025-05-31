@@ -34,6 +34,7 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
   const clearWorkflowStatusInChat = useSetAtom(clearWorkflowStatus);
   const [showBuyToken, setShowBuyToken] = useState(false);
   const [showEditCover, setShowEditCover] = useState(false);
+  const [showCarousel, setShowCarousel] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'description' | 'tokenization'>('description');
 
@@ -68,8 +69,10 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
   useEffect(() => {
     if (accountState.role === 'admin' || accountState.did === currentWorkflow?.creator) {
       setShowEditCover(true)
+      setShowCarousel(true)
     } else {
       setShowEditCover(false)
+      setShowCarousel(false)
     }
   }, [accountState.did, accountState.role, currentWorkflow?.creator]);
 
@@ -259,7 +262,9 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
         {/* 左侧轮播图组件 */}
         <ModelCarousel
           images={currentWorkflow.carousel || []}
-          coverImage={currentWorkflow.cover}
+          cover={currentWorkflow.cover}
+          workflowId={currentWorkflow.id}
+          showDeleteButton={showCarousel}
         />
 
         {/* 右侧信息面板 - 使用新的设计 */}
@@ -340,6 +345,7 @@ const WorkflowDetail: React.FC<WorkflowDetailProps> = ({ workflowId }) => {
                       imageListState.images = updatedImages;
                     }}
                     showEditCover={showEditCover}
+                    showCarousel={showCarousel}
                   />
                 </div>
               );

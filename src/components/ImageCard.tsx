@@ -5,15 +5,16 @@ import avatarSvg from '../assets/Avatar.svg';
 import showSvg from '../assets/show.svg';
 import hideSvg from '../assets/hidden.svg';
 import coverSvg from '../assets/cover.svg';
+import carouselSvg from '../assets/carousel.svg';
 import heart01Svg from '../assets/heart_01.svg'; // 未点赞图标
 import heart02Svg from '../assets/heart_02.svg'; // 点赞图标
 import { useSetAtom, useAtom } from 'jotai';
 import { openImageDetails } from '../store/modalStore';
-import { fetchToggleView, fetchEditCover } from '../store/modelStore';
+import { fetchToggleView, fetchEditCover, fetchEditCarousel } from '../store/modelStore';
 import { showDialogAtom } from '../store/dialogStore';
 import { accountAtom } from '../store/accountStore';
 import { showToastAtom } from "../store/imagesStore";
-import { fetchToggleWorkflowView, fetchWorkflowEditCover } from "../store/workflowStore.ts";
+import { fetchToggleWorkflowView, fetchWorkflowEditCover, fetchWorkflowEditCarousel } from "../store/workflowStore.ts";
 import { SOURCE_TYPE } from "../types/api.type.ts";
 import { likeImageAtom } from '../store/imageStore';
 
@@ -21,14 +22,17 @@ interface ImageCardProps {
   image: Image;
   onVisibilityChange?: (updatedImage: Image) => void;
   showEditCover?: boolean;
+  showCarousel?: boolean;
 }
 
-const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEditCover }) => {
+const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEditCover, showCarousel }) => {
   const handleOpenImageDetails = useSetAtom(openImageDetails);
   const [, toggleView] = useAtom(fetchToggleView);
   const [, editCover] = useAtom(fetchEditCover);
+  const [, editCarousel] = useAtom(fetchEditCarousel);
   const [, toggleWorkflowView] = useAtom(fetchToggleWorkflowView);
   const [, editWorkflowCover] = useAtom(fetchWorkflowEditCover);
+  const [, editWorkflowCarousel] = useAtom(fetchWorkflowEditCarousel);
   const [, likeImage] = useAtom(likeImageAtom);
   const showDialog = useSetAtom(showDialogAtom);
   const [accountState] = useAtom(accountAtom);
@@ -227,6 +231,51 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
     });
 
   }
+
+  const handleCarouselClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止事件冒泡，避免触发图片详情
+
+    const url = localImage.url;
+    if (isProcessing || !url || (!localImage.model_id && !localImage.workflow_id)) return; // 如果正在处理中，不响应点击
+
+    showDialog({
+      open: true,
+      message: 'Are you sure you want to toggle this image in carousel?',
+      confirmText: 'Confirm',
+      cancelText: 'Cancel',
+      onConfirm: () => {
+        setIsProcessing(true); // 设置处理中状态
+
+        // 根据图片类型调用对应的carousel接口
+        const carouselPromise = localImage.model_id 
+          ? editCarousel(localImage.model_id, url)
+          : editWorkflowCarousel(localImage.workflow_id!, url);
+
+        carouselPromise
+            .then(() => {
+              // 显示成功提示
+              showToast({
+                message: 'Carousel has been updated successfully',
+                severity: 'success'
+              });
+            })
+            .catch((error) => {
+              console.error('Failed to update carousel:', error);
+              showToast({
+                message: 'Failed to update carousel',
+                severity: 'error'
+              });
+            })
+            .finally(() => {
+              setIsProcessing(false); // 结束处理状态
+            });
+      },
+      onCancel: () => {},
+      confirmButtonColor: '#6366F1',
+      cancelButtonColor: '#6366F1'
+    });
+  }
+
   const handleToggleViewClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // 阻止事件冒泡，避免触发图片详情
 
@@ -424,7 +473,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
               )}
 
               {/* 右侧按钮容器 */}
-              {(canToggleVisibility || showEditCover) && (
+              {(canToggleVisibility || showEditCover || showCarousel) && (
                 <div className={styles.rightButtonContainer}>
                   {isProcessing ? (
                     <div className={styles.processingIndicator}>
@@ -440,6 +489,14 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
                           alt="cover"
                           className="w-7 h-7"
                           onClick={handleCoverClick}
+                        />
+                      )}
+                      {showCarousel && (
+                        <img
+                          src={carouselSvg}
+                          alt="carousel"
+                          className="w-7 h-7"
+                          onClick={handleCarouselClick}
                         />
                       )}
                       {canToggleVisibility && (
