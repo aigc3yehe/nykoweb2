@@ -176,22 +176,75 @@
 .geniCardHorizontal {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  border-radius: 0.25rem;
   flex-shrink: 0;
+  border-radius: 0.125rem;
+  background: linear-gradient(
+          90deg,
+          rgba(99, 102, 241, 0.1) 0%,
+          rgba(255, 106, 0, 0.1) 100%
+  );
+  border: none; /* 移除原始边框 */
+  position: relative; /* 添加相对定位 */
+  z-index: 1; /* 确保内容在渐变边框之上 */
+  overflow: hidden;
+}
+
+/* 添加伪元素来创建渐变边框 */
+.geniCardHorizontal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0.125rem; /* 与按钮相同的圆角 */
+  padding: 1px; /* 控制边框宽度 */
+  background: linear-gradient(90deg, #E8C4EA 43%, #39EDFF 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none; /* 确保点击事件穿透到按钮 */
+  z-index: -1; /* 放在按钮内容之下 */
 }
 
 .geniLabel {
-  border-radius: 0.125rem;
-  padding: 0.125rem 0.25rem; /* 调整内边距 */
+  width: 2.5625rem; /* 41px */
+  height: 0.875rem; /* 14px */
+  gap: 0.125rem; /* 2px */
+  padding: 0 0.25rem; /* 0 4px */
+
   background: linear-gradient(90deg, #E8C4EA 43%, #39EDFF 100%);
   font-family: 'Jura', sans-serif;
   font-weight: 700;
-  font-size: 0.75rem; /* 减小字体 */
-  line-height: 1;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  text-transform: capitalize;
   color: #000000;
   text-align: center;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.geni {
+  padding: 0 0.375rem; /* 0 6px */
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  text-transform: capitalize;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  background: #000000B2;
+  z-index: -2;
 }
 
 .geniValue {
@@ -231,12 +284,13 @@
   min-width: 0;
   flex: 1 1 0%;
   min-height: 2rem;
-  border-radius: 0.25rem;
+  gap: 0.25rem; /* 4px */
+  padding: 0.625rem 1.125rem; /* 10px 18px */
+  border-radius: 0.25rem; /* 4px */
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  gap: 0.125rem;
+  align-items: flex-start; /* 左对齐 */
   background: linear-gradient(119.95deg, rgba(102, 102, 102, 0.3) 44.16%, rgba(0, 0, 0, 0.3) 44.18%);
   backdrop-filter: blur(1.25rem);
   box-sizing: border-box;
@@ -245,7 +299,7 @@
 
 .pointsCard:last-child {
   flex: 1.5 1 0%; /* staking points更宽 */
-  background: linear-gradient(90deg, rgba(64, 224, 208, 0.18) 0%, rgba(255, 183, 94, 0.18) 100%); /* 浅teal到橘色，低饱和度 */
+  background: linear-gradient(119.95deg, rgba(255, 137, 53, 0.6) 44.16%, rgba(255, 106, 0, 0.6) 44.18%); /* 浅teal到橘色，低饱和度 */
 }
 
 .pointsCard:not(:last-child) {
@@ -261,7 +315,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: center;
+  text-align: left; /* 左对齐 */
+  width: 100%;
 }
 
 .pointsValue {
@@ -273,7 +328,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: center;
+  text-align: left; /* 左对齐 */
+  width: 100%;
 }
 
 /* Features 跑马灯样式 */
