@@ -4,7 +4,6 @@ import { Twitter } from './imageStore'; // 导入Twitter接口
 import { PRIVY_TOKEN_HEADER } from '../utils/constants';
 import { getAccessToken } from '@privy-io/react-auth';
 import {FlaunchStatusResponse, ModelTokenizationStateResponse} from './tokenStore';
-import { EditModelRequest, editModelRequest } from '../services/userService';
 
 export enum TOKENIZATION_LAUNCHPAD_TYPE {
   FLAUNCH = 'flaunch',
@@ -529,7 +528,7 @@ export const fetchEditCarousel = atom(
             // 更新carousel数组
             const currentCarousel = oldModelDetail.currentModel.carousel || [];
             let newCarousel: string[];
-
+            
             if (currentCarousel.includes(url)) {
               // 如果已存在，则删除
               newCarousel = currentCarousel.filter(item => item !== url);
@@ -537,7 +536,7 @@ export const fetchEditCarousel = atom(
               // 如果不存在，则添加
               newCarousel = [...currentCarousel, url];
             }
-
+            
             oldModelDetail.currentModel.carousel = newCarousel;
             set(modelDetailAtom, oldModelDetail);
           }
@@ -548,40 +547,4 @@ export const fetchEditCarousel = atom(
         throw error; // 抛出错误以便在组件中捕获
       }
     }
-);
-
-// 编辑模型的原子操作
-export const fetchEditModel = atom(
-  null,
-  async (get, set, params: Omit<EditModelRequest, 'user'>) => {
-    const accountState = get(accountAtom);
-
-    try {
-      const did = accountState.did;
-      if (!did) {
-        throw new Error("UserID is required");
-      }
-
-      const response = await editModelRequest({
-        ...params,
-        user: did
-      });
-
-      console.log('Edit model result:', response);
-
-      if (response.data) {
-        console.log('Model edited successfully', response);
-
-        // 如果编辑成功，重新获取模型详情
-        if (params.model_id) {
-          set(fetchModelDetail, params.model_id, false);
-        }
-      }
-
-      return response;
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  }
 );

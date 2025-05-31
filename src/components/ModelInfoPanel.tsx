@@ -270,7 +270,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
             </button>
 
             {/* 分享按钮 */}
-            <button className={styles.shareButton} onClick={handleShare} style={{display: "none"}}>
+            <button className={styles.shareButton} onClick={handleShare}>
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
 
@@ -331,7 +331,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
             </button>
 
             {/* 分享按钮 */}
-            <button className={styles.shareButton} onClick={handleShare} style={{display: "none"}}>
+            <button className={styles.shareButton} onClick={handleShare}>
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
           </>
