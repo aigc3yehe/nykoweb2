@@ -396,7 +396,7 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
   };
 
   const getTokenAssociationPlaceholder = () => {
-    return 'Input hash';
+    return 'Token contract (only on basechain)';
   };
 
   // 修改渲染Reference Image部分
@@ -494,7 +494,7 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
+    <div className={styles.modalOverlay}>
       <div
         className={styles.editModal}
         onClick={(e) => e.stopPropagation()}
@@ -532,19 +532,19 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
             <div className={styles.descriptionLabelRow}>
               <label className={styles.fieldLabel}>Description:</label>
               <span className={styles.charLimit}>
-                Max 300 char
+                Max 700 char
               </span>
             </div>
             <textarea
               className={styles.textArea}
               value={description}
               onChange={(e) => {
-                if (e.target.value.length <= 300) {
+                if (e.target.value.length <= 700) {
                   setDescription(e.target.value);
                 }
               }}
               placeholder="Enter workflow description"
-              maxLength={300}
+              maxLength={700}
               disabled={isSaving}
             />
           </div>
@@ -554,19 +554,19 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
             <div className={styles.descriptionLabelRow}>
               <label className={styles.fieldLabel}>Prompt:</label>
               <span className={styles.charLimit}>
-                Max 300 char
+                Max 700 char
               </span>
             </div>
             <textarea
               className={styles.textArea}
               value={prompt}
               onChange={(e) => {
-                if (e.target.value.length <= 300) {
+                if (e.target.value.length <= 700) {
                   setPrompt(e.target.value);
                 }
               }}
               placeholder="Enter workflow prompt"
-              maxLength={300}
+              maxLength={700}
               disabled={isSaving}
             />
           </div>
@@ -582,14 +582,14 @@ const EditWorkflowModal: React.FC<EditWorkflowModalProps> = ({
               className={styles.textInput}
               value={topics}
               onChange={handleTopicChange}
-              placeholder="Enter topics like #AI #ML #Workflow"
+              placeholder="Start with #, separate with SPACE, max 3, lowercase recommended."
               disabled={isSaving}
             />
           </div>
 
-          {/* Token Association */}
+          {/* Associated token */}
           <div className={`${styles.fieldContainer} ${styles.tokenAssociationContainer}`}>
-            <label className={styles.fieldLabel}>Token Association:</label>
+            <label className={styles.fieldLabel}>Associated Token:</label>
             <input
               ref={tokenInputRef}
               type="text"

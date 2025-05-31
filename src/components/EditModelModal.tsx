@@ -194,13 +194,13 @@ const EditModelModal: React.FC<EditModelModalProps> = ({
   };
 
   const getTokenAssociationPlaceholder = () => {
-    return 'Input hash';
+    return 'Token contract (only on basechain)';
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
+    <div className={styles.modalOverlay}>
       <div
         className={styles.editModal}
         onClick={(e) => e.stopPropagation()}
@@ -263,14 +263,14 @@ const EditModelModal: React.FC<EditModelModalProps> = ({
               className={styles.textInput}
               value={topics}
               onChange={handleTopicChange}
-              placeholder="Enter topics like #AI #ML #Model"
+              placeholder="Start with #, separate with SPACE, max 3, lowercase recommended."
               disabled={isSaving}
             />
           </div>
 
           {/* Token Association */}
           <div className={`${styles.fieldContainer} ${styles.tokenAssociationContainer}`}>
-            <label className={styles.fieldLabel}>Token Association:</label>
+            <label className={styles.fieldLabel}>Associated Token:</label>
             <input
               ref={tokenInputRef}
               type="text"
