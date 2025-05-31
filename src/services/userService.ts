@@ -373,3 +373,49 @@ export const getLeaderboard = async (params: {
     throw error;
   }
 };
+
+// 编辑模型请求接口
+export interface EditModelRequest {
+  user: string;
+  model_id: number;
+  name?: string;
+  description?: string;
+  tags?: string[];
+  token?: {
+    address: string;
+    launchpad: 'virtuals' | 'flaunch' | 'others';
+  };
+}
+
+// 编辑模型响应接口
+export interface EditModelResponse {
+  message: string;
+  data: boolean;
+}
+
+// 编辑模型函数
+export const editModelRequest = async (params: EditModelRequest): Promise<EditModelResponse> => {
+  const API_URL = "/studio-api/model/edit";
+
+  try {
+    const privyToken = await getAccessToken();
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      },
+      body: JSON.stringify(params)
+    });
+
+    if (!res.ok) {
+      throw new Error(`API returned error status ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

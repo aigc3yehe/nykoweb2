@@ -4,6 +4,8 @@ import dropdownIcon from '../assets/dropdown.svg';
 import backIcon from '../assets/back.svg';
 import checkboxNormal from '../assets/checkbox_normal.svg';
 import checkboxSelected from '../assets/checkbox_selected.svg';
+import shareIcon from '../assets/share_2.svg';
+import editIcon from '../assets/edit.svg';
 
 interface ContentHeaderProps {
   activeTab: 'models' | 'workflows' |'images';
@@ -16,6 +18,9 @@ interface ContentHeaderProps {
   isWorkflowDetailMode?: boolean;
   modelName?: string;
   onBackClick?: () => void;
+  tags?: string[];
+  onShareClick?: () => void;
+  onEditClick?: () => void;
 }
 
 const ContentHeader: React.FC<ContentHeaderProps> = ({
@@ -28,7 +33,10 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   isModelDetailMode = false,
   isWorkflowDetailMode = false,
   modelName = '',
-  onBackClick
+  onBackClick,
+  tags = [],
+  onShareClick,
+  onEditClick
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -50,11 +58,32 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   if (isModelDetailMode || isWorkflowDetailMode) {
     return (
       <div className={styles.contentHeader}>
-        <div className={styles.detailNavigation} >
-          <img src={backIcon} alt="Back" className={styles.backIcon} onClick={onBackClick}/>
-          <span className={styles.modelsLabel}>{isModelDetailMode ? 'Models' : 'Workflows'}</span>
-          <div className={styles.divider}></div>
-          <span className={styles.modelName}>{modelName}</span>
+        <div className={styles.detailNavigation}>
+          <div className={styles.navigationLeft}>
+            <img src={backIcon} alt="Back" className={styles.backIcon} onClick={onBackClick}/>
+            <span className={styles.modelsLabel}>{isModelDetailMode ? 'Models' : 'Workflows'}</span>
+            <div className={styles.divider}></div>
+            <span className={styles.modelName}>{modelName}</span>
+            
+            {tags.length > 0 && (
+              <div className={styles.tagsContainer}>
+                {tags.map((tag, index) => (
+                  <span key={index} className={styles.tag}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className={styles.navigationRight}>
+            <button className={styles.actionButton} onClick={onShareClick}>
+              <img src={shareIcon} alt="Share" className={styles.actionIcon} />
+            </button>
+            <button className={styles.actionButton} onClick={onEditClick}>
+              <img src={editIcon} alt="Edit" className={styles.actionIcon} />
+            </button>
+          </div>
         </div>
       </div>
     );
