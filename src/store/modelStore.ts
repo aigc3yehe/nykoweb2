@@ -487,7 +487,7 @@ export const fetchEditModel = atom(
     try {
       const did = accountState.did;
       if (!did) {
-        throw new Error("User DID is required");
+        throw new Error("UserID is required");
       }
 
       const response = await editModelRequest({
