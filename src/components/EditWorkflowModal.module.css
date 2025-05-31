@@ -171,6 +171,7 @@
 
 .textInput::placeholder {
   color: #6E788A;
+  font-size: 0.75rem;
 }
 
 /* 文本域样式 - 隐藏滚动条 */
@@ -580,11 +581,11 @@
     border: none;
     border-radius: 0;
   }
-  
+
   .previewImage {
     max-width: 90vw;
     max-height: 90vh;
     border-radius: 0.5rem;
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
   }
-} 
+}

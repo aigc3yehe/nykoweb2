@@ -34,6 +34,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   const clearModelStatusInChat = useSetAtom(clearModelStatus);
   const [showBuyToken, setShowBuyToken] = useState(false);
   const [showEditCover, setShowEditCover] = useState(false);
+  const [showCarousel, setShowCarousel] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'description' | 'tokenization'>('description');
 
@@ -68,8 +69,10 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   useEffect(() => {
     if (accountState.role === 'admin' || accountState.did === currentModel?.creator) {
       setShowEditCover(true)
+      setShowCarousel(true)
     } else {
       setShowEditCover(false)
+      setShowCarousel(false)
     }
   }, [accountState.did, accountState.role, currentModel?.creator]);
 
@@ -260,7 +263,9 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
         {/* 左侧轮播图组件 */}
         <ModelCarousel
           images={currentModel.carousel || []}
-          coverImage={currentModel.cover}
+          cover={currentModel.cover}
+          modelId={currentModel.id}
+          showDeleteButton={showCarousel}
         />
 
         {/* 右侧信息面板 - 使用新的设计 */}
@@ -341,6 +346,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
                       imageListState.images = updatedImages;
                     }}
                     showEditCover={showEditCover}
+                    showCarousel={showCarousel}
                   />
                 </div>
               );
