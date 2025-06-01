@@ -274,48 +274,40 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
 
-            {/* Token按钮 - Dexscreener 跳转 */}
-            {model?.model_tokenization?.meme_token && (
-              <Link
-                target="_blank"
-                to={`https://dexscreener.com/base/${model.model_tokenization.meme_token}`}
-              >
-                <button className={styles.dexButton}>
-                  <img
-                    src={dexSvg}
-                    alt="Dexscreener"
-                    className={styles.buttonIcon}
-                  />
-                </button>
-              </Link>
-            )}
-            {/* Token按钮 - Flaunch 跳转 */}
+            {/* Token按钮 - 根据launchpad显示不同图标和跳转逻辑 */}
             {model?.model_tokenization?.meme_token && (
               <Link
                 target="_blank"
                 to={
-                  model?.model_tokenization?.launchpad ==
-                  TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
-                    ? `https://app.virtuals.io/virtuals/${model.model_tokenization.metadata?.virtuals_id}`
-                    : `https://flaunch.gg/base/coin/${model.model_tokenization.meme_token}`
+                  model?.model_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.FLAUNCH
+                    ? `https://flaunch.gg/base/coin/${model.model_tokenization.meme_token}`
+                    : `https://dexscreener.com/base/${model.model_tokenization.meme_token}`
                 }
               >
                 <button
                   className={
-                    model?.model_tokenization?.launchpad ==
-                    TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
+                    model?.model_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.FLAUNCH
+                      ? styles.flaunchButton
+                      : model?.model_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
                       ? styles.virtualsButton
-                      : styles.flaunchButton
+                      : styles.dexButton
                   }
                 >
                   <img
                     src={
-                      model?.model_tokenization?.launchpad ==
-                      TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
+                      model?.model_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.FLAUNCH
+                        ? flaunchIcon
+                        : model?.model_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
                         ? virtualsIcon
-                        : flaunchIcon
+                        : dexSvg
                     }
-                    alt="Launchpad"
+                    alt={
+                      model?.model_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.FLAUNCH
+                        ? "Flaunch"
+                        : model?.model_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
+                        ? "Virtuals" 
+                        : "Dexscreener"
+                    }
                     className={styles.buttonIcon}
                   />
                 </button>
