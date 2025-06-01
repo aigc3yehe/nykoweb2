@@ -51,7 +51,7 @@ export interface Message {
   role: string;
   content: string;
   type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image' | 'tokenization_agreement' | "create_workflow"
-      | "run_workflow" | "workflow_generate_result" | "create_workflow_details";
+      | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image";
   imageUploadState?: {
     totalCount: number;
     uploadedCount: number;
@@ -121,6 +121,12 @@ export interface ChatState {
   workflowCreation: WorkflowCreationState;
   workflowImageValue: string; // 临时URL或S3 URL
   workflowImageFile: File | null; // 保存File对象用于上传
+  workflowRunningState: { // 当前正在执行的相关状态
+    workflow: WorkflowDetail | null;
+    width: number | null;
+    height: number | null;
+    prompt: string | null;
+  };
   workflowRunning: {
     isRunning: boolean;
     isSuccess: boolean;
@@ -135,6 +141,15 @@ export interface ChatState {
     error?: string;
   };
   workflow_extra_prompt: string; // 新增字段
+  // 新增：工作流生成结果状态
+  workflowGeneratedResult: {
+    status: 'none' | 'workflow_generated'; // 聊天状态
+    generatedImageUrl: string | null; // 工作流生成的图片URL
+    workflowInfo: WorkflowDetail | null;
+    width: number | null;
+    height: number | null;
+    prompt: string | null;
+  };
 }
 
 // 3. 更新初始状态
@@ -190,6 +205,21 @@ const initialState: ChatState = {
     error: undefined
   },
   workflow_extra_prompt: "", // 新增字段
+  // 初始化工作流生成结果状态
+  workflowGeneratedResult: {
+    status: 'none',
+    generatedImageUrl: null,
+    workflowInfo: null,
+    width: null,
+    height: null,
+    prompt: null,
+  },
+  workflowRunningState: {
+    workflow: null,
+    width: null,
+    height: null,
+    prompt: null,
+  }
 };
 
 // 创建原子状态
@@ -287,17 +317,16 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
 
         if (generatedImages.length > 0) {
           // 查找对应的 generating_image 消息
-
           const messageIndex = chatState.messages.findIndex(
             // @ts-ignore
-            msg => msg.type === 'generating_image' && msg.request_id === taskId
+            msg => (msg.type === 'generating_image' || msg.type === 'modify_image') && msg.request_id === taskId
           );
           if (messageIndex !== -1) {
             console.log('find message，update message');
-            const aspectRatio = chatState.selectedAspectRatio
+            const aspectRatio = isWorkflow ? chatState.selectedWorkflowAspectRatio : chatState.selectedAspectRatio;
             let width = 512;
             let height = 512;
-            if (aspectRatio) {
+            if (aspectRatio && aspectRatio.value !== 'auto') {
               width = aspectRatio.width;
               height = aspectRatio.height;
             }
@@ -306,7 +335,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             updatedMessages[messageIndex] = {
               ...updatedMessages[messageIndex],
               content: 'Image generation completed',
-              type: 'generate_result',
+              type: isWorkflow ? 'workflow_generate_result' : 'generate_result',
               images: generatedImages,
               imageInfo: {
                 width: width,
@@ -323,13 +352,14 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
           } else {
             console.log('not found message，create new message');
             // 如果找不到对应消息，创建新消息（兜底方案）
-            const aspectRatio = chatState.selectedAspectRatio
+            const aspectRatio = isWorkflow ? chatState.selectedWorkflowAspectRatio : chatState.selectedAspectRatio;
             let width = 512;
             let height = 512;
-            if (aspectRatio) {
+            if (aspectRatio && aspectRatio.value !== 'auto') {
               width = aspectRatio.width;
               height = aspectRatio.height;
             }
+
             const resultMessage: Message = {
               role: 'assistant',
               content: 'Image generation completed',
@@ -342,26 +372,36 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
               }
             };
 
-            // 添加消息到列表
-            // 任务完成，退出轮询
+            // 为工作流任务更新额外的状态
+            let updatedWorkflowResult = chatState.workflowGeneratedResult;
             if (isWorkflow) {
-              set(chatAtom, {
-                ...get(chatAtom),
-                messages: [...filterSystemMessages(chatState.messages), resultMessage],
-                workflowRunning: {
-                  isRunning: false,
-                  isSuccess: true
-                },
-                isGenerating: false,
-                workflowImageFile: null // 清除文件对象
-              });
-            } else {
-              set(chatAtom, {
-                ...chatState,
-                messages: [...filterSystemMessages(chatState.messages), resultMessage],
-                isGenerating: false
-              });
+              const workflowRunningState = chatState.workflowRunningState;
+              let generatedImageUrl = null
+              if (generatedImages && generatedImages.length > 0) {
+                generatedImageUrl = generatedImages[0];
+              }
+              updatedWorkflowResult = {
+                status: 'workflow_generated',
+                generatedImageUrl: generatedImageUrl,
+                workflowInfo: workflowRunningState.workflow,
+                width: workflowRunningState.width,
+                height: workflowRunningState.height,
+                prompt: workflowRunningState.prompt
+              };
             }
+
+            // 添加消息到列表
+            set(chatAtom, {
+              ...get(chatAtom),
+              messages: [...filterSystemMessages(chatState.messages), resultMessage],
+              workflowRunning: isWorkflow ? {
+                isRunning: false,
+                isSuccess: true
+              } : chatState.workflowRunning,
+              isGenerating: false,
+              workflowImageFile: isWorkflow ? null : chatState.workflowImageFile,
+              workflowGeneratedResult: updatedWorkflowResult
+            });
           }
 
           // 显示成功通知
@@ -390,7 +430,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
         // 查找对应的 generating_image 消息
         const messageIndex = chatState.messages.findIndex(
           // @ts-ignore
-          msg => msg.type === 'generating_image' && msg.request_id === taskId
+          msg => (msg.type === 'generating_image' || msg.type === 'modify_image') && msg.request_id === taskId
         );
 
         if (messageIndex !== -1) {
@@ -608,16 +648,67 @@ export const sendMessage = atom(
 
       const current_task_status = chatState.current_status
 
+      // 当前的工作流相关
       const workflow_id = chatState.currentWorkflow?.id
       const current_workflow_name = chatState.currentWorkflow?.name
       const workflow_cover = chatState.currentWorkflow?.cover;
       const workflow_description = chatState.currentWorkflow?.description;
       const workflow_creator = chatState.currentWorkflow?.creator;
 
+      // 获取工作流生成结果相关信息
+      const workflowGeneratedResult = chatState.workflowGeneratedResult;
+      const workflow_generated_status = workflowGeneratedResult.status;
+      const workflow_generated_image_url = workflowGeneratedResult.generatedImageUrl;
+      const workflow_generated_info = workflowGeneratedResult.workflowInfo;
+      const workflow_generated_width = workflowGeneratedResult.width;
+      const workflow_generated_height = workflowGeneratedResult.height;
+      const workflow_generated_prompt = workflowGeneratedResult.prompt;
+
       // 构建完整的API URL
       const API_URL = `${apiPrefix}/chat`;
 
       const lora_weight = 0.75 + (chatState.loraWeight || 0) * 0.25
+
+      // 构建请求体
+      const requestBody: any = {
+        message: userMessage.content,
+        conversation_history: chatState.messages.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        user_uuid: chatState.userUuid,
+        creator: chatState.did,
+        urls: chatState.urls.map(url => url.url),
+        model_id,
+        width,
+        height,
+        lora_name,
+        lora_weight: lora_weight,
+        model_creator,
+        model_name,
+        model_cover,
+        model_description,
+        wallet_address,
+        model_status,
+        agree,
+        task_type: current_task_type,
+        current_task_status,
+        workflow_id,
+        workflow_name: current_workflow_name,
+        workflow_cover,
+        workflow_description,
+        workflow_creator
+      };
+
+      // 如果当前处于工作流生成完成状态，附加工作流生成的信息
+      if (workflow_generated_status === 'workflow_generated') {
+        requestBody.workflow_generated_status = workflow_generated_status;
+        requestBody.workflow_generated_image_url = workflow_generated_image_url;
+        requestBody.workflow_generated_id = workflow_generated_info?.id;
+        requestBody.workflow_generated_width = workflow_generated_width;
+        requestBody.workflow_generated_height = workflow_generated_height;
+        requestBody.workflow_generated_prompt = workflow_generated_prompt;
+      }
 
       // 发送请求到API
       const response = await fetch(API_URL, {
@@ -625,35 +716,7 @@ export const sendMessage = atom(
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: userMessage.content,
-          conversation_history: chatState.messages.map(msg => ({
-            role: msg.role,
-            content: msg.content
-          })),
-          user_uuid: chatState.userUuid,
-          creator: chatState.did,
-          urls: chatState.urls.map(url => url.url),
-          model_id,
-          width,
-          height,
-          lora_name,
-          lora_weight: lora_weight,
-          model_creator,
-          model_name,
-          model_cover,
-          model_description,
-          wallet_address,
-          model_status,
-          agree,
-          task_type: current_task_type,
-          current_task_status,
-          workflow_id,
-          workflow_name: current_workflow_name,
-          workflow_cover,
-          workflow_description,
-          workflow_creator
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -738,6 +801,9 @@ export const sendMessage = atom(
       } else if (task_type === 'generation' && request_id) {
         messageType = 'generating_image';
         isGenerating = true;
+      } else if (task_type === 'modify_image' && request_id) {
+        messageType = 'modify_image';
+        isGenerating = true;
       }
 
       if (status === "tokenization_agreement" && task_type === 'tokenization') {
@@ -762,7 +828,7 @@ export const sendMessage = atom(
         role: 'assistant',
         content: content,
         type: messageType as 'text' | 'upload_image' | 'generating_image' | 'generate_result' | 'tokenization_agreement' | "create_workflow"
-            | "run_workflow" | "workflow_generate_result" | "create_workflow_details",
+            | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image",
         imageUploadState: messageType === 'upload_image'
           ? { totalCount: 0, uploadedCount: 0, isUploading: false, finishUpload: false }
           : undefined,
@@ -797,7 +863,12 @@ export const sendMessage = atom(
           return msg;
         });
       }
-
+      // 如果是执行工作流状态，则保存当前的工作流内容，防止被切换
+      const workflowRunningState = latestState.workflowRunningState;
+      if (messageType === 'run_workflow') {
+        // 更新 workflow
+        workflowRunningState.workflow = latestState.currentWorkflow
+      }
       // 更新状态 - 使用最新状态作为基础
       set(chatAtom, {
         ...latestState,
@@ -811,12 +882,14 @@ export const sendMessage = atom(
         workflow_name: workflow_name || undefined,
         workflow_description: workflow_goal || undefined,
         workflow_prompt: generated_prompt || undefined,
+        workflowRunningState: workflowRunningState,
       });
 
       // 如果 request_id 不为空，则代表创建生成图片任务完成
       console.log('request_id:', request_id);
       if (request_id) {
-        pollImageGenerationTask(request_id, set, get).catch(err => {
+        const isWorkflow = messageType === 'modify_image';
+        pollImageGenerationTask(request_id, set, get, isWorkflow).catch(err => {
           console.error('poll Image Generation Task Failed:', err);
         });
       }
@@ -1161,6 +1234,21 @@ export const clearChat = atom(
         isSuccess: false
       },
       workflow_extra_prompt: "", // 清空附加信息
+      // 清空工作流生成结果状态
+      workflowGeneratedResult: {
+        status: 'none',
+        generatedImageUrl: null,
+        workflowInfo: null,
+        width: null,
+        height: null,
+        prompt: null,
+      },
+      workflowRunningState: {
+        workflow: null,
+        width: null,
+        height: null,
+        prompt: null,
+      }
     });
   }
 );
@@ -1800,9 +1888,10 @@ export const runWorkflow = atom(
         }
       }
 
-      const workflowId = chatState.currentWorkflow?.id
+      // const workflowId = chatState.currentWorkflow?.id
+      const workflowId = chatState.workflowRunningState.workflow?.id
       const workflowRatio = chatState.selectedWorkflowAspectRatio
-      
+
       // 准备API参数，使用上传后的图片URL
       const params: RunWorkflowParams = {
         workflow_id: workflowId || 0,
@@ -1811,9 +1900,16 @@ export const runWorkflow = atom(
         text_value: chatState.workflow_extra_prompt || undefined,
       };
 
+      const workflowRunningState = chatState.workflowRunningState;
+
       if (workflowRatio !== undefined && workflowRatio.value !== 'auto') {
         params.width = workflowRatio.width
         params.height = workflowRatio.height
+        workflowRunningState.width = workflowRatio.width
+        workflowRunningState.height = workflowRatio.height
+      } else {
+        workflowRunningState.width = null
+        workflowRunningState.height = null
       }
 
       // 调用API
@@ -1821,6 +1917,12 @@ export const runWorkflow = atom(
 
       // 如果有生成的任务ID，启动轮询
       if (response.data.task_id) {
+        workflowRunningState.prompt = (chatState.workflow_extra_prompt || "") + (workflowRunningState.workflow?.prompt || "")
+        set(chatAtom, {
+          ...get(chatAtom),
+          workflowRunningState: workflowRunningState
+        });
+
         pollImageGenerationTask(response.data.task_id, set, get, true).catch(err => {
           console.error('Poll Image Generation Task Failed:', err);
         });
@@ -2019,6 +2121,25 @@ export const removeWorkflowReferenceImage = atom(
         uploadedUrl: "",
         fileName: "",
         error: undefined
+      }
+    });
+  }
+);
+
+// 新增：清除工作流生成结果状态的操作
+export const clearWorkflowGeneratedResult = atom(
+  null,
+  (get, set) => {
+    const chatState = get(chatAtom);
+    set(chatAtom, {
+      ...chatState,
+      workflowGeneratedResult: {
+        status: 'none',
+        generatedImageUrl: null,
+        workflowInfo: null,
+        width: null,
+        height: null,
+        prompt: null,
       }
     });
   }

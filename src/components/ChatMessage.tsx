@@ -34,7 +34,8 @@ export interface ChatMessageProps {
     | "create_workflow"
     | "run_workflow"
     | "workflow_generate_result"
-    | "create_workflow_details";
+    | "create_workflow_details"
+    | "modify_image";
   imageUploadState?: ImageUploadState;
   uploadedFiles?: Array<{ name: string; url: string }>;
   modelParam?: {
@@ -153,6 +154,22 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           Generating image, please wait...
         </span>
       </div>
+    );
+  };
+
+  // 添加图片修改中组件
+  const renderModifyImageComponent = () => {
+    return (
+        <div className={styles.generatingIndicator} key={request_id}>
+          <img
+              src={uploadingIcon}
+              alt="Modify"
+              className={styles.uploadingIcon}
+          />
+          <span className={styles.generatingText}>
+          Modifying image, please wait...(ETA 200 sec)
+        </span>
+        </div>
     );
   };
 
@@ -537,7 +554,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     return (
       <div className={styles.workflowSection}>
         <div className={styles.sectionLabel}>Reference Image (Optional):</div>
-        
+
         {!hasUploadedImage && !isUploading ? (
           // 未上传图片状态 - 显示上传按钮
           <button
@@ -781,7 +798,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     // 检查是否应该显示附加信息输入框
     // 只有当 input_type 包含 "text" 或者是 "image + text" 时才显示
-    const shouldShowAdditionalInfo = currentWorkflow?.input_type?.toLowerCase().includes('text') || 
+    const shouldShowAdditionalInfo = currentWorkflow?.input_type?.toLowerCase().includes('text') ||
                                    currentWorkflow?.input_type?.toLowerCase().includes('image + text');
 
     // 文件选择处理函数
@@ -795,7 +812,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         const target = event.target as HTMLInputElement;
         if (target.files && target.files.length > 0) {
           const file = target.files[0];
-          
+
           // 验证文件格式
           const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
           if (!allowedTypes.includes(file.type)) {
@@ -955,6 +972,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       {role === "assistant" &&
         type === "generating_image" &&
         renderGeneratingImageComponent()}
+      {role === "assistant" &&
+        type === "modify_image" &&
+          renderModifyImageComponent()}
       {role === "assistant" &&
         type === "tokenization_agreement" &&
         renderTokenizationAgreementComponent()}
