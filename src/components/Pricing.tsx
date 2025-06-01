@@ -445,6 +445,18 @@ const Pricing: React.FC = () => {
     }
   };
 
+  const handleRefreshPlan = async () => {
+    const result = await refreshUserPlan(true);
+    if (result?.plan_type) {
+      showToast({
+        message: `Current Plan: ${result?.plan_type?.toUpperCase()}. Credits: ${
+          (result?.sub_balance || 0) + (result?.paid_balance || 0)
+        }`,
+        severity: "success",
+      });
+    }
+  };
+
   return (
     <div className={styles.pricingPage}>
       <div className={styles.scrollContainer}>
@@ -469,7 +481,7 @@ const Pricing: React.FC = () => {
                   >
                     Buy $NYKO
                   </Link>
-                  <span onClick={() => refreshUserPlan(true)}>
+                  <span onClick={handleRefreshPlan}>
                     <Cached
                       style={{
                         color: "#88A4C2",

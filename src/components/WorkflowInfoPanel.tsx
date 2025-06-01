@@ -226,52 +226,44 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
             </button>
 
             {/* 分享按钮 */}
-            <button className={styles.shareButton} onClick={handleShare}>
+            <button className={styles.shareButton} onClick={handleShare} style={{display: "none"}}>
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
 
-            {/* Token按钮 - Dexscreener 跳转 */}
-            {workflow?.workflow_tokenization?.meme_token && (
-              <Link
-                target="_blank"
-                to={`https://dexscreener.com/base/${workflow.workflow_tokenization.meme_token}`}
-              >
-                <button className={styles.dexButton}>
-                  <img
-                    src={dexSvg}
-                    alt="Dexscreener"
-                    className={styles.buttonIcon}
-                  />
-                </button>
-              </Link>
-            )}
-            {/* Token按钮 - Flaunch 跳转 */}
+            {/* Token按钮 - 根据launchpad显示不同图标和跳转逻辑 */}
             {workflow?.workflow_tokenization?.meme_token && (
               <Link
                 target="_blank"
                 to={
-                  workflow?.workflow_tokenization?.launchpad ==
-                  TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
-                    ? `https://app.virtuals.io/virtuals/${workflow.workflow_tokenization.metadata?.virtuals_id}`
-                    : `https://flaunch.gg/base/coin/${workflow.workflow_tokenization.meme_token}`
+                  workflow?.workflow_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.FLAUNCH
+                    ? `https://flaunch.gg/base/coin/${workflow.workflow_tokenization.meme_token}`
+                    : `https://dexscreener.com/base/${workflow.workflow_tokenization.meme_token}`
                 }
               >
                 <button
                   className={
-                    workflow?.workflow_tokenization?.launchpad ==
-                    TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
+                    workflow?.workflow_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.FLAUNCH
+                      ? styles.flaunchButton
+                      : workflow?.workflow_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
                       ? styles.virtualsButton
-                      : styles.flaunchButton
+                      : styles.dexButton
                   }
                 >
                   <img
                     src={
-                      workflow?.workflow_tokenization?.launchpad ==
-                      TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
+                      workflow?.workflow_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.FLAUNCH
+                        ? flaunchIcon
+                        : workflow?.workflow_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
                         ? virtualsIcon
-                        : flaunchIcon
+                        : dexSvg
                     }
-                    alt="Launchpad"
+                    alt={
+                      workflow?.workflow_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.FLAUNCH
+                        ? "Flaunch"
+                        : workflow?.workflow_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
+                        ? "Virtuals"
+                        : "Dexscreener"
+                    }
                     className={styles.buttonIcon}
                   />
                 </button>
@@ -287,7 +279,7 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
             </button>
 
             {/* 分享按钮 */}
-            <button className={styles.shareButton} onClick={handleShare}>
+            <button className={styles.shareButton} onClick={handleShare} style={{display: "none"}}>
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
           </>

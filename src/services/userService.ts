@@ -267,22 +267,17 @@ export const refreshUserPlan = async (params: {
   did: string;
 }): Promise<QueryPlanResponse> => {
   try {
-    const queryParams = new URLSearchParams();
-
-    queryParams.append("user", params.did);
-    queryParams.append("refreshState", "true");
-
     const privyToken = await getAccessToken();
 
-    const response = await fetch(
-      `/studio-api/users/plan/update?${queryParams.toString()}`,
-      {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-          [PRIVY_TOKEN_HEADER]: privyToken || "",
-        },
-      }
-    );
+    const response = await fetch(`/studio-api/users/plan/update`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      },
+      body: JSON.stringify({ user: params.did, refreshState: "true" }),
+    });
 
     if (!response.ok) {
       console.error("Query user staked token failed.");
@@ -341,7 +336,7 @@ export const getLeaderboard = async (params: {
 }): Promise<LeaderboardResponse> => {
   try {
     const queryParams = new URLSearchParams();
-    
+
     if (params.page) {
       queryParams.append("page", params.page.toString());
     }
@@ -370,6 +365,52 @@ export const getLeaderboard = async (params: {
     return await response.json();
   } catch (error) {
     console.error("Get leaderboard failed:", error);
+    throw error;
+  }
+};
+
+// 编辑模型请求接口
+export interface EditModelRequest {
+  user: string;
+  model_id: number;
+  name?: string;
+  description?: string;
+  tags?: string[];
+  token?: {
+    address: string;
+    launchpad: 'virtuals' | 'flaunch' | 'others';
+  };
+}
+
+// 编辑模型响应接口
+export interface EditModelResponse {
+  message: string;
+  data: boolean;
+}
+
+// 编辑模型函数
+export const editModelRequest = async (params: EditModelRequest): Promise<EditModelResponse> => {
+  const API_URL = "/studio-api/model/edit";
+
+  try {
+    const privyToken = await getAccessToken();
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      },
+      body: JSON.stringify(params)
+    });
+
+    if (!res.ok) {
+      throw new Error(`API returned error status ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.log(error);
     throw error;
   }
 };
