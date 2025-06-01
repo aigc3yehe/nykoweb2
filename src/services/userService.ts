@@ -272,10 +272,11 @@ export const refreshUserPlan = async (params: {
     const response = await fetch(`/studio-api/users/plan/update`, {
       method: "POST",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
         [PRIVY_TOKEN_HEADER]: privyToken || "",
       },
-      body: JSON.stringify({ user: params.did, refreshState: true }),
+      body: JSON.stringify({ user: params.did, refreshState: "true" }),
     });
 
     if (!response.ok) {
