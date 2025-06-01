@@ -1,0 +1,323 @@
+/* 全屏遮罩层 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* 编辑弹窗样式 */
+.editModal {
+  width: 32.0625rem; /* 513px */
+  border-radius: 0.5rem; /* 8px */
+  background: linear-gradient(360deg, #181E31 0%, #0E111B 35.75%);
+  border: 1px solid #3741514D;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* 标题栏 */
+.headerContainer {
+  width: 100%;
+  height: 3rem; /* 48px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.625rem; /* 10px */
+  padding: 0.75rem 1.25rem; /* 12px 20px */
+  border-bottom: 1px solid #3741514D;
+}
+
+.headerTitle {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-transform: capitalize;
+  color: #FFFFFF;
+}
+
+.closeButton {
+  width: 1.5rem; /* 24px */
+  height: 1.5rem; /* 24px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* 内容区域 */
+.contentContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem; /* 14px */
+  padding: 1.25rem; /* 20px */
+  overflow-y: auto;
+}
+
+/* 输入字段容器 */
+.fieldContainer {
+  width: 100%; /* 473px */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 8px */
+}
+
+.nameFieldContainer {
+  height: 3.625rem; /* 58px */
+}
+
+.descriptionFieldContainer {
+  height: 6.5625rem; /* 105px */
+}
+
+.topicFieldContainer {
+  height: 3.625rem; /* 58px */
+}
+
+.tokenAssociationContainer {
+  height: 6.3125rem; /* 101px */
+}
+
+/* 字段标签 */
+.fieldLabel {
+  font-family: 'Jura', sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #FFFFFF;
+}
+
+/* Description标签行 */
+.descriptionLabelRow {
+  width: 100%; /* 473px */
+  height: 1.0625rem; /* 17px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.charLimit {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.625rem; /* 10px */
+  line-height: 130%;
+  letter-spacing: 0%;
+  text-align: right;
+  vertical-align: middle;
+  color: #6E788A;
+}
+
+/* 输入框样式 - 左对齐 */
+.textInput {
+  width: 100%;
+  height: 2.0625rem; /* 33px */
+  padding: 0.5rem 0.875rem; /* 8px 14px */
+  border-radius: 0.25rem; /* 4px */
+  border: 1px solid #37415180;
+  background: transparent;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: left; /* 改为左对齐 */
+  vertical-align: middle;
+  color: #FFFFFF;
+  outline: none;
+}
+
+.textInput:focus {
+  border: 1px solid #6366F1;
+}
+
+.textInput::placeholder {
+  color: #6E788A;
+  font-size: 0.75rem;
+}
+
+/* 文本域样式 - 隐藏滚动条 */
+.textArea {
+  width: 100%;
+  height: 5rem; /* 80px */
+  padding: 0.5rem 0.875rem; /* 8px 14px */
+  border-radius: 0.25rem; /* 4px */
+  border: 1px solid #37415180;
+  background: transparent;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #FFFFFF;
+  outline: none;
+  resize: none;
+}
+
+/* 隐藏文本域滚动条 */
+.textArea::-webkit-scrollbar {
+  display: none;
+}
+
+.textArea {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.textArea:focus {
+  border: 1px solid #6366F1;
+}
+
+.textArea::placeholder {
+  color: #6E788A;
+}
+
+/* Token Association只读输入框 */
+.readonlyInput {
+  width: 100%; /* 471px */
+  height: 2.0625rem; /* 33px */
+  padding: 0.5rem 0.875rem; /* 8px 14px */
+  border-radius: 0.25rem; /* 4px */
+  border: 1px solid #37415180;
+  background: transparent;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: #6E788A;
+  outline: none;
+  cursor: not-allowed;
+}
+
+/* Token选择器容器 */
+.tokenSelectorContainer {
+  width: 100%; /* 473px */
+  height: 2.0625rem; /* 33px */
+  display: flex;
+  gap: 0.5rem; /* 8px */
+}
+
+/* Token选择项 */
+.tokenOption {
+  width: 9.5208rem; /* 152.33px */
+  height: 2.0625rem; /* 33px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem; /* 4px */
+  padding: 0.5rem 0.875rem; /* 8px 14px */
+  border-radius: 0.25rem; /* 4px */
+  background: #1F293799;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tokenOption.selected {
+  background: transparent;
+  border: 1px solid #6366F1;
+}
+
+.tokenOption.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.tokenOptionContent {
+  width: 4.875rem; /* 78px */
+  height: 1.0625rem; /* 17px */
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* 4px */
+}
+
+.tokenOptionText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: #FFFFFF;
+}
+
+.tokenOption.selected .tokenOptionText {
+  color: #6366F1;
+}
+
+.tokenIcon {
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+  object-fit: contain;
+}
+
+.virtualsIcon {
+  width: 1.5625rem; /* 25px */
+  height: 1rem; /* 16px */
+  object-fit: contain;
+}
+
+/* 确认按钮容器 */
+.confirmButtonContainer {
+  width: 100%; /* 473px */
+  height: 3.1875rem; /* 51px */
+  display: flex;
+  align-items: center;
+  gap: 0.625rem; /* 10px */
+  padding: 0.625rem 0; /* 10px 0 */
+}
+
+.confirmButton {
+  width: 100%; /* 473px */
+  height: 1.9375rem; /* 31px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem; /* 4px */
+  padding: 0.375rem 0.625rem; /* 6px 10px */
+  border-radius: 0.25rem; /* 4px */
+  background: #34C759;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirmButton:hover {
+  background: #28a745;
+}
+
+.confirmButton:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.confirmButtonText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: #000000;
+}

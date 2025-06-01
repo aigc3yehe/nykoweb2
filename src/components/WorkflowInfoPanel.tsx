@@ -226,7 +226,7 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
             </button>
 
             {/* 分享按钮 */}
-            <button className={styles.shareButton} onClick={handleShare}>
+            <button className={styles.shareButton} onClick={handleShare} style={{display: "none"}}>
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
 
@@ -279,7 +279,7 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
             </button>
 
             {/* 分享按钮 */}
-            <button className={styles.shareButton} onClick={handleShare}>
+            <button className={styles.shareButton} onClick={handleShare} style={{display: "none"}}>
               <img src={shareSvg} alt="Share" className={styles.buttonIcon} />
             </button>
           </>
