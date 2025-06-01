@@ -267,22 +267,16 @@ export const refreshUserPlan = async (params: {
   did: string;
 }): Promise<QueryPlanResponse> => {
   try {
-    const queryParams = new URLSearchParams();
-
-    queryParams.append("user", params.did);
-    queryParams.append("refreshState", "true");
-
     const privyToken = await getAccessToken();
 
-    const response = await fetch(
-      `/studio-api/users/plan/update?${queryParams.toString()}`,
-      {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-          [PRIVY_TOKEN_HEADER]: privyToken || "",
-        },
-      }
-    );
+    const response = await fetch(`/studio-api/users/plan/update`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      },
+      body: JSON.stringify({ user: params.did, refreshState: true }),
+    });
 
     if (!response.ok) {
       console.error("Query user staked token failed.");
@@ -341,7 +335,7 @@ export const getLeaderboard = async (params: {
 }): Promise<LeaderboardResponse> => {
   try {
     const queryParams = new URLSearchParams();
-    
+
     if (params.page) {
       queryParams.append("page", params.page.toString());
     }
