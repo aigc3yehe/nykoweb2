@@ -183,6 +183,7 @@ export const refreshUserPlanAtom = atom(
           plan: planResult.data.plan_type,
           // isLoading: false, // Optional: clear loading state
         }));
+        return planResult?.data;
       } catch (error) {
         console.error("Failed to refresh user plan:", error);
         set(accountAtom, (prev) => ({
