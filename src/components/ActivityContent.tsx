@@ -178,7 +178,7 @@ const ActivityContent: React.FC = () => {
   };
 
   // 根据条件确定要显示的周信息
-  const weekInfo = { week: 'Week 4 (5.27-6.2)', rewards: '2,500,000', mindshare_points: 'X3' }
+  const weekInfo = { week: 'Week 5 (6.3-6.9)', rewards: '2,500,000', mindshare_points: 'X3' }
 
   // 更新滚动状态
   useEffect(() => {
@@ -350,7 +350,7 @@ const ActivityContent: React.FC = () => {
                 <div className={styles.tagItem}>Rewards: {weekInfo.rewards} $NYKO</div>
                 <div className={styles.tagItemWithTooltip}>
                   <div className={styles.tagItem}>
-                    <span 
+                    <span
                       onClick={handleTooltipShow}
                       className={styles.clickableText}
                     >
