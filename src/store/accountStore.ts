@@ -165,10 +165,10 @@ export const refreshUserPlanAtom = atom(
     const accountState = get(accountAtom);
     const did = accountState.did;
 
-  if (did) {
-    try {
-      // Optional: set loading state if you have a specific loading indicator for this
-      // set(accountAtom, (prev) => ({ ...prev, isLoading: true }));
+    if (did) {
+      try {
+        // Optional: set loading state if you have a specific loading indicator for this
+        // set(accountAtom, (prev) => ({ ...prev, isLoading: true }));
 
         let planResult;
         if (update) {
@@ -306,7 +306,7 @@ export const linkedWallet = async (did: string, address: string) => {
   }
   try {
     const privyToken = await getAccessToken();
-    const response = await fetch("/studio-api/users/link-wallet", {
+    const response = await fetch("/studio-api/users/link_wallet", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

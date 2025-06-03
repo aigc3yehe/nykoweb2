@@ -53,7 +53,7 @@ export const fetchTopTokens = atom(
     });
 
     try {
-      const response = await fetch('/studio-api/dashboard/model/top-mc-tokens', {
+      const response = await fetch('/studio-api/dashboard/model/top_mc', {
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
         }

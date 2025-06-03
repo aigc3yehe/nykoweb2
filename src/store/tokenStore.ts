@@ -312,7 +312,7 @@ export const setModelFlag = atom(
   async (_, __, { modelId, flag, user }: { modelId: number, flag: string, user: string }) => {
     try {
       const privyToken = await getAccessToken();
-      const response = await fetch('/studio-api/model/flag', {
+      const response = await fetch('/studio-api/model/edit_flag', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

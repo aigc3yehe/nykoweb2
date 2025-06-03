@@ -188,7 +188,7 @@ export const fetchModels = atom(
 );
 
 export async function toggleViewRequest(type: string, id: number, view_value: boolean, did?: string) {
-  const API_URL = "/studio-api/model/toggle_view";
+  const API_URL = type == 'image' ? "/studio-api/aigc/content/toggle_view" : "/studio-api/model/toggle_view_community";
 
   try {
     const privyToken = await getAccessToken();
