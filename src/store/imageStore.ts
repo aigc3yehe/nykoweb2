@@ -193,7 +193,7 @@ export const fetchImages = atom(
           lastRefreshTime = now;
 
           // 不使用await，避免阻塞主流程
-          fetch('/studio-api/aigc/refresh', {
+          fetch('/studio-api/aigc/image/refresh', {
             headers: {
               'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
             }
