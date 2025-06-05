@@ -1030,3 +1030,28 @@
 .removeReferenceIcon:hover {
   opacity: 0.7;
 }
+
+/* 上传图片展示容器 */
+.uploadedImageContainer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end; /* 用户消息右对齐 */
+  margin-top: 0.5rem;
+}
+
+.uploadedImageWrapper {
+  display: inline-block;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+}
+
+.uploadedImage {
+  display: block;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.uploadedImage:hover {
+  transform: scale(1.02);
+}

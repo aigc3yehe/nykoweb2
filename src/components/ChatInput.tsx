@@ -6,15 +6,16 @@ import sendActiveIcon from '../assets/send_activating.svg';
 import closeIcon from '../assets/close.svg';
 import imageIcon from '../assets/image.svg';
 import downIcon from '../assets/down.svg';
-import {AspectRatio, workflowAspectRatios, aspectRatios, chatAtom, sendMessage, setAspectRatio, setWorkflowAspectRatio, setLoraWeight} from '../store/chatStore';
+import {AspectRatio, workflowAspectRatios, aspectRatios, chatAtom, sendMessage, setAspectRatio, setWorkflowAspectRatio, setLoraWeight, uploadWorkflowReferenceImage, removeWorkflowReferenceImage, runWorkflowFromChatInput} from '../store/chatStore';
 
 interface Tag {
   id: string;
   text: string;
-  type: 'normal' | 'closeable' | 'imageRatio' | 'lora' | 'lora_weight' | 'workflow_image_ratio';
+  type: 'normal' | 'closeable' | 'imageRatio' | 'lora' | 'lora_weight' | 'workflow_image_ratio' | 'upload_workflow_image' | 'uploaded_workflow_image';
   value?: string;
   ratio?: string;
   weight?: number;
+  fileName?: string;
 }
 
 interface ChatInputProps {
@@ -29,6 +30,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   const [, setAspectRatioAction] = useAtom(setAspectRatio);
   const [, setLoraWeightAction] = useAtom(setLoraWeight);
   const [, setWorkflowAspectRatioAction] = useAtom(setWorkflowAspectRatio);
+  const [, uploadWorkflowReferenceImageAction] = useAtom(uploadWorkflowReferenceImage);
+  const [, removeWorkflowReferenceImageAction] = useAtom(removeWorkflowReferenceImage);
+  const [, runWorkflowFromChatInputAction] = useAtom(runWorkflowFromChatInput);
 
   const [activeTags, setActiveTags] = useState<Tag[]>([]);
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -42,6 +46,14 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   const customScrollbarRef = useRef<HTMLDivElement>(null);
   const ratioDropdownRef = useRef<HTMLDivElement>(null);
   const loraSliderRefs = useRef<HTMLDivElement>(null);
+
+  // 计算是否处于工作流模式且已上传图片
+  const isWorkflowWithImage = chatState.task_type === "use_workflow" && 
+                              chatState.currentWorkflow && 
+                              chatState.workflowReferenceImage.uploadedUrl;
+
+  // 计算发送按钮是否可用
+  const isSendEnabled = isWorkflowWithImage || (!isLoading && !disabled && input.trim());
 
   // 自动调整文本框高度
   useEffect(() => {
@@ -110,6 +122,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
     };
   }, [isDragging, handleSliderInteraction]);
 
+  // 格式化文件名以适应显示
+  const formatFileName = (name: string): string => {
+    if (name.length <= 9) return name;
+
+    const extension = name.split(".").pop() || "";
+    const baseName = name.substring(0, name.length - extension.length - 1);
+
+    return `${baseName.substring(0, 3)}...${baseName.substring(
+      baseName.length - 2
+    )}.${extension}`;
+  };
+
   // 根据task_type设置标签
   useEffect(() => {
     const baseTags: Tag[] = [];
@@ -140,7 +164,25 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
         text: 'image',
         type: 'workflow_image_ratio',
         ratio: chatState.selectedWorkflowAspectRatio?.value || '1:1'
-      })
+      });
+
+      // 添加工作流参考图片相关的tag
+      if (chatState.workflowReferenceImage.uploadedUrl) {
+        // 已上传图片的tag
+        baseTags.push({
+          id: 'uploaded_workflow_image',
+          text: 'Reference',
+          type: 'uploaded_workflow_image',
+          fileName: chatState.workflowReferenceImage.fileName
+        });
+      } else {
+        // 上传按钮的tag
+        baseTags.push({
+          id: 'upload_workflow_image',
+          text: 'Upload image',
+          type: 'upload_workflow_image'
+        });
+      }
     }
 
     // 如果当前进入到模型详情，则添加Base Model 和 LoraName标签
@@ -171,7 +213,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
     }
 
     setActiveTags(baseTags);
-  }, [chatState.task_value, chatState.task_type, chatState.currentModel, chatState.selectedAspectRatio, chatState.selectedWorkflowAspectRatio, chatState.loraWeight, chatState.currentWorkflow]);
+  }, [chatState.task_value, chatState.task_type, chatState.currentModel, chatState.selectedAspectRatio, chatState.selectedWorkflowAspectRatio, chatState.loraWeight, chatState.currentWorkflow, chatState.workflowReferenceImage]);
 
   // 监听textarea的滚动事件
   const handleTextareaScroll = () => {
@@ -190,10 +232,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   };
 
   const handleSendMessage = async () => {
-    if (!input.trim() || isLoading || disabled) return;
-    const message = input.trim();
-    setInput('');
-    await sendMessageAction(message);
+    if (!isSendEnabled) return;
+
+    // 如果是工作流模式且已上传图片，运行工作流
+    if (isWorkflowWithImage) {
+      await runWorkflowFromChatInputAction({ textInput: input.trim() });
+      setInput(''); // 清空输入框
+    } else {
+      // 否则发送普通消息
+      const message = input.trim();
+      setInput('');
+      await sendMessageAction(message);
+    }
   };
 
   // 处理按键事件
@@ -222,6 +272,20 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
   const handleWorkflowRatioSelect = (ratio: AspectRatio) => {
     setWorkflowAspectRatioAction(ratio);
     setShowWorkflowRatioDropdown(false);
+  };
+
+  // 处理上传工作流参考图片
+  const handleUploadWorkflowImage = () => {
+    if (!disabled) {
+      uploadWorkflowReferenceImageAction();
+    }
+  };
+
+  // 处理删除工作流参考图片
+  const handleRemoveWorkflowImage = () => {
+    if (!disabled) {
+      removeWorkflowReferenceImageAction();
+    }
   };
 
   // 处理自定义滚动条拖动
@@ -344,6 +408,37 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
                   )}
                 </div>
               );
+            } else if (tag.type === 'upload_workflow_image') {
+              return (
+                <div
+                  key={tag.id}
+                  className={styles.uploadWorkflowImageTag}
+                  onClick={handleUploadWorkflowImage}
+                >
+                  <span className={styles.uploadText}>{tag.text}</span>
+                </div>
+              );
+            } else if (tag.type === 'uploaded_workflow_image') {
+              return (
+                <div key={tag.id} className={styles.uploadedWorkflowImageTag}>
+                  <div className={styles.uploadedImageItem}>
+                    <img
+                      src={imageIcon}
+                      alt="File"
+                      className={styles.imageIcon}
+                    />
+                    <span className={styles.fileName}>
+                      {formatFileName(tag.fileName || '')}
+                    </span>
+                    <img
+                      src={closeIcon}
+                      alt="Remove"
+                      className={styles.removeIcon}
+                      onClick={handleRemoveWorkflowImage}
+                    />
+                  </div>
+                </div>
+              );
             } else if (tag.type === 'lora_weight') {
               return (
                   <div
@@ -398,7 +493,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             onScroll={handleTextareaScroll}
-            placeholder="Type a message..."
+            placeholder={isWorkflowWithImage ? "Additional text (optional)..." : "Type a message..."}
             rows={1}
             className={styles.hideScrollbar}
           />
@@ -406,9 +501,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ isLoading, disabled }) => {
             <button
               className={styles.sendButton}
               onClick={handleSendMessage}
-              disabled={!input.trim() || isLoading || disabled}
+              disabled={!isSendEnabled}
             >
-              <img src={input.trim() ? sendActiveIcon : sendIcon} alt="Send" />
+              <img src={isSendEnabled ? sendActiveIcon : sendIcon} alt="Send" />
             </button>
           </div>
         </div>
