@@ -100,6 +100,69 @@
   margin-top: 0.125rem;
 }
 
+/* 上传工作流图片标签样式 */
+.uploadWorkflowImageTag {
+  height: 1.6875rem; /* 27px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6.1875rem; /* 99px */
+  padding: 0.375rem 0.875rem; /* 6px 14px */
+  background: #6366F1;
+  cursor: pointer;
+}
+
+.uploadWorkflowImageTag .uploadText {
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.80625rem; /* 12.91px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+/* 已上传工作流图片标签样式 */
+.uploadedWorkflowImageTag {
+  height: 1.8125rem; /* 29px */
+  display: flex;
+  align-items: center;
+  border-radius: 6.1875rem; /* 99px */
+  padding: 0.375rem 0.875rem; /* 6px 14px */
+  gap: 0.5rem; /* 8px */
+  border: 1px solid rgba(55, 65, 81, 0.3); /* #3741514D */
+  background: transparent;
+}
+
+.uploadedWorkflowImageTag .uploadedImageItem {
+  height: 1.0625rem; /* 17px */
+  display: flex;
+  align-items: center;
+  gap: 0.375rem; /* 6px */
+}
+
+.uploadedWorkflowImageTag .imageIcon {
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+}
+
+.uploadedWorkflowImageTag .fileName {
+  font-family: 'Jura', sans-serif;
+  font-size: 0.875rem; /* 14px */
+  color: #9CA3AF;
+  height: 1.0625rem; /* 17px */
+  margin-bottom: 0.4rem;
+}
+
+.uploadedWorkflowImageTag .removeIcon {
+  width: 0.875rem; /* 14px */
+  height: 0.875rem; /* 14px */
+  cursor: pointer;
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
 /* 输入容器 */
 .inputContainer {
   width: 100%;

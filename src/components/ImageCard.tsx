@@ -105,8 +105,8 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
     } else if (localImage.users.twitter?.username) {
       return localImage.users.twitter.username;
     } else {
-      // 如果没有Twitter信息，显示缩略的钱包地址
-      return localImage.creator.substring(0, 6) + '...' + localImage.creator.substring(localImage.creator.length - 4);
+      // 如果没有Twitter信息，显示匿名
+      return "Anonymous";
     }
   };
 

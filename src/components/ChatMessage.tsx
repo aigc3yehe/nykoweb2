@@ -35,7 +35,8 @@ export interface ChatMessageProps {
     | "run_workflow"
     | "workflow_generate_result"
     | "create_workflow_details"
-    | "modify_image";
+    | "modify_image"
+    | "uploaded_image";
   imageUploadState?: ImageUploadState;
   uploadedFiles?: Array<{ name: string; url: string }>;
   modelParam?: {
@@ -944,8 +945,41 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
+  const getScaledImageUrl = (imageUrl: string) => {
+    return `https://ik.imagekit.io/xenoai/niyoko/${imageUrl}?tr=w-200,q-90`
+  }
+
+  // 添加渲染函数：
+  const renderUploadedImageComponent = () => {
+    if (!images || images.length === 0) return null;
+
+    // 固定显示尺寸为 12.5rem x 12.5rem
+    const displaySize = 12.5;
+
+    return (
+      <div className={styles.uploadedImageContainer}>
+        <div className={styles.uploadedImageWrapper}>
+          <img
+            src={getScaledImageUrl(images[0])}
+            alt="Uploaded Image"
+            className={styles.uploadedImage}
+            style={{
+              width: `${displaySize}rem`,
+              height: 'auto', // 原始比例
+              objectFit: 'contain',
+              borderRadius: '0.5rem'
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const showContent = ! (role === "user" && type === "uploaded_image");
+
   return (
     <div className={`${styles.messageContainer} ${styles[role]}`}>
+      {showContent && (
       <div className={styles.messageContent}>
         {type === "tokenization_agreement" ? (
           <p className={styles.text}>{processContent(content)}</p>
@@ -953,6 +987,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           <p className={styles.text}>{content}</p>
         )}
       </div>
+      )}
 
       {role === "assistant" &&
         type === "upload_image" &&
@@ -984,6 +1019,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       {role === "assistant" &&
         type === "run_workflow" &&
         renderUseWorkflowComponent()}
+      {role === "user" && 
+        type === "uploaded_image" && 
+        renderUploadedImageComponent()}
     </div>
   );
 };
