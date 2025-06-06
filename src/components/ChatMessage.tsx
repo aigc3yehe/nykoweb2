@@ -168,7 +168,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               className={styles.uploadingIcon}
           />
           <span className={styles.generatingText}>
-          Modifying image, please wait...(ETA 200 sec)
+          Generating image, please wait...(ETA 200 sec)
         </span>
         </div>
     );
@@ -1019,8 +1019,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       {role === "assistant" &&
         type === "run_workflow" &&
         renderUseWorkflowComponent()}
-      {role === "user" && 
-        type === "uploaded_image" && 
+      {role === "user" &&
+        type === "uploaded_image" &&
         renderUploadedImageComponent()}
     </div>
   );
