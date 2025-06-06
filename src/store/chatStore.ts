@@ -141,15 +141,21 @@ export interface ChatState {
     error?: string;
   };
   workflow_extra_prompt: string; // 新增字段
-  // 新增：工作流生成结果状态
-  workflowGeneratedResult: {
-    status: 'none' | 'workflow_generated'; // 聊天状态
-    generatedImageUrl: string | null; // 工作流生成的图片URL
-    workflowInfo: WorkflowDetail | null;
-    width: number | null;
-    height: number | null;
-    prompt: string | null;
-  };
+  // 新增：最新生成图片的状态信息
+  latestGeneratedImage: LatestGeneratedImage;
+}
+
+// 添加最新生成图片的接口
+interface LatestGeneratedImage {
+  aicc_status?: string;
+  provider?: string; // "gpt-4o" | "sd"
+  model?: string; // "gpt-image-1-vip" | "sd"
+  source?: string; // "model" | "workflow"
+  source_id?: number;
+  reference?: string; // 生成的图片 URL
+  aicc_width?: number;
+  aicc_height?: number;
+  aicc_prompt?: string;
 }
 
 // 3. 更新初始状态
@@ -205,21 +211,24 @@ const initialState: ChatState = {
     error: undefined
   },
   workflow_extra_prompt: "", // 新增字段
-  // 初始化工作流生成结果状态
-  workflowGeneratedResult: {
-    status: 'none',
-    generatedImageUrl: null,
-    workflowInfo: null,
-    width: null,
-    height: null,
-    prompt: null,
-  },
   workflowRunningState: {
     workflow: null,
     width: null,
     height: null,
     prompt: null,
-  }
+  },
+  // 初始化最新生成图片状态
+  latestGeneratedImage: {
+    aicc_status: undefined,
+    provider: undefined,
+    model: undefined,
+    source: undefined,
+    source_id: undefined,
+    reference: undefined,
+    aicc_width: undefined,
+    aicc_height: undefined,
+    aicc_prompt: undefined,
+  },
 };
 
 // 创建原子状态
@@ -236,9 +245,9 @@ export type CheckStatsResponse = {
 };
 
 // 查询图片生成状态的API
-export async function checkImageGenerationStatus(request_id: string, isWorkflow: boolean): Promise<CheckStatsResponse> {
+export async function checkImageGenerationStatus(request_id: string): Promise<CheckStatsResponse> {
   try {
-    const status_url = isWorkflow ? `/studio-api/workflow/aigc/state?task_id=${request_id}` : `/studio-api/model/aigc/state?task_id=${request_id}&refreshState=true`
+    const status_url = `/studio-api/aigc/generate/state?task_id=${request_id}&refreshState=true`
     const response = await fetch(status_url, {
       headers: {
         'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
@@ -275,7 +284,7 @@ export function hasSystemMessage(messages: Message[]): boolean {
 }
 
 // 简化的轮询函数 - 使用 for 循环
-export async function pollImageGenerationTask(taskId: string, set: any, get: any, isWorkflow: boolean=false): Promise<void> {
+export async function pollImageGenerationTask(taskId: string, set: any, get: any, isWorkflow: boolean = false): Promise<void> {
   console.log('Start poll image generation task:', taskId);
 
   // 最大轮询次数和间隔时间
@@ -292,7 +301,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
       }
 
       // 查询任务状态
-      const statusResponse = await checkImageGenerationStatus(taskId, isWorkflow);
+      const statusResponse = await checkImageGenerationStatus(taskId);
       console.log('task status:', statusResponse);
 
       // 获取当前状态
@@ -316,11 +325,42 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
         console.log('get image url:', generatedImages);
 
         if (generatedImages.length > 0) {
+          // 确定实际的操作类型
+          let actualIsWorkflow = isWorkflow;
+
+          if (isWorkflow) {
+            // 如果 isWorkflow 为 true，检查之前的 latestGeneratedImage 来判断是否应该继承之前的类型
+            const previousSource = chatState.latestGeneratedImage.source;
+            if (previousSource === 'model') {
+              // 如果之前是 model 生成的图片，这次修改也应该保持 model 类型
+              actualIsWorkflow = false;
+            } else if (previousSource === 'workflow') {
+              // 如果之前是 workflow 生成的图片，这次修改保持 workflow 类型
+              actualIsWorkflow = true;
+            }
+            // 如果 previousSource 为空或其他值，保持原来的 isWorkflow 判断
+          }
+          // 如果 isWorkflow 为 false，直接使用 model 类型，不需要额外判断
+
+          // 构建最新生成图片的状态信息
+          const latestGeneratedImage: LatestGeneratedImage = {
+            aicc_status: 'completed',
+            provider: actualIsWorkflow ? 'gpt-4o' : 'sd',
+            model: actualIsWorkflow ? 'gpt-image-1-vip' : 'sd',
+            source: actualIsWorkflow ? 'workflow' : 'model',
+            source_id: actualIsWorkflow ? chatState.workflowRunningState.workflow?.id : chatState.currentModel?.id,
+            reference: generatedImages[0], // 使用第一张生成的图片
+            aicc_width: actualIsWorkflow ? chatState.workflowRunningState.width : chatState.selectedAspectRatio?.width,
+            aicc_height: actualIsWorkflow ? chatState.workflowRunningState.height : chatState.selectedAspectRatio?.height,
+            aicc_prompt: actualIsWorkflow ? chatState.workflowRunningState.prompt : undefined,
+          };
+
           // 查找对应的 generating_image 消息
           const messageIndex = chatState.messages.findIndex(
             // @ts-ignore
             msg => (msg.type === 'generating_image' || msg.type === 'modify_image') && msg.request_id === taskId
           );
+
           if (messageIndex !== -1) {
             console.log('find message，update message');
             const aspectRatio = isWorkflow ? chatState.selectedWorkflowAspectRatio : chatState.selectedAspectRatio;
@@ -348,7 +388,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             let updatedWorkflowRunning = chatState.workflowRunning;
             let updatedWorkflowImageFile = chatState.workflowImageFile;
 
-            if (isWorkflow) {
+            if (actualIsWorkflow) {
               const workflowRunningState = chatState.workflowRunningState;
               let generatedImageUrl = null;
               if (generatedImages && generatedImages.length > 0) {
@@ -367,16 +407,31 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
                 isSuccess: true
               };
               updatedWorkflowImageFile = null;
+            } else {
+              // model 也需要, model也支持修图
+              let generatedImageUrl = null;
+              if (generatedImages && generatedImages.length > 0) {
+                generatedImageUrl = generatedImages[0];
+              }
+              updatedWorkflowResult = {
+                status: 'workflow_generated',
+                generatedImageUrl: generatedImageUrl,
+                workflowInfo: null,
+                width: chatState.selectedAspectRatio?.width || null,
+                height: chatState.selectedAspectRatio?.height || null,
+                prompt: null
+              };
             }
 
-            // 更新消息列表
+            // 更新消息列表和最新生成图片状态
             set(chatAtom, {
               ...chatState,
               messages: updatedMessages,
               isGenerating: false,
               workflowRunning: updatedWorkflowRunning,
               workflowImageFile: updatedWorkflowImageFile,
-              workflowGeneratedResult: updatedWorkflowResult
+              workflowGeneratedResult: updatedWorkflowResult,
+              latestGeneratedImage: latestGeneratedImage // 新增：保存最新生成图片状态
             });
           } else {
             console.log('not found message，create new message');
@@ -406,7 +461,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             let updatedWorkflowRunning = chatState.workflowRunning;
             let updatedWorkflowImageFile = chatState.workflowImageFile;
 
-            if (isWorkflow) {
+            if (actualIsWorkflow) {
               const workflowRunningState = chatState.workflowRunningState;
               let generatedImageUrl = null;
               if (generatedImages && generatedImages.length > 0) {
@@ -427,14 +482,15 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
               updatedWorkflowImageFile = null;
             }
 
-            // 添加消息到列表
+            // 添加消息到列表和最新生成图片状态
             set(chatAtom, {
               ...get(chatAtom),
               messages: [...filterSystemMessages(chatState.messages), resultMessage],
               workflowRunning: updatedWorkflowRunning,
               isGenerating: false,
               workflowImageFile: updatedWorkflowImageFile,
-              workflowGeneratedResult: updatedWorkflowResult
+              workflowGeneratedResult: updatedWorkflowResult,
+              latestGeneratedImage: latestGeneratedImage // 新增：保存最新生成图片状态
             });
           }
 
@@ -450,7 +506,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             // 使用 fetchImages 重新加载图片
             set(fetchImages, { reset: true, model_id: chatState.currentModel.id });
           }
-          if (isWorkflow && chatState.currentWorkflow?.id) {
+          if (actualIsWorkflow && chatState.currentWorkflow?.id) {
             console.log('reset model images，workflow id:', chatState.currentWorkflow.id);
             // 使用 fetchImages 重新加载图片
             set(fetchImages, { reset: true, workflow_id: chatState.currentWorkflow.id });
@@ -691,13 +747,16 @@ export const sendMessage = atom(
       const workflow_creator = chatState.currentWorkflow?.creator;
 
       // 获取工作流生成结果相关信息
-      const workflowGeneratedResult = chatState.workflowGeneratedResult;
-      const workflow_generated_status = workflowGeneratedResult.status;
-      const workflow_generated_image_url = workflowGeneratedResult.generatedImageUrl;
-      const workflow_generated_info = workflowGeneratedResult.workflowInfo;
-      const workflow_generated_width = workflowGeneratedResult.width;
-      const workflow_generated_height = workflowGeneratedResult.height;
-      const workflow_generated_prompt = workflowGeneratedResult.prompt;
+      // const workflowGeneratedResult = chatState.workflowGeneratedResult;
+      // const workflow_generated_status = workflowGeneratedResult.status;
+      // const workflow_generated_image_url = workflowGeneratedResult.generatedImageUrl;
+      // const workflow_generated_info = workflowGeneratedResult.workflowInfo;
+      // const workflow_generated_width = workflowGeneratedResult.width;
+      // const workflow_generated_height = workflowGeneratedResult.height;
+      // const workflow_generated_prompt = workflowGeneratedResult.prompt;
+
+      // 获取最新生成图片的状态信息
+      const latestGenerated = chatState.latestGeneratedImage;
 
       // 构建完整的API URL
       const API_URL = `${apiPrefix}/chat`;
@@ -735,15 +794,17 @@ export const sendMessage = atom(
         workflow_description,
         workflow_creator
       };
-
-      // 如果当前处于工作流生成完成状态，附加工作流生成的信息
-      if (workflow_generated_status === 'workflow_generated') {
-        requestBody.workflow_generated_status = workflow_generated_status;
-        requestBody.workflow_generated_image_url = workflow_generated_image_url;
-        requestBody.workflow_generated_id = workflow_generated_info?.id;
-        requestBody.workflow_generated_width = workflow_generated_width;
-        requestBody.workflow_generated_height = workflow_generated_height;
-        requestBody.workflow_generated_prompt = workflow_generated_prompt;
+      // 新增：modify image 相关参数
+      if (latestGenerated.aicc_status === 'completed') {
+        requestBody.aicc_status = latestGenerated.aicc_status;
+        requestBody.provider = latestGenerated.provider;
+        requestBody.model = latestGenerated.model;
+        requestBody.source = latestGenerated.source;
+        requestBody.source_id = latestGenerated.source_id;
+        requestBody.reference = latestGenerated.reference;
+        requestBody.aicc_width = latestGenerated.aicc_width;
+        requestBody.aicc_height = latestGenerated.aicc_height;
+        requestBody.aicc_prompt = latestGenerated.aicc_prompt;
       }
 
       // 发送请求到API
@@ -830,6 +891,7 @@ export const sendMessage = atom(
         console.log('create train model success');
       }
 
+      let isWorkflow = false;
       let isGenerating = false;
       let messageType = 'text';
       if (status === 'upload_image') {
@@ -838,8 +900,9 @@ export const sendMessage = atom(
         messageType = 'generating_image';
         isGenerating = true;
       } else if (task_type === 'modify_image' && request_id) {
-        messageType = 'modify_image';
+        messageType = 'generating_image';
         isGenerating = true;
+        isWorkflow = true;
       }
 
       if (status === "tokenization_agreement" && task_type === 'tokenization') {
@@ -924,7 +987,7 @@ export const sendMessage = atom(
       // 如果 request_id 不为空，则代表创建生成图片任务完成
       console.log('request_id:', request_id);
       if (request_id) {
-        const isWorkflow = messageType === 'modify_image';
+        // const isWorkflow = messageType === 'modify_image';
         pollImageGenerationTask(request_id, set, get, isWorkflow).catch(err => {
           console.error('poll Image Generation Task Failed:', err);
         });
@@ -1270,21 +1333,24 @@ export const clearChat = atom(
         isSuccess: false
       },
       workflow_extra_prompt: "", // 清空附加信息
-      // 清空工作流生成结果状态
-      workflowGeneratedResult: {
-        status: 'none',
-        generatedImageUrl: null,
-        workflowInfo: null,
-        width: null,
-        height: null,
-        prompt: null,
-      },
       workflowRunningState: {
         workflow: null,
         width: null,
         height: null,
         prompt: null,
-      }
+      },
+      // 清空最新生成图片状态
+      latestGeneratedImage: {
+        aicc_status: undefined,
+        provider: undefined,
+        model: undefined,
+        source: undefined,
+        source_id: undefined,
+        reference: undefined,
+        aicc_width: undefined,
+        aicc_height: undefined,
+        aicc_prompt: undefined,
+      },
     });
   }
 );
@@ -2162,25 +2228,6 @@ export const removeWorkflowReferenceImage = atom(
   }
 );
 
-// 新增：清除工作流生成结果状态的操作
-export const clearWorkflowGeneratedResult = atom(
-  null,
-  (get, set) => {
-    const chatState = get(chatAtom);
-    set(chatAtom, {
-      ...chatState,
-      workflowGeneratedResult: {
-        status: 'none',
-        generatedImageUrl: null,
-        workflowInfo: null,
-        width: null,
-        height: null,
-        prompt: null,
-      }
-    });
-  }
-);
-
 // 新增：专门用于ChatInput中已上传图片的工作流运行方法
 export const runWorkflowFromChatInput = atom(
   null,
@@ -2331,5 +2378,27 @@ export const runWorkflowFromChatInput = atom(
         severity: 'error'
       });
     }
+  }
+);
+
+// 添加清除最新生成图片状态的操作
+export const clearLatestGeneratedImage = atom(
+  null,
+  (get, set) => {
+    const chatState = get(chatAtom);
+    set(chatAtom, {
+      ...chatState,
+      latestGeneratedImage: {
+        aicc_status: undefined,
+        provider: undefined,
+        model: undefined,
+        source: undefined,
+        source_id: undefined,
+        reference: undefined,
+        aicc_width: undefined,
+        aicc_height: undefined,
+        aicc_prompt: undefined,
+      }
+    });
   }
 );
