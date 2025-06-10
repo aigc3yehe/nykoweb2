@@ -25,14 +25,15 @@ Project Primedata S1 marks the launch phase of NYKO, a 12-week incentive program
   Deposit 75,000 $NYKO into the [Plan&Pricing](/pricing) page.
 - Earn Generation Rewards
 
-  Create images using NYKO AI image generation service.
+  Create images using NYKO AI image generation service. Creating popular AICCs can earn you significant $NYKO rewards.
 - Earn Mindshare Rewards
 
-  Share your creative outputs from the platform on X, or simply mention @niyoko_agent or $NYKO. If your creation is related to Virtuals native culture, like Vader, Luna, AIXBT, you'll earn *3 points! And make sure to tag this Agent.
+  Share your creative outputs from the platform on X, or simply mention @niyoko_agent or $NYKO.
 
 ## Reward Structure
 
-- 30 million $NYKO distributed totally based on user points.
+- $NYKO distributed totally based on user points.
+- $NYKO distributed to AICC creators.
 
 ## Reward Calculation
 
@@ -47,7 +48,11 @@ Mindshare Points = GENI × IF × Cooldown_X x Virtuality
 - GENI (AI Creator Score): Default is 1. After being certified as an AI expert-level creator, increased up to 3. Open a ticket in Discord to apply.
 - IF (Influence Factor): 5~20, depends on the social influence of your tweets.
 - Cooldown_X: Every day, we select the most influential tweet for pointing.
-- Virtuality: 3 if your creation is related to Virtuals native culture, like Vader, Luna, AIXBT, otherwise 1.
+- Virtuality: Projects recognized by NYKO will be considered part of Virtuality. The list of agents is currently under review.
+
+AICC rewards = given exclusively to the creators of each AICC.
+
+- Every week, rewards are distributed to AICC creators based on the credits consumed by each AICC (models & workflows).
 `;
 
 type TabType = 'information' | 'leaderboard';
@@ -178,7 +183,7 @@ const ActivityContent: React.FC = () => {
   };
 
   // 根据条件确定要显示的周信息
-  const weekInfo = { week: 'Week 5 (6.3-6.9)', rewards: '2,500,000', mindshare_points: 'X3' }
+  const weekInfo = { week: 'Week 6 (6.10-6.16)', rewards: '2,500,000', mindshare_points: 'X3' }
 
   // 更新滚动状态
   useEffect(() => {
@@ -347,14 +352,14 @@ const ActivityContent: React.FC = () => {
 
               <div className={styles.tagsGroup}>
                 <div className={styles.tagItem}>{weekInfo.week}</div>
-                <div className={styles.tagItem}>Rewards: {weekInfo.rewards} $NYKO</div>
+                <div className={styles.tagItem}>Rewards: 1.5M $NYKO</div>
                 <div className={styles.tagItemWithTooltip}>
                   <div className={styles.tagItem}>
                     <span
                       onClick={handleTooltipShow}
                       className={styles.clickableText}
                     >
-                      Mindshare Points: {weekInfo.mindshare_points} (Virtuality)
+                      AICC rewards: 1M $NYKO
                     </span>
                     <img
                       src={InfoIcon}
@@ -367,10 +372,10 @@ const ActivityContent: React.FC = () => {
                   {showTooltip && (
                     <div className={styles.tooltip}>
                       <div className={styles.tooltipTitle}>
-                        Mindshare Points = GENI × IF × Cooldown_X × Virtuality
+                      Exclusively to the creators of AICCs
                       </div>
                       <div className={styles.tooltipContent}>
-                        *Virtuality: 3 if your twitter content relates to native Virtuals culture (Vader, Luna, AIXBT, etc.), otherwise 1.
+                      Every week, AICC rewards are distributed to AICC creators based on the credits consumed by each AICC (models & workflows).
                       </div>
                     </div>
                   )}
