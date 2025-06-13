@@ -6,14 +6,15 @@ import PlanPlusIcon from "../assets/plan_plus.svg";
 import KeyIcon from "../assets/key.svg";
 import LogoutIcon from "../assets/logout.svg";
 import CopyIcon from "../assets/copy_address.svg";
+import DoneIcon from "../assets/done.svg";
 import CreditIcon from "../assets/credit.svg";
 import CloseIcon from "../assets/close_account.svg";
 import RocketIcon from "../assets/bxs_rocket.svg";
 import WalletAssets from "./WalletAssets";
 import { Link, useNavigate } from "react-router-dom";
-import { PLAN_TYPE } from "../services/userService.ts";
+import { PLAN_TYPE, bindReferralCode } from "../services/userService.ts";
 import { useAtom } from "jotai";
-import { refreshUserPlanAtom } from "../store/accountStore";
+import { refreshUserPlanAtom, updateReferrals } from "../store/accountStore";
 import { accountAtom } from "../store/accountStore";
 
 interface AccountPopupProps {
@@ -42,11 +43,21 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState("Assets");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isEditingReferrer, setIsEditingReferrer] = useState(false);
+  const [referrerInput, setReferrerInput] = useState("");
+  const [referrerError, setReferrerError] = useState("");
+  const [isBindingReferrer, setIsBindingReferrer] = useState(false);
+  const [walletCopySuccess, setWalletCopySuccess] = useState(false);
+  const [inviteCopySuccess, setInviteCopySuccess] = useState(false);
+  const [referrerTwitter, setReferrerTwitter] = useState<string>("");
+
+
   const popupRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [, refreshUserPlan] = useAtom(refreshUserPlanAtom);
   const [accountState] = useAtom(accountAtom);
-  const { credits } = accountState;
+  const [, updateReferralsAtom] = useAtom(updateReferrals);
+  const { credits, referrals } = accountState;
 
   // 在弹窗打开时刷新用户的credits
   useEffect(() => {
@@ -54,6 +65,15 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
       refreshUserPlan();
     }
   }, [isOpen, refreshUserPlan]);
+
+  // 从store中获取邀请人Twitter信息
+  useEffect(() => {
+    if (referrals?.referrer_twitter?.username) {
+      setReferrerTwitter(referrals.referrer_twitter.username);
+    } else if (referrals?.referrer_code) {
+      setReferrerTwitter(referrals.referrer_code);
+    }
+  }, [referrals?.referrer_twitter, referrals?.referrer_code]);
 
   // 格式化数字，添加千位分隔符，如果为0则显示无限符号
   const formatNumber = (num: number) => {
@@ -109,6 +129,62 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
   const formatName = (name: string | undefined) => {
     if (!name) return `@${userData.username}`;
     return `@${name}`;
+  };
+
+  // 复制邀请码到剪贴板
+  const copyInviteCode = () => {
+    if (referrals?.invite_code) {
+      navigator.clipboard.writeText(referrals.invite_code);
+      setInviteCopySuccess(true);
+      setTimeout(() => {
+        setInviteCopySuccess(false);
+      }, 3000);
+    }
+  };
+
+  // 复制钱包地址到剪贴板
+  const copyWalletAddress = () => {
+    if (userData.walletAddress) {
+      navigator.clipboard.writeText(userData.walletAddress);
+      setWalletCopySuccess(true);
+      setTimeout(() => {
+        setWalletCopySuccess(false);
+      }, 3000);
+    }
+  };
+
+
+
+  // 处理绑定推荐人邀请码
+  const handleBindReferrer = async () => {
+    if (!referrerInput.trim() || !accountState.did) return;
+    
+    setIsBindingReferrer(true);
+    setReferrerError("");
+    
+    try {
+      const result = await bindReferralCode({
+        user: accountState.did,
+        referrer_code: referrerInput.trim()
+      });
+      
+      if (result.statusCode === 200) {
+        // 成功绑定，更新本地状态
+        updateReferralsAtom({
+          invite_code: referrals?.invite_code || null,
+          referrer_code: referrerInput.trim(),
+          point_reward_ratio: referrals?.point_reward_ratio || 0
+        });
+        setIsEditingReferrer(false);
+        setReferrerInput("");
+      } else {
+        setReferrerError(result.message || "Binding failed");
+      }
+    } catch (error) {
+      setReferrerError((error as Error).message || "Binding failed");
+    } finally {
+      setIsBindingReferrer(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -179,10 +255,15 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
                   className={styles.copyButton}
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigator.clipboard.writeText(userData.walletAddress || "");
+                    copyWalletAddress();
                   }}
                 >
-                  <img src={CopyIcon} alt="copy" width="20" height="20" />
+                  <img 
+                    src={walletCopySuccess ? DoneIcon : CopyIcon} 
+                    alt={walletCopySuccess ? "copied" : "copy"} 
+                    width="20" 
+                    height="20" 
+                  />
                 </button>
               </div>
               <Link to="/link-wallet">
@@ -195,6 +276,71 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
                 </div>
               </Link>
             </div>
+          </div>
+        </div>
+
+        {/* 新增：邀请码模块 */}
+        <div className={styles.referralContainer}>
+          {/* 用户邀请码展示 */}
+          <div className={styles.referralRow}>
+            <span className={styles.referralLabel}>
+              Referral Code: <span className={styles.referralCode}>{referrals?.invite_code || "Loading..."}</span>
+            </span>
+            <button
+              className={styles.copyButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                copyInviteCode();
+              }}
+              disabled={!referrals?.invite_code}
+            >
+              <img 
+                src={inviteCopySuccess ? DoneIcon : CopyIcon} 
+                alt={inviteCopySuccess ? "copied" : "copy"} 
+                width="20" 
+                height="20" 
+              />
+            </button>
+          </div>
+
+          {/* 推荐人邀请码 */}
+          <div className={styles.referrerSection}>
+            {referrals?.referrer_code ? (
+              <div className={styles.referralRow}>
+                <span className={styles.inviterLabel}>
+                  Inviter: @{referrerTwitter || "Loading..."}
+                </span>
+              </div>
+            ) : isEditingReferrer ? (
+              <div className={styles.referrerInputSection}>
+                <div className={styles.referrerInputContainer}>
+                  <input
+                    type="text"
+                    value={referrerInput}
+                    onChange={(e) => setReferrerInput(e.target.value)}
+                    placeholder="Enter the code"
+                    className={`${styles.referrerInput} ${referrerError ? styles.inputError : ''}`}
+                  />
+                  <button
+                    className={styles.confirmButton}
+                    onClick={handleBindReferrer}
+                    disabled={!referrerInput.trim() || isBindingReferrer}
+                  >
+                    {isBindingReferrer ? "Loading..." : "Confirm"}
+                  </button>
+                </div>
+                {referrerError && (
+                  <div className={styles.errorMessage}>{referrerError}</div>
+                )}
+              </div>
+            ) : (
+              <div 
+                className={styles.referrerPrompt}
+                onClick={() => setIsEditingReferrer(true)}
+              >
+                You can bind someone else's invitation code and he can get extra points &gt;
+              </div>
+            )}
           </div>
         </div>
 

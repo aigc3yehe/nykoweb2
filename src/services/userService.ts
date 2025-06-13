@@ -31,6 +31,23 @@ export interface QueryUserResponse {
     role?: string; // 'user' or 'adimn'
     linked_wallet?: string;
     geni?: number;
+    referrals?: {
+      invite_code: string;
+      referrer_code?: string;
+      point_reward_ratio: number;
+      referrer_twitter?: {
+        name: string;
+        subject: string;
+        username: string;
+        profilePictureUrl: string;
+      };
+    };
+    referrer_twitter?: {
+      name: string;
+      subject: string;
+      username: string;
+      profilePictureUrl: string;
+    };
   };
 }
 
@@ -141,7 +158,11 @@ export const queryUser = async (params: {
       throw new Error("Query user failed");
     }
 
-    return await response.json();
+    const result = await response.json();
+    
+
+    
+    return result;
   } catch (error) {
     console.error("Query user failed：", error);
     throw error;
@@ -411,6 +432,130 @@ export const editModelRequest = async (params: EditModelRequest): Promise<EditMo
     return await res.json();
   } catch (error) {
     console.log(error);
+    throw error;
+  }
+};
+
+// 绑定邀请码响应接口
+export interface BindReferralResponse {
+  statusCode: number;
+  message: string;
+  data: boolean;
+}
+
+// 绑定邀请码函数
+export const bindReferralCode = async (params: {
+  user: string; // 用户的did
+  referrer_code: string; // 邀请人的邀请码
+}): Promise<BindReferralResponse> => {
+  try {
+    const privyToken = await getAccessToken();
+    const response = await fetch("/studio-api/referral/bind", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      },
+      body: JSON.stringify(params),
+    });
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.message || "Bind referral code failed");
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Bind referral code failed:", error);
+    throw error;
+  }
+};
+
+// 获取邀请列表响应接口
+export interface GetInviteListResponse {
+  message: string;
+  data: Array<{
+    user: string; // 被邀请用户的did
+    twitter: Twitter; // 被邀请用户的twitter信息
+  }>;
+}
+
+// 获取邀请列表函数
+export const getInviteList = async (params: {
+  invite_code: string; // 邀请码
+  page?: number;
+  pageSize?: number;
+}): Promise<GetInviteListResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+    queryParams.append("invite_code", params.invite_code);
+    
+    if (params.page) {
+      queryParams.append("page", params.page.toString());
+    }
+    if (params.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
+
+    const privyToken = await getAccessToken();
+    const response = await fetch(
+      `/studio-api/referral/list/invite?${queryParams.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          [PRIVY_TOKEN_HEADER]: privyToken || "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Get invite list failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Get invite list failed:", error);
+    throw error;
+  }
+};
+
+// 根据邀请码查询用户信息响应接口
+export interface GetUserByInviteCodeResponse {
+  message: string;
+  data: {
+    user: string; // 用户的did
+    twitter: Twitter; // 用户的twitter信息
+  } | null;
+}
+
+// 根据邀请码查询用户信息函数
+export const getUserByInviteCode = async (params: {
+  invite_code: string; // 邀请码
+}): Promise<GetUserByInviteCodeResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+    queryParams.append("invite_code", params.invite_code);
+
+    const privyToken = await getAccessToken();
+    const response = await fetch(
+      `/studio-api/referral/user?${queryParams.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+          [PRIVY_TOKEN_HEADER]: privyToken || "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Get user by invite code failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Get user by invite code failed:", error);
     throw error;
   }
 };

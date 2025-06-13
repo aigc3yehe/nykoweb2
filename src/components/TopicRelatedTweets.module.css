@@ -1,0 +1,30 @@
+/* TopicRelatedTweets样式 */
+.relatedTweets {
+  width: 100%;
+  background: rgba(31, 41, 55, 0.2);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  backdrop-filter: blur(30px);
+}
+
+.tweetsTitle {
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #F3F4F6;
+  margin: 0 0 1rem 0;
+}
+
+.tweetsPlaceholder {
+  min-height: 10rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyMessage {
+  color: #9CA3AF;
+  font-family: 'Jura', sans-serif;
+  font-size: 0.875rem;
+  text-align: center;
+} 
