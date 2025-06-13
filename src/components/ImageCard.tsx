@@ -131,12 +131,18 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
     return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-335,q-90`
   }
 
-  // 只有当图片有URL时才能点击查看详情
+  // 新增：判断是否为视频类型
+  const isVideo = () => {
+    return localImage.type === 'video';
+  }
+
+  // 只有当图片/视频有URL时才能点击查看详情
   const handleImageClick = () => {
     if (localImage.url) {
       handleOpenImageDetails(localImage);
     }
   };
+
   const handleCoverClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // 阻止事件冒泡，避免触发图片详情
 
@@ -437,20 +443,43 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
     <div className={styles.imageCard} onClick={handleImageClick}>
       <div className={styles.imageContainer}>
         {localImage.url ? (
-          <img src={getScaledImageUrl()} alt={`Image ${localImage.id}`} className={styles.image} />
+          isVideo() ? (
+            // 视频渲染 - 移除悬停播放功能，只显示第一帧
+            <video 
+              src={localImage.url} 
+              className={styles.image}
+              controls={false}
+              muted
+              playsInline
+              preload="metadata"
+              style={{ objectFit: 'cover' }}
+            >
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            // 图片渲染
+            <img src={getScaledImageUrl()} alt={`Image ${localImage.id}`} className={styles.image} />
+          )
         ) : (
           <div className={styles.placeholderImage}>
-            {isFailed ? 'Failed' : 'Generating...'}
+            {isFailed ? 'Failed' : (isVideo() ? 'Generating Video...' : 'Generating...')}
           </div>
         )}
 
         <div className={styles.tagsContainer}>
           {isPending && (
-            <div className={styles.pendingTag}>Generating</div>
+            <div className={styles.pendingTag}>
+              {isVideo() ? 'Generating Video' : 'Generating'}
+            </div>
           )}
 
           {isFailed && (
             <div className={styles.failedTag}>Failed</div>
+          )}
+
+          {/* 新增：视频标识标签 */}
+          {localImage.url && isVideo() && (
+            <div className={styles.videoTag}>Video</div>
           )}
         </div>
 

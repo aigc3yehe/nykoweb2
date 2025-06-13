@@ -268,4 +268,31 @@
   font-size: 14px;
   margin-left: 8px;
   cursor: help;
+}
+
+/* 视频样式 */
+.image video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 视频控件样式自定义 */
+.image video::-webkit-media-controls-panel {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.image video::-webkit-media-controls-play-button,
+.image video::-webkit-media-controls-pause-button {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+}
+
+.image video::-webkit-media-controls-timeline {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.image video::-webkit-media-controls-current-time-display,
+.image video::-webkit-media-controls-time-remaining-display {
+  color: white;
 } 

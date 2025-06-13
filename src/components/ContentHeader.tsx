@@ -86,7 +86,7 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
             <span className={styles.modelsLabel}>{isModelDetailMode ? 'Models' : 'Workflows'}</span>
             <div className={styles.divider}></div>
             <span className={styles.modelName}>{modelName}</span>
-            
+
             {tags.length > 0 && (
               <div className={styles.tagsContainer}>
                 {tags.map((tag, index) => (
@@ -97,7 +97,7 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
               </div>
             )}
           </div>
-          
+
           <div className={styles.navigationRight}>
             <button className={styles.actionButton} onClick={onShareClick}>
               <img src={shareIcon} alt="Share" className={styles.actionIcon} />

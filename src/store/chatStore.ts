@@ -51,7 +51,8 @@ export interface Message {
   role: string;
   content: string;
   type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image' | 'tokenization_agreement' | "create_workflow"
-      | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image" | "uploaded_image";
+      | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image" | "uploaded_image" 
+      | "generating_video" | "video_generate_result"; // 新增视频相关类型
   imageUploadState?: {
     totalCount: number;
     uploadedCount: number;
@@ -65,6 +66,7 @@ export interface Message {
   }
   request_id?: string;
   images?: string[];
+  videos?: string[]; // 新增视频URL数组
   imageInfo?: {
     width: number;
     height: number;
@@ -143,6 +145,8 @@ export interface ChatState {
   workflow_extra_prompt: string; // 新增字段
   // 新增：最新生成图片的状态信息
   latestGeneratedImage: LatestGeneratedImage;
+  // 新增：AI服务提供商状态
+  aiProviders: AIProvidersState;
 }
 
 // 添加最新生成图片的接口
@@ -229,6 +233,14 @@ const initialState: ChatState = {
     aicc_height: undefined,
     aicc_prompt: undefined,
   },
+  // 新增：AI服务提供商初始状态
+  aiProviders: {
+    providers: [],
+    isLoading: false,
+    error: null,
+    selectedProvider: '',
+    selectedModel: ''
+  },
 };
 
 // 创建原子状态
@@ -283,13 +295,13 @@ export function hasSystemMessage(messages: Message[]): boolean {
   return messages.some(message => message.role === 'system');
 }
 
-// 简化的轮询函数 - 使用 for 循环
-export async function pollImageGenerationTask(taskId: string, set: any, get: any, isWorkflow: boolean = false): Promise<void> {
-  console.log('Start poll image generation task:', taskId);
+// 修改轮询函数，支持视频生成的不同参数
+export async function pollImageGenerationTask(taskId: string, set: any, get: any, isWorkflow: boolean = false, isVideo: boolean = false): Promise<void> {
+  console.log('Start poll image generation task:', taskId, 'isVideo:', isVideo);
 
-  // 最大轮询次数和间隔时间
-  const MAX_POLL_COUNT = 60; // 最多轮询60次
-  const POLL_INTERVAL = 5000; // 每次间隔5秒
+  // 根据是否为视频设置不同的轮询参数
+  const MAX_POLL_COUNT = isVideo ? 20 : 60; // 视频：20次，图片：60次
+  const POLL_INTERVAL = isVideo ? 30000 : 5000; // 视频：30秒，图片：5秒
 
   for (let pollCount = 0; pollCount < MAX_POLL_COUNT; pollCount++) {
     try {
@@ -314,17 +326,18 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
       }
 
       const status = statusResponse.data.status.toLowerCase();
+      // 获取生成的内容（图片或视频）
+      const generatedUrls = statusResponse.data.upscaled_urls || [];
       console.log('task status:', status);
 
       // 处理不同状态
-      if (status === 'completed') {
+      if (status === 'completed' || status === 'success' || generatedUrls.length > 0) {
         console.log('task completed:', status);
 
-        // 获取生成的图片
-        const generatedImages = statusResponse.data.upscaled_urls || [];
-        console.log('get image url:', generatedImages);
+        
+        console.log('get generated url:', generatedUrls);
 
-        if (generatedImages.length > 0) {
+        if (generatedUrls.length > 0) {
           // 确定实际的操作类型
           let actualIsWorkflow = isWorkflow;
 
@@ -342,23 +355,23 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
           }
           // 如果 isWorkflow 为 false，直接使用 model 类型，不需要额外判断
 
-          // 构建最新生成图片的状态信息
+          // 构建最新生成内容的状态信息
           const latestGeneratedImage: LatestGeneratedImage = {
             aicc_status: 'completed',
-            provider: actualIsWorkflow ? 'gpt-4o' : 'sd',
-            model: actualIsWorkflow ? 'gpt-image-1-vip' : 'sd',
+            provider: actualIsWorkflow ? isVideo ? 'kling' : 'gpt-4o' : 'sd',
+            model: actualIsWorkflow ? isVideo ? 'kling-video-v1' : 'gpt-image-1-vip' : 'sd',
             source: actualIsWorkflow ? 'workflow' : 'model',
             source_id: actualIsWorkflow ? chatState.workflowRunningState.workflow?.id : chatState.currentModel?.id,
-            reference: generatedImages[0], // 使用第一张生成的图片
+            reference: generatedUrls[0], // 使用第一个生成的内容
             aicc_width: actualIsWorkflow ? chatState.workflowRunningState.width : chatState.selectedAspectRatio?.width,
             aicc_height: actualIsWorkflow ? chatState.workflowRunningState.height : chatState.selectedAspectRatio?.height,
             aicc_prompt: actualIsWorkflow ? chatState.workflowRunningState.prompt : undefined,
           };
 
-          // 查找对应的 generating_image 消息
+          // 查找对应的生成中消息
           const messageIndex = chatState.messages.findIndex(
             // @ts-ignore
-            msg => (msg.type === 'generating_image' || msg.type === 'modify_image') && msg.request_id === taskId
+            msg => (msg.type === 'generating_image' || msg.type === 'modify_image' || msg.type === 'generating_video') && msg.request_id === taskId
           );
 
           if (messageIndex !== -1) {
@@ -370,18 +383,34 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
               width = aspectRatio.width;
               height = aspectRatio.height;
             }
+            
             // 更新现有消息而不是创建新消息
             const updatedMessages = [...chatState.messages];
-            updatedMessages[messageIndex] = {
-              ...updatedMessages[messageIndex],
-              content: 'Image generation completed',
-              type: isWorkflow ? 'workflow_generate_result' : 'generate_result',
-              images: generatedImages,
-              imageInfo: {
-                width: width,
-                height: height
-              }
-            };
+            
+            // 根据是否为视频设置不同的消息类型和内容
+            if (isVideo) {
+              updatedMessages[messageIndex] = {
+                ...updatedMessages[messageIndex],
+                content: 'Video generation completed',
+                type: isWorkflow ? 'video_generate_result' : 'video_generate_result', // 视频结果类型
+                videos: generatedUrls, // 使用videos字段存储视频URL
+                imageInfo: {
+                  width: width,
+                  height: height
+                }
+              };
+            } else {
+              updatedMessages[messageIndex] = {
+                ...updatedMessages[messageIndex],
+                content: 'Image generation completed',
+                type: isWorkflow ? 'workflow_generate_result' : 'generate_result',
+                images: generatedUrls,
+                imageInfo: {
+                  width: width,
+                  height: height
+                }
+              };
+            }
 
             // 为工作流任务更新额外的状态
             let updatedWorkflowResult = chatState.workflowGeneratedResult;
@@ -390,13 +419,13 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
 
             if (actualIsWorkflow) {
               const workflowRunningState = chatState.workflowRunningState;
-              let generatedImageUrl = null;
-              if (generatedImages && generatedImages.length > 0) {
-                generatedImageUrl = generatedImages[0];
+              let generatedUrl = null;
+              if (generatedUrls && generatedUrls.length > 0) {
+                generatedUrl = generatedUrls[0];
               }
               updatedWorkflowResult = {
                 status: 'workflow_generated',
-                generatedImageUrl: generatedImageUrl,
+                generatedImageUrl: generatedUrl,
                 workflowInfo: workflowRunningState.workflow,
                 width: workflowRunningState.width,
                 height: workflowRunningState.height,
@@ -409,13 +438,13 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
               updatedWorkflowImageFile = null;
             } else {
               // model 也需要, model也支持修图
-              let generatedImageUrl = null;
-              if (generatedImages && generatedImages.length > 0) {
-                generatedImageUrl = generatedImages[0];
+              let generatedUrl = null;
+              if (generatedUrls && generatedUrls.length > 0) {
+                generatedUrl = generatedUrls[0];
               }
               updatedWorkflowResult = {
                 status: 'workflow_generated',
-                generatedImageUrl: generatedImageUrl,
+                generatedImageUrl: generatedUrl,
                 workflowInfo: null,
                 width: chatState.selectedAspectRatio?.width || null,
                 height: chatState.selectedAspectRatio?.height || null,
@@ -423,7 +452,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
               };
             }
 
-            // 更新消息列表和最新生成图片状态
+            // 更新消息列表和最新生成内容状态
             set(chatAtom, {
               ...chatState,
               messages: updatedMessages,
@@ -431,7 +460,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
               workflowRunning: updatedWorkflowRunning,
               workflowImageFile: updatedWorkflowImageFile,
               workflowGeneratedResult: updatedWorkflowResult,
-              latestGeneratedImage: latestGeneratedImage // 新增：保存最新生成图片状态
+              latestGeneratedImage: latestGeneratedImage // 新增：保存最新生成内容状态
             });
           } else {
             console.log('not found message，create new message');
@@ -446,9 +475,9 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
 
             const resultMessage: Message = {
               role: 'assistant',
-              content: 'Image generation completed',
-              type: isWorkflow ? 'workflow_generate_result' : 'generate_result',
-              images: generatedImages,
+              content: isVideo ? 'Video generation completed' : 'Image generation completed',
+              type: isVideo ? 'video_generate_result' : (isWorkflow ? 'workflow_generate_result' : 'generate_result'),
+              ...(isVideo ? { videos: generatedUrls } : { images: generatedUrls }),
               request_id: taskId,
               imageInfo: {
                 width: width,
@@ -463,13 +492,13 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
 
             if (actualIsWorkflow) {
               const workflowRunningState = chatState.workflowRunningState;
-              let generatedImageUrl = null;
-              if (generatedImages && generatedImages.length > 0) {
-                generatedImageUrl = generatedImages[0];
+              let generatedUrl = null;
+              if (generatedUrls && generatedUrls.length > 0) {
+                generatedUrl = generatedUrls[0];
               }
               updatedWorkflowResult = {
                 status: 'workflow_generated',
-                generatedImageUrl: generatedImageUrl,
+                generatedImageUrl: generatedUrl,
                 workflowInfo: workflowRunningState.workflow,
                 width: workflowRunningState.width,
                 height: workflowRunningState.height,
@@ -482,7 +511,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
               updatedWorkflowImageFile = null;
             }
 
-            // 添加消息到列表和最新生成图片状态
+            // 添加消息到列表和最新生成内容状态
             set(chatAtom, {
               ...get(chatAtom),
               messages: [...filterSystemMessages(chatState.messages), resultMessage],
@@ -490,13 +519,13 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
               isGenerating: false,
               workflowImageFile: updatedWorkflowImageFile,
               workflowGeneratedResult: updatedWorkflowResult,
-              latestGeneratedImage: latestGeneratedImage // 新增：保存最新生成图片状态
+              latestGeneratedImage: latestGeneratedImage // 新增：保存最新生成内容状态
             });
           }
 
           // 显示成功通知
           set(showToastAtom, {
-            message: 'Image generation completed',
+            message: isVideo ? 'Video generation completed' : 'Image generation completed',
             severity: 'success'
           });
 
@@ -517,10 +546,10 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
       } else if (status === 'failed' || status === 'error') {
         console.log('task failed');
 
-        // 查找对应的 generating_image 消息
+        // 查找对应的生成中消息
         const messageIndex = chatState.messages.findIndex(
           // @ts-ignore
-          msg => (msg.type === 'generating_image' || msg.type === 'modify_image') && msg.request_id === taskId
+          msg => (msg.type === 'generating_image' || msg.type === 'modify_image' || msg.type === 'generating_video') && msg.request_id === taskId
         );
 
         if (messageIndex !== -1) {
@@ -529,9 +558,10 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
           const updatedMessages = [...chatState.messages];
           updatedMessages[messageIndex] = {
             ...updatedMessages[messageIndex],
-            content: 'Image generation failed',
+            content: isVideo ? 'Video generation failed' : 'Image generation failed',
             type: 'text', // 改为普通文本消息
-            images: undefined // 清除图片字段
+            images: undefined, // 清除图片字段
+            videos: undefined // 清除视频字段
           };
 
           // 更新消息列表
@@ -552,7 +582,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
             ...chatState,
             messages: [...filterSystemMessages(chatState.messages), {
               role: 'system',
-              content: 'image generation failed',
+              content: isVideo ? 'video generation failed' : 'image generation failed',
               request_id: taskId
             }],
             workflowRunning: {
@@ -566,7 +596,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
 
         // 显示失败通知
         set(showToastAtom, {
-          message: 'image generation failed',
+          message: isVideo ? 'video generation failed' : 'image generation failed',
           severity: 'error'
         });
 
@@ -595,7 +625,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
     ...finalChatState,
     messages: [...filterSystemMessages(finalChatState.messages), {
       role: 'system',
-      content: 'Image generation timed out, please check again later or try again',
+      content: isVideo ? 'Video generation timed out, please check again later or try again' : 'Image generation timed out, please check again later or try again',
       request_id: taskId
     }],
     isGenerating: false
@@ -603,7 +633,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
 
   // 显示超时通知
   set(showToastAtom, {
-    message: 'Image generation timed out',
+    message: isVideo ? 'Video generation timed out' : 'Image generation timed out',
     severity: 'warning'
   });
 }
@@ -927,7 +957,8 @@ export const sendMessage = atom(
         role: 'assistant',
         content: content,
         type: messageType as 'text' | 'upload_image' | 'generating_image' | 'generate_result' | 'tokenization_agreement' | "create_workflow"
-            | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image" | "uploaded_image",
+            | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image" | "uploaded_image" 
+            | "generating_video" | "video_generate_result",
         imageUploadState: messageType === 'upload_image'
           ? { totalCount: 0, uploadedCount: 0, isUploading: false, finishUpload: false }
           : undefined,
@@ -1351,6 +1382,14 @@ export const clearChat = atom(
         aicc_height: undefined,
         aicc_prompt: undefined,
       },
+      // 新增：AI服务提供商初始状态
+      aiProviders: {
+        providers: [],
+        isLoading: false,
+        error: null,
+        selectedProvider: '',
+        selectedModel: ''
+      },
     });
   }
 );
@@ -1664,10 +1703,11 @@ export const toggleBetaMode = atom(
   }
 );
 
-// 工作流值类型枚举 - 修改为正确的值
+// 工作流值类型枚举 - 添加 VIDEO 类型
 export enum WORKFLOW_VALUE_TYPE {
   IMAGE = 'image',
   TEXT = 'text',
+  VIDEO = 'video', // 新增 VIDEO 类型
 }
 
 // 工作流提供商枚举 - 修改为正确的值
@@ -1681,7 +1721,7 @@ export enum WORKFLOW_GPT_MODEL {
   GPT_IMAGE_1_VIP = 'gpt-image-1-vip',
 }
 
-// 将输入类型字符串转换为API需要的枚举类型 - 修改映射逻辑
+// 将输入类型字符串转换为API需要的枚举类型 - 添加 Video 类型处理
 function mapInputOutputType(type: string): WORKFLOW_VALUE_TYPE[] {
   switch (type) {
     case 'Image':
@@ -1690,6 +1730,8 @@ function mapInputOutputType(type: string): WORKFLOW_VALUE_TYPE[] {
       return [WORKFLOW_VALUE_TYPE.TEXT];
     case 'Image + Text':
       return [WORKFLOW_VALUE_TYPE.IMAGE, WORKFLOW_VALUE_TYPE.TEXT];
+    case 'Video': // 新增 Video 类型处理
+      return [WORKFLOW_VALUE_TYPE.VIDEO];
     default:
       return [WORKFLOW_VALUE_TYPE.IMAGE];
   }
@@ -1776,15 +1818,16 @@ export const createWorkflow = atom(
       if (chatState.workflowReferenceImage.uploadedUrl) {
         reference_images.push(chatState.workflowReferenceImage.uploadedUrl);
       }
+      
       const params: CreateWorkflowParams = {
         name: chatState.workflow_name || 'New Workflow',
-        description: chatState.workflow_description || '', // 可以添加描述输入框或使用其他字段
+        description: chatState.workflow_description || '',
         creator: chatState.did || '',
         prompt: chatState.workflow_prompt,
         input_type: mapInputOutputType(chatState.workflow_input),
         output_type: mapInputOutputType(chatState.workflow_output),
-        provider: WORKFLOW_PROVIDER.GPT_4o, // 使用正确的枚举值
-        model: WORKFLOW_GPT_MODEL.GPT_IMAGE_1_VIP, // 使用正确的枚举值
+        provider: chatState.aiProviders.selectedProvider as WORKFLOW_PROVIDER,
+        model: chatState.aiProviders.selectedModel as WORKFLOW_GPT_MODEL,
         reference_images: reference_images
       };
 
@@ -1793,7 +1836,7 @@ export const createWorkflow = atom(
 
       // 设置成功状态
       set(chatAtom, {
-        ...get(chatAtom), // 重新获取最新状态
+        ...get(chatAtom),
         workflowCreation: {
           isCreating: false,
           isSuccess: true,
@@ -2228,7 +2271,7 @@ export const removeWorkflowReferenceImage = atom(
   }
 );
 
-// 新增：专门用于ChatInput中已上传图片的工作流运行方法
+// 修改 runWorkflowFromChatInput 函数，根据工作流输出类型设置正确的消息
 export const runWorkflowFromChatInput = atom(
   null,
   async (get, set, params: { textInput?: string }) => {
@@ -2253,6 +2296,10 @@ export const runWorkflowFromChatInput = atom(
         throw new Error('No reference image uploaded');
       }
 
+      // 检查当前工作流的输出类型
+      const currentWorkflow = chatState.currentWorkflow;
+      const isVideoOutput = currentWorkflow?.output_type?.includes('video') || false;
+
       // 添加消息到聊天记录
       const messages = [...filterSystemMessages(chatState.messages)];
 
@@ -2275,11 +2322,11 @@ export const runWorkflowFromChatInput = atom(
         messages.push(textMessage);
       }
 
-      // 添加工作流执行中的消息
+      // 根据输出类型添加不同的执行中消息
       const runningMessage: Message = {
         role: 'assistant',
         content: 'Got it! Starting the workflow now.',
-        type: 'modify_image',
+        type: isVideoOutput ? 'generating_video' : 'modify_image', // 根据输出类型选择消息类型
         request_id: `workflow_${Date.now()}`
       };
       messages.push(runningMessage);
@@ -2333,7 +2380,7 @@ export const runWorkflowFromChatInput = atom(
 
         // 更新最后一条消息的request_id
         const updatedMessages = get(chatAtom).messages.map((msg, index, arr) => {
-          if (index === arr.length - 1 && msg.type === 'modify_image') {
+          if (index === arr.length - 1 && (msg.type === 'modify_image' || msg.type === 'generating_video')) {
             return { ...msg, request_id: response.data.task_id };
           }
           return msg;
@@ -2344,8 +2391,9 @@ export const runWorkflowFromChatInput = atom(
           messages: updatedMessages
         });
 
-        pollImageGenerationTask(response.data.task_id, set, get, true).catch(err => {
-          console.error('Poll Image Generation Task Failed:', err);
+        // 根据输出类型启动不同的轮询
+        pollImageGenerationTask(response.data.task_id, set, get, true, isVideoOutput).catch(err => {
+          console.error('Poll Generation Task Failed:', err);
         });
       } else {
         set(chatAtom, {
@@ -2402,3 +2450,176 @@ export const clearLatestGeneratedImage = atom(
     });
   }
 );
+
+// 新增：AI服务提供商和模型接口
+export interface AIModel {
+  name: string;
+  support_input_types: string[];
+  support_output_types: string[];
+}
+
+export interface AIProvider {
+  name: string;
+  models: AIModel[];
+}
+
+export interface AIProvidersResponse {
+  message: string;
+  data: AIProvider[];
+}
+
+// 新增：AI服务提供商状态
+export interface AIProvidersState {
+  providers: AIProvider[];
+  isLoading: boolean;
+  error: string | null;
+  selectedProvider: string;
+  selectedModel: string;
+}
+
+// 新增：获取AI服务提供商API函数
+export async function fetchAIProvidersAPI(): Promise<AIProvidersResponse> {
+  try {
+    const privyToken = await getAccessToken();
+    const response = await fetch('/studio-api/dashboard/provider/ai', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch AI providers with status code ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Fetch AI Providers Failed:', error);
+    throw error;
+  }
+}
+
+// 新增：获取AI服务提供商操作
+export const fetchAIProviders = atom(
+  null,
+  async (get, set) => {
+    const chatState = get(chatAtom);
+
+    // 设置加载状态
+    set(chatAtom, {
+      ...chatState,
+      aiProviders: {
+        ...chatState.aiProviders,
+        isLoading: true,
+        error: null
+      }
+    });
+
+    try {
+      const response = await fetchAIProvidersAPI();
+
+      // 设置默认选择的提供商和模型
+      let selectedProvider = '';
+      let selectedModel = '';
+      
+      if (response.data.length > 0) {
+        selectedProvider = response.data[0].name;
+        if (response.data[0].models.length > 0) {
+          selectedModel = response.data[0].models[0].name;
+        }
+      }
+
+      // 更新状态
+      set(chatAtom, {
+        ...get(chatAtom),
+        aiProviders: {
+          providers: response.data,
+          isLoading: false,
+          error: null,
+          selectedProvider,
+          selectedModel
+        },
+        workflow_model: selectedModel // 同时更新工作流模型
+      });
+
+    } catch (error) {
+      // 设置错误状态
+      set(chatAtom, {
+        ...get(chatAtom),
+        aiProviders: {
+          ...chatState.aiProviders,
+          isLoading: false,
+          error: error instanceof Error ? error.message : 'Failed to fetch AI providers'
+        }
+      });
+    }
+  }
+);
+
+// 新增：更新选择的提供商
+export const updateSelectedProvider = atom(
+  null,
+  (get, set, providerName: string) => {
+    const chatState = get(chatAtom);
+    const provider = chatState.aiProviders.providers.find(p => p.name === providerName);
+    
+    // 选择该提供商的第一个模型作为默认模型
+    const selectedModel = provider?.models[0]?.name || '';
+
+    set(chatAtom, {
+      ...chatState,
+      aiProviders: {
+        ...chatState.aiProviders,
+        selectedProvider: providerName,
+        selectedModel
+      },
+      workflow_model: selectedModel
+    });
+  }
+);
+
+// 新增：更新选择的模型
+export const updateSelectedModel = atom(
+  null,
+  (get, set, modelName: string) => {
+    const chatState = get(chatAtom);
+
+    set(chatAtom, {
+      ...chatState,
+      aiProviders: {
+        ...chatState.aiProviders,
+        selectedModel: modelName
+      },
+      workflow_model: modelName
+    });
+  }
+);
+
+// 新增：根据选择的模型获取支持的输入输出类型
+export const getSupportedTypes = (providers: AIProvider[], providerName: string, modelName: string) => {
+  const provider = providers.find(p => p.name === providerName);
+  const model = provider?.models.find(m => m.name === modelName);
+  
+  return {
+    inputTypes: model?.support_input_types || [],
+    outputTypes: model?.support_output_types || []
+  };
+};
+
+// 新增：将API返回的类型转换为显示用的标签
+export const formatTypeLabel = (type: string): string => {
+  switch (type) {
+    case 'image':
+      return 'Image';
+    case 'text':
+      return 'Text';
+    case 'image,text':
+      return 'Image + Text';
+    case 'video':
+      return 'Video';
+    default:
+      return type;
+  }
+};
