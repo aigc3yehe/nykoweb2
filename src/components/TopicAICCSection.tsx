@@ -8,10 +8,9 @@ interface TopicAICCSectionProps {
 }
 
 const TopicAICCSection: React.FC<TopicAICCSectionProps> = ({ aiccList }) => {
-  console.log('[TopicAICCSection] Received aiccList:', {
-    count: aiccList?.length || 0,
-    items: aiccList?.map(item => ({ id: item.id, name: item.name, source: item.source }))
-  });
+  // 只在数据变化时记录日志
+  const aiccCount = aiccList?.length || 0;
+  console.log('[TopicAICCSection] 📊 AICC List:', { count: aiccCount, hasData: aiccCount > 0 });
   
   const navigate = useNavigate();
 

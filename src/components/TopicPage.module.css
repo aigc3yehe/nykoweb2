@@ -75,10 +75,13 @@
   margin: 0;
 }
 
-/* 媒体信息区域 */
-.mediaInfoArea {
+/* Project Info区域 */
+.projectInfoArea {
   height: 2rem; /* 32px */
   width: 100%;
+  display: flex;
+  align-items: flex-start; /* 左对齐 */
+  margin-bottom: 1rem; /* 16px 底部间距 */
 }
 
 /* 原有样式保持不变 */

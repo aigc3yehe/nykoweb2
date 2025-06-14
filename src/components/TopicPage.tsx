@@ -2,10 +2,11 @@ import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import styles from './TopicPage.module.css';
-import { topicAtom, fetchTopicAICC, fetchTopicContents } from '../store/topicStore';
+import { topicAtom, fetchTopicAICC, fetchTopicContents, fetchProjectInfo } from '../store/topicStore';
 import TopicHeader from './TopicHeader';
 import TopicAICCSection from './TopicAICCSection';
 import TopicGallery from './TopicGallery';
+import ProjectInfo from './ProjectInfo';
 import StatePrompt from './StatePrompt';
 import backIcon from '../assets/back.svg';
 import topicIcon from '../assets/topic.svg';
@@ -15,11 +16,10 @@ interface TopicPageProps {
 }
 
 const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
-  console.log('[TopicPage] Component rendered with topicName:', topicName);
-  
   const [topicState] = useAtom(topicAtom);
   const fetchAICC = useSetAtom(fetchTopicAICC);
   const fetchContents = useSetAtom(fetchTopicContents);
+  const fetchProject = useSetAtom(fetchProjectInfo);
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const observer = useRef<IntersectionObserver | null>(null);
@@ -28,38 +28,71 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
   const [requestAttempts, setRequestAttempts] = useState(0);
   const [lastRequestTime, setLastRequestTime] = useState<number>(0);
 
-  // 简化数据请求逻辑
+  // 添加ref来跟踪当前加载的topic，避免重复请求
+  const currentLoadingTopic = useRef<string>('');
+
+  // 简化数据请求逻辑 - 只依赖topicName，避免状态竞争
   useEffect(() => {
-    console.log('[TopicPage] useEffect triggered:', {
-      topicName,
-      currentTopic: topicState.currentTopic,
-      hasAiccData: topicState.aiccList.length > 0,
-      hasContentData: topicState.contentsList.length > 0
-    });
+    console.log('[TopicPage] 🔄 Effect triggered for topic:', topicName, 'AICC count:', topicState.aiccList.length);
 
-    // 简单直接的数据请求逻辑
-    if (topicName && topicName !== topicState.currentTopic) {
-      console.log('[TopicPage] Starting data fetch for:', topicName);
-      fetchAICC(topicName);
-      fetchContents({ tag: topicName, reset: true });
-      setRequestAttempts(prev => prev + 1);
-      setLastRequestTime(Date.now());
+    // 避免重复加载同一个topic
+    if (!topicName || topicName === currentLoadingTopic.current) {
+      console.log('[TopicPage] Skipping fetch - same topic or empty topicName');
+      return;
     }
-  }, [topicName, topicState.currentTopic]);
 
-  // 调试AICC数据加载
-  console.log('[TopicPage] Current State:', {
-    topic: topicName,
-    currentTopic: topicState.currentTopic,
-    aiccCount: topicState.aiccList.length,
-    contentsCount: topicState.contentsList.length,
-    loading: {
-      aicc: topicState.isLoading,
-      contents: topicState.isLoadingContents
-    },
-    error: topicState.error,
-    firstAicc: topicState.aiccList[0]?.name
-  });
+    // 检查缓存是否存在且有效
+    const cache = topicState.cacheMap.get(topicName);
+    const now = Date.now();
+    const CACHE_DURATION = 5 * 60 * 1000; // 5分钟
+    if (cache && now - cache.timestamp < CACHE_DURATION && cache.aiccList.length > 0) {
+      console.log('[TopicPage] Using cache for topic:', topicName);
+      return;
+    }
+
+    console.log('[TopicPage] Starting data fetch for:', topicName);
+    currentLoadingTopic.current = topicName;
+    
+    // 并行调用所有fetch函数
+    console.log('[TopicPage] 🚀 Calling all fetch functions for:', topicName);
+    
+    const aiccPromise = fetchAICC(topicName);
+    const contentsPromise = fetchContents({ tag: topicName, reset: true });
+    const projectPromise = fetchProject(topicName);
+    
+    console.log('[TopicPage] 📡 Individual promises created:', {
+      aicc: !!aiccPromise,
+      contents: !!contentsPromise,
+      project: !!projectPromise
+    });
+    
+    Promise.all([aiccPromise, contentsPromise, projectPromise])
+      .then((results) => {
+        console.log('[TopicPage] ✅ All fetch functions completed for:', topicName);
+        console.log('[TopicPage] 📊 Promise results:', {
+          aiccResult: !!results[0],
+          contentsResult: !!results[1], 
+          projectResult: !!results[2]
+        });
+      })
+      .catch((error) => {
+        console.error('[TopicPage] ❌ Promise.all failed for topic:', topicName);
+        console.error('[TopicPage] ❌ Error details:', error);
+        
+        // 检查单个Promise的状态
+        aiccPromise.catch(e => console.error('[TopicPage] ❌ AICC Promise failed:', e));
+        contentsPromise.catch(e => console.error('[TopicPage] ❌ Contents Promise failed:', e));
+        projectPromise.catch(e => console.error('[TopicPage] ❌ Project Promise failed:', e));
+      });
+
+    setRequestAttempts(prev => prev + 1);
+    setLastRequestTime(Date.now());
+  }, [topicName]); // 只依赖topicName，移除currentTopic依赖
+
+  // 简化状态日志
+  if (topicState.aiccList.length > 0) {
+    console.log('[TopicPage] ✅ AICC Data loaded:', topicState.aiccList.length, 'items');
+  }
 
   const handleBack = () => {
     navigate(-1); // 返回上一页
@@ -67,69 +100,84 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
 
   // 分页加载逻辑（简化依赖）
   const loadMoreTriggerRef = useCallback((node: HTMLDivElement | null) => {
-    console.log('[TopicPage] loadMoreTriggerRef called:', {
-      node: !!node,
-      isLoadingContents: topicState.isLoadingContents,
-      contentsHasMore: topicState.contentsHasMore,
-      topicName
-    });
+    if (topicState.isLoadingContents) return;
 
-    if (topicState.isLoadingContents) {
-      console.log('[TopicPage] Skipping observer setup - already loading');
-      return;
-    }
-
-    if (observer.current) {
-      console.log('[TopicPage] Disconnecting existing observer');
-      observer.current.disconnect();
-    }
+    if (observer.current) observer.current.disconnect();
 
     observer.current = new IntersectionObserver(entries => {
-      console.log('[TopicPage] IntersectionObserver triggered:', {
-        isIntersecting: entries[0].isIntersecting,
-        hasMore: topicState.contentsHasMore,
-        topicName,
-        entry: entries[0]
-      });
-      
       if (entries[0].isIntersecting && topicState.contentsHasMore) {
-        console.log('[TopicPage] 🚀 Triggering fetchContents for next page');
+        console.log('[TopicPage] 📄 Loading more contents...');
         fetchContents({ tag: topicName, reset: false });
-      } else {
-        console.log('[TopicPage] Not triggering load:', {
-          isIntersecting: entries[0].isIntersecting,
-          hasMore: topicState.contentsHasMore
-        });
       }
     }, {
-      root: null, // 监听视口滚动
-      rootMargin: '500px', // 大幅提前触发点，当元素距离视口底部500px时就开始加载
-      threshold: 0 // 元素一旦进入rootMargin范围就触发
+      root: null,
+      rootMargin: '500px',
+      threshold: 0
     });
 
-    if (node) {
-      console.log('[TopicPage] Setting up observer on node');
-      observer.current.observe(node);
-    } else {
-      console.log('[TopicPage] No node provided to observe');
-    }
+    if (node) observer.current.observe(node);
   }, [topicState.isLoadingContents, topicState.contentsHasMore, topicName]);
 
-  // Gallery渲染调试信息
-  console.log('[TopicPage] About to render, Gallery props:', {
-    contentsListLength: topicState.contentsList.length,
-    isLoading: topicState.isLoadingContents,
-    hasMore: topicState.contentsHasMore,
-    hasLoadMoreTriggerRef: !!loadMoreTriggerRef
-  });
+  // Gallery状态简要日志
+  if (topicState.contentsList.length > 0) {
+    console.log('[TopicPage] Gallery ready:', topicState.contentsList.length, 'contents');
+  }
 
   // 手动重试函数
   const handleRetry = () => {
-    console.log('[TopicPage] Manual retry triggered for:', topicName);
-    fetchAICC(topicName);
-    fetchContents({ tag: topicName, reset: true });
-    setRequestAttempts(prev => prev + 1);
-    setLastRequestTime(Date.now());
+    console.log('[TopicPage] 🔄 Manual retry triggered for:', topicName);
+    currentLoadingTopic.current = ''; // 重置加载标记，允许重新加载
+    
+    // 并行调用所有fetch函数
+    const retryAiccPromise = fetchAICC(topicName);
+    const retryContentsPromise = fetchContents({ tag: topicName, reset: true });
+    const retryProjectPromise = fetchProject(topicName);
+    
+    Promise.all([retryAiccPromise, retryContentsPromise, retryProjectPromise])
+      .then((results) => {
+        console.log('[TopicPage] ✅ Retry completed for:', topicName);
+        console.log('[TopicPage] 📊 Retry results:', {
+          aiccResult: !!results[0],
+          contentsResult: !!results[1], 
+          projectResult: !!results[2]
+        });
+      })
+      .catch((error) => {
+        console.error('[TopicPage] ❌ Retry failed for topic:', topicName, error);
+        retryAiccPromise.catch(e => console.error('[TopicPage] ❌ Retry AICC failed:', e));
+        retryContentsPromise.catch(e => console.error('[TopicPage] ❌ Retry Contents failed:', e));
+        retryProjectPromise.catch(e => console.error('[TopicPage] ❌ Retry Project failed:', e));
+      });
+
+          setRequestAttempts(prev => prev + 1);
+      setLastRequestTime(Date.now());
+    };
+
+  // 🧪 临时测试函数：直接测试AICC API
+  const testAICCAPI = async () => {
+    console.log('[TopicPage] 🧪 Testing AICC API directly for:', topicName);
+    try {
+      const url = `/studio-api/infofi/aicc?tag=${encodeURIComponent(topicName)}`;
+      console.log('[TopicPage] 🧪 Direct API call to:', url);
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        }
+      });
+      
+      console.log('[TopicPage] 🧪 Direct API response:', response.status, response.ok);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[TopicPage] 🧪 Direct API data:', data);
+      } else {
+        const errorText = await response.text();
+        console.error('[TopicPage] 🧪 Direct API error:', errorText);
+      }
+    } catch (error) {
+      console.error('[TopicPage] 🧪 Direct API exception:', error);
+    }
   };
 
   if (topicState.error) {
@@ -149,8 +197,11 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
           <h1 className={styles.tagTitle}>{topicName}</h1>
         </div>
 
-        {/* 媒体信息区域 - 暂时留空 */}
-        <div className={styles.mediaInfoArea}></div>
+        {/* Project Info区域 */}
+        <ProjectInfo 
+          projectInfo={topicState.projectInfo}
+          isLoading={topicState.isLoadingProjectInfo}
+        />
 
         <StatePrompt message="No relevant topic data found." />
         <button onClick={handleRetry} style={{ margin: '1rem', padding: '0.5rem 1rem', background: '#6366F1', color: 'white', border: 'none', borderRadius: '0.25rem' }}>
@@ -182,8 +233,11 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
         <h1 className={styles.tagTitle}>{topicName}</h1>
       </div>
 
-      {/* 媒体信息区域 - 暂时留空 */}
-      <div className={styles.mediaInfoArea}></div>
+      {/* Project Info区域 - 替换原来的媒体信息区域 */}
+      <ProjectInfo 
+        projectInfo={topicState.projectInfo}
+        isLoading={topicState.isLoadingProjectInfo}
+      />
 
       <div className={styles.topicContent}>
         {/* 统计数据区域 */}
@@ -224,8 +278,25 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
             >
               Retry Loading Data
             </button>
+            <button 
+              onClick={testAICCAPI} 
+              style={{ 
+                margin: '0.5rem', 
+                padding: '0.75rem 1.5rem', 
+                background: '#10B981', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+                fontSize: '0.875rem'
+              }}
+            >
+              🧪 Test AICC API
+            </button>
           </div>
         )}
+
+
       </div>
     </div>
   );
