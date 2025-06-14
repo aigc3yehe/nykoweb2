@@ -61,7 +61,7 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
     } else if (isWorkflowDetailMode) {
       setCanEdit(accountState.role === 'admin' || accountState.did === workflowDetailState.currentWorkflow?.creator);
     }
-  }, [isModelDetailMode, isWorkflowDetailMode, modelDetailState.currentModel, workflowDetailState.currentWorkflow]);
+  }, [accountState, isModelDetailMode, isWorkflowDetailMode, modelDetailState.currentModel, workflowDetailState.currentWorkflow]);
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
