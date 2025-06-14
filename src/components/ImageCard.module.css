@@ -269,3 +269,22 @@
     transform: translateY(-2px);
   }
 }
+
+.videoTag {
+  height: 1.375rem; /* 22px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.25rem 0.5rem; /* 4px 8px */
+  backdrop-filter: blur(1.25rem); /* 20px */
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem; /* 12px */
+  line-height: 100%;
+  letter-spacing: 0;
+  vertical-align: middle;
+  color: #F3F4F6;
+  background-color: rgba(99, 102, 241, 0.8); /* #6366F1CC 蓝色 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}

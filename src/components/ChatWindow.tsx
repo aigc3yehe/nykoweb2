@@ -24,12 +24,14 @@ import {
   updateWorkflowPrompt,
   updateWorkflowInput,
   updateWorkflowOutput,
-  updateWorkflowModel,
   setWorkflowImage,
   runWorkflow,
   uploadWorkflowReferenceImage,
   removeWorkflowReferenceImage,
-  updateWorkflowExtraPrompt
+  updateWorkflowExtraPrompt,
+  fetchAIProviders,
+  updateSelectedProvider,
+  updateSelectedModel,
 } from '../store/chatStore';
 import {showDialogAtom} from '../store/dialogStore';
 import {useLogin, usePrivy} from '@privy-io/react-auth';
@@ -56,13 +58,15 @@ const ChatWindow: React.FC = () => {
   const [, updateWorkflowPromptAction] = useAtom(updateWorkflowPrompt);
   const [, updateWorkflowInputAction] = useAtom(updateWorkflowInput);
   const [, updateWorkflowOutputAction] = useAtom(updateWorkflowOutput);
-  const [, updateWorkflowModelAction] = useAtom(updateWorkflowModel);
   const [, setWorkflowImageAction] = useAtom(setWorkflowImage);
   const [, runWorkflowAction] = useAtom(runWorkflow);
   const [, fetchWorkflowsAction] = useAtom(fetchWorkflows);
   const [, uploadWorkflowReferenceImageAction] = useAtom(uploadWorkflowReferenceImage);
   const [, removeWorkflowReferenceImageAction] = useAtom(removeWorkflowReferenceImage);
   const [, updateWorkflowExtraPromptAction] = useAtom(updateWorkflowExtraPrompt);
+  const [, fetchAIProvidersAction] = useAtom(fetchAIProviders);
+  const [, updateSelectedProviderAction] = useAtom(updateSelectedProvider);
+  const [, updateSelectedModelAction] = useAtom(updateSelectedModel);
 
   // 添加滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -254,6 +258,32 @@ const ChatWindow: React.FC = () => {
 
   const maintenance = false; // TODO: 维护状态，请设置为true
 
+  // 新增：扩展选项处理函数
+  const handlePartiallyModify = (imageUrl?: string) => {
+    if (imageUrl) {
+      sendMessageAction('I want to partially modify this image.');
+    }
+  };
+
+  const handleAnimate = (imageUrl?: string) => {
+    if (imageUrl) {
+      sendMessageAction('I want to animate this image.');
+    }
+  };
+
+  const handleMintNFT = (imageUrl?: string) => {
+    if (imageUrl) {
+      sendMessageAction('I want to mint this image as NFT.');
+    }
+  };
+
+  // 在组件挂载时获取AI服务提供商数据
+  useEffect(() => {
+    if (authenticated && accountState.did && !chatState.aiProviders.providers.length && !chatState.aiProviders.isLoading) {
+      fetchAIProvidersAction();
+    }
+  }, [authenticated, accountState.did, chatState.aiProviders.providers.length, chatState.aiProviders.isLoading, fetchAIProvidersAction]);
+
   return (
     <div className={styles.chatWindow}>
       {maintenance ? (
@@ -394,13 +424,14 @@ const ChatWindow: React.FC = () => {
                 images={message.images}
                 imageWidth={message.imageInfo?.width || 256}
                 imageHeight={message.imageInfo?.height || 256}
+                videos={message.videos}
                 request_id={message.request_id}
                 agree={message.agree}
                 workflow_name={chatState.workflow_name}
                 workflow_description={chatState.workflow_description}
                 workflow_prompt={chatState.workflow_prompt}
                 workflow_input={chatState.workflow_input}
-                workflow_model={chatState.workflow_model || "gpt-4o"}
+                workflow_output={chatState.workflow_output}
                 isCreatingWorkflow={chatState.workflowCreation.isCreating}
                 creationSuccess={chatState.workflowCreation.isSuccess}
                 onAddImage={() => addImageAction(index, 30 - (message.uploadedFiles?.length || 0))}
@@ -410,7 +441,6 @@ const ChatWindow: React.FC = () => {
                 onUpdatePrompt={(text) => updateWorkflowPromptAction(text)}
                 onChangeInput={(type) => updateWorkflowInputAction(type)}
                 onChangeOutput={(type) => updateWorkflowOutputAction(type)}
-                onSelectModel={(model) => updateWorkflowModelAction(model)}
                 onCreateWorkflow={createWorkflowAction}
                 workflowId={message.type === 'run_workflow' ? chatState.workflowCreation.workflowId : undefined}
                 workflowImageValue={chatState.workflowImageValue}
@@ -425,6 +455,15 @@ const ChatWindow: React.FC = () => {
                 workflow_extra_prompt={chatState.workflow_extra_prompt}
                 onUpdateWorkflowExtraPrompt={updateWorkflowExtraPromptAction}
                 currentWorkflow={chatState.currentWorkflow}
+                // 新增：扩展选项相关
+                isLastMessage={index === chatState.messages.length - 1 && (message.type === 'generate_result' || message.type === 'workflow_generate_result')}
+                onPartiallyModify={() => handlePartiallyModify(message.images?.[0])}
+                onAnimate={() => handleAnimate(message.images?.[0])}
+                onMintNFT={() => handleMintNFT(message.images?.[0])}
+                // 新增：AI服务提供商相关
+                aiProviders={chatState.aiProviders}
+                onSelectProvider={updateSelectedProviderAction}
+                onSelectAIModel={updateSelectedModelAction}
               />
             ))
           )}
