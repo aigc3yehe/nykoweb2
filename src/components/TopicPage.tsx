@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import styles from './TopicPage.module.css';
-import { topicAtom, fetchTopicAICC, fetchTopicContents, fetchProjectInfo } from '../store/topicStore';
+import { topicAtom, fetchTopicAICC, fetchTopicContents, fetchProjectInfo, switchToTopic } from '../store/topicStore';
 import TopicHeader from './TopicHeader';
 import TopicAICCSection from './TopicAICCSection';
 import TopicGallery from './TopicGallery';
@@ -20,6 +20,7 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
   const fetchAICC = useSetAtom(fetchTopicAICC);
   const fetchContents = useSetAtom(fetchTopicContents);
   const fetchProject = useSetAtom(fetchProjectInfo);
+  const switchTopic = useSetAtom(switchToTopic);
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const observer = useRef<IntersectionObserver | null>(null);
@@ -28,66 +29,86 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
   const [requestAttempts, setRequestAttempts] = useState(0);
   const [lastRequestTime, setLastRequestTime] = useState<number>(0);
 
-  // 添加ref来跟踪当前加载的topic，避免重复请求
-  const currentLoadingTopic = useRef<string>('');
+  // ✅ 修复：使用ref跟踪组件是否已卸载，避免内存泄漏
+  const isMountedRef = useRef(true);
+  const lastTopicRef = useRef<string>('');
 
-  // 简化数据请求逻辑 - 只依赖topicName，避免状态竞争
+  // ✅ 修复：组件卸载时清理
   useEffect(() => {
-    console.log('[TopicPage] 🔄 Effect triggered for topic:', topicName, 'AICC count:', topicState.aiccList.length);
+    return () => {
+      isMountedRef.current = false;
+      console.log('[TopicPage] 🧹 Component unmounting, cleaning up...');
+    };
+  }, []);
 
-    // 避免重复加载同一个topic
-    if (!topicName || topicName === currentLoadingTopic.current) {
-      console.log('[TopicPage] Skipping fetch - same topic or empty topicName');
+  // ✅ 修复：优化数据请求逻辑，确保首次加载一定触发
+  useEffect(() => {
+    console.log('[TopicPage] 🔄 Effect triggered for topic:', topicName);
+
+    if (!topicName) {
+      console.log('[TopicPage] No topicName provided, skipping fetch');
       return;
     }
 
-    // 检查缓存是否存在且有效
-    const cache = topicState.cacheMap.get(topicName);
-    const now = Date.now();
-    const CACHE_DURATION = 5 * 60 * 1000; // 5分钟
-    if (cache && now - cache.timestamp < CACHE_DURATION && cache.aiccList.length > 0) {
-      console.log('[TopicPage] Using cache for topic:', topicName);
-      return;
-    }
-
-    console.log('[TopicPage] Starting data fetch for:', topicName);
-    currentLoadingTopic.current = topicName;
-    
-    // 并行调用所有fetch函数
-    console.log('[TopicPage] 🚀 Calling all fetch functions for:', topicName);
-    
-    const aiccPromise = fetchAICC(topicName);
-    const contentsPromise = fetchContents({ tag: topicName, reset: true });
-    const projectPromise = fetchProject(topicName);
-    
-    console.log('[TopicPage] 📡 Individual promises created:', {
-      aicc: !!aiccPromise,
-      contents: !!contentsPromise,
-      project: !!projectPromise
-    });
-    
-    Promise.all([aiccPromise, contentsPromise, projectPromise])
-      .then((results) => {
-        console.log('[TopicPage] ✅ All fetch functions completed for:', topicName);
-        console.log('[TopicPage] 📊 Promise results:', {
-          aiccResult: !!results[0],
-          contentsResult: !!results[1], 
-          projectResult: !!results[2]
-        });
-      })
-      .catch((error) => {
-        console.error('[TopicPage] ❌ Promise.all failed for topic:', topicName);
-        console.error('[TopicPage] ❌ Error details:', error);
-        
-        // 检查单个Promise的状态
-        aiccPromise.catch(e => console.error('[TopicPage] ❌ AICC Promise failed:', e));
-        contentsPromise.catch(e => console.error('[TopicPage] ❌ Contents Promise failed:', e));
-        projectPromise.catch(e => console.error('[TopicPage] ❌ Project Promise failed:', e));
+    // 🚀 立即切换topic状态，清理旧数据
+    if (lastTopicRef.current !== topicName) {
+      console.log('[TopicPage] 🔄 Topic change detected, switching immediately:', {
+        from: lastTopicRef.current,
+        to: topicName
+      });
+      
+      // 立即切换并清理数据，避免显示错误内容
+      switchTopic(topicName);
+      lastTopicRef.current = topicName;
+      
+      // ✅ 修复：首次进入新topic时，立即发起API请求，不依赖缓存检查
+      console.log('[TopicPage] 🚀 New topic detected, starting immediate data fetch');
+      
+      // 并发发起所有API请求
+      fetchAICC(topicName).catch(error => {
+        console.error('[TopicPage] ❌ AICC fetch failed:', error);
+      });
+      
+      fetchContents({ tag: topicName, reset: true }).catch(error => {
+        console.error('[TopicPage] ❌ Contents fetch failed:', error);
+      });
+      
+      fetchProject(topicName).catch(error => {
+        console.error('[TopicPage] ❌ Project info fetch failed:', error);
       });
 
-    setRequestAttempts(prev => prev + 1);
-    setLastRequestTime(Date.now());
-  }, [topicName]); // 只依赖topicName，移除currentTopic依赖
+      setRequestAttempts(prev => prev + 1);
+      setLastRequestTime(Date.now());
+      
+      return; // 新topic直接返回，不需要进一步检查
+    }
+    
+    // 如果是相同topic，检查是否需要重新加载（比如手动刷新）
+    const hasNoData = topicState.aiccList.length === 0 && 
+                      topicState.contentsList.length === 0 && 
+                      !topicState.isLoading && 
+                      !topicState.isLoadingContents;
+    
+    if (hasNoData && requestAttempts === 0) {
+      console.log('[TopicPage] 🔄 Same topic but no data, triggering initial load');
+      
+      fetchAICC(topicName).catch(error => {
+        console.error('[TopicPage] ❌ AICC fetch failed:', error);
+      });
+      
+      fetchContents({ tag: topicName, reset: true }).catch(error => {
+        console.error('[TopicPage] ❌ Contents fetch failed:', error);
+      });
+      
+      fetchProject(topicName).catch(error => {
+        console.error('[TopicPage] ❌ Project info fetch failed:', error);
+      });
+
+      setRequestAttempts(prev => prev + 1);
+      setLastRequestTime(Date.now());
+    }
+    
+  }, [topicName, fetchAICC, fetchContents, fetchProject, switchTopic]); // ✅ 修复：移除循环依赖，只保留基本依赖
 
   // 简化状态日志
   if (topicState.aiccList.length > 0) {
@@ -98,7 +119,7 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
     navigate(-1); // 返回上一页
   };
 
-  // 分页加载逻辑（简化依赖）
+  // 分页加载逻辑（优化依赖）
   const loadMoreTriggerRef = useCallback((node: HTMLDivElement | null) => {
     if (topicState.isLoadingContents) return;
 
@@ -116,7 +137,7 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
     });
 
     if (node) observer.current.observe(node);
-  }, [topicState.isLoadingContents, topicState.contentsHasMore, topicName]);
+  }, [topicState.isLoadingContents, topicState.contentsHasMore, topicName, fetchContents]);
 
   // Gallery状态简要日志
   if (topicState.contentsList.length > 0) {
@@ -126,32 +147,20 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
   // 手动重试函数
   const handleRetry = () => {
     console.log('[TopicPage] 🔄 Manual retry triggered for:', topicName);
-    currentLoadingTopic.current = ''; // 重置加载标记，允许重新加载
     
-    // 并行调用所有fetch函数
-    const retryAiccPromise = fetchAICC(topicName);
-    const retryContentsPromise = fetchContents({ tag: topicName, reset: true });
-    const retryProjectPromise = fetchProject(topicName);
+    // 先切换topic状态，清理数据
+    switchTopic(topicName);
     
-    Promise.all([retryAiccPromise, retryContentsPromise, retryProjectPromise])
-      .then((results) => {
-        console.log('[TopicPage] ✅ Retry completed for:', topicName);
-        console.log('[TopicPage] 📊 Retry results:', {
-          aiccResult: !!results[0],
-          contentsResult: !!results[1], 
-          projectResult: !!results[2]
-        });
-      })
-      .catch((error) => {
-        console.error('[TopicPage] ❌ Retry failed for topic:', topicName, error);
-        retryAiccPromise.catch(e => console.error('[TopicPage] ❌ Retry AICC failed:', e));
-        retryContentsPromise.catch(e => console.error('[TopicPage] ❌ Retry Contents failed:', e));
-        retryProjectPromise.catch(e => console.error('[TopicPage] ❌ Retry Project failed:', e));
-      });
+    // 然后重新加载
+    setTimeout(() => {
+      fetchAICC(topicName).catch(console.error);
+      fetchContents({ tag: topicName, reset: true }).catch(console.error);
+      fetchProject(topicName).catch(console.error);
+    }, 100);
 
-          setRequestAttempts(prev => prev + 1);
-      setLastRequestTime(Date.now());
-    };
+    setRequestAttempts(prev => prev + 1);
+    setLastRequestTime(Date.now());
+  };
 
   // 🧪 临时测试函数：直接测试AICC API
   const testAICCAPI = async () => {
@@ -180,6 +189,17 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
     }
   };
 
+  // ✅ 修复：添加topic名称一致性检查
+  const isCurrentTopic = topicState.currentTopic === topicName;
+  const showTopicMismatch = topicState.currentTopic && !isCurrentTopic;
+
+  if (showTopicMismatch) {
+    console.warn('[TopicPage] ⚠️ Topic mismatch detected:', {
+      pageTopicName: topicName,
+      stateCurrentTopic: topicState.currentTopic
+    });
+  }
+
   if (topicState.error) {
     return (
       <div className={styles.topicPage} ref={scrollContainerRef}>
@@ -199,7 +219,7 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
 
         {/* Project Info区域 */}
         <ProjectInfo 
-          projectInfo={topicState.projectInfo}
+          projectInfo={isCurrentTopic ? topicState.projectInfo : null}
           isLoading={topicState.isLoadingProjectInfo}
         />
 
@@ -231,24 +251,29 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
       <div className={styles.tagTitleArea}>
         <img src={topicIcon} alt="Topic" className={styles.topicIcon} />
         <h1 className={styles.tagTitle}>{topicName}</h1>
+        {showTopicMismatch && (
+          <div style={{ color: '#EF4444', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+            ⚠️ State mismatch: {topicState.currentTopic} ≠ {topicName}
+          </div>
+        )}
       </div>
 
       {/* Project Info区域 - 替换原来的媒体信息区域 */}
       <ProjectInfo 
-        projectInfo={topicState.projectInfo}
+        projectInfo={isCurrentTopic ? topicState.projectInfo : null}
         isLoading={topicState.isLoadingProjectInfo}
       />
 
       <div className={styles.topicContent}>
         {/* 统计数据区域 */}
-        <TopicHeader topicInfo={topicState.topicInfo} />
+        <TopicHeader topicInfo={isCurrentTopic ? topicState.topicInfo : null} />
 
         {/* AICC横滚区域 */}
-        <TopicAICCSection aiccList={topicState.aiccList} />
+        <TopicAICCSection aiccList={isCurrentTopic ? topicState.aiccList : []} />
 
         {/* Gallery区域 */}
         <TopicGallery 
-          contentsList={topicState.contentsList}
+          contentsList={isCurrentTopic ? topicState.contentsList : []}
           isLoading={topicState.isLoadingContents}
           hasMore={topicState.contentsHasMore}
           loadMoreTriggerRef={loadMoreTriggerRef}
@@ -261,6 +286,11 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
               No data loaded. Request attempts: {requestAttempts}
               {lastRequestTime > 0 && (
                 <div>Last attempt: {new Date(lastRequestTime).toLocaleTimeString()}</div>
+              )}
+              {showTopicMismatch && (
+                <div style={{ color: '#EF4444', marginTop: '0.5rem' }}>
+                  Topic state mismatch detected
+                </div>
               )}
             </div>
             <button 
@@ -295,7 +325,6 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
             </button>
           </div>
         )}
-
 
       </div>
     </div>
