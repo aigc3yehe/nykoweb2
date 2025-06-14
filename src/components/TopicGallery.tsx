@@ -120,6 +120,7 @@ const TopicGallery: React.FC<TopicGalleryProps> = ({
             source: content.source,
             version: 1,
             task_id: `topic-${content.id}`,
+            type: 'image',
             public: 1,
           };
 
@@ -173,4 +174,4 @@ const TopicGallery: React.FC<TopicGalleryProps> = ({
   );
 };
 
-export default TopicGallery; 
+export default TopicGallery;
