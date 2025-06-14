@@ -68,5 +68,14 @@
   flex: 1;
   width: 100%;
   height: calc(100vh - 4rem); /* 减去header高度 */
-  overflow: hidden; /* 改为hidden，让子组件处理滚动 */
+  overflow-y: auto; /* 允许垂直滚动 */
+  overflow-x: hidden; /* 防止水平滚动 */
+  
+  /* 隐藏原生滚动条 */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.fullWidthContent::-webkit-scrollbar {
+  display: none;
 }

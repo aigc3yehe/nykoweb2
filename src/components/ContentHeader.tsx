@@ -14,8 +14,8 @@ import { useNavigate } from 'react-router-dom';
 import { encodeTopicName } from '../store/topicStore';
 
 interface ContentHeaderProps {
-  activeTab: 'models' | 'workflows' |'images';
-  setActiveTab: (tab: 'models' | 'workflows' | 'images') => void;
+  activeTab: 'models' | 'workflows' |'images' | 'agentApps';
+  setActiveTab: (tab: 'models' | 'workflows' | 'images' | 'agentApps') => void;
   ownedOnly: boolean;
   setOwnedOnly: (owned: boolean) => void;
   sortOption: 'New Model' | 'Popular';
@@ -148,21 +148,29 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
         >
           Images
         </div>
+        <div
+          className={`${styles.tab} ${activeTab === 'agentApps' ? styles.active : styles.inactive}`}
+          onClick={() => setActiveTab('agentApps')}
+        >
+          Agent Apps
+        </div>
       </div>
 
       <div className={styles.controlsGroup}>
-        <div
-          className={styles.checkboxContainer}
-          onClick={() => setOwnedOnly(!ownedOnly)}
-        >
-          <div className={styles.checkboxIcon}>
-            <img
-              src={ownedOnly ? checkboxSelected : checkboxNormal}
-              alt="checkbox"
-            />
+        {activeTab !== 'agentApps' && (
+          <div
+            className={styles.checkboxContainer}
+            onClick={() => setOwnedOnly(!ownedOnly)}
+          >
+            <div className={styles.checkboxIcon}>
+              <img
+                src={ownedOnly ? checkboxSelected : checkboxNormal}
+                alt="checkbox"
+              />
+            </div>
+            <span className={styles.checkboxLabel}>Owned</span>
           </div>
-          <span className={styles.checkboxLabel}>Owned</span>
-        </div>
+        )}
 
         {(activeTab === 'models' || activeTab === 'workflows') && (
           <div className={styles.dropdownContainer} ref={dropdownRef}>

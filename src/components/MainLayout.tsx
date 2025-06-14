@@ -9,11 +9,15 @@ import TokenMarquee from './TokenMarquee';
 import LinkWallet from './LinkWallet.tsx';
 import TopicPageRouter from './TopicPageRouter';
 import TopicRelatedTweets from './TopicRelatedTweets';
+import CollectionPage from './CollectionPage';
 
 const MainLayout: React.FC = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const hasTopic = searchParams.has('topic');
+  
+  // 检查是否是 collection 页面
+  const hasCollection = searchParams.has('collection') && searchParams.has('name') && searchParams.has('description');
 
   return (
     <div className={styles.mainLayout}>
@@ -35,7 +39,16 @@ const MainLayout: React.FC = () => {
           </div>
         } />
         <Route path="*" element={
-          hasTopic ? (
+          hasCollection ? (
+            <div className={styles.fullWidthContent}>
+              <CollectionPage
+                contractAddress={searchParams.get('collection')!}
+                name={searchParams.get('name')!}
+                description={searchParams.get('description')!}
+                onBack={() => window.history.back()}
+              />
+            </div>
+          ) : hasTopic ? (
           <div className={styles.contentContainer}>
             <div className={styles.contentSection}>
                 <div className={styles.centeredContent}>
