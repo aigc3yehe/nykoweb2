@@ -10,6 +10,8 @@ import { useAtom } from 'jotai';
 import { accountAtom } from '../store/accountStore';
 import { modelDetailAtom } from '../store/modelStore';
 import { workflowDetailAtom } from '../store/workflowStore';
+import { useNavigate } from 'react-router-dom';
+import { encodeTopicName } from '../store/topicStore';
 
 interface ContentHeaderProps {
   activeTab: 'models' | 'workflows' |'images';
@@ -49,6 +51,12 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
 
   const [accountState] = useAtom(accountAtom);
   const [canEdit, setCanEdit] = useState(false);
+  const navigate = useNavigate();
+
+  // hashtag点击处理函数
+  const handleTagClick = (tag: string) => {
+    navigate(`/?topic=${encodeTopicName(tag)}`);
+  };
 
   useEffect(() => {
     console.log('isModelDetailMode', isModelDetailMode);
@@ -90,7 +98,12 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
             {tags.length > 0 && (
               <div className={styles.tagsContainer}>
                 {tags.map((tag, index) => (
-                  <span key={index} className={styles.tag}>
+                  <span 
+                    key={index} 
+                    className={styles.tag}
+                    onClick={() => handleTagClick(tag)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     {tag}
                   </span>
                 ))}

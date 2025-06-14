@@ -18,6 +18,18 @@
   width: 100%;
   height: 100%;
   overflow: hidden; /* 修改为hidden，防止内容溢出 */
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: flex-start; /* 顶部对齐 */
+}
+
+.centeredContent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 57.625rem; /* 最大宽度与TokenMarquee和TopicPage保持一致 */
+  height: 100%;
+  overflow-y: auto; /* 允许垂直滚动 */
 }
 
 .chatSection {
@@ -32,11 +44,22 @@
     height: 100vh; /* 修改为100vh，确保占满整个视口高度 */
   }
 
-  .contentSection,
+  .contentContainer {
+    flex-direction: row; /* 保持水平布局 */
+  }
+
+  .contentSection {
+    flex: 1; /* 占满剩余空间 */
+    width: 100%; /* 占满全宽 */
+  }
+
   .chatSection {
-    width: 100%;
-    height: 100%;
-    max-width: none;
+    display: none; /* 小屏幕下隐藏右侧区域 */
+  }
+
+  .centeredContent {
+    max-width: none; /* 移除最大宽度限制 */
+    padding: 0 1rem; /* 添加适当的内边距 */
   }
 }
 
