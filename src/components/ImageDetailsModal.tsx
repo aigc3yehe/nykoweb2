@@ -98,22 +98,6 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
     });
   };
 
-  // 计算图片高度，保持原始宽高比
-  const calculateImageHeight = () => {
-    // 优先使用详细信息中的宽高
-    if (localImageDetail?.width && localImageDetail?.height) {
-      const aspectRatio = localImageDetail.height / localImageDetail.width;
-      return 25.625 * aspectRatio;
-    }
-
-    if (image.width && image.height) {
-      const aspectRatio = image.height / image.width;
-      return 25.625 * aspectRatio;
-    }
-
-    return 25.625; // 默认高度
-  };
-
   // 新增：判断是否为视频类型
   const isVideo = () => {
     return localImageDetail?.type === 'video' || image.type === 'video';
@@ -199,8 +183,8 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
           {getMediaUrl() ? (
             isVideo() ? (
               // 视频渲染 - 带完整控件
-              <video 
-                src={getMediaUrl()} 
+              <video
+                src={getMediaUrl()}
                 className={styles.image}
                 controls={true}
                 playsInline
@@ -215,8 +199,8 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
             )
           ) : (
             <div className={styles.placeholderImage}>
-              {image.state === -1 ? 
-                (isVideo() ? 'Failed to generate video' : 'Failed to generate') : 
+              {image.state === -1 ?
+                (isVideo() ? 'Failed to generate video' : 'Failed to generate') :
                 (isVideo() ? 'Generating video...' : 'Generating...')
               }
             </div>

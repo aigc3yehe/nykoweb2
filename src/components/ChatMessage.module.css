@@ -399,6 +399,25 @@
   border: 1px solid #3741514D;
 }
 
+.mintingIndicator {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 10px */
+  border-radius: 0.5rem; /* 8px */
+  padding: 0.875rem; /* 14px */
+  margin-top: 0.625rem; /* 10px */
+  background: linear-gradient(90deg, rgba(31, 41, 55, 0.2) 0%, rgba(63, 79, 103, 0.2) 100%);
+  border: 1px solid #3741514D;
+}
+
+/* 新增：NFT铸造第一行样式 */
+.mintingFirstRow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem; /* 10px */
+}
+
 .generatingText {
   font-family: 'Jura', sans-serif;
   font-size: 0.875rem; /* 14px */
@@ -1113,4 +1132,57 @@
 
 .extensionButton:active {
   background: rgba(99, 102, 241, 0.2);
+}
+
+/* 新增：服务提供商信息样式 */
+.serviceProviderInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  /* 移除背景色和内边距 */
+}
+
+.serviceProviderText {
+  font-size: 0.75rem;
+  color: #88A4C2;
+  font-family: 'Jura', sans-serif;
+}
+
+/* 新增：服务提供商链接样式 */
+.serviceProviderLink {
+  color: #6366F1;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.serviceProviderLink:hover {
+  color: #7C3AED;
+}
+
+/* 修改：服务提供商图标容器 */
+.serviceProviderIcons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.serviceProviderAvatar {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.xIcon {
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.xIcon:hover {
+  opacity: 1;
 }
