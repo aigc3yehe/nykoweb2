@@ -1,10 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './FeatureCard.module.css';
 import {useAtom, useSetAtom} from 'jotai';
-import {
-  sendMessage
-} from '../store/chatStore';
-import {showToastAtom} from "../store/imagesStore.ts";
 import {usePrivy} from "@privy-io/react-auth";
 import { accountAtom } from '../store/accountStore';
 import { queryUserPoints, QueryPointsResponse } from '../services/userService';
@@ -12,6 +8,7 @@ import { fetchFeatures, featureListAtom, FeaturedItem, shouldRefreshFeatures } f
 import { useNavigate } from 'react-router-dom';
 import { SOURCE_TYPE } from '../types/api.type';
 import {formatNumber} from "../utils/format.ts";
+import TopicCloud from './TopicCloud';
 
 // 获取用户显示名称的逻辑（参考LoginButton）
 const formatName = (twitter: any, address: string | null) => {
@@ -28,15 +25,13 @@ const formatAddress = (address: string | null) => {
 };
 
 const FeatureCard: React.FC = () => {
-  const [, sendMessageAction] = useAtom(sendMessage);
-  const showToast = useSetAtom(showToastAtom);
   const { authenticated } = usePrivy();
   const [accountState] = useAtom(accountAtom);
   const [pointsData, setPointsData] = useState<QueryPointsResponse['data'] | null>(null);
 
   // 添加 Features 相关状态
   const [featureState] = useAtom(featureListAtom);
-  const [, getFeatures] = useAtom(fetchFeatures);
+  const getFeatures = useSetAtom(fetchFeatures);
   const [needsRefresh] = useAtom(shouldRefreshFeatures);
 
   // 跑马灯交互状态
@@ -158,38 +153,7 @@ const FeatureCard: React.FC = () => {
     }
   };
 
-  const handleGenerateClick = async () => {
-    if (!authenticated) {
-      showToast({
-        message: 'Please log in first',
-        severity: 'info'
-      });
-      return;
-    }
-    await sendMessageAction('I want to generate an image.')
-  };
 
-  const handleTrainClick = async () => {
-    if (!authenticated) {
-      showToast({
-        message: 'Please log in first',
-        severity: 'info'
-      });
-      return;
-    }
-    await sendMessageAction('I want to finetuning a model.')
-  };
-
-  const handleCreateClick = async () => {
-    if (!authenticated) {
-      showToast({
-        message: 'Please log in first',
-        severity: 'info'
-      });
-      return;
-    }
-    await sendMessageAction('I want to create a workflow.')
-  };
 
   // 处理"Creativity economy model"点击事件
   const handleCreativityEconomyClick = () => {
@@ -262,17 +226,12 @@ const FeatureCard: React.FC = () => {
   const renderFeatureCards = () => {
     return (<div className={styles.featureCardContainer}>
       <div className={styles.featureCards}>
+        {/* 第一个卡片：话题云 */}
         <div className={styles.featureCard}>
-          <div className={styles.cardContent}>
-            <h3>Share Your Creativity</h3>
-            <p>Host Your Creativity On NYKO — Ready To Use Anytime.</p>
-          </div>
-          <div className={styles.buttonContainer}>
-            <button className={styles.featureButton} onClick={handleGenerateClick}>Generate Image &gt;</button>
-            <button className={styles.featureButton} onClick={handleTrainClick}>Train Model &gt;</button>
-            <button className={styles.featureButton} onClick={handleCreateClick}>Create Workflow &gt;</button>
-          </div>
+          <TopicCloud />
         </div>
+        
+        {/* 第二个卡片：用户资产或创意经济 */}
         {authenticated ? (
             <div className={styles.featureCard}>
               {renderUserAssets()}

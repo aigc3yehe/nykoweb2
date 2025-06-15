@@ -8,7 +8,7 @@ import { accountAtom } from '../store/accountStore';
 
 interface WorkflowsContentProps {
   ownedOnly: boolean;
-  sortOption: 'New Model' | 'Popular';
+  sortOption: 'Newest' | 'Popular';
   onWorkflowClick: (workflowId: number, workflowName: string) => void;
 }
 

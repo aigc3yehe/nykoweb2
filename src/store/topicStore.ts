@@ -14,6 +14,16 @@ export interface TopicInfo {
   posts?: number;
 }
 
+// 新增：项目信息接口
+export interface ProjectInfo {
+  point_boost: number; // 对积分的加成
+  twitter: Twitter;
+  slug: string;
+  links: {
+    [key: string]: string; // 完整URL
+  };
+}
+
 export interface AICCItem {
   id: number;
   name: string;
@@ -44,6 +54,7 @@ export interface ContentItem {
 // 缓存接口
 interface TopicCache {
   topicInfo: TopicInfo | null;
+  projectInfo: ProjectInfo | null; // 新增缓存字段
   aiccList: AICCItem[];
   contentsList: ContentItem[];
   contentsPage: number;
@@ -55,6 +66,7 @@ interface TopicCache {
 export interface TopicState {
   currentTopic: string;
   topicInfo: TopicInfo | null;
+  projectInfo: ProjectInfo | null; // 新增项目信息
   aiccList: AICCItem[];
   contentsList: ContentItem[];
   contentsPage: number;
@@ -62,6 +74,7 @@ export interface TopicState {
   contentsHasMore: boolean;
   isLoading: boolean;
   isLoadingContents: boolean;
+  isLoadingProjectInfo: boolean; // 新增加载状态
   error: string | null;
   cacheMap: Map<string, TopicCache>;
 }
@@ -73,13 +86,15 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5分钟
 const initialState: TopicState = {
   currentTopic: '',
   topicInfo: null,
+  projectInfo: null, // 新增初始值
   aiccList: [],
   contentsList: [],
   contentsPage: 1,
-  contentsPageSize: 35, // 调整为匹配API实际返回数量
+  contentsPageSize: 30,
   contentsHasMore: true,
   isLoading: false,
   isLoadingContents: false,
+  isLoadingProjectInfo: false, // 新增初始值
   error: null,
   cacheMap: new Map(),
 };
@@ -87,37 +102,21 @@ const initialState: TopicState = {
 // 创建带调试的状态原子
 const baseTopicAtom = atom<TopicState>(initialState);
 
-// 主要状态原子 - 添加调试包装
-export const topicAtom = atom(
-  (get) => get(baseTopicAtom),
-  (get, set, update: Partial<TopicState> | ((prevState: TopicState) => TopicState)) => {
-    const oldState = get(baseTopicAtom);
-    const newState = typeof update === 'function' ? update(oldState) : { ...oldState, ...update };
-    
-    console.log('[topicAtom] State update:', {
-      from: {
-        currentTopic: oldState.currentTopic,
-        aiccCount: oldState.aiccList.length,
-        contentsCount: oldState.contentsList.length,
-        isLoading: oldState.isLoading,
-        isLoadingContents: oldState.isLoadingContents
-      },
-      to: {
-        currentTopic: newState.currentTopic,
-        aiccCount: newState.aiccList.length,
-        contentsCount: newState.contentsList.length,
-        isLoading: newState.isLoading,
-        isLoadingContents: newState.isLoadingContents
-      }
-    });
-    set(baseTopicAtom, newState);
-  }
-);
+// 请求防重复Map - 改进为支持取消
+const ongoingRequests = new Map<string, { promise: Promise<any>; controller: AbortController }>();
 
-// 请求防重复Map
-const ongoingRequests = new Map<string, Promise<any>>();
-
-
+// 取消指定topic的所有进行中请求
+const cancelTopicRequests = (tag: string) => {
+  const keysToCancel = Array.from(ongoingRequests.keys()).filter(key => key.includes(tag));
+  keysToCancel.forEach(key => {
+    const request = ongoingRequests.get(key);
+    if (request) {
+      console.log('[topicStore] 🚫 Cancelling request:', key);
+      request.controller.abort();
+      ongoingRequests.delete(key);
+    }
+  });
+};
 
 // URL编码工具函数
 const encodeTopicName = (topic: string): string => {
@@ -139,6 +138,66 @@ interface TopicContentsResponse {
   data: ContentItem[];
 }
 
+// 主要状态原子 - 改进状态保护机制
+export const topicAtom = atom(
+  (get) => get(baseTopicAtom),
+  (get, set, update: Partial<TopicState> | ((prevState: TopicState) => TopicState)) => {
+    const oldState = get(baseTopicAtom);
+    const newState = typeof update === 'function' ? update(oldState) : { ...oldState, ...update };
+    
+    // 🛡️ 改进的保护机制：只在非主动切换topic时保护数据
+    const isTopicSwitch = oldState.currentTopic !== newState.currentTopic && newState.currentTopic !== '';
+    const shouldProtectData = !isTopicSwitch && oldState.aiccList.length > 0 && newState.aiccList.length === 0 && !newState.isLoading;
+    
+    if (shouldProtectData) {
+      console.warn('⚠️  [topicAtom] PROTECTING AICC DATA - preventing accidental data loss:', {
+        oldTopic: oldState.currentTopic,
+        newTopic: newState.currentTopic,
+        oldCount: oldState.aiccList.length,
+        newCount: newState.aiccList.length
+      });
+      newState.aiccList = oldState.aiccList;
+    }
+    
+    // 🧹 主动清理：切换topic时清理相关数据
+    if (isTopicSwitch) {
+      console.log('[topicAtom] 🔄 Topic switch detected, clearing data:', {
+        from: oldState.currentTopic,
+        to: newState.currentTopic
+      });
+      
+      // 取消之前topic的进行中请求
+      if (oldState.currentTopic) {
+        cancelTopicRequests(oldState.currentTopic);
+      }
+      
+      // 清理非缓存的临时数据，但保留缓存
+      newState.aiccList = [];
+      newState.contentsList = [];
+      newState.projectInfo = null;
+      newState.contentsPage = 1;
+      newState.contentsHasMore = true;
+      newState.error = null;
+    }
+    
+    // 只在关键数据变化时记录日志
+    const aiccChanged = oldState.aiccList.length !== newState.aiccList.length;
+    const contentsChanged = oldState.contentsList.length !== newState.contentsList.length;
+    const projectInfoChanged = !!oldState.projectInfo !== !!newState.projectInfo;
+    const topicChanged = oldState.currentTopic !== newState.currentTopic;
+    
+    if (aiccChanged || contentsChanged || projectInfoChanged || topicChanged) {
+      console.log('[topicAtom] 📊 State update:', {
+        topic: oldState.currentTopic === newState.currentTopic ? newState.currentTopic : `${oldState.currentTopic} → ${newState.currentTopic}`,
+        aicc: `${oldState.aiccList.length} → ${newState.aiccList.length}`,
+        contents: `${oldState.contentsList.length} → ${newState.contentsList.length}`,
+        projectInfo: `${!!oldState.projectInfo} → ${!!newState.projectInfo}`
+      });
+    }
+    set(baseTopicAtom, newState);
+  }
+);
+
 // 获取topic相关的AICC
 export const fetchTopicAICC = atom(
   null,
@@ -148,49 +207,76 @@ export const fetchTopicAICC = atom(
     // 防止重复请求
     if (ongoingRequests.has(requestKey)) {
       console.log('[topicStore] AICC request already in progress for tag:', tag);
-      return ongoingRequests.get(requestKey);
+      return ongoingRequests.get(requestKey)!.promise;
     }
 
     const state = get(topicAtom);
     
-    // 检查缓存
+    // 检查缓存 - 使用函数式更新确保一致性
     const cache = state.cacheMap.get(tag);
     const now = Date.now();
     if (cache && now - cache.timestamp < CACHE_DURATION) {
       console.log('[topicStore] Using cached AICC data for tag:', tag);
-      set(topicAtom, {
-        ...state,
+      
+      // ✅ 修复：统一使用函数式更新，避免状态覆盖
+      set(topicAtom, (prevState) => {
+        // 如果当前已经在处理其他topic，不要被缓存覆盖
+        if (prevState.currentTopic && prevState.currentTopic !== tag) {
+          console.log('[topicStore] ⚠️ Topic changed during cache restore, skipping:', {
+            cached: tag,
+            current: prevState.currentTopic
+          });
+          return prevState;
+        }
+        
+        return {
+          ...prevState,
         currentTopic: tag,
         topicInfo: cache.topicInfo,
+          projectInfo: cache.projectInfo,
         aiccList: cache.aiccList,
         contentsList: cache.contentsList,
         contentsPage: cache.contentsPage,
         contentsHasMore: cache.contentsHasMore,
         isLoading: false,
         error: null,
+        };
       });
-      return;
+      return Promise.resolve();
     }
 
     console.log('[topicStore] Starting fetchTopicAICC for tag:', tag);
-    set(topicAtom, { ...state, isLoading: true, error: null, currentTopic: tag });
+    
+    // ✅ 修复：设置loading状态时也使用函数式更新
+    set(topicAtom, (prevState) => ({ 
+      ...prevState, 
+      isLoading: true, 
+      error: null, 
+      currentTopic: tag 
+    }));
+
+    // 创建可取消的请求
+    const controller = new AbortController();
 
     // 创建请求Promise并存储
     const requestPromise = (async () => {
       try {
+        console.log('[topicStore] 🔄 Getting access token for AICC request...');
         const privyToken = await getAccessToken();
         const url = `/studio-api/infofi/aicc?tag=${encodeURIComponent(tag)}`;
 
-        console.log('[topicStore] Making AICC request to:', url);
-        // 使用vite.config.ts中配置的/studio-api代理
+        console.log('[topicStore] 📡 Making AICC request to:', url);
+        
+        // 使用AbortController进行请求取消
         const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
             [PRIVY_TOKEN_HEADER]: privyToken || '',
-          }
+          },
+          signal: controller.signal
         });
 
-        console.log('[topicStore] AICC response status:', response.status, response.ok);
+        console.log('[topicStore] 📊 AICC response status:', response.status, response.ok);
         
         if (!response.ok) {
           const errorText = await response.text();
@@ -199,24 +285,65 @@ export const fetchTopicAICC = atom(
         }
 
         const result: TopicAICCResponse = await response.json();
-        console.log('[topicStore] AICC response data:', result);
+        console.log('[topicStore] ✅ AICC response SUCCESS:', result);
         
-        set(topicAtom, (prevState) => ({
+        set(topicAtom, (prevState) => {
+          // ✅ 修复：检查topic是否仍然一致，避免过时请求覆盖新数据
+          if (prevState.currentTopic !== tag) {
+            console.log('[topicStore] ⚠️ Topic changed during AICC fetch, discarding result:', {
+              fetched: tag,
+              current: prevState.currentTopic
+            });
+            return prevState;
+          }
+          
+          // 更新缓存
+          const updatedCache: TopicCache = {
+            topicInfo: { tag },
+            projectInfo: prevState.projectInfo,
+            aiccList: result.data || [],
+            contentsList: prevState.contentsList,
+            contentsPage: prevState.contentsPage,
+            contentsHasMore: prevState.contentsHasMore,
+            timestamp: Date.now(),
+          };
+          
+          const newCacheMap = new Map(prevState.cacheMap);
+          newCacheMap.set(tag, updatedCache);
+
+          return {
           ...prevState,
           currentTopic: tag,
           topicInfo: { tag },
           aiccList: result.data || [],
           isLoading: false,
           error: null,
-        }));
+            cacheMap: newCacheMap,
+          };
+        });
 
       } catch (error) {
-        set(topicAtom, (prevState) => ({
+        // 如果是取消操作，不更新错误状态
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.log('[topicStore] 🚫 AICC request cancelled for tag:', tag);
+          return;
+        }
+        
+        console.error('[topicStore] ❌ AICC fetch ERROR for tag:', tag, error);
+        
+        set(topicAtom, (prevState) => {
+          // 只在当前topic一致时才更新错误状态
+          if (prevState.currentTopic !== tag) {
+            return prevState;
+          }
+          
+          return {
           ...prevState,
           currentTopic: tag,
           isLoading: false,
           error: error instanceof Error ? error.message : 'Unknown error',
-        }));
+          };
+        });
       } finally {
         // 清除正在进行的请求标记
         ongoingRequests.delete(requestKey);
@@ -224,7 +351,7 @@ export const fetchTopicAICC = atom(
     })();
 
     // 存储正在进行的请求
-    ongoingRequests.set(requestKey, requestPromise);
+    ongoingRequests.set(requestKey, { promise: requestPromise, controller });
     
     return requestPromise;
   }
@@ -239,7 +366,7 @@ export const fetchTopicContents = atom(
     // 防止重复请求
     if (ongoingRequests.has(requestKey)) {
       console.log('[topicStore] Contents request already in progress for tag:', tag, 'reset:', reset);
-      return ongoingRequests.get(requestKey);
+      return ongoingRequests.get(requestKey)!.promise;
     }
 
     const state = get(topicAtom);
@@ -247,11 +374,17 @@ export const fetchTopicContents = atom(
     if (!reset && !state.contentsHasMore) return;
 
     console.log('[topicStore] Starting fetchTopicContents for tag:', tag, 'reset:', reset);
-    set(topicAtom, { 
-      ...state, 
+    
+    // ✅ 修复：使用函数式更新设置loading状态
+    set(topicAtom, (prevState) => ({ 
+      ...prevState, 
       isLoadingContents: true,
-      contentsPage: reset ? 1 : state.contentsPage
-    });
+      contentsPage: reset ? 1 : prevState.contentsPage,
+      currentTopic: tag
+    }));
+
+    // 创建可取消的请求
+    const controller = new AbortController();
 
     // 创建请求Promise并存储
     const requestPromise = (async () => {
@@ -261,12 +394,14 @@ export const fetchTopicContents = atom(
         const url = `/studio-api/infofi/aicc/contents?tag=${encodeURIComponent(tag)}&page=${page}&pageSize=${state.contentsPageSize}`;
         
         console.log('[topicStore] Making contents request to:', url);
-        // 使用vite.config.ts中配置的/studio-api代理
+        
+        // 使用AbortController进行请求取消
         const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
             [PRIVY_TOKEN_HEADER]: privyToken || '',
-          }
+          },
+          signal: controller.signal
         });
 
         console.log('[topicStore] Contents response status:', response.status, response.ok);
@@ -282,6 +417,15 @@ export const fetchTopicContents = atom(
         const newContents = result.data || [];
         
         set(topicAtom, (prevState) => {
+          // ✅ 修复：检查topic是否仍然一致
+          if (prevState.currentTopic !== tag) {
+            console.log('[topicStore] ⚠️ Topic changed during contents fetch, discarding result:', {
+              fetched: tag,
+              current: prevState.currentTopic
+            });
+            return prevState;
+          }
+          
           const contentsList = reset ? newContents : [...prevState.contentsList, ...newContents];
           const contentsPage = reset ? 2 : prevState.contentsPage + 1;
           const contentsHasMore = newContents.length >= prevState.contentsPageSize;
@@ -294,9 +438,10 @@ export const fetchTopicContents = atom(
             totalContentsList: contentsList.length
           });
 
+          // 更新缓存
           const updatedCache: TopicCache = {
-            ...prevState.cacheMap.get(tag)!,
             topicInfo: prevState.topicInfo,
+            projectInfo: prevState.projectInfo,
             aiccList: prevState.aiccList,
             contentsList,
             contentsPage,
@@ -319,12 +464,25 @@ export const fetchTopicContents = atom(
         });
 
       } catch (error) {
-        set(topicAtom, (prevState) => ({
+        // 如果是取消操作，不更新错误状态
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.log('[topicStore] 🚫 Contents request cancelled for tag:', tag);
+          return;
+        }
+        
+        set(topicAtom, (prevState) => {
+          // 只在当前topic一致时才更新错误状态
+          if (prevState.currentTopic !== tag) {
+            return prevState;
+          }
+          
+          return {
           ...prevState,
           currentTopic: tag,
           isLoadingContents: false,
           error: error instanceof Error ? error.message : 'Unknown error',
-        }));
+          };
+        });
       } finally {
         // 清除正在进行的请求标记
         ongoingRequests.delete(requestKey);
@@ -332,7 +490,7 @@ export const fetchTopicContents = atom(
     })();
 
     // 存储正在进行的请求
-    ongoingRequests.set(requestKey, requestPromise);
+    ongoingRequests.set(requestKey, { promise: requestPromise, controller });
     
     return requestPromise;
   }
@@ -344,6 +502,45 @@ export const resetTopicState = atom(
   (_, set) => {
     console.log('[resetTopicState] Resetting topic state to initial state');
     set(topicAtom, initialState);
+  }
+);
+
+// 主动切换到新topic，清理旧数据
+export const switchToTopic = atom(
+  null,
+  (get, set, newTopic: string) => {
+    const currentState = get(topicAtom);
+    
+    if (currentState.currentTopic === newTopic) {
+      console.log('[switchToTopic] Already on topic:', newTopic);
+      return;
+    }
+    
+    console.log('[switchToTopic] 🔄 Switching topic:', {
+      from: currentState.currentTopic,
+      to: newTopic
+    });
+    
+    // 取消之前topic的所有请求
+    if (currentState.currentTopic) {
+      cancelTopicRequests(currentState.currentTopic);
+    }
+    
+    // 立即清理显示数据，设置新topic
+    set(topicAtom, (prevState) => ({
+      ...prevState,
+      currentTopic: newTopic,
+      aiccList: [],
+      contentsList: [],
+      projectInfo: null,
+      topicInfo: null,
+      contentsPage: 1,
+      contentsHasMore: true,
+      isLoading: false,
+      isLoadingContents: false,
+      isLoadingProjectInfo: false,
+      error: null,
+    }));
   }
 );
 
@@ -373,6 +570,157 @@ export const isCacheExpired = atom(
       console.log('[isCacheExpired] Cache check for tag:', tag, 'expired:', expired);
       return expired;
     };
+  }
+);
+
+// 获取项目信息
+export const fetchProjectInfo = atom(
+  null,
+  async (get, set, tag: string) => {
+    const requestKey = `projectInfo-${tag}`;
+    
+    // 防止重复请求
+    if (ongoingRequests.has(requestKey)) {
+      console.log('[topicStore] Project info request already in progress for tag:', tag);
+      return ongoingRequests.get(requestKey)!.promise;
+    }
+
+    const state = get(topicAtom);
+    
+    // 检查缓存
+    const cache = state.cacheMap.get(tag);
+    const now = Date.now();
+    if (cache && cache.projectInfo && now - cache.timestamp < CACHE_DURATION) {
+      console.log('[topicStore] Using cached project info for tag:', tag);
+      
+      // ✅ 修复：使用函数式更新恢复缓存
+      set(topicAtom, (prevState) => {
+        // 如果当前已经在处理其他topic，不要被缓存覆盖
+        if (prevState.currentTopic && prevState.currentTopic !== tag) {
+          console.log('[topicStore] ⚠️ Topic changed during project info cache restore, skipping:', {
+            cached: tag,
+            current: prevState.currentTopic
+          });
+          return prevState;
+        }
+        
+        return {
+          ...prevState,
+          projectInfo: cache.projectInfo,
+          isLoadingProjectInfo: false,
+        };
+      });
+      return Promise.resolve();
+    }
+
+    console.log('[topicStore] Starting fetchProjectInfo for tag:', tag);
+    
+    // ✅ 修复：使用函数式更新设置loading状态
+    set(topicAtom, (prevState) => ({ 
+      ...prevState, 
+      isLoadingProjectInfo: true 
+    }));
+
+    // 创建可取消的请求
+    const controller = new AbortController();
+    
+    // 创建请求Promise并存储
+    const requestPromise = (async () => {
+      try {
+        const privyToken = await getAccessToken();
+        const url = `/studio-api/tags?name=${encodeURIComponent(tag)}`;
+        
+        console.log('[topicStore] Making project info request to:', url, 'with tag:', tag);
+        
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+            [PRIVY_TOKEN_HEADER]: privyToken || '',
+          },
+          signal: controller.signal
+        });
+
+        console.log('[topicStore] Project info response status:', response.status, response.ok);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('[topicStore] Project info request failed:', response.status, errorText);
+          throw new Error(`Failed to load project info: ${response.status} ${errorText}`);
+        }
+
+        const result: { message: string; data: ProjectInfo } = await response.json();
+        console.log('[topicStore] ✅ Project info response SUCCESS:', result);
+        
+        set(topicAtom, (prevState) => {
+          // ✅ 修复：检查当前topic，避免过时数据覆盖
+          if (prevState.currentTopic && prevState.currentTopic !== tag) {
+            console.log('[topicStore] ⚠️ Topic changed during project info fetch, discarding result:', {
+              fetched: tag,
+              current: prevState.currentTopic
+            });
+            return prevState;
+          }
+          
+          console.log('[topicStore] 🔄 Updating state with ProjectInfo, preserving existing data:', {
+            aiccCount: prevState.aiccList.length,
+            contentsCount: prevState.contentsList.length,
+            hasProjectInfo: !!result.data
+          });
+          
+          // 更新缓存
+          const existingCache = prevState.cacheMap.get(tag);
+          const updatedCache: TopicCache = {
+            topicInfo: existingCache?.topicInfo || prevState.topicInfo,
+            projectInfo: result.data,
+            aiccList: existingCache?.aiccList || prevState.aiccList,
+            contentsList: existingCache?.contentsList || prevState.contentsList,
+            contentsPage: existingCache?.contentsPage || prevState.contentsPage,
+            contentsHasMore: existingCache?.contentsHasMore ?? prevState.contentsHasMore,
+            timestamp: now,
+          };
+          
+          const newCacheMap = new Map(prevState.cacheMap);
+          newCacheMap.set(tag, updatedCache);
+          
+          return {
+            ...prevState,
+            projectInfo: result.data,
+            isLoadingProjectInfo: false,
+            cacheMap: newCacheMap,
+          };
+        });
+
+      } catch (error) {
+        // 如果是取消操作，不更新错误状态
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.log('[topicStore] 🚫 Project info request cancelled for tag:', tag);
+          return;
+        }
+        
+        console.error('[topicStore] ❌ Project info fetch error for tag:', tag, error);
+        
+        set(topicAtom, (prevState) => {
+          // 只在当前topic一致时才更新错误状态
+          if (prevState.currentTopic && prevState.currentTopic !== tag) {
+            return prevState;
+          }
+          
+          return {
+            ...prevState,
+            isLoadingProjectInfo: false,
+            // 不设置error，避免影响其他数据加载
+          };
+        });
+      } finally {
+        // 清除正在进行的请求标记
+        ongoingRequests.delete(requestKey);
+      }
+    })();
+
+    // 存储正在进行的请求
+    ongoingRequests.set(requestKey, { promise: requestPromise, controller });
+    
+    return requestPromise;
   }
 );
 

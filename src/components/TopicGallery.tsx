@@ -17,12 +17,11 @@ const TopicGallery: React.FC<TopicGalleryProps> = ({
   hasMore,
   loadMoreTriggerRef
 }) => {
-  console.log('[TopicGallery] Render:', {
-    contentsCount: contentsList.length,
-    isLoading,
-    hasMore,
-    hasLoadMoreTriggerRef: !!loadMoreTriggerRef
-  });
+  // 减少重复日志，只在内容数量变化时记录
+  const contentCount = contentsList.length;
+  if (contentCount > 0) {
+    console.log('[TopicGallery] 🖼️ Displaying', contentCount, 'images');
+  }
 
   // 完全复用WorkflowDetail的瀑布流逻辑
   const [containerHeight, setContainerHeight] = useState(0);

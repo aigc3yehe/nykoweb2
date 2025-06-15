@@ -13,11 +13,12 @@ import WorkflowsContent from "./WorkflowsContent.tsx";
 import WorkflowDetail from "./WorkflowDetail.tsx";
 import {showEditModelAtom, showEditWorkflowAtom} from "../store/editStore.ts";
 import {FlaunchStatusResponse, tokenizationStateAtom} from "../store/tokenStore.ts";
+import AgentAppsContent from './AgentAppsContent';
 
 const ContentDisplay: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'models' | 'workflows' | 'images'>('workflows');
+  const [activeTab, setActiveTab] = useState<'models' | 'workflows' | 'images' | 'agentApps'>('workflows');
   const [ownedOnly, setOwnedOnly] = useState(false);
-  const [sortOption, setSortOption] = useState<'New Model' | 'Popular'>('Popular');
+  const [sortOption, setSortOption] = useState<'Newest' | 'Popular'>('Popular');
   const [viewingModelId, setViewingModelId] = useState<number | null>(null);
   const [viewingModelName, setViewingModelName] = useState<string | null>(null);
   const [viewingWorkflowId, setViewingWorkflowId] = useState<number | null>(null);
@@ -46,6 +47,18 @@ const ContentDisplay: React.FC = () => {
     e.stopPropagation = () => {};
   };
 
+  // 修改setActiveTab函数，同时更新URL参数
+  const handleSetActiveTab = (tab: 'models' | 'workflows' | 'images' | 'agentApps') => {
+    setActiveTab(tab);
+    
+    // 更新URL参数
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('tab', tab);
+    
+    // 保持其他参数不变，只更新tab参数
+    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+  };
+
   // 处理查看模型详情
   const handleViewModelDetail = (modelId: number, modelName: string) => {
     // 只负责更新URL，状态由useEffect根据URL更新
@@ -60,8 +73,10 @@ const ContentDisplay: React.FC = () => {
 
   // 处理返回到模型列表
   const handleBackToList = () => {
-    // 只负责更新URL，状态由useEffect根据URL更新
-    navigate(location.pathname);
+    // 返回时保持当前的tab状态
+    const searchParams = new URLSearchParams();
+    searchParams.set('tab', activeTab);
+    navigate(`${location.pathname}?${searchParams.toString()}`);
   };
 
   // 点击分享按钮触发x的分享
@@ -176,6 +191,20 @@ const ContentDisplay: React.FC = () => {
     const modelName = searchParams.get('model_name');
     const workflowId = searchParams.get('workflow_id');
     const workflowName = searchParams.get('workflow_name');
+    const tabParam = searchParams.get('tab') as 'models' | 'workflows' | 'images' | 'agentApps' | null;
+
+    // 同步tab状态
+    if (tabParam && ['models', 'workflows', 'images', 'agentApps'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    } else if (!modelId && !workflowId) {
+      // 如果没有tab参数且不在详情页，设置默认tab并更新URL
+      const defaultTab = 'workflows';
+      setActiveTab(defaultTab);
+      if (!tabParam) {
+        searchParams.set('tab', defaultTab);
+        navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+      }
+    }
 
     if (modelId && modelName) {
       // 进入模型详情页
@@ -245,7 +274,7 @@ const ContentDisplay: React.FC = () => {
             <div className={styles.headerWrapper}>
               <ContentHeader
                 activeTab={activeTab}
-                setActiveTab={setActiveTab}
+                setActiveTab={handleSetActiveTab}
                 ownedOnly={ownedOnly}
                 setOwnedOnly={setOwnedOnly}
                 sortOption={sortOption}
@@ -268,7 +297,7 @@ const ContentDisplay: React.FC = () => {
               <div className={styles.headerWrapper}>
                 <ContentHeader
                     activeTab={activeTab}
-                    setActiveTab={setActiveTab}
+                    setActiveTab={handleSetActiveTab}
                     ownedOnly={ownedOnly}
                     setOwnedOnly={setOwnedOnly}
                     sortOption={sortOption}
@@ -291,7 +320,7 @@ const ContentDisplay: React.FC = () => {
             <div className={styles.headerWrapper}>
               <ContentHeader
                 activeTab={activeTab}
-                setActiveTab={setActiveTab}
+                setActiveTab={handleSetActiveTab}
                 ownedOnly={ownedOnly}
                 setOwnedOnly={setOwnedOnly}
                 sortOption={sortOption}
@@ -312,8 +341,10 @@ const ContentDisplay: React.FC = () => {
                       sortOption={sortOption}
                       onWorkflowClick={handleViewWorkflowDetail}
                   />
-              ): (
+              ) : activeTab === 'images' ? (
                 <ImagesContent ownedOnly={ownedOnly} />
+              ) : (
+                <AgentAppsContent />
               )}
             </div>
           </>
