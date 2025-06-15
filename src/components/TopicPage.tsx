@@ -3,7 +3,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import styles from './TopicPage.module.css';
 import { topicAtom, fetchTopicAICC, fetchTopicContents, fetchProjectInfo, switchToTopic } from '../store/topicStore';
-import TopicHeader from './TopicHeader';
+import TopicHeaderStats from './TopicHeaderStats';
 import TopicAICCSection from './TopicAICCSection';
 import TopicGallery from './TopicGallery';
 import ProjectInfo from './ProjectInfo';
@@ -266,7 +266,7 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
 
       <div className={styles.topicContent}>
         {/* 统计数据区域 */}
-        <TopicHeader topicInfo={isCurrentTopic ? topicState.topicInfo : null} />
+        <TopicHeaderStats topicName={topicName} />
 
         {/* AICC横滚区域 */}
         <TopicAICCSection aiccList={isCurrentTopic ? topicState.aiccList : []} />

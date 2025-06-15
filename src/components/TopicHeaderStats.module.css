@@ -1,0 +1,44 @@
+/* 统计数据容器 */
+.statsContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* 错误消息 */
+.errorMessage {
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.2) 0%, rgba(255, 0, 0, 0.2) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 4px;
+  color: #EF4444;
+  font-family: 'Jura', sans-serif;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .statsContainer {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 992px) {
+  .statsContainer {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .statsContainer {
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+} 

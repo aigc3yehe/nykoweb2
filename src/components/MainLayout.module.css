@@ -38,6 +38,21 @@
   overflow: auto; /* 保持聊天部分可滚动 */
 }
 
+.relatedTweetsSection {
+  width: 29.5rem; /* 472px */
+  border-left: 1px solid rgba(55, 65, 81, 0.3);
+  overflow: auto; /* 保持推文部分可滚动 */
+  padding: 1rem;
+  
+  /* 隐藏滚动条但保持滚动功能 */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.relatedTweetsSection::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 @media (max-width: 768px) {
   .mainLayout {
     flex-direction: column;
@@ -54,6 +69,10 @@
   }
 
   .chatSection {
+    display: none; /* 小屏幕下隐藏右侧区域 */
+  }
+
+  .relatedTweetsSection {
     display: none; /* 小屏幕下隐藏右侧区域 */
   }
 

@@ -56,8 +56,8 @@ const MainLayout: React.FC = () => {
                   <TopicPageRouter />
                 </div>
               </div>
-              <div className={styles.chatSection}>
-                <TopicRelatedTweets />
+              <div className={styles.relatedTweetsSection}>
+                <TopicRelatedTweets topicName={searchParams.get('topic') || ''} />
               </div>
             </div>
           ) : (

@@ -4,7 +4,7 @@ import styles from './ChatWindow.module.css';
 import clearIcon from '../assets/clear.svg';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
-import GoldIcon from "../assets/gold.svg";
+
 import WarningIcon from "../assets/warning.svg";
 import {accountAtom} from "../store/accountStore";
 import {
@@ -159,13 +159,7 @@ const ChatWindow: React.FC = () => {
     });
   };
 
-  const handleStake = async () => {
-    if (!authenticated || !accountState.did) {
-      await handleLogin();
-    } else {
-      navigate('/pricing');
-    }
-  }
+
 
   // 处理自定义滚动条拖动
   const handleScrollThumbDrag = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -284,7 +278,7 @@ const ChatWindow: React.FC = () => {
 
   return (
     <div className={styles.chatWindow}>
-      {maintenance ? (
+      {maintenance && (
         <>
           {/* 维护title */}
           <div className={styles.maintenanceBanner}>
@@ -292,19 +286,6 @@ const ChatWindow: React.FC = () => {
               <img src={WarningIcon} alt="Warning" className={styles.warningIcon} />
               <span className={styles.maintenanceText}>Maintenance in progress. We'll be back soon!</span>
             </div>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* 活动title */}
-          <div className={styles.activityBanner}>
-            <div className={styles.activityInfo}>
-              <img src={GoldIcon} alt="Gold" className={styles.goldIcon} />
-              <span className={styles.activityText}>stake $NYKO. go premium. share 30M in rewards!</span>
-            </div>
-            <button className={styles.stakeButton} onClick={handleStake}>
-              Stake
-            </button>
           </div>
         </>
       )}

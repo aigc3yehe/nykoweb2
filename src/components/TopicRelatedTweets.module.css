@@ -1,12 +1,4 @@
 /* TopicRelatedTweets样式 */
-.relatedTweets {
-  width: 100%;
-  background: rgba(31, 41, 55, 0.2);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  backdrop-filter: blur(30px);
-}
-
 .tweetsTitle {
   font-family: 'Jura', sans-serif;
   font-weight: 700;
@@ -15,16 +7,19 @@
   margin: 0 0 1rem 0;
 }
 
-.tweetsPlaceholder {
-  min-height: 10rem;
+.tweetsContainer {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  position: relative;
+  padding-bottom: 50px; /* 底部增加50px空间 */
 }
 
-.emptyMessage {
+.loadingMessage {
   color: #9CA3AF;
   font-family: 'Jura', sans-serif;
   font-size: 0.875rem;
   text-align: center;
+  padding: 2rem;
 } 
