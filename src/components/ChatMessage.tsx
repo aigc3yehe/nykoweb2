@@ -694,7 +694,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
-  // 修改工作流组件，使用动态数据
+  // 修改工作流组件，去掉Model选择部分，只保留Provider选择但显示为Model
   const renderCreateWorkflowComponent = () => {
     const isPromptTooLong = workflow_prompt.length > 300;
     const supportedInputTypes = getSupportedInputTypes();
@@ -708,9 +708,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           {workflow_name} - Workflow
         </div>
 
-        {/* Provider选择部分 */}
+        {/* Model选择部分 - 实际是Provider选择，但显示为Model */}
         <div className={styles.workflowSection}>
-          <div className={styles.sectionLabel}>Provider:</div>
+          <div className={styles.sectionLabel}>Model:</div>
           <div className={styles.modelSelectContainer}>
             <button
               className={styles.modelSelectButton}
@@ -719,7 +719,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               type="button"
             >
               <span className={styles.buttonText}>
-                {aiProviders?.isLoading ? 'Loading...' : (aiProviders?.selectedProvider || 'Select Provider')}
+                {aiProviders?.isLoading ? 'Loading...' : (aiProviders?.selectedProvider || 'Select Model')}
               </span>
               <img
                 src={selectModelIcon}
@@ -741,46 +741,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     }}
                   >
                     {provider.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Model选择部分 */}
-        <div className={styles.workflowSection}>
-          <div className={styles.sectionLabel}>Model:</div>
-          <div className={styles.modelSelectContainer}>
-            <button
-              className={styles.modelSelectButton}
-              onClick={() => !isCreatingWorkflow && setShowModelDropdown(!showModelDropdown)}
-              disabled={isCreatingWorkflow || !getCurrentProvider()}
-              type="button"
-            >
-              <span className={styles.buttonText}>
-                {aiProviders?.selectedModel || 'Select Model'}
-              </span>
-              <img
-                src={selectModelIcon}
-                alt="Select"
-                className={styles.selectModelIcon}
-              />
-            </button>
-
-            {/* Model下拉菜单 */}
-            {showModelDropdown && getCurrentProvider() && (
-              <div className={styles.modelDropdown}>
-                {getCurrentProvider()!.models.map((model) => (
-                  <div
-                    key={model.name}
-                    className={`${styles.modelOption} ${aiProviders?.selectedModel === model.name ? styles.modelOptionSelected : ''}`}
-                    onClick={() => {
-                      if (onSelectAIModel) onSelectAIModel(model.name);
-                      setShowModelDropdown(false);
-                    }}
-                  >
-                    {model.name}
                   </div>
                 ))}
               </div>

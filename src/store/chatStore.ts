@@ -2638,6 +2638,51 @@ export const updateSelectedProvider = atom(
 
     // 选择该提供商的第一个模型作为默认模型
     const selectedModel = provider?.models[0]?.name || '';
+    
+    // 获取第一个模型的支持类型
+    const firstModel = provider?.models[0];
+    const supportedInputTypes = firstModel?.support_input_types || [];
+    const supportedOutputTypes = firstModel?.support_output_types || [];
+
+    // 自动选择第一个支持的输入类型
+    let defaultInputType = '';
+    const inputTypeOrder = ['image', 'text', 'image,text'];
+    for (const type of inputTypeOrder) {
+      if (supportedInputTypes.includes(type)) {
+        switch (type) {
+          case 'image':
+            defaultInputType = 'Image';
+            break;
+          case 'text':
+            defaultInputType = 'Text';
+            break;
+          case 'image,text':
+            defaultInputType = 'Image + Text';
+            break;
+        }
+        break;
+      }
+    }
+
+    // 自动选择第一个支持的输出类型
+    let defaultOutputType = '';
+    const outputTypeOrder = ['image', 'text', 'video'];
+    for (const type of outputTypeOrder) {
+      if (supportedOutputTypes.includes(type)) {
+        switch (type) {
+          case 'image':
+            defaultOutputType = 'Image';
+            break;
+          case 'text':
+            defaultOutputType = 'Text';
+            break;
+          case 'video':
+            defaultOutputType = 'Video';
+            break;
+        }
+        break;
+      }
+    }
 
     set(chatAtom, {
       ...chatState,
@@ -2646,7 +2691,9 @@ export const updateSelectedProvider = atom(
         selectedProvider: providerName,
         selectedModel
       },
-      workflow_model: selectedModel
+      workflow_model: selectedModel,
+      workflow_input: defaultInputType,
+      workflow_output: defaultOutputType
     });
   }
 );
