@@ -105,7 +105,6 @@ export interface ChatMessageProps {
     isLoading: boolean;
   };
   onSelectProvider?: (provider: string) => void;
-  onSelectAIModel?: (model: string) => void;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -159,7 +158,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   onMintNFT,
   aiProviders,
   onSelectProvider,
-  onSelectAIModel,
 }) => {
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
@@ -489,7 +487,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   const [isFocused, setIsFocused] = useState(false);
 
   // 在组件内部添加状态来跟踪下拉菜单是否显示
-  const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [showProviderDropdown, setShowProviderDropdown] = useState(false);
 
   // 添加滚动条相关状态
@@ -1160,14 +1157,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             Minting NFT, please wait...
           </span>
         </div>
-        
+
         {/* 第二行：服务提供商信息 */}
         <div className={styles.serviceProviderInfo}>
           <span className={styles.serviceProviderText}>
             This service is provided by{' '}
-            <a 
-              href="https://x.com/Misato_virtuals" 
-              target="_blank" 
+            <a
+              href="https://x.com/Misato_virtuals"
+              target="_blank"
               rel="noopener noreferrer"
               className={styles.serviceProviderLink}
             >
