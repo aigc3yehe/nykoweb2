@@ -231,15 +231,15 @@ export const fetchTopicAICC = atom(
         
         return {
           ...prevState,
-          currentTopic: tag,
-          topicInfo: cache.topicInfo,
+        currentTopic: tag,
+        topicInfo: cache.topicInfo,
           projectInfo: cache.projectInfo,
-          aiccList: cache.aiccList,
-          contentsList: cache.contentsList,
-          contentsPage: cache.contentsPage,
-          contentsHasMore: cache.contentsHasMore,
-          isLoading: false,
-          error: null,
+        aiccList: cache.aiccList,
+        contentsList: cache.contentsList,
+        contentsPage: cache.contentsPage,
+        contentsHasMore: cache.contentsHasMore,
+        isLoading: false,
+        error: null,
         };
       });
       return Promise.resolve();
@@ -257,7 +257,7 @@ export const fetchTopicAICC = atom(
 
     // 创建可取消的请求
     const controller = new AbortController();
-    
+
     // 创建请求Promise并存储
     const requestPromise = (async () => {
       try {
@@ -312,12 +312,12 @@ export const fetchTopicAICC = atom(
           newCacheMap.set(tag, updatedCache);
 
           return {
-            ...prevState,
-            currentTopic: tag,
-            topicInfo: { tag },
-            aiccList: result.data || [],
-            isLoading: false,
-            error: null,
+          ...prevState,
+          currentTopic: tag,
+          topicInfo: { tag },
+          aiccList: result.data || [],
+          isLoading: false,
+          error: null,
             cacheMap: newCacheMap,
           };
         });
@@ -338,10 +338,10 @@ export const fetchTopicAICC = atom(
           }
           
           return {
-            ...prevState,
-            currentTopic: tag,
-            isLoading: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
+          ...prevState,
+          currentTopic: tag,
+          isLoading: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
           };
         });
       } finally {
@@ -385,7 +385,7 @@ export const fetchTopicContents = atom(
 
     // 创建可取消的请求
     const controller = new AbortController();
-    
+
     // 创建请求Promise并存储
     const requestPromise = (async () => {
       try {
@@ -477,10 +477,10 @@ export const fetchTopicContents = atom(
           }
           
           return {
-            ...prevState,
-            currentTopic: tag,
-            isLoadingContents: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
+          ...prevState,
+          currentTopic: tag,
+          isLoadingContents: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
           };
         });
       } finally {

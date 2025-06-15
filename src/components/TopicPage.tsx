@@ -55,8 +55,8 @@ const TopicPage: React.FC<TopicPageProps> = ({ topicName }) => {
       console.log('[TopicPage] 🔄 Topic change detected, switching immediately:', {
         from: lastTopicRef.current,
         to: topicName
-      });
-      
+    });
+
       // 立即切换并清理数据，避免显示错误内容
       switchTopic(topicName);
       lastTopicRef.current = topicName;

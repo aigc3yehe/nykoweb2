@@ -18,7 +18,7 @@ import AgentAppsContent from './AgentAppsContent';
 const ContentDisplay: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'models' | 'workflows' | 'images' | 'agentApps'>('workflows');
   const [ownedOnly, setOwnedOnly] = useState(false);
-  const [sortOption, setSortOption] = useState<'New Model' | 'Popular'>('Popular');
+  const [sortOption, setSortOption] = useState<'Newest' | 'Popular'>('Popular');
   const [viewingModelId, setViewingModelId] = useState<number | null>(null);
   const [viewingModelName, setViewingModelName] = useState<string | null>(null);
   const [viewingWorkflowId, setViewingWorkflowId] = useState<number | null>(null);

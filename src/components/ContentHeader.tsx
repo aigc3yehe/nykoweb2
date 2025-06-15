@@ -18,8 +18,8 @@ interface ContentHeaderProps {
   setActiveTab: (tab: 'models' | 'workflows' | 'images' | 'agentApps') => void;
   ownedOnly: boolean;
   setOwnedOnly: (owned: boolean) => void;
-  sortOption: 'New Model' | 'Popular';
-  setSortOption: (option: 'New Model' | 'Popular') => void;
+  sortOption: 'Newest' | 'Popular';
+  setSortOption: (option: 'Newest' | 'Popular') => void;
   isModelDetailMode?: boolean;
   isWorkflowDetailMode?: boolean;
   modelName?: string;
@@ -183,12 +183,12 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
 
             {dropdownOpen && (
               <div className={styles.dropdownMenu}>
-                {['New Model', 'Popular'].map((option) => (
+                {['Newest', 'Popular'].map((option) => (
                   <div
                     key={option}
                     className={styles.dropdownItem}
                     onClick={() => {
-                      setSortOption(option as 'New Model' | 'Popular');
+                      setSortOption(option as 'Newest' | 'Popular');
                       setDropdownOpen(false);
                     }}
                   >
