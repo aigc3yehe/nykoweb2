@@ -13,6 +13,7 @@ import deleteIcon from "../assets/delete.svg";
 import deleteDisableIcon from "../assets/delete_disable.svg";
 import { GENERATE_IMAGE_SERVICE_CONFIG, TRAIN_MODEL_SERVICE_CONFIG, RUN_WORKFLOW_SERVICE_CONFIG } from "../utils/plan";
 import { WorkflowDetail } from '../store/workflowStore';
+import xIcon from "../assets/x.svg";
 
 interface ImageUploadState {
   totalCount: number;
@@ -38,7 +39,9 @@ export interface ChatMessageProps {
     | "modify_image"
     | "uploaded_image"
     | "generating_video"
-    | "video_generate_result";
+    | "video_generate_result"
+    | "animating_image"
+    | "minting_nft";
   imageUploadState?: ImageUploadState;
   uploadedFiles?: Array<{ name: string; url: string }>;
   modelParam?: {
@@ -691,7 +694,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
-  // 修改工作流组件，使用动态数据
+  // 修改工作流组件，去掉Model选择部分，只保留Provider选择但显示为Model
   const renderCreateWorkflowComponent = () => {
     const isPromptTooLong = workflow_prompt.length > 300;
     const supportedInputTypes = getSupportedInputTypes();
@@ -705,9 +708,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           {workflow_name} - Workflow
         </div>
 
-        {/* Provider选择部分 */}
+        {/* Model选择部分 - 实际是Provider选择，但显示为Model */}
         <div className={styles.workflowSection}>
-          <div className={styles.sectionLabel}>Provider:</div>
+          <div className={styles.sectionLabel}>Model:</div>
           <div className={styles.modelSelectContainer}>
             <button
               className={styles.modelSelectButton}
@@ -716,7 +719,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               type="button"
             >
               <span className={styles.buttonText}>
-                {aiProviders?.isLoading ? 'Loading...' : (aiProviders?.selectedProvider || 'Select Provider')}
+                {aiProviders?.isLoading ? 'Loading...' : (aiProviders?.selectedProvider || 'Select Model')}
               </span>
               <img
                 src={selectModelIcon}
@@ -738,46 +741,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     }}
                   >
                     {provider.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Model选择部分 */}
-        <div className={styles.workflowSection}>
-          <div className={styles.sectionLabel}>Model:</div>
-          <div className={styles.modelSelectContainer}>
-            <button
-              className={styles.modelSelectButton}
-              onClick={() => !isCreatingWorkflow && setShowModelDropdown(!showModelDropdown)}
-              disabled={isCreatingWorkflow || !getCurrentProvider()}
-              type="button"
-            >
-              <span className={styles.buttonText}>
-                {aiProviders?.selectedModel || 'Select Model'}
-              </span>
-              <img
-                src={selectModelIcon}
-                alt="Select"
-                className={styles.selectModelIcon}
-              />
-            </button>
-
-            {/* Model下拉菜单 */}
-            {showModelDropdown && getCurrentProvider() && (
-              <div className={styles.modelDropdown}>
-                {getCurrentProvider()!.models.map((model) => (
-                  <div
-                    key={model.name}
-                    className={`${styles.modelOption} ${aiProviders?.selectedModel === model.name ? styles.modelOptionSelected : ''}`}
-                    onClick={() => {
-                      if (onSelectAIModel) onSelectAIModel(model.name);
-                      setShowModelDropdown(false);
-                    }}
-                  >
-                    {model.name}
                   </div>
                 ))}
               </div>
@@ -1166,6 +1129,68 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
+  // 新增：动画生成中组件
+  const renderAnimatingImageComponent = () => {
+    return (
+      <div className={styles.generatingIndicator} key={request_id}>
+        <img
+          src={uploadingIcon}
+          alt="Animating"
+          className={styles.uploadingIcon}
+        />
+        <span className={styles.generatingText}>
+          Generating video, please wait...(ETA 600 sec)
+        </span>
+      </div>
+    );
+  };
+
+  // 新增：NFT铸造中组件
+  const renderMintingNFTComponent = () => {
+    return (
+      <div className={styles.mintingIndicator} key={request_id}>
+        {/* 第一行：图标和文本 */}
+        <div className={styles.mintingFirstRow}>
+          <img
+            src={uploadingIcon}
+            alt="Minting"
+            className={styles.uploadingIcon}
+          />
+          <span className={styles.generatingText}>
+            Minting NFT, please wait...
+          </span>
+        </div>
+        
+        {/* 第二行：服务提供商信息 */}
+        <div className={styles.serviceProviderInfo}>
+          <span className={styles.serviceProviderText}>
+            This service is provided by{' '}
+            <a 
+              href="https://x.com/Misato_virtuals" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={styles.serviceProviderLink}
+            >
+              @virtuals_misato
+            </a>
+          </span>
+          <div className={styles.serviceProviderIcons} onClick={() => window.open('https://x.com/Misato_virtuals', '_blank')}>
+            <img
+              src="https://pbs.twimg.com/profile_images/1914882710524534784/jMbLIgZD_400x400.jpg"
+              alt="Misato"
+              className={styles.serviceProviderAvatar}
+            />
+            <img
+              src={xIcon}
+              alt="X"
+              className={styles.xIcon}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const showContent = ! (role === "user" && type === "uploaded_image");
 
   return (
@@ -1219,6 +1244,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       {role === "user" &&
         type === "uploaded_image" &&
         renderUploadedImageComponent()}
+      {role === "assistant" &&
+        type === "animating_image" &&
+        renderAnimatingImageComponent()}
+      {role === "assistant" &&
+        type === "minting_nft" &&
+        renderMintingNFTComponent()}
     </div>
   );
 };

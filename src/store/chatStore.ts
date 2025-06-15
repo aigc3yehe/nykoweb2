@@ -51,8 +51,8 @@ export interface Message {
   role: string;
   content: string;
   type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image' | 'tokenization_agreement' | "create_workflow"
-      | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image" | "uploaded_image" 
-      | "generating_video" | "video_generate_result"; // 新增视频相关类型
+      | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image" | "uploaded_image"
+      | "generating_video" | "video_generate_result" | "animating_image" | "minting_nft"; // 新增动画和NFT类型
   imageUploadState?: {
     totalCount: number;
     uploadedCount: number;
@@ -98,6 +98,7 @@ export interface ChatState {
   task_type?: string;
   task_value?: string;
   current_status?: string; // 当前对话任务状态
+  previous_sub_intent_status?: string; // 新增：上一次子意图状态
   modelParam?: {
     modelName?: string;
     description?: string;
@@ -149,7 +150,7 @@ export interface ChatState {
   aiProviders: AIProvidersState;
 }
 
-// 添加最新生成图片的接口
+// 添加最新生成图片的接口 - 新增aicc_type字段
 interface LatestGeneratedImage {
   aicc_status?: string;
   provider?: string; // "gpt-4o" | "sd"
@@ -160,6 +161,34 @@ interface LatestGeneratedImage {
   aicc_width?: number;
   aicc_height?: number;
   aicc_prompt?: string;
+  aicc_type?: string; // 新增：'image' | 'video'
+  content_id?: number;
+}
+
+// 新增：NFT铸造相关接口
+export interface TokenizationParams {
+  user: string;
+  content_id: number;
+}
+
+export interface TokenizationResponse {
+  message: string;
+  data: {
+    task_id: string;
+  };
+}
+
+export interface TokenizationStateResponse {
+  message: string;
+  data: {
+    task_id: string;
+    status?: string; // completed, failed
+    network?: number;
+    tx_hash?: string;
+    token_id?: string;
+    error?: string;
+    collection?: string;
+  };
 }
 
 // 3. 更新初始状态
@@ -175,6 +204,7 @@ const initialState: ChatState = {
   task_type: 'chat',
   current_status: 'init',
   task_value: 'chat',
+  previous_sub_intent_status: undefined, // 新增初始化
   modelParam: undefined,
   currentModel: null,
   modelStatus: null,
@@ -232,6 +262,8 @@ const initialState: ChatState = {
     aicc_width: undefined,
     aicc_height: undefined,
     aicc_prompt: undefined,
+    aicc_type: undefined, // 新增初始化
+    content_id: undefined,
   },
   // 新增：AI服务提供商初始状态
   aiProviders: {
@@ -296,7 +328,7 @@ export function hasSystemMessage(messages: Message[]): boolean {
 }
 
 // 修改轮询函数，支持视频生成的不同参数
-export async function pollImageGenerationTask(taskId: string, set: any, get: any, isWorkflow: boolean = false, isVideo: boolean = false): Promise<void> {
+export async function pollImageGenerationTask(taskId: string, content_id: number, set: any, get: any, isWorkflow: boolean = false, isVideo: boolean = false): Promise<void> {
   console.log('Start poll image generation task:', taskId, 'isVideo:', isVideo);
 
   // 根据是否为视频设置不同的轮询参数
@@ -327,14 +359,13 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
 
       const status = statusResponse.data.status.toLowerCase();
       // 获取生成的内容（图片或视频）
-      const generatedUrls = statusResponse.data.upscaled_urls || [];
+      const generatedUrls = statusResponse.data.upscaled_urls?.filter(url => url !== null && url !== undefined && url.trim() !== '') || [];
       console.log('task status:', status);
 
       // 处理不同状态
       if (status === 'completed' || status === 'success' || generatedUrls.length > 0) {
         console.log('task completed:', status);
 
-        
         console.log('get generated url:', generatedUrls);
 
         if (generatedUrls.length > 0) {
@@ -358,35 +389,37 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
           // 构建最新生成内容的状态信息
           const latestGeneratedImage: LatestGeneratedImage = {
             aicc_status: 'completed',
-            provider: actualIsWorkflow ? isVideo ? 'kling' : 'gpt-4o' : 'sd',
-            model: actualIsWorkflow ? isVideo ? 'kling-video-v1' : 'gpt-image-1-vip' : 'sd',
+            provider: actualIsWorkflow ? (isVideo ? 'kling' : 'gpt-4o') : 'sd',
+            model: actualIsWorkflow ? (isVideo ? 'kling-video-v1' : 'gpt-image-1-vip') : 'sd',
             source: actualIsWorkflow ? 'workflow' : 'model',
             source_id: actualIsWorkflow ? chatState.workflowRunningState.workflow?.id : chatState.currentModel?.id,
             reference: generatedUrls[0], // 使用第一个生成的内容
             aicc_width: actualIsWorkflow ? chatState.workflowRunningState.width : chatState.selectedAspectRatio?.width,
             aicc_height: actualIsWorkflow ? chatState.workflowRunningState.height : chatState.selectedAspectRatio?.height,
             aicc_prompt: actualIsWorkflow ? chatState.workflowRunningState.prompt : undefined,
+            aicc_type: isVideo ? 'video' : 'image',
+            content_id: content_id,
           };
 
           // 查找对应的生成中消息
           const messageIndex = chatState.messages.findIndex(
             // @ts-ignore
-            msg => (msg.type === 'generating_image' || msg.type === 'modify_image' || msg.type === 'generating_video') && msg.request_id === taskId
+            msg => (msg.type === 'generating_image' || msg.type === 'modify_image' || msg.type === 'generating_video' || msg.type === 'animating_image') && msg.request_id === taskId
           );
 
           if (messageIndex !== -1) {
             console.log('find message，update message');
-            const aspectRatio = isWorkflow ? chatState.selectedWorkflowAspectRatio : chatState.selectedAspectRatio;
+            const aspectRatio = actualIsWorkflow ? chatState.selectedWorkflowAspectRatio : chatState.selectedAspectRatio;
             let width = 512;
             let height = 512;
             if (aspectRatio && aspectRatio.value !== 'auto') {
               width = aspectRatio.width;
               height = aspectRatio.height;
             }
-            
+
             // 更新现有消息而不是创建新消息
             const updatedMessages = [...chatState.messages];
-            
+
             // 根据是否为视频设置不同的消息类型和内容
             if (isVideo) {
               updatedMessages[messageIndex] = {
@@ -460,12 +493,12 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
               workflowRunning: updatedWorkflowRunning,
               workflowImageFile: updatedWorkflowImageFile,
               workflowGeneratedResult: updatedWorkflowResult,
-              latestGeneratedImage: latestGeneratedImage // 新增：保存最新生成内容状态
+              latestGeneratedImage: latestGeneratedImage // 更新：保存最新生成内容状态（包含aicc_type）
             });
           } else {
             console.log('not found message，create new message');
             // 如果找不到对应消息，创建新消息（兜底方案）
-            const aspectRatio = isWorkflow ? chatState.selectedWorkflowAspectRatio : chatState.selectedAspectRatio;
+            const aspectRatio = actualIsWorkflow ? chatState.selectedWorkflowAspectRatio : chatState.selectedAspectRatio;
             let width = 512;
             let height = 512;
             if (aspectRatio && aspectRatio.value !== 'auto') {
@@ -549,7 +582,7 @@ export async function pollImageGenerationTask(taskId: string, set: any, get: any
         // 查找对应的生成中消息
         const messageIndex = chatState.messages.findIndex(
           // @ts-ignore
-          msg => (msg.type === 'generating_image' || msg.type === 'modify_image' || msg.type === 'generating_video') && msg.request_id === taskId
+          msg => (msg.type === 'generating_image' || msg.type === 'modify_image' || msg.type === 'generating_video' || msg.type === 'animating_image') && msg.request_id === taskId
         );
 
         if (messageIndex !== -1) {
@@ -776,15 +809,6 @@ export const sendMessage = atom(
       const workflow_description = chatState.currentWorkflow?.description;
       const workflow_creator = chatState.currentWorkflow?.creator;
 
-      // 获取工作流生成结果相关信息
-      // const workflowGeneratedResult = chatState.workflowGeneratedResult;
-      // const workflow_generated_status = workflowGeneratedResult.status;
-      // const workflow_generated_image_url = workflowGeneratedResult.generatedImageUrl;
-      // const workflow_generated_info = workflowGeneratedResult.workflowInfo;
-      // const workflow_generated_width = workflowGeneratedResult.width;
-      // const workflow_generated_height = workflowGeneratedResult.height;
-      // const workflow_generated_prompt = workflowGeneratedResult.prompt;
-
       // 获取最新生成图片的状态信息
       const latestGenerated = chatState.latestGeneratedImage;
 
@@ -824,6 +848,12 @@ export const sendMessage = atom(
         workflow_description,
         workflow_creator
       };
+
+      // 新增：添加previous_sub_intent_status参数
+      if (chatState.previous_sub_intent_status) {
+        requestBody.previous_sub_intent_status = chatState.previous_sub_intent_status;
+      }
+
       // 新增：modify image 相关参数
       if (latestGenerated.aicc_status === 'completed') {
         requestBody.aicc_status = latestGenerated.aicc_status;
@@ -835,6 +865,7 @@ export const sendMessage = atom(
         requestBody.aicc_width = latestGenerated.aicc_width;
         requestBody.aicc_height = latestGenerated.aicc_height;
         requestBody.aicc_prompt = latestGenerated.aicc_prompt;
+        requestBody.aicc_type = latestGenerated.aicc_type; // 新增：传递内容类型
       }
 
       // 发送请求到API
@@ -860,6 +891,8 @@ export const sendMessage = atom(
       const task_type = responseData.task_type;
       const model = responseData.model;
       const request_id = responseData.request_id;
+      const content_id = responseData.content_id; // 新增：获取content_id
+      const previous_sub_intent_status = responseData.previous_sub_intent_status;
 
       const workflow_name = responseData.workflow_name;
       const workflow_goal = responseData.workflow_goal;
@@ -899,7 +932,8 @@ export const sendMessage = atom(
           }],
           isLoading: false,
           isGenerating: false,
-          connection: newConnectionStatus
+          connection: newConnectionStatus,
+          previous_sub_intent_status: previous_sub_intent_status // 新增：更新状态
         });
 
         // 显示通知
@@ -921,9 +955,28 @@ export const sendMessage = atom(
         console.log('create train model success');
       }
 
+      // 新增：处理NFT铸造确认
+      if (task_type === 'mint_nft' && previous_sub_intent_status === 'mint_confirmed') {
+        console.log('NFT mint confirmed, starting tokenization process');
+
+        const latestGenerated = chatState.latestGeneratedImage;
+        if (latestGenerated.content_id) {
+          // 调用NFT铸造
+          set(createTokenization, latestGenerated.content_id);
+        } else {
+          console.error('No content ID available for NFT minting');
+          set(showToastAtom, {
+            message: 'No content available for NFT minting',
+            severity: 'error'
+          });
+        }
+      }
+
       let isWorkflow = false;
       let isGenerating = false;
+      let isVideo = false; // 新增：视频标识
       let messageType = 'text';
+
       if (status === 'upload_image') {
         messageType = 'upload_image';
       } else if (task_type === 'generation' && request_id) {
@@ -933,6 +986,15 @@ export const sendMessage = atom(
         messageType = 'generating_image';
         isGenerating = true;
         isWorkflow = true;
+      } else if (task_type === 'animate_image' && request_id) {
+        // 新增：处理图片动画化（生成视频）
+        messageType = 'generating_video';
+        isGenerating = true;
+        isVideo = true;
+        isWorkflow = true; // 动画化通常基于现有图片，类似工作流
+      } else if (task_type === 'mint_nft' && previous_sub_intent_status === 'mint_confirmed') {
+        messageType = 'minting_nft';
+        isGenerating = true;
       }
 
       if (status === "tokenization_agreement" && task_type === 'tokenization') {
@@ -957,7 +1019,7 @@ export const sendMessage = atom(
         role: 'assistant',
         content: content,
         type: messageType as 'text' | 'upload_image' | 'generating_image' | 'generate_result' | 'tokenization_agreement' | "create_workflow"
-            | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image" | "uploaded_image" 
+            | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image" | "uploaded_image"
             | "generating_video" | "video_generate_result",
         imageUploadState: messageType === 'upload_image'
           ? { totalCount: 0, uploadedCount: 0, isUploading: false, finishUpload: false }
@@ -993,12 +1055,14 @@ export const sendMessage = atom(
           return msg;
         });
       }
+
       // 如果是执行工作流状态，则保存当前的工作流内容，防止被切换
       const workflowRunningState = latestState.workflowRunningState;
       if (status === "AWAITING_WORKFLOW_INPUTS" && task_type === "use_workflow") {
         // 更新 workflow
         workflowRunningState.workflow = latestState.currentWorkflow
       }
+
       // 更新状态 - 使用最新状态作为基础
       set(chatAtom, {
         ...latestState,
@@ -1013,13 +1077,14 @@ export const sendMessage = atom(
         workflow_description: workflow_goal || undefined,
         workflow_prompt: generated_prompt || undefined,
         workflowRunningState: workflowRunningState,
+        previous_sub_intent_status: previous_sub_intent_status, // 新增：更新状态
       });
 
-      // 如果 request_id 不为空，则代表创建生成图片任务完成
-      console.log('request_id:', request_id);
+      // 如果 request_id 不为空，则代表创建生成图片/视频任务完成
+      console.log('request_id:', request_id, 'content_id:', content_id, 'isVideo:', isVideo);
       if (request_id) {
-        // const isWorkflow = messageType === 'modify_image';
-        pollImageGenerationTask(request_id, set, get, isWorkflow).catch(err => {
+        // 根据任务类型传递正确的参数
+        pollImageGenerationTask(request_id, content_id, set, get, isWorkflow, isVideo).catch(err => {
           console.error('poll Image Generation Task Failed:', err);
         });
       }
@@ -1352,6 +1417,7 @@ export const clearChat = atom(
       messages: [],
       urls: [],
       task_type: 'chat',
+      previous_sub_intent_status: undefined, // 新增：清空状态
       modelParam: undefined,
       workflowCreation: {
         isCreating: false,
@@ -1381,6 +1447,8 @@ export const clearChat = atom(
         aicc_width: undefined,
         aicc_height: undefined,
         aicc_prompt: undefined,
+        aicc_type: undefined, // 新增：清空类型
+        content_id: undefined,
       },
       // 新增：AI服务提供商初始状态
       aiProviders: {
@@ -1818,7 +1886,7 @@ export const createWorkflow = atom(
       if (chatState.workflowReferenceImage.uploadedUrl) {
         reference_images.push(chatState.workflowReferenceImage.uploadedUrl);
       }
-      
+
       const params: CreateWorkflowParams = {
         name: chatState.workflow_name || 'New Workflow',
         description: chatState.workflow_description || '',
@@ -1950,6 +2018,7 @@ interface AigcResponse {
   data: {
     image_id?: number; // 图片id
     task_id?: string; // 任务id
+    content_id?: number; // 新增：内容id
   };
 }
 
@@ -2068,7 +2137,7 @@ export const runWorkflow = atom(
           workflowRunningState: workflowRunningState
         });
 
-        pollImageGenerationTask(response.data.task_id, set, get, true).catch(err => {
+        pollImageGenerationTask(response.data.task_id, response.data.content_id || 0, set, get, true).catch(err => {
           console.error('Poll Image Generation Task Failed:', err);
         });
       } else {
@@ -2392,7 +2461,7 @@ export const runWorkflowFromChatInput = atom(
         });
 
         // 根据输出类型启动不同的轮询
-        pollImageGenerationTask(response.data.task_id, set, get, true, isVideoOutput).catch(err => {
+        pollImageGenerationTask(response.data.task_id, response.data.content_id || 0, set, get, true, isVideoOutput).catch(err => {
           console.error('Poll Generation Task Failed:', err);
         });
       } else {
@@ -2446,6 +2515,8 @@ export const clearLatestGeneratedImage = atom(
         aicc_width: undefined,
         aicc_height: undefined,
         aicc_prompt: undefined,
+        aicc_type: undefined, // 新增：清空类型
+        content_id: undefined,
       }
     });
   }
@@ -2523,7 +2594,7 @@ export const fetchAIProviders = atom(
       // 设置默认选择的提供商和模型
       let selectedProvider = '';
       let selectedModel = '';
-      
+
       if (response.data.length > 0) {
         selectedProvider = response.data[0].name;
         if (response.data[0].models.length > 0) {
@@ -2564,9 +2635,54 @@ export const updateSelectedProvider = atom(
   (get, set, providerName: string) => {
     const chatState = get(chatAtom);
     const provider = chatState.aiProviders.providers.find(p => p.name === providerName);
-    
+
     // 选择该提供商的第一个模型作为默认模型
     const selectedModel = provider?.models[0]?.name || '';
+    
+    // 获取第一个模型的支持类型
+    const firstModel = provider?.models[0];
+    const supportedInputTypes = firstModel?.support_input_types || [];
+    const supportedOutputTypes = firstModel?.support_output_types || [];
+
+    // 自动选择第一个支持的输入类型
+    let defaultInputType = '';
+    const inputTypeOrder = ['image', 'text', 'image,text'];
+    for (const type of inputTypeOrder) {
+      if (supportedInputTypes.includes(type)) {
+        switch (type) {
+          case 'image':
+            defaultInputType = 'Image';
+            break;
+          case 'text':
+            defaultInputType = 'Text';
+            break;
+          case 'image,text':
+            defaultInputType = 'Image + Text';
+            break;
+        }
+        break;
+      }
+    }
+
+    // 自动选择第一个支持的输出类型
+    let defaultOutputType = '';
+    const outputTypeOrder = ['image', 'text', 'video'];
+    for (const type of outputTypeOrder) {
+      if (supportedOutputTypes.includes(type)) {
+        switch (type) {
+          case 'image':
+            defaultOutputType = 'Image';
+            break;
+          case 'text':
+            defaultOutputType = 'Text';
+            break;
+          case 'video':
+            defaultOutputType = 'Video';
+            break;
+        }
+        break;
+      }
+    }
 
     set(chatAtom, {
       ...chatState,
@@ -2575,7 +2691,9 @@ export const updateSelectedProvider = atom(
         selectedProvider: providerName,
         selectedModel
       },
-      workflow_model: selectedModel
+      workflow_model: selectedModel,
+      workflow_input: defaultInputType,
+      workflow_output: defaultOutputType
     });
   }
 );
@@ -2601,7 +2719,7 @@ export const updateSelectedModel = atom(
 export const getSupportedTypes = (providers: AIProvider[], providerName: string, modelName: string) => {
   const provider = providers.find(p => p.name === providerName);
   const model = provider?.models.find(m => m.name === modelName);
-  
+
   return {
     inputTypes: model?.support_input_types || [],
     outputTypes: model?.support_output_types || []
@@ -2623,3 +2741,221 @@ export const formatTypeLabel = (type: string): string => {
       return type;
   }
 };
+
+// 新增：NFT铸造API函数
+export async function createTokenizationAPI(params: TokenizationParams): Promise<TokenizationResponse> {
+  try {
+    const privyToken = await getAccessToken();
+    const response = await fetch('/studio-api/aigc/tokenization', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+        [PRIVY_TOKEN_HEADER]: privyToken || "",
+      },
+      body: JSON.stringify(params)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Create tokenization failed with status code ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Create Tokenization Failed:', error);
+    throw error;
+  }
+}
+
+// 新增：查询NFT铸造状态API
+export async function checkTokenizationStatus(content_id: number, refreshState: boolean = true): Promise<TokenizationStateResponse> {
+  try {
+    const params = new URLSearchParams({
+      content_id: content_id.toString(),
+      refreshState: refreshState.toString()
+    });
+
+    const response = await fetch(`/studio-api/aigc/tokenization/state?${params}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Check tokenization status failed with status code ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Check Tokenization Status Failed:', error);
+    throw error;
+  }
+}
+
+// 新增：NFT铸造轮询函数
+export async function pollTokenizationTask(contentId: number, set: any, get: any): Promise<void> {
+  console.log('Start poll tokenization task:', contentId);
+
+  const MAX_POLL_COUNT = 60; // 最大轮询次数
+  const POLL_INTERVAL = 5000; // 5秒轮询间隔
+
+  for (let pollCount = 0; pollCount < MAX_POLL_COUNT; pollCount++) {
+    try {
+      console.log(`Tokenization task ${contentId} the ${pollCount + 1} times`);
+
+      // 等待一段时间再查询
+      if (pollCount > 0) {
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+      }
+
+      // 查询任务状态
+      const statusResponse = await checkTokenizationStatus(contentId);
+      console.log('Tokenization status:', statusResponse);
+
+      // 获取当前状态
+      const chatState = get(chatAtom);
+
+      // 如果没有状态信息，继续轮询
+      if (!statusResponse?.data?.status) {
+        console.log('Tokenization status is null, keep polling');
+        continue;
+      }
+
+      const status = statusResponse.data.status.toLowerCase();
+      console.log('Tokenization task status:', status);
+
+      // 处理不同状态
+      if (status === 'completed') {
+        console.log('Tokenization completed:', status);
+
+        // 新增：查找并更新minting_nft消息
+        // @ts-ignore
+        const messageIndex = chatState.messages.findIndex(msg => msg.type === 'minting_nft');
+
+        if (messageIndex !== -1) {
+          console.log('Found minting message, updating to success');
+          const updatedMessages = [...chatState.messages];
+          updatedMessages[messageIndex] = {
+            ...updatedMessages[messageIndex],
+            content: `NFT minted successfully! Token ID: ${statusResponse.data.token_id}`,
+            type: 'text' // 改为普通文本消息
+          };
+
+          // 更新消息列表
+          set(chatAtom, {
+            ...chatState,
+            messages: updatedMessages
+          });
+        }
+
+        // 显示成功通知
+        set(showToastAtom, {
+          message: `NFT minted successfully! Token ID: ${statusResponse.data.token_id}`,
+          severity: 'success'
+        });
+
+        console.log('Tokenization finished, exit');
+        return;
+      } else if (status === 'failed') {
+        console.log('Tokenization failed');
+
+        // 新增：查找并更新minting_nft消息
+        // @ts-ignore
+        const messageIndex = chatState.messages.findIndex(msg => msg.type === 'minting_nft');
+
+        if (messageIndex !== -1) {
+          console.log('Found minting message, updating to failed');
+          const updatedMessages = [...chatState.messages];
+          updatedMessages[messageIndex] = {
+            ...updatedMessages[messageIndex],
+            content: `NFT minting failed: ${statusResponse.data.error || 'Unknown error'}`,
+            type: 'text' // 改为普通文本消息
+          };
+
+          // 更新消息列表
+          set(chatAtom, {
+            ...chatState,
+            messages: updatedMessages
+          });
+        }
+
+        // 显示失败通知
+        set(showToastAtom, {
+          message: `NFT minting failed: ${statusResponse.data.error || 'Unknown error'}`,
+          severity: 'error'
+        });
+
+        console.log('Tokenization failed, exit');
+        return;
+      }
+
+      // 如果是其他状态（处理中），继续轮询
+      console.log('Tokenization in progress, keep polling');
+
+    } catch (error) {
+      console.error('Tokenization polling failed:', error);
+
+      // 发生错误时，增加轮询间隔时间，但继续轮询
+      const waitTime = Math.min(30000, POLL_INTERVAL * Math.min(5, Math.floor(pollCount / 5) + 1));
+      console.log(`Tokenization polling failed, waiting ${waitTime}ms to continue`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+
+  // 达到最大轮询次数，显示超时消息
+  console.log('Tokenization polling timeout');
+  set(showToastAtom, {
+    message: 'NFT minting timed out, please check again later',
+    severity: 'warning'
+  });
+}
+
+// 新增：创建NFT铸造操作
+export const createTokenization = atom(
+  null,
+  async (get, set, contentId: number) => {
+    const chatState = get(chatAtom);
+
+    if (!chatState.did) {
+      set(showToastAtom, {
+        message: 'Please connect your wallet first',
+        severity: 'error'
+      });
+      return;
+    }
+
+    try {
+      // 准备API参数
+      const params: TokenizationParams = {
+        user: chatState.did,
+        content_id: contentId
+      };
+
+      console.log('Starting NFT tokenization for content ID:', contentId);
+
+      // 调用API
+      // @ts-ignore
+      const response = await createTokenizationAPI(params);
+
+      // 显示开始铸造提示
+      set(showToastAtom, {
+        message: 'NFT minting started...',
+        severity: 'info'
+      });
+
+      // 启动轮询
+      pollTokenizationTask(contentId, set, get).catch(err => {
+        console.error('Poll Tokenization Task Failed:', err);
+      });
+
+    } catch (error) {
+      console.error('Create tokenization failed:', error);
+      // 显示错误提示
+      set(showToastAtom, {
+        message: error instanceof Error ? error.message : 'Failed to start NFT minting',
+        severity: 'error'
+      });
+    }
+  }
+);
