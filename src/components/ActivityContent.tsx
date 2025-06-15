@@ -48,7 +48,7 @@ Mindshare Points = GENI × IF × Cooldown_X x Virtuality
 - GENI (AI Creator Score): Default is 1. After being certified as an AI expert-level creator, increased up to 3. Open a ticket in Discord to apply.
 - IF (Influence Factor): 5~20, depends on the social influence of your tweets.
 - Cooldown_X: Every day, we select the most influential tweet for pointing.
-- Virtuality: Projects recognized by NYKO will be considered part of Virtuality. List: Virgen, Misato, RoboStack.
+- Virtuality: Projects recognized by NYKO will be considered part of Virtuality. List: NYKO/Niyoko, Virgen, Misato, RoboStack.
 
 AICC rewards = given exclusively to the creators of each AICC.
 
