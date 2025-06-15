@@ -31,7 +31,6 @@ import {
   updateWorkflowExtraPrompt,
   fetchAIProviders,
   updateSelectedProvider,
-  updateSelectedModel,
 } from '../store/chatStore';
 import {showDialogAtom} from '../store/dialogStore';
 import {useLogin, usePrivy} from '@privy-io/react-auth';
@@ -66,7 +65,6 @@ const ChatWindow: React.FC = () => {
   const [, updateWorkflowExtraPromptAction] = useAtom(updateWorkflowExtraPrompt);
   const [, fetchAIProvidersAction] = useAtom(fetchAIProviders);
   const [, updateSelectedProviderAction] = useAtom(updateSelectedProvider);
-  const [, updateSelectedModelAction] = useAtom(updateSelectedModel);
 
   // 添加滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -463,7 +461,6 @@ const ChatWindow: React.FC = () => {
                 // 新增：AI服务提供商相关
                 aiProviders={chatState.aiProviders}
                 onSelectProvider={updateSelectedProviderAction}
-                onSelectAIModel={updateSelectedModelAction}
               />
             ))
           )}
