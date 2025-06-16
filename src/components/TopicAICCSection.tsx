@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './TopicAICCSection.module.css';
 import { AICCItem } from '../store/topicStore';
+import { isVideoUrl } from '../utils/tools';
 
 interface TopicAICCSectionProps {
   aiccList: AICCItem[];
@@ -48,12 +49,40 @@ const TopicAICCSection: React.FC<TopicAICCSectionProps> = ({ aiccList }) => {
             </div>
             
             {item.cover ? (
-              <img
-                src={item.cover}
-                alt={item.name}
-                className={styles.aiccCoverImage}
-                draggable={false}
-              />
+              isVideoUrl(item.cover) ? (
+                <video
+                  src={item.cover}
+                  className={styles.aiccCoverImage}
+                  controls={false}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  draggable={false}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    zIndex: 1,
+                    transition: 'transform 0.3s ease',
+                    userSelect: 'none',
+                    pointerEvents: 'none'
+                  }}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <img
+                  src={item.cover}
+                  alt={item.name}
+                  className={styles.aiccCoverImage}
+                  draggable={false}
+                />
+              )
             ) : (
               <div className={styles.aiccCoverPlaceholder}>
                 No Image

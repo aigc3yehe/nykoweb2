@@ -3,6 +3,7 @@ import styles from './TopicGallery.module.css';
 import { ContentItem } from '../store/topicStore';
 import ImageCard from './ImageCard';
 import StatePrompt from './StatePrompt';
+import { isVideoUrl } from '../utils/tools';
 
 interface TopicGalleryProps {
   contentsList: ContentItem[];
@@ -119,7 +120,7 @@ const TopicGallery: React.FC<TopicGalleryProps> = ({
             source: content.source,
             version: 1,
             task_id: `topic-${content.id}`,
-            type: 'image',
+            type: isVideoUrl(content.url) ? 'video' : 'image', // 动态判断类型
             public: 1,
           };
 

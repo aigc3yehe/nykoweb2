@@ -13,6 +13,10 @@
       "destination": "http://170.106.196.194:5576/:path*"
     },
     {
+      "source": "/infofi-api/:path*",
+      "destination": "http://43.153.40.155:4004/:path*"
+    },
+    {
       "source": "/:path*",
       "destination": "/index.html"
     }
