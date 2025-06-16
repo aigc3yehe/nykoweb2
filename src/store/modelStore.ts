@@ -46,6 +46,7 @@ export interface Model {
   batch: number;
   cover: string;
   usage: number;
+  cu: number;
   flag: string | null;
   public?: number; // 1 为可视, 0为由所有者设置为不可视，-1则是系统管理员设置的不可见，级别最高
   model_tokenization: ModelToken | null;

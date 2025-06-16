@@ -31,6 +31,7 @@ import {
   updateWorkflowExtraPrompt,
   fetchAIProviders,
   updateSelectedProvider,
+  retryPolling,
 } from '../store/chatStore';
 import {showDialogAtom} from '../store/dialogStore';
 import {useLogin, usePrivy} from '@privy-io/react-auth';
@@ -65,6 +66,11 @@ const ChatWindow: React.FC = () => {
   const [, updateWorkflowExtraPromptAction] = useAtom(updateWorkflowExtraPrompt);
   const [, fetchAIProvidersAction] = useAtom(fetchAIProviders);
   const [, updateSelectedProviderAction] = useAtom(updateSelectedProvider);
+  const [, retryPollingAction] = useAtom(retryPolling);
+  // 当前工作流消耗的积分
+  const [currentWorkflowCredit, setCurrentWorkflowCredit] = useState(50);
+  // 当前模型消耗的积分
+  const [currentModelCredit, setCurrentModelCredit] = useState(5);
 
   // 添加滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -99,6 +105,26 @@ const ChatWindow: React.FC = () => {
     const did = accountState.did || undefined;
     setUserInfoAction({ uuid, did, wallet_address });
   }, [accountState, setUserInfoAction]);
+
+  // 监听左侧当前工作流
+  useEffect(() => {
+    const workflow = chatState.currentWorkflow;
+    if (workflow) {
+      setCurrentWorkflowCredit(workflow.cu);
+    } else {
+      setCurrentWorkflowCredit(50);
+    }
+  }, [chatState.currentWorkflow]);
+
+  // 监听左侧当前模型
+  useEffect(() => {
+    const model = chatState.currentModel;
+    if (model) {
+      setCurrentModelCredit(model.cu);
+    } else {
+      setCurrentModelCredit(5);
+    }
+  }, [chatState.currentModel]);
 
   // 监听工作流创建成功状态，刷新工作流列表
   useEffect(() => {
@@ -356,10 +382,10 @@ const ChatWindow: React.FC = () => {
                       ⏳ Create a workflow (800 Credits)
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to generate an image.')}>
-                      🌄 Generate an image (5 Credits)
+                      🌄 Generate an image ({currentModelCredit} Credits)
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to use this workflow.')}>
-                      ✨ Use this workflow (50 Credits)
+                      ✨ Use this workflow ({currentWorkflowCredit} Credits)
                     </button>
                   </div>
                 </div>
@@ -406,6 +432,7 @@ const ChatWindow: React.FC = () => {
                 videos={message.videos}
                 request_id={message.request_id}
                 agree={message.agree}
+                token_id={message.token_id}
                 workflow_name={chatState.workflow_name}
                 workflow_description={chatState.workflow_description}
                 workflow_prompt={chatState.workflow_prompt}
@@ -434,12 +461,16 @@ const ChatWindow: React.FC = () => {
                 workflow_extra_prompt={chatState.workflow_extra_prompt}
                 onUpdateWorkflowExtraPrompt={updateWorkflowExtraPromptAction}
                 currentWorkflow={chatState.currentWorkflow}
-                // 新增：扩展选项相关
-                isLastMessage={index === chatState.messages.length - 1 && (message.type === 'generate_result' || message.type === 'workflow_generate_result')}
+                isLastMessage={index === chatState.messages.length - 1 && 
+                  (message.type === 'generate_result' || 
+                   message.type === 'workflow_generate_result' || 
+                   message.type === 'generation_timeout' || 
+                   message.type === 'tokenization_timeout' ||
+                   message.type === 'minting_success')}
                 onPartiallyModify={() => handlePartiallyModify(message.images?.[0])}
                 onAnimate={() => handleAnimate(message.images?.[0])}
                 onMintNFT={() => handleMintNFT(message.images?.[0])}
-                // 新增：AI服务提供商相关
+                onRetryPolling={() => retryPollingAction(index)}
                 aiProviders={chatState.aiProviders}
                 onSelectProvider={updateSelectedProviderAction}
               />

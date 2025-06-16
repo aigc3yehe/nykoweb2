@@ -11,7 +11,12 @@ import uploadIcon from "../assets/upload.svg";
 import createWorkflowIcon from "../assets/create_workflow.svg";
 import deleteIcon from "../assets/delete.svg";
 import deleteDisableIcon from "../assets/delete_disable.svg";
-import { GENERATE_IMAGE_SERVICE_CONFIG, TRAIN_MODEL_SERVICE_CONFIG, RUN_WORKFLOW_SERVICE_CONFIG } from "../utils/plan";
+import {
+  GENERATE_IMAGE_SERVICE_CONFIG,
+  TRAIN_MODEL_SERVICE_CONFIG,
+  RUN_WORKFLOW_SERVICE_CONFIG,
+  RUN_VIDEO_WORKFLOW_SERVICE_CONFIG
+} from "../utils/plan";
 import { WorkflowDetail } from '../store/workflowStore';
 import xIcon from "../assets/x.svg";
 
@@ -41,7 +46,10 @@ export interface ChatMessageProps {
     | "generating_video"
     | "video_generate_result"
     | "animating_image"
-    | "minting_nft";
+    | "minting_nft"
+    | "generation_timeout"
+    | "tokenization_timeout"
+    | "minting_success";
   imageUploadState?: ImageUploadState;
   uploadedFiles?: Array<{ name: string; url: string }>;
   modelParam?: {
@@ -59,6 +67,7 @@ export interface ChatMessageProps {
   workflow_prompt?: string;
   workflow_input?: string;
   workflow_output?: string;
+  token_id?: string;
   onAddImage?: () => void;
   onConfirmImages?: () => void;
   onRemoveImage?: (url: string) => void;
@@ -105,6 +114,7 @@ export interface ChatMessageProps {
     isLoading: boolean;
   };
   onSelectProvider?: (provider: string) => void;
+  onRetryPolling?: () => void;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -130,6 +140,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   workflow_prompt = "",
   workflow_input = "",
   workflow_output = "",
+  token_id,
   onAddImage,
   onConfirmImages,
   onRemoveImage,
@@ -158,6 +169,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   onMintNFT,
   aiProviders,
   onSelectProvider,
+  onRetryPolling,
 }) => {
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
@@ -312,13 +324,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 className={styles.extensionButton}
                 onClick={onAnimate}
               >
-                Animate (100 credits)
+                Animate (300 credits)
               </button>
               <button
                 className={styles.extensionButton}
                 onClick={onMintNFT}
               >
-                mint as NFT (20 credits)
+                Mint as NFT (50 credits)
               </button>
             </div>
           </div>
@@ -759,7 +771,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 onBlur={() => setIsFocused(false)}
                 onScroll={handlePromptTextareaScroll}
                 placeholder="Enter your prompt here"
-                maxLength={300}
+                maxLength={800}
                 disabled={isCreatingWorkflow}
               />
 
@@ -780,7 +792,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
 
             <div className={`${styles.charCount} ${isPromptTooLong ? styles.charCountError : ''}`}>
-              Max 300 Chars
+              Max 800 Chars
             </div>
           </div>
         </div>
@@ -1188,18 +1200,66 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
+  const renderMintingSuccessComponent = () => {
+    if (!token_id) return null;
+
+    const magicEdenLink = `https://magiceden.io/item-details/base/0xa1c45a08c205d2683b63f1007a3dd72aa1f01961/${token_id}`;
+
+    return (
+      <div className={styles.mintingSuccessContainer}>
+        <div className={styles.mintingSuccessMessage}>
+          {content}
+        </div>
+        <div className={styles.mintingSuccessLink}>
+          <a
+            href={magicEdenLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.magicEdenLink}
+          >
+            {magicEdenLink}
+          </a>
+        </div>
+      </div>
+    );
+  };
+
+  // 新增：渲染超时重试组件
+  const renderTimeoutRetryComponent = () => {
+    const isGenerationTimeout = type === 'generation_timeout';
+    const isTokenizationTimeout = type === 'tokenization_timeout';
+
+    if (!isGenerationTimeout && !isTokenizationTimeout) return null;
+
+    return (
+      <div className={styles.timeoutContainer}>
+        <div className={styles.timeoutMessage}>
+          {content}
+        </div>
+        {isLastMessage && (
+          <button
+            className={styles.retryButton}
+            onClick={onRetryPolling}
+          >
+            Continue refreshing query
+          </button>
+        )}
+      </div>
+    );
+  };
+
   const showContent = ! (role === "user" && type === "uploaded_image");
 
   return (
     <div className={`${styles.messageContainer} ${styles[role]}`}>
-      {showContent && (
-      <div className={styles.messageContent}>
-        {type === "tokenization_agreement" ? (
-          <p className={styles.text}>{processContent(content)}</p>
-        ) : (
-          <p className={styles.text}>{content}</p>
-        )}
-      </div>
+      {showContent && type !== "minting_success" && (
+        <div className={styles.messageContent}>
+          {type === "tokenization_agreement" ? (
+            <p className={styles.text}>{processContent(content)}</p>
+          ) : (
+            <p className={styles.text}>{content}</p>
+          )}
+        </div>
       )}
 
       {role === "assistant" &&
@@ -1219,7 +1279,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         renderGenerateResultComponent(RUN_WORKFLOW_SERVICE_CONFIG.cu)}
       {role === "assistant" &&
         type === "video_generate_result" &&
-        renderVideoResultComponent(RUN_WORKFLOW_SERVICE_CONFIG.cu)}
+        renderVideoResultComponent(RUN_VIDEO_WORKFLOW_SERVICE_CONFIG.cu)}
       {role === "assistant" &&
         type === "generating_image" &&
         renderGeneratingImageComponent()}
@@ -1247,6 +1307,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       {role === "assistant" &&
         type === "minting_nft" &&
         renderMintingNFTComponent()}
+      {role === "assistant" &&
+        type === "minting_success" &&
+        renderMintingSuccessComponent()}
+
+      {/* 新增：超时重试组件 */}
+      {(type === 'generation_timeout' || type === 'tokenization_timeout') &&
+        renderTimeoutRetryComponent()}
     </div>
   );
 };

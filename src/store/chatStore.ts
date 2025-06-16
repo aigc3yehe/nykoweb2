@@ -52,7 +52,7 @@ export interface Message {
   content: string;
   type?: 'text' | 'upload_image' | 'model_config' | 'generate_result' | 'generating_image' | 'tokenization_agreement' | "create_workflow"
       | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image" | "uploaded_image"
-      | "generating_video" | "video_generate_result" | "animating_image" | "minting_nft"; // 新增动画和NFT类型
+      | "generating_video" | "video_generate_result" | "animating_image" | "minting_nft" | "generation_timeout" | "tokenization_timeout" | "minting_success"; // 新增超时类型和 minting_success 类型
   imageUploadState?: {
     totalCount: number;
     uploadedCount: number;
@@ -72,6 +72,15 @@ export interface Message {
     height: number;
   }
   agree?: boolean;
+  // 新增：轮询重试相关参数
+  retryParams?: {
+    taskId: string;
+    contentId: number;
+    isWorkflow: boolean;
+    isVideo: boolean;
+  };
+  // 新增：NFT相关字段
+  token_id?: string; // NFT的token ID
 }
 
 // 1. 添加连接状态接口
@@ -148,6 +157,13 @@ export interface ChatState {
   latestGeneratedImage: LatestGeneratedImage;
   // 新增：AI服务提供商状态
   aiProviders: AIProvidersState;
+  // 新增：轮询重试状态
+  pollingRetryState: {
+    taskId?: string;
+    contentId?: number;
+    isWorkflow?: boolean;
+    isVideo?: boolean;
+  };
 }
 
 // 添加最新生成图片的接口 - 新增aicc_type字段
@@ -190,7 +206,6 @@ export interface TokenizationStateResponse {
     collection?: string;
   };
 }
-
 // 3. 更新初始状态
 const initialState: ChatState = {
   messages: [],
@@ -273,6 +288,8 @@ const initialState: ChatState = {
     selectedProvider: '',
     selectedModel: ''
   },
+  // 新增：初始化轮询重试状态
+  pollingRetryState: {},
 };
 
 // 创建原子状态
@@ -330,6 +347,18 @@ export function hasSystemMessage(messages: Message[]): boolean {
 // 修改轮询函数，支持视频生成的不同参数
 export async function pollImageGenerationTask(taskId: string, content_id: number, set: any, get: any, isWorkflow: boolean = false, isVideo: boolean = false): Promise<void> {
   console.log('Start poll image generation task:', taskId, 'isVideo:', isVideo);
+
+  // 存储轮询参数到状态中
+  const chatState = get(chatAtom);
+  set(chatAtom, {
+    ...chatState,
+    pollingRetryState: {
+      taskId,
+      contentId: content_id,
+      isWorkflow,
+      isVideo
+    }
+  });
 
   // 根据是否为视频设置不同的轮询参数
   const MAX_POLL_COUNT = isVideo ? 20 : 60; // 视频：20次，图片：60次
@@ -575,6 +604,11 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
           }
         }
         console.log('task finished，exit');
+        // 清除轮询重试状态
+        set(chatAtom, {
+          ...get(chatAtom),
+          pollingRetryState: {}
+        });
         return;
       } else if (status === 'failed' || status === 'error') {
         console.log('task failed');
@@ -635,6 +669,13 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
 
         // 任务失败，退出轮询
         console.log('task failed, exit');
+
+        // 清除轮询重试状态
+        set(chatAtom, {
+          ...get(chatAtom),
+          pollingRetryState: {}
+        });
+
         return;
       }
 
@@ -654,12 +695,20 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
   // 达到最大轮询次数，添加超时消息
   console.log('more than times，task maybe failed');
   const finalChatState = get(chatAtom);
+
   set(chatAtom, {
     ...finalChatState,
     messages: [...filterSystemMessages(finalChatState.messages), {
       role: 'system',
       content: isVideo ? 'Video generation timed out, please check again later or try again' : 'Image generation timed out, please check again later or try again',
-      request_id: taskId
+      type: 'generation_timeout', // 新增：使用超时类型
+      request_id: taskId,
+      retryParams: { // 新增：保存重试参数
+        taskId,
+        contentId: content_id,
+        isWorkflow,
+        isVideo
+      }
     }],
     isGenerating: false
   });
@@ -2638,7 +2687,7 @@ export const updateSelectedProvider = atom(
 
     // 选择该提供商的第一个模型作为默认模型
     const selectedModel = provider?.models[0]?.name || '';
-    
+
     // 获取第一个模型的支持类型
     const firstModel = provider?.models[0];
     const supportedInputTypes = firstModel?.support_input_types || [];
@@ -2836,10 +2885,13 @@ export async function pollTokenizationTask(contentId: number, set: any, get: any
         if (messageIndex !== -1) {
           console.log('Found minting message, updating to success');
           const updatedMessages = [...chatState.messages];
+          const tokenId = statusResponse.data.token_id;
+          
           updatedMessages[messageIndex] = {
             ...updatedMessages[messageIndex],
-            content: `NFT minted successfully! Token ID: ${statusResponse.data.token_id}`,
-            type: 'text' // 改为普通文本消息
+            content: 'NFT minted successfully!',
+            type: 'minting_success', // 使用新的消息类型
+            token_id: tokenId // 传递token ID
           };
 
           // 更新消息列表
@@ -2903,8 +2955,22 @@ export async function pollTokenizationTask(contentId: number, set: any, get: any
     }
   }
 
-  // 达到最大轮询次数，显示超时消息
+  // 达到最大轮询次数，添加超时消息
   console.log('Tokenization polling timeout');
+  const finalChatState = get(chatAtom);
+  
+  set(chatAtom, {
+    ...finalChatState,
+    messages: [...filterSystemMessages(finalChatState.messages), {
+      role: 'system',
+      content: 'NFT minting timed out, please check again later or try again',
+      type: 'tokenization_timeout', // 新增：使用超时类型
+      retryParams: { // 新增：保存重试参数
+        contentId
+      }
+    }],
+  });
+  
   set(showToastAtom, {
     message: 'NFT minting timed out, please check again later',
     severity: 'warning'
@@ -2955,6 +3021,65 @@ export const createTokenization = atom(
       set(showToastAtom, {
         message: error instanceof Error ? error.message : 'Failed to start NFT minting',
         severity: 'error'
+      });
+    }
+  }
+);
+
+// 新增：重试轮询操作
+export const retryPolling = atom(
+  null,
+  async (get, set, messageIndex: number) => {
+    const chatState = get(chatAtom);
+    const message = chatState.messages[messageIndex];
+
+    if (!message || (!message.retryParams && message.type !== 'tokenization_timeout')) {
+      return;
+    }
+
+    // 移除超时消息
+    const updatedMessages = chatState.messages.filter((_, index) => index !== messageIndex);
+
+    if (message.type === 'generation_timeout' && message.retryParams) {
+      const { taskId, contentId, isWorkflow, isVideo } = message.retryParams;
+
+      // 重新添加生成中消息
+      const generatingMessage = {
+        role: 'assistant' as const,
+        content: isVideo ? 'Generating video, please wait...' : 'Generating image, please wait...',
+        type: isVideo ? 'generating_video' as const : (isWorkflow ? 'modify_image' as const : 'generating_image' as const),
+        request_id: taskId
+      };
+
+      set(chatAtom, {
+        ...chatState,
+        messages: [...updatedMessages, generatingMessage],
+        isGenerating: true
+      });
+
+      // 重新启动轮询
+      pollImageGenerationTask(taskId, contentId, set, get, isWorkflow, isVideo).catch(err => {
+        console.error('Retry Poll Image Generation Task Failed:', err);
+      });
+
+    } else if (message.type === 'tokenization_timeout' && message.retryParams) {
+      const { contentId } = message.retryParams;
+
+      // 重新添加铸造中消息
+      const mintingMessage = {
+        role: 'assistant' as const,
+        content: 'Minting NFT, please wait...',
+        type: 'minting_nft' as const
+      };
+
+      set(chatAtom, {
+        ...chatState,
+        messages: [...updatedMessages, mintingMessage]
+      });
+
+      // 重新启动轮询
+      pollTokenizationTask(contentId, set, get).catch(err => {
+        console.error('Retry Poll Tokenization Task Failed:', err);
       });
     }
   }

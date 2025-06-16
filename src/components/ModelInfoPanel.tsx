@@ -17,7 +17,6 @@ import {
   FlaunchStatusResponse,
 } from "../store/tokenStore";
 import { Link } from "react-router-dom";
-import { GENERATE_IMAGE_SERVICE_CONFIG } from "../utils/plan";
 import { formatNumber } from "../utils/format";
 
 interface ModelInfoPanelProps {
@@ -186,6 +185,10 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
     }
   };
 
+  const getCredit = () => {
+    return model.cu * model.usage;
+  };
+
   return (
     <div className={styles.infoPanel}>
       {/* 第一行: 创建者信息 */}
@@ -230,7 +233,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
         {/* Credit */}
         <div className={styles.detailRow}>
           <span className={styles.detailLabel}>Credit</span>
-          <span className={styles.detailValue}>{formatNumber(model.usage * 5)}</span>
+          <span className={styles.detailValue}>{formatNumber(getCredit())}</span>
         </div>
 
         {/* Published */}
@@ -264,7 +267,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
               <div className="flex items-end gap-[1px]">
                 <span>Generate</span>
                 <span className="!text-xs">
-                  ({GENERATE_IMAGE_SERVICE_CONFIG.cu} Credits)
+                  ({model.cu} Credits)
                 </span>
               </div>
             </button>
@@ -305,7 +308,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
                       model?.model_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.FLAUNCH
                         ? "Flaunch"
                         : model?.model_tokenization?.launchpad === TOKENIZATION_LAUNCHPAD_TYPE.VIRTUALS
-                        ? "Virtuals" 
+                        ? "Virtuals"
                         : "Dexscreener"
                     }
                     className={styles.buttonIcon}

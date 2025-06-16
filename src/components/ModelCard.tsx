@@ -10,6 +10,7 @@ import {showDialogAtom} from '../store/dialogStore';
 import {accountAtom} from '../store/accountStore';
 import {showToastAtom} from "../store/imagesStore";
 import {formatNumber} from "../utils/format.ts";
+import { isVideoUrl } from '../utils/tools';
 
 interface ModelCardProps {
   model: Model;
@@ -32,11 +33,6 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
   const canToggleVisibility =
     accountState.role === 'admin' ||
     (accountState.did && accountState.did === localModel.creator);
-
-  // 格式化数字，每三位添加逗号
-  // const formatNumber = (num: number) => {
-  //   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  // };
 
   // 检查是否在训练中
   const isTraining = localModel.model_tran[0]?.train_state === 0 || localModel.model_tran[0]?.train_state === 1;
@@ -191,7 +187,41 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
       backdropFilter: 'blur(1.875rem)'
     }}>
       <div className={styles.modelCover}>
-        <img src={getCoverUrl()} alt={localModel.name} />
+        {isVideoUrl(localModel.cover) ? (
+          <video 
+            src={getCoverUrl()} 
+            className={styles.modelCover}
+            controls={false}
+            muted
+            playsInline
+            preload="metadata"
+            style={{ 
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderRadius: '0.5rem 0.5rem 0.5rem 1.875rem'
+            }}
+          >
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <img 
+            src={getCoverUrl()} 
+            alt={localModel.name}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderRadius: '0.5rem 0.5rem 0.5rem 1.875rem',
+              transition: 'transform 0.3s ease',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+              pointerEvents: 'none'
+            }}
+          />
+        )}
 
         <div className={styles.tagsContainer}>
           {isTraining && (
