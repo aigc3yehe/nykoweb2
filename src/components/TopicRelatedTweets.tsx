@@ -32,7 +32,7 @@ const TopicRelatedTweets: React.FC<TopicRelatedTweetsProps> = ({ topicName }) =>
         {tweetsState.isLoading ? (
           <div className={styles.loadingMessage}>
             Loading tweets...
-          </div>
+        </div>
         ) : (
           tweetsState.tweets.map((tweet) => (
             <TweetCard key={tweet.tweet_id} tweet={tweet} />

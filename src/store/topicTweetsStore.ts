@@ -7,10 +7,10 @@ export interface Tweet {
   publish_date: string;
   content: string;
   tweet_id: string;
-  view_count: number;
-  like_count: number;
-  comment_count: number;
-  retweet_count: number;
+  view_count: number | null;
+  like_count: number | null;
+  comment_count: number | null;
+  retweet_count: number | null;
   author_twitter: {
     name: string;
     subject: string;
@@ -50,7 +50,10 @@ export const topicTweetsAtom = atom<TopicTweetsState>(initialState);
 const CACHE_DURATION = 24 * 60 * 60 * 1000;
 
 // 数值格式化函数
-export const formatCount = (count: number): string => {
+export const formatCount = (count: number | null): string => {
+  if (count === null || count === undefined) {
+    return '0';
+  }
   if (count >= 1000000) {
     return (count / 1000000).toFixed(1) + 'M';
   } else if (count >= 1000) {

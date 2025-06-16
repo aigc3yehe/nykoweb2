@@ -136,78 +136,91 @@ const getProjectSlug = async (topicName: string): Promise<string | null> => {
   }
 };
 
-// 时间处理函数 - 将UTC时间转换为本地时间并靠近整点
-const processTimeData = (data: Array<{ date: string; value: number; }>): Array<{ date: string; value: number; }> => {
-  if (data.length === 0) return [];
+// 时间处理函数 - 处理历史数据并确保30个数据点
+const processTimeData = (data: Array<{ date: string; value: number; update_time: string; }>): Array<{ date: string; value: number; }> => {
+  console.log('[processTimeData] 原始数据:', data);
   
-  // 1. 转换时间并靠近整点
+  if (data.length === 0) {
+    console.log('[processTimeData] 数据为空，返回30个占位点');
+    return ensureThirtyDataPoints([]);
+  }
+  
+  // 1. 使用 update_time 而不是 date，并格式化为 M-D 格式（使用UTC时间）
   const processedData = data.map(item => {
-    // 解析UTC时间
-    const utcDate = new Date(item.date);
+    const updateDate = new Date(item.update_time);
+    // 使用 UTC 时间而不是本地时间
+    const month = updateDate.getUTCMonth() + 1; // 不补零
+    const day = updateDate.getUTCDate(); // 不补零
+    const formattedDate = `${month}-${day}`;
     
-    // 转换为本地时间
-    const localDate = new Date(utcDate.getTime());
-    
-    // 靠近整点处理
-    const minutes = localDate.getMinutes();
-    
-    // 如果分钟数>=30，向上取整到下一个小时；否则向下取整到当前小时
-    if (minutes >= 30) {
-      localDate.setHours(localDate.getHours() + 1);
-    }
-    localDate.setMinutes(0);
-    localDate.setSeconds(0);
-    localDate.setMilliseconds(0);
-    
-    // 格式化为 YYYY-MM-DD HH:00 格式
-    const formattedDate = localDate.toISOString().slice(0, 13) + ':00';
+    console.log(`[processTimeData] 处理数据点: update_time=${item.update_time} -> UTC日期=${updateDate.toISOString().split('T')[0]} -> 格式化日期=${formattedDate}, value=${item.value}`);
     
     return {
       date: formattedDate,
       value: item.value,
-      originalDate: item.date
+      originalUpdateTime: item.update_time
     };
   });
   
-  // 2. 按处理后的时间分组，如果同一时间点有多个值，取最高值
-  const groupedData = new Map<string, number>();
+  console.log('[processTimeData] 处理后的数据:', processedData);
+  
+  // 2. 按日期分组，如果同一日期有多个值，取最新的值
+  const groupedData = new Map<string, { value: number; updateTime: string }>();
   
   processedData.forEach(item => {
-    const existingValue = groupedData.get(item.date);
-    if (existingValue === undefined || item.value > existingValue) {
-      groupedData.set(item.date, item.value);
+    const existing = groupedData.get(item.date);
+    if (!existing || new Date(item.originalUpdateTime) > new Date(existing.updateTime)) {
+      groupedData.set(item.date, { 
+        value: item.value, 
+        updateTime: item.originalUpdateTime 
+      });
+      console.log(`[processTimeData] 分组数据: 日期=${item.date}, 值=${item.value}, 时间=${item.originalUpdateTime}`);
     }
   });
   
-  // 3. 转换回数组格式并排序
+  // 3. 转换回数组格式并按时间排序
   const result = Array.from(groupedData.entries())
-    .map(([date, value]) => ({ date, value }))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .map(([date, data]) => ({ date, value: data.value, updateTime: data.updateTime }))
+    .sort((a, b) => new Date(a.updateTime).getTime() - new Date(b.updateTime).getTime())
+    .map(({ date, value }) => ({ date, value }));
   
-  // 4. 填充缺失数据点
-  return fillMissingDataPoints(result);
+  console.log('[processTimeData] 排序后的结果:', result);
+  
+  // 4. 确保有30个数据点，不足时前补0
+  const finalResult = ensureThirtyDataPoints(result);
+  console.log('[processTimeData] 最终结果 (30个点):', finalResult);
+  
+  return finalResult;
 };
 
-// 数据填充函数 - 处理缺失数据点
-const fillMissingDataPoints = (data: Array<{ date: string; value: number; }>): Array<{ date: string; value: number; }> => {
-  if (data.length === 0) return [];
+// 确保30个数据点的函数 - 不足时前补0
+const ensureThirtyDataPoints = (data: Array<{ date: string; value: number; }>): Array<{ date: string; value: number; }> => {
+  console.log(`[ensureThirtyDataPoints] 输入数据长度: ${data.length}`);
   
-  const filledData: Array<{ date: string; value: number; }> = [];
-  
-  for (let i = 0; i < data.length; i++) {
-    const current = data[i];
-    filledData.push(current);
-    
-    // 如果当前值为0且有前面的数据，使用前面最近的非零值
-    if (current.value === 0 && filledData.length > 1) {
-      const lastNonZero = filledData.slice(0, -1).reverse().find(item => item.value > 0);
-      if (lastNonZero) {
-        filledData[filledData.length - 1] = { ...current, value: lastNonZero.value };
-      }
-    }
+  if (data.length >= 30) {
+    // 如果超过30个点，取最后30个
+    console.log('[ensureThirtyDataPoints] 数据超过30个，取最后30个');
+    return data.slice(-30);
   }
   
-  return filledData;
+  // 如果不足30个点，前面补0
+  const paddingCount = 30 - data.length;
+  const paddingData: Array<{ date: string; value: number; }> = [];
+  
+  console.log(`[ensureThirtyDataPoints] 需要补充 ${paddingCount} 个占位点`);
+  
+  for (let i = 0; i < paddingCount; i++) {
+    paddingData.push({
+      date: `1-1`, // 使用 1-1 作为占位符日期
+      value: 0
+    });
+  }
+  
+  const result = [...paddingData, ...data];
+  console.log(`[ensureThirtyDataPoints] 最终数据长度: ${result.length}`);
+  console.log('[ensureThirtyDataPoints] 最终数据:', result);
+  
+  return result;
 };
 
 // 获取统计数据的主函数
@@ -296,7 +309,7 @@ export const fetchTopicStats = atom(
           change24h: mindshareCurrentData.success ? mindshareCurrentData.data.mindshare_diff_24h : 0,
           history: processTimeData(
             mindshareHistoryData.success 
-              ? mindshareHistoryData.data.map(item => ({ date: item.date, value: item.mindshare }))
+              ? mindshareHistoryData.data.map(item => ({ date: item.date, value: item.mindshare, update_time: item.update_time }))
               : []
           ),
         },
@@ -305,7 +318,7 @@ export const fetchTopicStats = atom(
           change24h: authorsCurrentData.success ? authorsCurrentData.data.change_24h : 0,
           history: processTimeData(
             authorsHistoryData.success 
-              ? authorsHistoryData.data.map(item => ({ date: item.date, value: item.author_count }))
+              ? authorsHistoryData.data.map(item => ({ date: item.date, value: item.author_count, update_time: item.update_time }))
               : []
           ),
         },
@@ -314,7 +327,7 @@ export const fetchTopicStats = atom(
           change24h: tweetsCurrentData.success ? tweetsCurrentData.data.change_24h : 0,
           history: processTimeData(
             tweetsHistoryData.success 
-              ? tweetsHistoryData.data.map(item => ({ date: item.date, value: item.tweet_count }))
+              ? tweetsHistoryData.data.map(item => ({ date: item.date, value: item.tweet_count, update_time: item.update_time }))
               : []
           ),
         },

@@ -44,30 +44,63 @@ const StatsCard: React.FC<StatsCardProps> = ({
   // 判断变化趋势
   const isPositive = change24h > 0;
   const isNegative = change24h < 0;
+  
+  // 根据24h变化确定图表颜色
+  const getChartColor = (): string => {
+    if (change24h >= 0) {
+      return '#34C759'; // 绿色：正数或0
+    } else {
+      return '#F87171'; // 红色：负数
+    }
+  };
 
   // 格式化时间显示
   const formatTooltipDate = (dateString: string): string => {
+    console.log('[formatTooltipDate] 输入日期字符串:', dateString);
+    
+    // 如果是占位符日期，直接返回
+    if (dateString === '--' || dateString === '1-1') {
+      console.log('[formatTooltipDate] 占位符日期，直接返回');
+      return dateString;
+    }
+    
+    // 如果已经是 M-D 格式，直接返回
+    if (/^\d{1,2}-\d{1,2}$/.test(dateString)) {
+      console.log('[formatTooltipDate] 已经是 M-D 格式，直接返回:', dateString);
+      return dateString;
+    }
+    
     try {
       const date = new Date(dateString);
-      // 格式化为本地时间显示，例如：06-15 13:00
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hour = String(date.getHours()).padStart(2, '0');
-      return `${month}-${day} ${hour}:00`;
+      // 格式化为 M-D 格式，不补零
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      const result = `${month}-${day}`;
+      console.log('[formatTooltipDate] 转换结果:', result);
+      return result;
     } catch (error) {
+      console.log('[formatTooltipDate] 转换失败，返回原字符串:', dateString);
       return dateString;
     }
   };
 
   // 自定义Tooltip组件
   const CustomTooltip = ({ active, payload, label }: any) => {
+    console.log('[CustomTooltip] active:', active, 'payload:', payload, 'label:', label);
+    
     if (active && payload && payload.length) {
       const value = payload[0].value;
       const formattedValue = type === 'mindshare' ? formatPercentage(value) : formatNumber(value);
       
+      // 从 payload 中获取完整的数据项，包含 date 字段
+      const dataItem = payload[0].payload;
+      const actualDate = dataItem?.date || label;
+      
+      console.log('[CustomTooltip] dataItem:', dataItem, 'actualDate:', actualDate);
+      
       return (
         <div className={styles.tooltip}>
-          <p className={styles.tooltipDate}>{formatTooltipDate(label)}</p>
+          <p className={styles.tooltipDate}>{formatTooltipDate(actualDate)}</p>
           <p className={styles.tooltipValue}>{formattedValue}</p>
         </div>
       );
@@ -135,10 +168,10 @@ const StatsCard: React.FC<StatsCardProps> = ({
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#FF6A00"
+                stroke={getChartColor()}
                 strokeWidth={1}
                 dot={false}
-                activeDot={{ r: 2, fill: '#FF6A00' }}
+                activeDot={{ r: 2, fill: getChartColor() }}
               />
               <Tooltip content={<CustomTooltip />} />
             </LineChart>
