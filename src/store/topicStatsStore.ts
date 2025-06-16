@@ -265,7 +265,7 @@ export const fetchTopicStats = atom(
       console.log('[topicStatsStore] Got project slug:', slug);
 
       // 2. 并行获取所有数据
-      const baseUrl = 'http://43.153.40.155:4004';
+      const baseUrl = '/infofi-api';
       const headers = {
         'Authorization': `Bearer ${import.meta.env.VITE_INFOFI_BEARER_TOKEN}`,
       };

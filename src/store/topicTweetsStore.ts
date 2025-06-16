@@ -179,7 +179,7 @@ export const fetchTopicTweets = atom(
       console.log('[topicTweetsStore] Got project slug:', slug);
 
       // 2. 获取推文数据
-      const baseUrl = 'http://43.153.40.155:4004';
+      const baseUrl = '/infofi-api';
       const headers = {
         'Authorization': `Bearer ${import.meta.env.VITE_INFOFI_BEARER_TOKEN}`,
       };
