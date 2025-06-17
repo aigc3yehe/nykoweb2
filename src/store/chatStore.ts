@@ -1147,7 +1147,7 @@ export const sendMessage = atom(
       console.log('request_id:', request_id, 'content_id:', content_id, 'isVideo:', isVideo);
       if (request_id) {
         // 根据任务类型传递正确的参数
-        const cu = isVideo ? 300 : 35; // flux 35
+        const cu = isWorkflow ? (isVideo ? 300 : 35) : 5; // flux 35
         pollImageGenerationTask(request_id, content_id, cu, set, get, isWorkflow, isVideo).catch(err => {
           console.error('poll Image Generation Task Failed:', err);
         });
