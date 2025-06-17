@@ -25,6 +25,12 @@ export interface AccountState {
   plan: string;
   linked_wallet: string | null;
   geni: number | null;
+  referrals: {
+    invite_code: string | null;
+    referrer_code: string | null;
+    point_reward_ratio: number;
+    referrer_twitter?: Twitter | null;
+  } | null;
 }
 
 // 初始账户状态
@@ -44,6 +50,7 @@ const initialState: AccountState = {
   plan: "Free",
   linked_wallet: null,
   geni: null,
+  referrals: null,
 };
 
 // 创建账户状态原子
@@ -78,6 +85,17 @@ export const setUser = atom(null, async (get, set, user: User | null) => {
         const result = await queryUser(queryParams);
         const planResult = await queryUserPlan(queryParams);
 
+
+
+        const referralsData = result.data.referrals ? {
+          invite_code: result.data.referrals.invite_code,
+          referrer_code: result.data.referrals.referrer_code || null,
+          point_reward_ratio: result.data.referrals.point_reward_ratio,
+          referrer_twitter: result.data.referrals.referrer_twitter || null
+        } : null;
+
+
+
         set(accountAtom, {
           user,
           twitter: result.data.twitter,
@@ -94,7 +112,10 @@ export const setUser = atom(null, async (get, set, user: User | null) => {
           plan: planResult.data.plan_type,
           linked_wallet: result.data.linked_wallet || null,
           geni: result.data.geni || 1,
+          referrals: referralsData,
         });
+
+
       } catch (error) {
         // 如果查询失败，仍使用本地用户信息
         set(accountAtom, {
@@ -120,6 +141,7 @@ export const setUser = atom(null, async (get, set, user: User | null) => {
           plan: "free", // Fallback plan
           linked_wallet: null,
           geni: 1,
+          referrals: null,
         });
       }
     } else {
@@ -147,6 +169,7 @@ export const setUser = atom(null, async (get, set, user: User | null) => {
         plan: "Free",
         linked_wallet: null,
         geni: 0,
+        referrals: null,
       });
     }
   } catch (error) {
@@ -326,3 +349,16 @@ export const linkedWallet = async (did: string, address: string) => {
     throw error;
   }
 };
+
+// 更新邀请码信息
+export const updateReferrals = atom(null, (get, set, referrals: {
+  invite_code: string | null;
+  referrer_code: string | null;
+  point_reward_ratio: number;
+} | null) => {
+  const state = get(accountAtom);
+  set(accountAtom, {
+    ...state,
+    referrals,
+  });
+});

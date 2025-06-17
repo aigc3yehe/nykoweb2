@@ -34,8 +34,10 @@
   overflow: hidden; /* 防止内容溢出 */
 }
 
+/* 第一个卡片（话题云）：移除背景图片，让TopicCloud组件自己处理样式 */
 .featureCard:first-child {
-  background-image: url('/public/sac_left.png');
+  background: transparent;
+  padding: 0; /* 移除padding，让TopicCloud完全控制内部布局 */
 }
 
 .featureCard:last-child {

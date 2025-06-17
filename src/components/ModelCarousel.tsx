@@ -9,6 +9,7 @@ import { fetchWorkflowEditCarousel } from '../store/workflowStore';
 import { showDialogAtom } from '../store/dialogStore';
 import { showToastAtom } from "../store/imagesStore";
 import delCarouselIcon from '../assets/del_carousel.svg';
+import { isVideoUrl } from '../utils/tools';
 
 interface ModelCarouselProps {
   images: string[];
@@ -119,11 +120,25 @@ export default function ModelCarousel({
         {currentImages.map((image, index) => (
           <div key={index} className={styles.imageWrapper}>
             <div className={styles.imageContainer}>
-              <img 
-                src={image || emptyCoverIcon} 
-                alt={`Carousel ${currentIndex + index}`}
-                className={styles.carouselImage}
-              />
+              {isVideoUrl(image) ? (
+                <video 
+                  src={image || emptyCoverIcon} 
+                  className={styles.carouselImage}
+                  controls={false}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  style={{ objectFit: 'cover' }}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <img 
+                  src={image || emptyCoverIcon} 
+                  alt={`Carousel ${currentIndex + index}`}
+                  className={styles.carouselImage}
+                />
+              )}
               
               {/* 第一张图的删除按钮 */}
               {index === 0 && (

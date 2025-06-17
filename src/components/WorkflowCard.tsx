@@ -11,6 +11,7 @@ import {showDialogAtom} from '../store/dialogStore';
 import {accountAtom} from '../store/accountStore';
 import {showToastAtom} from "../store/imagesStore";
 import {formatNumber} from "../utils/format.ts";
+import { isVideoUrl } from '../utils/tools';
 
 interface WorkflowCardProps {
   workflow: Workflow;
@@ -196,13 +197,48 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
       backdropFilter: 'blur(1.875rem)'
     }}>
       <div className={styles.workflowCover}>
-        <img
-          src={getCoverUrl()}
-          alt={localWorkflow.name}
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = emptyCoverIcon;
-          }}
-        />
+        {localWorkflow.cover && isVideoUrl(localWorkflow.cover) ? (
+          <video 
+            src={getCoverUrl()} 
+            className={styles.workflowCover}
+            controls={false}
+            muted
+            playsInline
+            preload="metadata"
+            style={{ 
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderRadius: '0.5rem 0.5rem 0.5rem 1.875rem'
+            }}
+            onError={(e) => {
+              // 如果视频加载失败，可以设置一个默认图片
+              console.error('Video failed to load:', e);
+            }}
+          >
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <img
+            src={getCoverUrl()}
+            alt={localWorkflow.name}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = emptyCoverIcon;
+            }}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderRadius: '0.5rem 0.5rem 0.5rem 1.875rem',
+              transition: 'transform 0.3s ease',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+              pointerEvents: 'none'
+            }}
+          />
+        )}
 
         <div className={styles.tagsContainer}>
           {isTraining && (

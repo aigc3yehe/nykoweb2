@@ -10,14 +10,16 @@ import { useAtom } from 'jotai';
 import { accountAtom } from '../store/accountStore';
 import { modelDetailAtom } from '../store/modelStore';
 import { workflowDetailAtom } from '../store/workflowStore';
+import { useNavigate } from 'react-router-dom';
+import { encodeTopicName } from '../store/topicStore';
 
 interface ContentHeaderProps {
-  activeTab: 'models' | 'workflows' |'images';
-  setActiveTab: (tab: 'models' | 'workflows' | 'images') => void;
+  activeTab: 'models' | 'workflows' |'images' | 'agentApps';
+  setActiveTab: (tab: 'models' | 'workflows' | 'images' | 'agentApps') => void;
   ownedOnly: boolean;
   setOwnedOnly: (owned: boolean) => void;
-  sortOption: 'New Model' | 'Popular';
-  setSortOption: (option: 'New Model' | 'Popular') => void;
+  sortOption: 'Newest' | 'Popular';
+  setSortOption: (option: 'Newest' | 'Popular') => void;
   isModelDetailMode?: boolean;
   isWorkflowDetailMode?: boolean;
   modelName?: string;
@@ -49,6 +51,12 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
 
   const [accountState] = useAtom(accountAtom);
   const [canEdit, setCanEdit] = useState(false);
+  const navigate = useNavigate();
+
+  // hashtag点击处理函数
+  const handleTagClick = (tag: string) => {
+    navigate(`/?topic=${encodeTopicName(tag)}`);
+  };
 
   useEffect(() => {
     console.log('isModelDetailMode', isModelDetailMode);
@@ -86,18 +94,23 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
             <span className={styles.modelsLabel}>{isModelDetailMode ? 'Models' : 'Workflows'}</span>
             <div className={styles.divider}></div>
             <span className={styles.modelName}>{modelName}</span>
-            
+
             {tags.length > 0 && (
               <div className={styles.tagsContainer}>
                 {tags.map((tag, index) => (
-                  <span key={index} className={styles.tag}>
+                  <span 
+                    key={index} 
+                    className={styles.tag}
+                    onClick={() => handleTagClick(tag)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     {tag}
                   </span>
                 ))}
               </div>
             )}
           </div>
-          
+
           <div className={styles.navigationRight}>
             <button className={styles.actionButton} onClick={onShareClick}>
               <img src={shareIcon} alt="Share" className={styles.actionIcon} />
@@ -135,21 +148,29 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
         >
           Images
         </div>
+        <div
+          className={`${styles.tab} ${activeTab === 'agentApps' ? styles.active : styles.inactive}`}
+          onClick={() => setActiveTab('agentApps')}
+        >
+          Agent Apps
+        </div>
       </div>
 
       <div className={styles.controlsGroup}>
-        <div
-          className={styles.checkboxContainer}
-          onClick={() => setOwnedOnly(!ownedOnly)}
-        >
-          <div className={styles.checkboxIcon}>
-            <img
-              src={ownedOnly ? checkboxSelected : checkboxNormal}
-              alt="checkbox"
-            />
+        {activeTab !== 'agentApps' && (
+          <div
+            className={styles.checkboxContainer}
+            onClick={() => setOwnedOnly(!ownedOnly)}
+          >
+            <div className={styles.checkboxIcon}>
+              <img
+                src={ownedOnly ? checkboxSelected : checkboxNormal}
+                alt="checkbox"
+              />
+            </div>
+            <span className={styles.checkboxLabel}>Owned</span>
           </div>
-          <span className={styles.checkboxLabel}>Owned</span>
-        </div>
+        )}
 
         {(activeTab === 'models' || activeTab === 'workflows') && (
           <div className={styles.dropdownContainer} ref={dropdownRef}>
@@ -162,12 +183,12 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
 
             {dropdownOpen && (
               <div className={styles.dropdownMenu}>
-                {['New Model', 'Popular'].map((option) => (
+                {['Newest', 'Popular'].map((option) => (
                   <div
                     key={option}
                     className={styles.dropdownItem}
                     onClick={() => {
-                      setSortOption(option as 'New Model' | 'Popular');
+                      setSortOption(option as 'Newest' | 'Popular');
                       setDropdownOpen(false);
                     }}
                   >

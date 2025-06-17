@@ -98,8 +98,27 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
     });
   };
 
-  // 计算图片高度，保持原始宽高比
-  const calculateImageHeight = () => {
+  // 新增：判断是否为视频类型
+  const isVideo = () => {
+    return localImageDetail?.type === 'video' || image.type === 'video';
+  };
+
+  // 获取媒体URL（图片或视频）
+  const getMediaUrl = () => {
+    const url = localImageDetail?.url || image.url || undefined;
+    if (url != undefined) {
+      // 对于视频，不需要ImageKit的图片处理参数
+      if (isVideo()) {
+        return url;
+      } else {
+        return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-615,q-100`;
+      }
+    }
+    return undefined;
+  };
+
+  // 计算媒体高度，保持原始宽高比
+  const calculateMediaHeight = () => {
     // 优先使用详细信息中的宽高
     if (localImageDetail?.width && localImageDetail?.height) {
       const aspectRatio = localImageDetail.height / localImageDetail.width;
@@ -135,15 +154,6 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
     }
   };
 
-  // 获取图片URL
-  const getImageUrl = () => {
-    const url = localImageDetail?.url || image.url || undefined;
-    if (url != undefined) {
-      return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-615,q-100`;
-    }
-    return undefined;
-  };
-
   // 获取模型名称
   const getModelName = () => {
     let defaultName = ""
@@ -169,12 +179,30 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
       </button>
 
       <div className={styles.modalContent} onClick={handleContentClick}>
-        <div className={styles.imageContainer} style={{ height: `${calculateImageHeight()}rem` }}>
-          {getImageUrl() ? (
-            <img src={getImageUrl()} alt={`image ${image.id}`} className={styles.image} />
+        <div className={styles.imageContainer} style={{ height: `${calculateMediaHeight()}rem` }}>
+          {getMediaUrl() ? (
+            isVideo() ? (
+              // 视频渲染 - 带完整控件
+              <video
+                src={getMediaUrl()}
+                className={styles.image}
+                controls={true}
+                playsInline
+                preload="metadata"
+                style={{ objectFit: 'contain' }}
+              >
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              // 图片渲染
+              <img src={getMediaUrl()} alt={`image ${image.id}`} className={styles.image} />
+            )
           ) : (
             <div className={styles.placeholderImage}>
-              {image.state === -1 ? 'Failed to generate' : 'Generating...'}
+              {image.state === -1 ?
+                (isVideo() ? 'Failed to generate video' : 'Failed to generate') :
+                (isVideo() ? 'Generating video...' : 'Generating...')
+              }
             </div>
           )}
           {isLoading && (

@@ -11,8 +11,11 @@ import uploadIcon from "../assets/upload.svg";
 import createWorkflowIcon from "../assets/create_workflow.svg";
 import deleteIcon from "../assets/delete.svg";
 import deleteDisableIcon from "../assets/delete_disable.svg";
-import { GENERATE_IMAGE_SERVICE_CONFIG, TRAIN_MODEL_SERVICE_CONFIG, RUN_WORKFLOW_SERVICE_CONFIG } from "../utils/plan";
+import {
+  TRAIN_MODEL_SERVICE_CONFIG,
+} from "../utils/plan";
 import { WorkflowDetail } from '../store/workflowStore';
+import xIcon from "../assets/x.svg";
 
 interface ImageUploadState {
   totalCount: number;
@@ -36,7 +39,14 @@ export interface ChatMessageProps {
     | "workflow_generate_result"
     | "create_workflow_details"
     | "modify_image"
-    | "uploaded_image";
+    | "uploaded_image"
+    | "generating_video"
+    | "video_generate_result"
+    | "animating_image"
+    | "minting_nft"
+    | "generation_timeout"
+    | "tokenization_timeout"
+    | "minting_success";
   imageUploadState?: ImageUploadState;
   uploadedFiles?: Array<{ name: string; url: string }>;
   modelParam?: {
@@ -45,6 +55,8 @@ export interface ChatMessageProps {
   };
   agree?: boolean;
   images?: string[];
+  videos?: string[];
+  cu?: number;
   imageWidth?: number;
   imageHeight?: number;
   request_id?: string;
@@ -52,12 +64,12 @@ export interface ChatMessageProps {
   workflow_description?: string;
   workflow_prompt?: string;
   workflow_input?: string;
-  workflow_model?: string;
+  workflow_output?: string;
+  token_id?: string;
   onAddImage?: () => void;
   onConfirmImages?: () => void;
   onRemoveImage?: (url: string) => void;
   onAgree?: () => void;
-  onSelectModel?: (model: string) => void;
   onUpdatePrompt?: (text: string) => void;
   onChangeInput?: (type: string) => void;
   onChangeOutput?: (type: string) => void;
@@ -82,6 +94,25 @@ export interface ChatMessageProps {
   workflow_extra_prompt?: string;
   onUpdateWorkflowExtraPrompt?: (prompt: string) => void;
   currentWorkflow?: WorkflowDetail | null;
+  isLastMessage?: boolean;
+  onPartiallyModify?: () => void;
+  onAnimate?: () => void;
+  onMintNFT?: () => void;
+  aiProviders?: {
+    providers: Array<{
+      name: string;
+      models: Array<{
+        name: string;
+        support_input_types: string[];
+        support_output_types: string[];
+      }>;
+    }>;
+    selectedProvider: string;
+    selectedModel: string;
+    isLoading: boolean;
+  };
+  onSelectProvider?: (provider: string) => void;
+  onRetryPolling?: () => void;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -98,6 +129,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   modelParam = { modelName: undefined, description: undefined },
   agree = false,
   images = [],
+  videos = [],
+  cu = 0,
   imageWidth = 256,
   imageHeight = 256,
   request_id = "",
@@ -105,12 +138,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   workflow_description = "",
   workflow_prompt = "",
   workflow_input = "",
-  workflow_model = "",
+  workflow_output = "",
+  token_id,
   onAddImage,
   onConfirmImages,
   onRemoveImage,
   onAgree,
-  onSelectModel,
   onUpdatePrompt,
   onChangeInput,
   onChangeOutput,
@@ -129,6 +162,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   workflow_extra_prompt,
   onUpdateWorkflowExtraPrompt,
   currentWorkflow,
+  isLastMessage = false,
+  onPartiallyModify,
+  onAnimate,
+  onMintNFT,
+  aiProviders,
+  onSelectProvider,
+  onRetryPolling,
 }) => {
   // 格式化文件名以适应显示
   const formatFileName = (name: string): string => {
@@ -267,6 +307,33 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         <div className="text-[0.625rem] leading-[0.625rem] font-medium text-[#88A4C2] text-start font-['Jura']">
           {cu} Credits
         </div>
+
+        {/* 新增：扩展选项 - 只在最后一条消息时显示 */}
+        {isLastMessage && (
+          <div className={styles.extensionsContainer}>
+            <div className={styles.extensionsLabel}>Extensions</div>
+            <div className={styles.extensionsButtons}>
+              <button
+                className={styles.extensionButton}
+                onClick={onPartiallyModify}
+              >
+                Partially Modify (35 credits)
+              </button>
+              <button
+                className={styles.extensionButton}
+                onClick={onAnimate}
+              >
+                Animate (300 credits)
+              </button>
+              <button
+                className={styles.extensionButton}
+                onClick={onMintNFT}
+              >
+                Mint as NFT (50 credits)
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -431,7 +498,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   const [isFocused, setIsFocused] = useState(false);
 
   // 在组件内部添加状态来跟踪下拉菜单是否显示
-  const [showModelDropdown, setShowModelDropdown] = useState(false);
+  const [showProviderDropdown, setShowProviderDropdown] = useState(false);
 
   // 添加滚动条相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -496,17 +563,38 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     }
   }, [workflow_prompt]);
 
-  // 添加模型选项列表
-  const modelOptions = [
-    { value: 'gpt-4o', label: 'GPT-image' }
-  ];
+  // 获取当前选择的提供商和模型信息
+  const getCurrentProvider = () => {
+    return aiProviders?.providers.find(p => p.name === aiProviders.selectedProvider);
+  };
 
-  const getModelLabel = (model: string) => {
-    if (model === "gpt-4o") {
-      return 'GPT-image';
-    }
-    return 'GPT-image';
-  }
+  const getCurrentModel = () => {
+    const provider = getCurrentProvider();
+    return provider?.models.find(m => m.name === aiProviders?.selectedModel);
+  };
+
+  // 获取支持的输入输出类型
+  const getSupportedInputTypes = () => {
+    const model = getCurrentModel();
+    return model?.support_input_types || [];
+  };
+
+  const getSupportedOutputTypes = () => {
+    const model = getCurrentModel();
+    return model?.support_output_types || [];
+  };
+
+  // 检查类型是否被支持
+  const isTypeSupported = (type: string, supportedTypes: string[]): boolean => {
+    const typeMap: { [key: string]: string } = {
+      'Image': 'image',
+      'Text': 'text',
+      'Image + Text': 'image,text',
+      'Video': 'video'
+    };
+
+    return supportedTypes.includes(typeMap[type] || type);
+  };
 
   // 添加创建工作流中的状态UI
   const renderCreatingWorkflowComponent = () => {
@@ -614,9 +702,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
-  // 修改工作流组件，创建成功后隐藏标题
+  // 修改工作流组件，去掉Model选择部分，只保留Provider选择但显示为Model
   const renderCreateWorkflowComponent = () => {
     const isPromptTooLong = workflow_prompt.length > 300;
+    const supportedInputTypes = getSupportedInputTypes();
+    const supportedOutputTypes = getSupportedOutputTypes();
+
+    const isKlingProvider = () => {
+      return aiProviders?.selectedProvider?.toLocaleLowerCase()?.includes('kling');
+    }
 
     return (
       <>
@@ -625,159 +719,151 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         <div className={styles.workflowTitle}>
           {workflow_name} - Workflow
         </div>
-         {/* Model选择部分 */}
-         <div className={styles.workflowSection}>
-                <div className={styles.sectionLabel}>Model:</div>
-                <div className={styles.modelSelectContainer}>
-                  <button
-                    className={styles.modelSelectButton}
-                    onClick={() => !isCreatingWorkflow && setShowModelDropdown(!showModelDropdown)}
-                    disabled={isCreatingWorkflow}
-                    type="button"
+
+        {/* Model选择部分 - 实际是Provider选择，但显示为Model */}
+        <div className={styles.workflowSection}>
+          <div className={styles.sectionLabel}>Model:</div>
+          <div className={styles.modelSelectContainer}>
+            <button
+              className={styles.modelSelectButton}
+              onClick={() => !isCreatingWorkflow && setShowProviderDropdown(!showProviderDropdown)}
+              disabled={isCreatingWorkflow || aiProviders?.isLoading}
+              type="button"
+            >
+              <span className={styles.buttonText}>
+                {aiProviders?.isLoading ? 'Loading...' : (aiProviders?.selectedProvider || 'Select Model')}
+              </span>
+              <img
+                src={selectModelIcon}
+                alt="Select"
+                className={styles.selectModelIcon}
+              />
+            </button>
+
+            {/* Provider下拉菜单 */}
+            {showProviderDropdown && aiProviders?.providers && (
+              <div className={styles.modelDropdown}>
+                {aiProviders.providers.map((provider) => (
+                  <div
+                    key={provider.name}
+                    className={`${styles.modelOption} ${aiProviders.selectedProvider === provider.name ? styles.modelOptionSelected : ''}`}
+                    onClick={() => {
+                      if (onSelectProvider) onSelectProvider(provider.name);
+                      setShowProviderDropdown(false);
+                    }}
                   >
-                    <span className={styles.buttonText}>
-                      {getModelLabel(workflow_model || "GPT-4o")}
-                    </span>
-                    <img
-                      src={selectModelIcon}
-                      alt="Select"
-                      className={styles.selectModelIcon}
-                    />
-                  </button>
-
-                  {/* 下拉菜单 */}
-                  {showModelDropdown && (
-                    <div className={styles.modelDropdown}>
-                      {modelOptions.map((option) => (
-                        <div
-                          key={option.value}
-                          className={`${styles.modelOption} ${workflow_model === option.value ? styles.modelOptionSelected : ''}`}
-                          onClick={() => {
-                            if (onSelectModel) onSelectModel(option.value);
-                            setShowModelDropdown(false);
-                          }}
-                        >
-                          {option.label}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Prompt输入部分 */}
-              <div className={styles.workflowSection}>
-                <div className={styles.sectionLabel}>Prompt:</div>
-                <div className={`${styles.promptInputContainer} ${isFocused ? styles.focused : ''}`}>
-                  <div className={styles.promptTextareaWrapper}>
-                    <textarea
-                      ref={promptTextareaRef}
-                      className={styles.promptInput}
-                      value={workflow_prompt}
-                      onChange={(e) => onUpdatePrompt && onUpdatePrompt(e.target.value)}
-                      onFocus={() => setIsFocused(true)}
-                      onBlur={() => setIsFocused(false)}
-                      onScroll={handlePromptTextareaScroll}
-                      placeholder="Enter your prompt here"
-                      maxLength={300}
-                      disabled={isCreatingWorkflow}
-                    />
-
-                    {/* 自定义滚动条 */}
-                    {showPromptCustomScrollbar && (
-                      <div className={styles.promptCustomScrollbarTrack}>
-                        <div
-                          ref={promptScrollbarRef}
-                          className={styles.promptCustomScrollbarThumb}
-                          style={{
-                            height: `${getPromptScrollThumbHeight()}px`,
-                            top: `${getPromptScrollThumbTop()}px`
-                          }}
-                          onMouseDown={handlePromptScrollThumbDrag}
-                        />
-                      </div>
-                    )}
+                    {provider.name}
                   </div>
-
-                  <div className={`${styles.charCount} ${isPromptTooLong ? styles.charCountError : ''}`}>
-                    Max 300 Chars
-                  </div>
-                </div>
+                ))}
               </div>
+            )}
+          </div>
+        </div>
 
-              {/* Reference Image上传部分 */}
-              {renderReferenceImageSection()}
+        {/* Prompt输入部分 */}
+        <div className={styles.workflowSection}>
+          <div className={styles.sectionLabel}>Prompt:</div>
+          <div className={`${styles.promptInputContainer} ${isFocused ? styles.focused : ''}`}>
+            <div className={styles.promptTextareaWrapper}>
+              <textarea
+                ref={promptTextareaRef}
+                className={styles.promptInput}
+                value={workflow_prompt}
+                onChange={(e) => onUpdatePrompt && onUpdatePrompt(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                onScroll={handlePromptTextareaScroll}
+                placeholder="Enter your prompt here"
+                maxLength={800}
+                disabled={isCreatingWorkflow}
+              />
 
-              {/* Input类型选择部分 */}
-              <div className={styles.workflowSection}>
-                <div className={styles.sectionLabel}>Input:</div>
-                <div className={styles.optionsContainer}>
-                  <button
-                    className={`${styles.optionButton} ${workflow_input === "Image" ? styles.optionSelected : ''}`}
-                    onClick={() => onChangeInput && onChangeInput("Image")}
-                    disabled={isCreatingWorkflow}
-                  >
-                    Image
-                  </button>
-                  <button
-                    className={`${styles.optionButton} ${styles.disabled}`}
-                    disabled={true}
-                  >
-                    Text
-                  </button>
-                  <button
-                    className={`${styles.optionButton} ${workflow_input === "Image + Text" ? styles.optionSelected : ''}`}
-                    onClick={() => onChangeInput && onChangeInput("Image + Text")}
-                    disabled={isCreatingWorkflow}
-                  >
-                    Image + Text
-                  </button>
+              {/* 自定义滚动条 */}
+              {showPromptCustomScrollbar && (
+                <div className={styles.promptCustomScrollbarTrack}>
+                  <div
+                    ref={promptScrollbarRef}
+                    className={styles.promptCustomScrollbarThumb}
+                    style={{
+                      height: `${getPromptScrollThumbHeight()}px`,
+                      top: `${getPromptScrollThumbTop()}px`
+                    }}
+                    onMouseDown={handlePromptScrollThumbDrag}
+                  />
                 </div>
-              </div>
+              )}
+            </div>
 
-              {/* Output类型选择部分 */}
-              <div className={styles.workflowSection}>
-                <div className={styles.sectionLabel}>Output:</div>
-                <div className={styles.optionsContainer}>
-                  <button
-                    className={`${styles.optionButton} ${styles.optionSelected}`}
-                    onClick={() => onChangeOutput && onChangeOutput("Image")}
-                    disabled={isCreatingWorkflow}
-                  >
-                    Image
-                  </button>
-                  <button
-                    className={`${styles.optionButton} ${styles.disabled}`}
-                    disabled={true}
-                  >
-                    Text
-                  </button>
-                  <button
-                    className={`${styles.optionButton} ${styles.disabled}`}
-                    disabled={true}
-                  >
-                    Image + Text
-                  </button>
-                </div>
-              </div>
+            <div className={`${styles.charCount} ${isPromptTooLong ? styles.charCountError : ''}`}>
+              Max 800 Chars
+            </div>
+          </div>
+        </div>
 
-              {/* 确认按钮 */}
-              <div className={styles.confirmWorkflowButtonContainer}>
+        {/* Reference Image上传部分 */}
+        {!isKlingProvider() && renderReferenceImageSection()}
+
+        {/* Input类型选择部分 */}
+        <div className={styles.workflowSection}>
+          <div className={styles.sectionLabel}>Input:</div>
+          <div className={styles.optionsContainer}>
+            {['Image', 'Text', 'Image + Text'].map((type) => {
+              const isSupported = isTypeSupported(type, supportedInputTypes);
+              const isSelected = workflow_input === type;
+
+              return (
                 <button
-                  className={styles.confirmWorkflowButton}
-                  onClick={onCreateWorkflow}
-                  disabled={isCreatingWorkflow}
+                  key={type}
+                  className={`${styles.optionButton} ${isSelected ? styles.optionSelected : ''} ${!isSupported ? styles.disabled : ''}`}
+                  onClick={() => isSupported && onChangeInput && onChangeInput(type)}
+                  disabled={isCreatingWorkflow || !isSupported}
                 >
-                  Confirm
+                  {type}
                 </button>
-              </div>
-        </div>)}
+              );
+            })}
+          </div>
+        </div>
 
-        {/* 创建中状态 */}
-        {isCreatingWorkflow && renderCreatingWorkflowComponent()}
+        {/* Output类型选择部分 */}
+        <div className={styles.workflowSection}>
+          <div className={styles.sectionLabel}>Output:</div>
+          <div className={styles.optionsContainer}>
+            {['Image', 'Text', 'Video'].map((type) => {
+              const isSupported = isTypeSupported(type, supportedOutputTypes);
+              const isSelected = workflow_output === type;
 
-        {/* 创建成功状态 */}
-        {creationSuccess && renderWorkflowSuccessComponent()}
+              return (
+                <button
+                  key={type}
+                  className={`${styles.optionButton} ${isSelected ? styles.optionSelected : ''} ${!isSupported ? styles.disabled : ''}`}
+                  onClick={() => isSupported && onChangeOutput && onChangeOutput(type)}
+                  disabled={isCreatingWorkflow || !isSupported}
+                >
+                  {type}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 确认按钮 */}
+        <div className={styles.confirmWorkflowButtonContainer}>
+          <button
+            className={styles.confirmWorkflowButton}
+            onClick={onCreateWorkflow}
+            disabled={isCreatingWorkflow}
+          >
+            Confirm
+          </button>
+        </div>
+      </div>)}
+
+      {/* 创建中状态 */}
+      {isCreatingWorkflow && renderCreatingWorkflowComponent()}
+
+      {/* 创建成功状态 */}
+      {creationSuccess && renderWorkflowSuccessComponent()}
       </>
     );
   };
@@ -975,18 +1061,208 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
+  // 新增：视频生成中组件
+  const renderGeneratingVideoComponent = () => {
+    return (
+      <div className={styles.generatingIndicator} key={request_id}>
+        <img
+          src={uploadingIcon}
+          alt="Generating"
+          className={styles.uploadingIcon}
+        />
+        <span className={styles.generatingText}>
+          Generating video, please wait...(ETA 600 sec)
+        </span>
+      </div>
+    );
+  };
+
+  // 新增：视频生成结果组件
+  const renderVideoResultComponent = (cu: number) => {
+    return (
+      <div className={styles.imageResultContainer}>
+        <div className={styles.generatedImagesGrid}>
+          {/* 显示第一个视频 */}
+          {videos.length > 0 && (
+            <div
+              className={styles.generatedImageWrapper}
+              style={{
+                width: `${12.5}rem`,
+                height: `${12.5}rem`,
+              }}
+            >
+              <video
+                src={videos[0]}
+                controls
+                className={styles.generatedVideo}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  borderRadius: '0.5rem'
+                }}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+        </div>
+        <div className="text-[0.625rem] leading-[0.625rem] font-medium text-[#88A4C2] text-start font-['Jura']">
+          {cu} Credits
+        </div>
+
+        {/* 扩展选项 - 只在最后一条消息时显示 */}
+        {isLastMessage && (
+          <div className={styles.extensionsContainer}>
+            <div className={styles.extensionsLabel}>Extensions</div>
+            <div className={styles.extensionsButtons}>
+              <button
+                className={styles.extensionButton}
+                onClick={onPartiallyModify}
+              >
+                Partially Modify (35 credits)
+              </button>
+              <button
+                className={styles.extensionButton}
+                onClick={onAnimate}
+              >
+                Animate (100 credits)
+              </button>
+              <button
+                className={styles.extensionButton}
+                onClick={onMintNFT}
+              >
+                mint as NFT (20 credits)
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // 新增：动画生成中组件
+  const renderAnimatingImageComponent = () => {
+    return (
+      <div className={styles.generatingIndicator} key={request_id}>
+        <img
+          src={uploadingIcon}
+          alt="Animating"
+          className={styles.uploadingIcon}
+        />
+        <span className={styles.generatingText}>
+          Generating video, please wait...(ETA 600 sec)
+        </span>
+      </div>
+    );
+  };
+
+  // 新增：NFT铸造中组件
+  const renderMintingNFTComponent = () => {
+    return (
+      <div className={styles.mintingIndicator} key={request_id}>
+        {/* 第一行：图标和文本 */}
+        <div className={styles.mintingFirstRow}>
+          <img
+            src={uploadingIcon}
+            alt="Minting"
+            className={styles.uploadingIcon}
+          />
+          <span className={styles.generatingText}>
+            Minting NFT, please wait...
+          </span>
+        </div>
+
+        {/* 第二行：服务提供商信息 */}
+        <div className={styles.serviceProviderInfo}>
+          <span className={styles.serviceProviderText}>
+            This service is provided by{' '}
+            <a
+              href="https://x.com/Misato_virtuals"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.serviceProviderLink}
+            >
+              @virtuals_misato
+            </a>
+          </span>
+          <div className={styles.serviceProviderIcons} onClick={() => window.open('https://x.com/Misato_virtuals', '_blank')}>
+            <img
+              src="https://pbs.twimg.com/profile_images/1914882710524534784/jMbLIgZD_400x400.jpg"
+              alt="Misato"
+              className={styles.serviceProviderAvatar}
+            />
+            <img
+              src={xIcon}
+              alt="X"
+              className={styles.xIcon}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderMintingSuccessComponent = () => {
+    if (!token_id) return null;
+
+    const magicEdenLink = `https://magiceden.io/item-details/base/0xa1c45a08c205d2683b63f1007a3dd72aa1f01961/${token_id}`;
+
+    return (
+      <div className={styles.mintingSuccessContainer}>
+        <div className={styles.mintingSuccessMessage}>
+          {content}
+        </div>
+        <div className={styles.mintingSuccessLink}>
+          <a
+            href={magicEdenLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.magicEdenLink}
+          >
+            {magicEdenLink}
+          </a>
+        </div>
+      </div>
+    );
+  };
+
+  // 新增：渲染超时重试组件
+  const renderTimeoutRetryComponent = () => {
+    const isGenerationTimeout = type === 'generation_timeout';
+    const isTokenizationTimeout = type === 'tokenization_timeout';
+
+    if (!isGenerationTimeout && !isTokenizationTimeout) return null;
+
+    return (
+      <div className={styles.timeoutContainer}>
+        <div className={styles.timeoutMessage}>
+          {content}
+        </div>
+        {isLastMessage && (
+          <button
+            className={styles.retryButton}
+            onClick={onRetryPolling}
+          >
+            Continue refreshing query
+          </button>
+        )}
+      </div>
+    );
+  };
+
   const showContent = ! (role === "user" && type === "uploaded_image");
 
   return (
     <div className={`${styles.messageContainer} ${styles[role]}`}>
-      {showContent && (
-      <div className={styles.messageContent}>
-        {type === "tokenization_agreement" ? (
-          <p className={styles.text}>{processContent(content)}</p>
-        ) : (
-          <p className={styles.text}>{content}</p>
-        )}
-      </div>
+      {showContent && type !== "minting_success" && (
+        <div className={styles.messageContent}>
+          {type === "tokenization_agreement" ? (
+            <p className={styles.text}>{processContent(content)}</p>
+          ) : (
+            <p className={styles.text}>{content}</p>
+          )}
+        </div>
       )}
 
       {role === "assistant" &&
@@ -1000,13 +1276,19 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           renderWorkflowConfigComponent()}
       {role === "assistant" &&
         type === "generate_result" &&
-        renderGenerateResultComponent(GENERATE_IMAGE_SERVICE_CONFIG.cu)}
+        renderGenerateResultComponent(cu)}
       {role === "assistant" &&
         type === "workflow_generate_result" &&
-        renderGenerateResultComponent(RUN_WORKFLOW_SERVICE_CONFIG.cu)}
+        renderGenerateResultComponent(cu)}
+      {role === "assistant" &&
+        type === "video_generate_result" &&
+        renderVideoResultComponent(cu)}
       {role === "assistant" &&
         type === "generating_image" &&
         renderGeneratingImageComponent()}
+      {role === "assistant" &&
+        type === "generating_video" &&
+        renderGeneratingVideoComponent()}
       {role === "assistant" &&
         type === "modify_image" &&
           renderModifyImageComponent()}
@@ -1022,6 +1304,19 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       {role === "user" &&
         type === "uploaded_image" &&
         renderUploadedImageComponent()}
+      {role === "assistant" &&
+        type === "animating_image" &&
+        renderAnimatingImageComponent()}
+      {role === "assistant" &&
+        type === "minting_nft" &&
+        renderMintingNFTComponent()}
+      {role === "assistant" &&
+        type === "minting_success" &&
+        renderMintingSuccessComponent()}
+
+      {/* 新增：超时重试组件 */}
+      {(type === 'generation_timeout' || type === 'tokenization_timeout') &&
+        renderTimeoutRetryComponent()}
     </div>
   );
 };

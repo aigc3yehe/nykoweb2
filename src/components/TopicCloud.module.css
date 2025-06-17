@@ -1,0 +1,223 @@
+/* 话题云容器 */
+.topicCloudContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  
+  /* Auto layout */
+  background: linear-gradient(113.08deg, rgba(99, 102, 241, 0.4) 7.13%, rgba(99, 102, 241, 0.1) 34.77%, rgba(99, 102, 241, 0.1) 59.04%, rgba(99, 102, 241, 0.4) 77.25%);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  /* Note: backdrop-filter has minimal browser support */
+  border-radius: 8px;
+}
+
+/* 话题云网格布局 */
+.topicCloudGrid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* 3等分 */
+  gap: 2px; /* 间距2px */
+  padding: 6px; /* 内边距 */
+  box-sizing: border-box;
+}
+
+/* 左列（topics 1-2） */
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+}
+
+/* 中列（topics 3-5） */
+.middleColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+}
+
+/* 右列 */
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* 增加间距使其更明显 */
+  height: 100%;
+}
+
+/* 右列上方区域（76%） */
+.rightTopSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 0 76%; /* 进一步减少高度以适应4px间距 */
+}
+
+/* 右列下方区域（20%） */
+.rightBottomSection {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  flex: 0 0 20%;
+}
+
+/* 话题标签默认样式 */
+.topicTag {
+  /* Auto layout */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6px;
+  gap: 4px;
+  
+  /* 最小尺寸确保可见性 */
+  min-height: 20px;
+  
+  /* 默认背景 */
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.7) 0%, rgba(123, 126, 255, 0.7) 100%);
+  backdrop-filter: blur(10px);
+  border-radius: 2px;
+  
+  /* Inside auto layout */
+  flex: none;
+  align-self: stretch;
+  flex-grow: 1;
+  
+  /* 交互样式 */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  /* 防止文字选中 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  
+  /* 确保内容不溢出 */
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* 话题标签hover状态 */
+.topicTag:hover {
+  background: linear-gradient(101.92deg, rgba(255, 106, 0, 0.7) 5.86%, rgba(255, 137, 53, 0.7) 88.43%);
+}
+
+/* 话题标签文字样式 */
+.topicLabel {
+  /* 文字样式 */
+  font-family: 'Jura', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 100%; /* identical to box height, or 12px */
+  
+  /* 布局 */
+  display: flex;
+  align-items: center;
+  text-align: center;
+  text-transform: capitalize;
+  
+  /* 渐变文字 */
+  background: linear-gradient(90deg, #FFFFFF 0%, #FFDB59 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  
+  /* Inside auto layout */
+  flex: none;
+  flex-grow: 0;
+  
+  /* 文字处理 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  
+  /* 防止文字选中 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 加载状态 */
+.loadingState {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  font-family: 'Jura', sans-serif;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.3) 0%, rgba(123, 126, 255, 0.3) 100%);
+  backdrop-filter: blur(10px);
+  border-radius: 2px;
+}
+
+/* 错误状态 */
+.errorState {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  font-family: 'Jura', sans-serif;
+  font-size: 14px;
+  color: #EF4444;
+  
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.2) 0%, rgba(255, 0, 0, 0.2) 100%);
+  backdrop-filter: blur(10px);
+  border-radius: 2px;
+}
+
+/* 空状态 */
+.emptyState {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  font-family: 'Jura', sans-serif;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  
+  background: linear-gradient(90deg, rgba(156, 163, 175, 0.2) 0%, rgba(107, 114, 128, 0.2) 100%);
+  backdrop-filter: blur(10px);
+  border-radius: 2px;
+}
+
+/* 右下角区域的标签需要水平分布 */
+.rightBottomSection .topicTag {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
+}
+
+/* 响应式调整：当标签过多时的处理 */
+@media (max-height: 100px) {
+  .topicTag {
+    min-height: 16px;
+    padding: 4px;
+    gap: 2px;
+  }
+  
+  .topicLabel {
+    font-size: 10px;
+  }
+} 

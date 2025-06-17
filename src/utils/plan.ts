@@ -9,6 +9,7 @@ export enum SERVICE_TYPE {
   TRAIN_MODEL = "train_model",
   MODEL_TOKENIZATION = "model_tokenization",
   RUN_WORKFLOW = "run_workflow",
+  RUN_VIDEO_WORKFLOW = "run_video",
   CREATE_WORKFLOW = "create_workflow",
 }
 
@@ -29,7 +30,12 @@ export const TRAIN_MODEL_SERVICE_CONFIG: ServiceConfig = {
 
 export const RUN_WORKFLOW_SERVICE_CONFIG: ServiceConfig = {
   name: SERVICE_TYPE.RUN_WORKFLOW,
-  cu: 50,
+  cu: 35,
+};
+
+export const RUN_VIDEO_WORKFLOW_SERVICE_CONFIG: ServiceConfig = {
+  name: SERVICE_TYPE.RUN_VIDEO_WORKFLOW,
+  cu: 300,
 };
 
 export const CREATE_WORKFLOW_SERVICE_CONFIG: ServiceConfig = {

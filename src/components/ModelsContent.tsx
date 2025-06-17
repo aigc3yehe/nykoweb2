@@ -8,7 +8,7 @@ import { accountAtom } from '../store/accountStore';
 
 interface ModelsContentProps {
   ownedOnly: boolean;
-  sortOption: 'New Model' | 'Popular';
+  sortOption: 'Newest' | 'Popular';
   onModelClick: (modelId: number, modelName: string) => void;
 }
 

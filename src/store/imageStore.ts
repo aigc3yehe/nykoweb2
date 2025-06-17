@@ -28,6 +28,7 @@ export interface Image {
   state: number; // -1: 失败, 0: 待处理, 1: 成功
   public: number; // 1 为可见的 0是相关人员关闭了的
   is_liked?: boolean; // 当前用户是否点赞了这张图片
+  type: string; // 图片类型 "image" | "video"
   users: {
     twitter: Twitter | null;
     address: string | null;
@@ -297,6 +298,9 @@ export interface ImageDetail {
   height: number;
   width: number;
   state: number;
+  is_liked: boolean;
+  like_count: number;
+  type: string;
 }
 
 // 获取图片详情

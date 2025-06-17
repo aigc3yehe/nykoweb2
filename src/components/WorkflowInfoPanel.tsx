@@ -15,7 +15,6 @@ import {
   FlaunchStatusResponse,
 } from "../store/tokenStore";
 import { Link } from "react-router-dom";
-import {RUN_WORKFLOW_SERVICE_CONFIG} from "../utils/plan";
 import {sendMessage} from "../store/chatStore.ts";
 import {formatNumber} from "../utils/format.ts"
 
@@ -142,6 +141,10 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
     }
   };
 
+  const getCredit = () => {
+    return workflow.cu * workflow.usage;
+  };
+
   return (
     <div className={styles.infoPanel}>
       {/* 第一行: 创建者信息 */}
@@ -186,7 +189,7 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
         {/* Credit */}
         <div className={styles.detailRow}>
           <span className={styles.detailLabel}>Credit</span>
-          <span className={styles.detailValue}>{formatNumber(workflow.usage * 50)}</span>
+          <span className={styles.detailValue}>{formatNumber(getCredit())}</span>
         </div>
 
         {/* Published */}
@@ -220,7 +223,7 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
               <div className="flex items-end gap-[1px]">
                 <span>Generate</span>
                 <span className="!text-xs">
-                  ({RUN_WORKFLOW_SERVICE_CONFIG.cu} Credits)
+                  ({workflow.cu} Credits)
                 </span>
               </div>
             </button>

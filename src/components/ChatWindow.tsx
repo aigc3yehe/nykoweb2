@@ -4,7 +4,7 @@ import styles from './ChatWindow.module.css';
 import clearIcon from '../assets/clear.svg';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
-import GoldIcon from "../assets/gold.svg";
+
 import WarningIcon from "../assets/warning.svg";
 import {accountAtom} from "../store/accountStore";
 import {
@@ -24,12 +24,14 @@ import {
   updateWorkflowPrompt,
   updateWorkflowInput,
   updateWorkflowOutput,
-  updateWorkflowModel,
   setWorkflowImage,
   runWorkflow,
   uploadWorkflowReferenceImage,
   removeWorkflowReferenceImage,
-  updateWorkflowExtraPrompt
+  updateWorkflowExtraPrompt,
+  fetchAIProviders,
+  updateSelectedProvider,
+  retryPolling,
 } from '../store/chatStore';
 import {showDialogAtom} from '../store/dialogStore';
 import {useLogin, usePrivy} from '@privy-io/react-auth';
@@ -56,13 +58,19 @@ const ChatWindow: React.FC = () => {
   const [, updateWorkflowPromptAction] = useAtom(updateWorkflowPrompt);
   const [, updateWorkflowInputAction] = useAtom(updateWorkflowInput);
   const [, updateWorkflowOutputAction] = useAtom(updateWorkflowOutput);
-  const [, updateWorkflowModelAction] = useAtom(updateWorkflowModel);
   const [, setWorkflowImageAction] = useAtom(setWorkflowImage);
   const [, runWorkflowAction] = useAtom(runWorkflow);
   const [, fetchWorkflowsAction] = useAtom(fetchWorkflows);
   const [, uploadWorkflowReferenceImageAction] = useAtom(uploadWorkflowReferenceImage);
   const [, removeWorkflowReferenceImageAction] = useAtom(removeWorkflowReferenceImage);
   const [, updateWorkflowExtraPromptAction] = useAtom(updateWorkflowExtraPrompt);
+  const [, fetchAIProvidersAction] = useAtom(fetchAIProviders);
+  const [, updateSelectedProviderAction] = useAtom(updateSelectedProvider);
+  const [, retryPollingAction] = useAtom(retryPolling);
+  // 当前工作流消耗的积分
+  const [currentWorkflowCredit, setCurrentWorkflowCredit] = useState(50);
+  // 当前模型消耗的积分
+  const [currentModelCredit, setCurrentModelCredit] = useState(5);
 
   // 添加滚动相关状态
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -97,6 +105,26 @@ const ChatWindow: React.FC = () => {
     const did = accountState.did || undefined;
     setUserInfoAction({ uuid, did, wallet_address });
   }, [accountState, setUserInfoAction]);
+
+  // 监听左侧当前工作流
+  useEffect(() => {
+    const workflow = chatState.currentWorkflow;
+    if (workflow) {
+      setCurrentWorkflowCredit(workflow.cu);
+    } else {
+      setCurrentWorkflowCredit(50);
+    }
+  }, [chatState.currentWorkflow]);
+
+  // 监听左侧当前模型
+  useEffect(() => {
+    const model = chatState.currentModel;
+    if (model) {
+      setCurrentModelCredit(model.cu);
+    } else {
+      setCurrentModelCredit(5);
+    }
+  }, [chatState.currentModel]);
 
   // 监听工作流创建成功状态，刷新工作流列表
   useEffect(() => {
@@ -157,13 +185,7 @@ const ChatWindow: React.FC = () => {
     });
   };
 
-  const handleStake = async () => {
-    if (!authenticated || !accountState.did) {
-      await handleLogin();
-    } else {
-      navigate('/pricing');
-    }
-  }
+
 
   // 处理自定义滚动条拖动
   const handleScrollThumbDrag = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -254,9 +276,35 @@ const ChatWindow: React.FC = () => {
 
   const maintenance = false; // TODO: 维护状态，请设置为true
 
+  // 新增：扩展选项处理函数
+  const handlePartiallyModify = (imageUrl?: string) => {
+    if (imageUrl) {
+      sendMessageAction('I want to partially modify this image.');
+    }
+  };
+
+  const handleAnimate = (imageUrl?: string) => {
+    if (imageUrl) {
+      sendMessageAction('I want to animate this image.');
+    }
+  };
+
+  const handleMintNFT = (imageUrl?: string) => {
+    if (imageUrl) {
+      sendMessageAction('I want to mint this image as NFT.');
+    }
+  };
+
+  // 在组件挂载时获取AI服务提供商数据
+  useEffect(() => {
+    if (authenticated && accountState.did && !chatState.aiProviders.providers.length && !chatState.aiProviders.isLoading) {
+      fetchAIProvidersAction();
+    }
+  }, [authenticated, accountState.did, chatState.aiProviders.providers.length, chatState.aiProviders.isLoading, fetchAIProvidersAction]);
+
   return (
     <div className={styles.chatWindow}>
-      {maintenance ? (
+      {maintenance && (
         <>
           {/* 维护title */}
           <div className={styles.maintenanceBanner}>
@@ -264,19 +312,6 @@ const ChatWindow: React.FC = () => {
               <img src={WarningIcon} alt="Warning" className={styles.warningIcon} />
               <span className={styles.maintenanceText}>Maintenance in progress. We'll be back soon!</span>
             </div>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* 活动title */}
-          <div className={styles.activityBanner}>
-            <div className={styles.activityInfo}>
-              <img src={GoldIcon} alt="Gold" className={styles.goldIcon} />
-              <span className={styles.activityText}>stake $NYKO. go premium. share 30M in rewards!</span>
-            </div>
-            <button className={styles.stakeButton} onClick={handleStake}>
-              Stake
-            </button>
           </div>
         </>
       )}
@@ -347,10 +382,10 @@ const ChatWindow: React.FC = () => {
                       ⏳ Create a workflow (800 Credits)
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to generate an image.')}>
-                      🌄 Generate an image (5 Credits)
+                      🌄 Generate an image ({currentModelCredit} Credits)
                     </button>
                     <button className={styles.quickOptionButton} onClick={() => sendMessageAction('I want to use this workflow.')}>
-                      ✨ Use this workflow (50 Credits)
+                      ✨ Use this workflow ({currentWorkflowCredit} Credits)
                     </button>
                   </div>
                 </div>
@@ -392,15 +427,18 @@ const ChatWindow: React.FC = () => {
                 uploadedFiles={message.uploadedFiles}
                 modelParam={message.modelParam}
                 images={message.images}
+                cu={message.cu}
                 imageWidth={message.imageInfo?.width || 256}
                 imageHeight={message.imageInfo?.height || 256}
+                videos={message.videos}
                 request_id={message.request_id}
                 agree={message.agree}
+                token_id={message.token_id}
                 workflow_name={chatState.workflow_name}
                 workflow_description={chatState.workflow_description}
                 workflow_prompt={chatState.workflow_prompt}
                 workflow_input={chatState.workflow_input}
-                workflow_model={chatState.workflow_model || "gpt-4o"}
+                workflow_output={chatState.workflow_output}
                 isCreatingWorkflow={chatState.workflowCreation.isCreating}
                 creationSuccess={chatState.workflowCreation.isSuccess}
                 onAddImage={() => addImageAction(index, 30 - (message.uploadedFiles?.length || 0))}
@@ -410,7 +448,6 @@ const ChatWindow: React.FC = () => {
                 onUpdatePrompt={(text) => updateWorkflowPromptAction(text)}
                 onChangeInput={(type) => updateWorkflowInputAction(type)}
                 onChangeOutput={(type) => updateWorkflowOutputAction(type)}
-                onSelectModel={(model) => updateWorkflowModelAction(model)}
                 onCreateWorkflow={createWorkflowAction}
                 workflowId={message.type === 'run_workflow' ? chatState.workflowCreation.workflowId : undefined}
                 workflowImageValue={chatState.workflowImageValue}
@@ -425,6 +462,18 @@ const ChatWindow: React.FC = () => {
                 workflow_extra_prompt={chatState.workflow_extra_prompt}
                 onUpdateWorkflowExtraPrompt={updateWorkflowExtraPromptAction}
                 currentWorkflow={chatState.currentWorkflow}
+                isLastMessage={index === chatState.messages.length - 1 &&
+                  (message.type === 'generate_result' ||
+                   message.type === 'workflow_generate_result' ||
+                   message.type === 'generation_timeout' ||
+                   message.type === 'tokenization_timeout' ||
+                   message.type === 'minting_success')}
+                onPartiallyModify={() => handlePartiallyModify(message.images?.[0])}
+                onAnimate={() => handleAnimate(message.images?.[0])}
+                onMintNFT={() => handleMintNFT(message.images?.[0])}
+                onRetryPolling={() => retryPollingAction(index)}
+                aiProviders={chatState.aiProviders}
+                onSelectProvider={updateSelectedProviderAction}
               />
             ))
           )}

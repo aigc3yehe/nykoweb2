@@ -45,6 +45,8 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
   const isPending = localImage.state === 0;
   // 检查是否失败
   const isFailed = localImage.state === -1;
+  // 检查是否因内容政策失败
+  const isContentPolicyFailed = localImage.state === -2;
   // 是否可见
   const isPublic = localImage.public === 1;
   // 是否被管理员隐藏
@@ -131,12 +133,29 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
     return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-335,q-90`
   }
 
-  // 只有当图片有URL时才能点击查看详情
+  // 新增：判断是否为视频类型
+  const isVideo = () => {
+    return localImage.type === 'video';
+  }
+
+  // 获取placeholder显示文本
+  const getPlaceholderText = () => {
+    if (isContentPolicyFailed) {
+      return 'Failed due to content policy';
+    } else if (isFailed) {
+      return 'Failed';
+    } else {
+      return isVideo() ? 'Generating Video...' : 'Generating...';
+    }
+  };
+
+  // 只有当图片/视频有URL时才能点击查看详情
   const handleImageClick = () => {
     if (localImage.url) {
       handleOpenImageDetails(localImage);
     }
   };
+
   const handleCoverClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // 阻止事件冒泡，避免触发图片详情
 
@@ -437,84 +456,104 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
     <div className={styles.imageCard} onClick={handleImageClick}>
       <div className={styles.imageContainer}>
         {localImage.url ? (
-          <img src={getScaledImageUrl()} alt={`Image ${localImage.id}`} className={styles.image} />
+          isVideo() ? (
+            // 视频渲染 - 移除悬停播放功能，只显示第一帧
+            <video 
+              src={localImage.url} 
+              className={styles.image}
+              controls={false}
+              muted
+              playsInline
+              preload="metadata"
+              style={{ objectFit: 'cover' }}
+            >
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            // 图片渲染
+            <img src={getScaledImageUrl()} alt={`Image ${localImage.id}`} className={styles.image} />
+          )
         ) : (
           <div className={styles.placeholderImage}>
-            {isFailed ? 'Failed' : 'Generating...'}
+            {getPlaceholderText()}
           </div>
         )}
 
         <div className={styles.tagsContainer}>
           {isPending && (
-            <div className={styles.pendingTag}>Generating</div>
+            <div className={styles.pendingTag}>
+              {isVideo() ? 'Generating Video' : 'Generating'}
+            </div>
           )}
 
-          {isFailed && (
-            <div className={styles.failedTag}>Failed</div>
+          {(isFailed || isContentPolicyFailed) && (
+            <div className={styles.failedTag}>
+              {isContentPolicyFailed ? 'Content Policy' : 'Failed'}
+            </div>
+          )}
+
+          {/* 新增：视频标识标签 */}
+          {localImage.url && isVideo() && (
+            <div className={styles.videoTag}>Video</div>
           )}
         </div>
 
         {/* 悬停时显示的半透明黑色遮罩和作者信息 */}
         <div className={styles.overlay}>
-          {/* 按钮区域 - 点赞按钮始终显示，其他按钮仅对有权限的用户显示 */}
-          {(accountState.did || canToggleVisibility || showEditCover) && (
+          {/* 按钮区域 - 所有按钮都移到右侧 */}
+          {(accountState.did || canToggleVisibility || showEditCover || showCarousel) && (
             <div className={styles.imagePublicStatus}>
-              {/* 左侧点赞按钮 */}
-              {accountState.did && (
-                <div className={styles.likeButtonContainer}>
-                  <img
-                    src={getLikeIcon()}
-                    alt={localImage.is_liked ? "Liked" : "Not liked"}
-                    className={styles.likeButton}
-                    onClick={handleLikeClick}
-                    style={{ opacity: isLiking ? 0.6 : 1 }}
-                    title={localImage.is_liked ? "Unlike" : "Like"}
-                  />
-                </div>
-              )}
-
-              {/* 右侧按钮容器 */}
-              {(canToggleVisibility || showEditCover || showCarousel) && (
-                <div className={styles.rightButtonContainer}>
-                  {isProcessing ? (
-                    <div className={styles.processingIndicator}>
-                      <div className={styles.typingIndicator}>
-                        <span></span><span></span><span></span>
-                      </div>
+              {/* 右侧按钮容器 - 包含所有按钮 */}
+              <div className={styles.rightButtonContainer}>
+                {isProcessing ? (
+                  <div className={styles.processingIndicator}>
+                    <div className={styles.typingIndicator}>
+                      <span></span><span></span><span></span>
                     </div>
-                  ) : (
-                    <>
-                      {showEditCover && (
-                        <img
-                          src={coverSvg}
-                          alt="cover"
-                          className="w-7 h-7"
-                          onClick={handleCoverClick}
-                          title="Change cover"
-                        />
-                      )}
-                      {showCarousel && (
-                        <img
-                          src={carouselSvg}
-                          alt="carousel"
-                          className="w-7 h-7"
-                          onClick={handleCarouselClick}
-                          title="Add/Remove featured image"
-                        />
-                      )}
-                      {canToggleVisibility && (
-                        <img
-                          src={getImagePublicUrl()}
-                          alt={isPublic ? "Visible" : "Hidden"}
-                          className={styles.imagePublic}
-                          onClick={handleToggleViewClick}
-                          title={isPublic ? "Hide" : "Show"}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
+                  </div>
+                ) : (
+                  <>
+                    {/* 点赞按钮移到右侧 */}
+                    {accountState.did && (
+                      <img
+                        src={getLikeIcon()}
+                        alt={localImage.is_liked ? "Liked" : "Not liked"}
+                        className={styles.likeButton}
+                        onClick={handleLikeClick}
+                        style={{ opacity: isLiking ? 0.6 : 1 }}
+                        title={localImage.is_liked ? "Unlike" : "Like"}
+                      />
+                    )}
+                    {showEditCover && (
+                      <img
+                        src={coverSvg}
+                        alt="cover"
+                        className="w-7 h-7"
+                        onClick={handleCoverClick}
+                        title="Change cover"
+                      />
+                    )}
+                    {showCarousel && (
+                      <img
+                        src={carouselSvg}
+                        alt="carousel"
+                        className="w-7 h-7"
+                        onClick={handleCarouselClick}
+                        title="Add/Remove featured image"
+                      />
+                    )}
+                    {canToggleVisibility && (
+                      <img
+                        src={getImagePublicUrl()}
+                        alt={isPublic ? "Visible" : "Hidden"}
+                        className={styles.imagePublic}
+                        onClick={handleToggleViewClick}
+                        title={isPublic ? "Hide" : "Show"}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           )}
           <div className={styles.creatorInfo}>
