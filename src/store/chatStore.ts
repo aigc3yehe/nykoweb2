@@ -2203,7 +2203,13 @@ export const runWorkflow = atom(
           workflowRunningState: workflowRunningState
         });
 
-        pollImageGenerationTask(response.data.task_id, response.data.content_id || 0, 100, set, get, true).catch(err => {
+        let contentId = response.data.content_id;
+        const imageId = response.data.image_id;
+        if (contentId === undefined && imageId !== undefined) {
+          contentId = imageId
+        }
+
+        pollImageGenerationTask(response.data.task_id, contentId || 0, 100, set, get, true).catch(err => {
           console.error('Poll Image Generation Task Failed:', err);
         });
       } else {
@@ -2527,8 +2533,14 @@ export const runWorkflowFromChatInput = atom(
           messages: updatedMessages
         });
 
+        let contentId = response.data.content_id
+        const imageId = response.data.image_id
+        if (contentId === undefined && imageId !== undefined) {
+          contentId = imageId
+        }
+
         // 根据输出类型启动不同的轮询
-        pollImageGenerationTask(response.data.task_id, response.data.content_id || 0, cu, set, get, true, isVideoOutput).catch(err => {
+        pollImageGenerationTask(response.data.task_id, contentId || 0, cu, set, get, true, isVideoOutput).catch(err => {
           console.error('Poll Generation Task Failed:', err);
         });
       } else {
