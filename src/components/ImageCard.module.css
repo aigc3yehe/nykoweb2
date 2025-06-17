@@ -171,15 +171,9 @@
   left: 0.625rem; /* 改为left */
   right: 0.625rem;
   display: flex;
-  justify-content: space-between; /* 左右分布 */
+  justify-content: flex-end; /* 改为右对齐，因为所有按钮都在右侧 */
   align-items: center;
   z-index: 5;
-}
-
-/* 点赞按钮容器 */
-.likeButtonContainer {
-  display: flex;
-  align-items: center;
 }
 
 /* 点赞按钮 */

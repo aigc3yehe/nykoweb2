@@ -12,10 +12,7 @@ import createWorkflowIcon from "../assets/create_workflow.svg";
 import deleteIcon from "../assets/delete.svg";
 import deleteDisableIcon from "../assets/delete_disable.svg";
 import {
-  GENERATE_IMAGE_SERVICE_CONFIG,
   TRAIN_MODEL_SERVICE_CONFIG,
-  RUN_WORKFLOW_SERVICE_CONFIG,
-  RUN_VIDEO_WORKFLOW_SERVICE_CONFIG
 } from "../utils/plan";
 import { WorkflowDetail } from '../store/workflowStore';
 import xIcon from "../assets/x.svg";
@@ -59,6 +56,7 @@ export interface ChatMessageProps {
   agree?: boolean;
   images?: string[];
   videos?: string[];
+  cu?: number;
   imageWidth?: number;
   imageHeight?: number;
   request_id?: string;
@@ -132,6 +130,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   agree = false,
   images = [],
   videos = [],
+  cu = 0,
   imageWidth = 256,
   imageHeight = 256,
   request_id = "",
@@ -709,6 +708,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     const supportedInputTypes = getSupportedInputTypes();
     const supportedOutputTypes = getSupportedOutputTypes();
 
+    const isKlingProvider = () => {
+      return aiProviders?.selectedProvider?.toLocaleLowerCase()?.includes('kling');
+    }
+
     return (
       <>
       {!creationSuccess && (<div className={styles.workflowContainer}>
@@ -798,7 +801,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         </div>
 
         {/* Reference Image上传部分 */}
-        {renderReferenceImageSection()}
+        {!isKlingProvider() && renderReferenceImageSection()}
 
         {/* Input类型选择部分 */}
         <div className={styles.workflowSection}>
@@ -1273,13 +1276,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           renderWorkflowConfigComponent()}
       {role === "assistant" &&
         type === "generate_result" &&
-        renderGenerateResultComponent(GENERATE_IMAGE_SERVICE_CONFIG.cu)}
+        renderGenerateResultComponent(cu)}
       {role === "assistant" &&
         type === "workflow_generate_result" &&
-        renderGenerateResultComponent(RUN_WORKFLOW_SERVICE_CONFIG.cu)}
+        renderGenerateResultComponent(cu)}
       {role === "assistant" &&
         type === "video_generate_result" &&
-        renderVideoResultComponent(RUN_VIDEO_WORKFLOW_SERVICE_CONFIG.cu)}
+        renderVideoResultComponent(cu)}
       {role === "assistant" &&
         type === "generating_image" &&
         renderGeneratingImageComponent()}

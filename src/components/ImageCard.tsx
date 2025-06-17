@@ -45,6 +45,8 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
   const isPending = localImage.state === 0;
   // 检查是否失败
   const isFailed = localImage.state === -1;
+  // 检查是否因内容政策失败
+  const isContentPolicyFailed = localImage.state === -2;
   // 是否可见
   const isPublic = localImage.public === 1;
   // 是否被管理员隐藏
@@ -135,6 +137,17 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
   const isVideo = () => {
     return localImage.type === 'video';
   }
+
+  // 获取placeholder显示文本
+  const getPlaceholderText = () => {
+    if (isContentPolicyFailed) {
+      return 'Failed due to content policy';
+    } else if (isFailed) {
+      return 'Failed';
+    } else {
+      return isVideo() ? 'Generating Video...' : 'Generating...';
+    }
+  };
 
   // 只有当图片/视频有URL时才能点击查看详情
   const handleImageClick = () => {
@@ -462,7 +475,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
           )
         ) : (
           <div className={styles.placeholderImage}>
-            {isFailed ? 'Failed' : (isVideo() ? 'Generating Video...' : 'Generating...')}
+            {getPlaceholderText()}
           </div>
         )}
 
@@ -473,8 +486,10 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
             </div>
           )}
 
-          {isFailed && (
-            <div className={styles.failedTag}>Failed</div>
+          {(isFailed || isContentPolicyFailed) && (
+            <div className={styles.failedTag}>
+              {isContentPolicyFailed ? 'Content Policy' : 'Failed'}
+            </div>
           )}
 
           {/* 新增：视频标识标签 */}
@@ -485,65 +500,60 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
 
         {/* 悬停时显示的半透明黑色遮罩和作者信息 */}
         <div className={styles.overlay}>
-          {/* 按钮区域 - 点赞按钮始终显示，其他按钮仅对有权限的用户显示 */}
-          {(accountState.did || canToggleVisibility || showEditCover) && (
+          {/* 按钮区域 - 所有按钮都移到右侧 */}
+          {(accountState.did || canToggleVisibility || showEditCover || showCarousel) && (
             <div className={styles.imagePublicStatus}>
-              {/* 左侧点赞按钮 */}
-              {accountState.did && (
-                <div className={styles.likeButtonContainer}>
-                  <img
-                    src={getLikeIcon()}
-                    alt={localImage.is_liked ? "Liked" : "Not liked"}
-                    className={styles.likeButton}
-                    onClick={handleLikeClick}
-                    style={{ opacity: isLiking ? 0.6 : 1 }}
-                    title={localImage.is_liked ? "Unlike" : "Like"}
-                  />
-                </div>
-              )}
-
-              {/* 右侧按钮容器 */}
-              {(canToggleVisibility || showEditCover || showCarousel) && (
-                <div className={styles.rightButtonContainer}>
-                  {isProcessing ? (
-                    <div className={styles.processingIndicator}>
-                      <div className={styles.typingIndicator}>
-                        <span></span><span></span><span></span>
-                      </div>
+              {/* 右侧按钮容器 - 包含所有按钮 */}
+              <div className={styles.rightButtonContainer}>
+                {isProcessing ? (
+                  <div className={styles.processingIndicator}>
+                    <div className={styles.typingIndicator}>
+                      <span></span><span></span><span></span>
                     </div>
-                  ) : (
-                    <>
-                      {showEditCover && (
-                        <img
-                          src={coverSvg}
-                          alt="cover"
-                          className="w-7 h-7"
-                          onClick={handleCoverClick}
-                          title="Change cover"
-                        />
-                      )}
-                      {showCarousel && (
-                        <img
-                          src={carouselSvg}
-                          alt="carousel"
-                          className="w-7 h-7"
-                          onClick={handleCarouselClick}
-                          title="Add/Remove featured image"
-                        />
-                      )}
-                      {canToggleVisibility && (
-                        <img
-                          src={getImagePublicUrl()}
-                          alt={isPublic ? "Visible" : "Hidden"}
-                          className={styles.imagePublic}
-                          onClick={handleToggleViewClick}
-                          title={isPublic ? "Hide" : "Show"}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
+                  </div>
+                ) : (
+                  <>
+                    {/* 点赞按钮移到右侧 */}
+                    {accountState.did && (
+                      <img
+                        src={getLikeIcon()}
+                        alt={localImage.is_liked ? "Liked" : "Not liked"}
+                        className={styles.likeButton}
+                        onClick={handleLikeClick}
+                        style={{ opacity: isLiking ? 0.6 : 1 }}
+                        title={localImage.is_liked ? "Unlike" : "Like"}
+                      />
+                    )}
+                    {showEditCover && (
+                      <img
+                        src={coverSvg}
+                        alt="cover"
+                        className="w-7 h-7"
+                        onClick={handleCoverClick}
+                        title="Change cover"
+                      />
+                    )}
+                    {showCarousel && (
+                      <img
+                        src={carouselSvg}
+                        alt="carousel"
+                        className="w-7 h-7"
+                        onClick={handleCarouselClick}
+                        title="Add/Remove featured image"
+                      />
+                    )}
+                    {canToggleVisibility && (
+                      <img
+                        src={getImagePublicUrl()}
+                        alt={isPublic ? "Visible" : "Hidden"}
+                        className={styles.imagePublic}
+                        onClick={handleToggleViewClick}
+                        title={isPublic ? "Hide" : "Show"}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           )}
           <div className={styles.creatorInfo}>

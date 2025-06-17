@@ -427,6 +427,7 @@ const ChatWindow: React.FC = () => {
                 uploadedFiles={message.uploadedFiles}
                 modelParam={message.modelParam}
                 images={message.images}
+                cu={message.cu}
                 imageWidth={message.imageInfo?.width || 256}
                 imageHeight={message.imageInfo?.height || 256}
                 videos={message.videos}
@@ -461,10 +462,10 @@ const ChatWindow: React.FC = () => {
                 workflow_extra_prompt={chatState.workflow_extra_prompt}
                 onUpdateWorkflowExtraPrompt={updateWorkflowExtraPromptAction}
                 currentWorkflow={chatState.currentWorkflow}
-                isLastMessage={index === chatState.messages.length - 1 && 
-                  (message.type === 'generate_result' || 
-                   message.type === 'workflow_generate_result' || 
-                   message.type === 'generation_timeout' || 
+                isLastMessage={index === chatState.messages.length - 1 &&
+                  (message.type === 'generate_result' ||
+                   message.type === 'workflow_generate_result' ||
+                   message.type === 'generation_timeout' ||
                    message.type === 'tokenization_timeout' ||
                    message.type === 'minting_success')}
                 onPartiallyModify={() => handlePartiallyModify(message.images?.[0])}

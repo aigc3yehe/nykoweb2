@@ -67,6 +67,7 @@ export interface Message {
   request_id?: string;
   images?: string[];
   videos?: string[]; // 新增视频URL数组
+  cu?: number;
   imageInfo?: {
     width: number;
     height: number;
@@ -76,6 +77,7 @@ export interface Message {
   retryParams?: {
     taskId: string;
     contentId: number;
+    cu: number;
     isWorkflow: boolean;
     isVideo: boolean;
   };
@@ -299,7 +301,8 @@ export const chatAtom = atom<ChatState>(initialState);
 export type CheckStatsResponse = {
   data?: {
     id?: string;
-    status?: string;  // completed 时为完成
+    status?: string;  // completed 时为完成，SUCCESS 时为成功
+    error?: string;
     date_created?: string;
     upscaled_urls?: string[];
   };
@@ -345,7 +348,7 @@ export function hasSystemMessage(messages: Message[]): boolean {
 }
 
 // 修改轮询函数，支持视频生成的不同参数
-export async function pollImageGenerationTask(taskId: string, content_id: number, set: any, get: any, isWorkflow: boolean = false, isVideo: boolean = false): Promise<void> {
+export async function pollImageGenerationTask(taskId: string, content_id: number, cu: number, set: any, get: any, isWorkflow: boolean = false, isVideo: boolean = false): Promise<void> {
   console.log('Start poll image generation task:', taskId, 'isVideo:', isVideo);
 
   // 存储轮询参数到状态中
@@ -355,6 +358,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
     pollingRetryState: {
       taskId,
       contentId: content_id,
+      cu: cu,
       isWorkflow,
       isVideo
     }
@@ -456,6 +460,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
                 content: 'Video generation completed',
                 type: isWorkflow ? 'video_generate_result' : 'video_generate_result', // 视频结果类型
                 videos: generatedUrls, // 使用videos字段存储视频URL
+                cu: cu,
                 imageInfo: {
                   width: width,
                   height: height
@@ -467,6 +472,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
                 content: 'Image generation completed',
                 type: isWorkflow ? 'workflow_generate_result' : 'generate_result',
                 images: generatedUrls,
+                cu: cu,
                 imageInfo: {
                   width: width,
                   height: height
@@ -540,6 +546,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
               content: isVideo ? 'Video generation completed' : 'Image generation completed',
               type: isVideo ? 'video_generate_result' : (isWorkflow ? 'workflow_generate_result' : 'generate_result'),
               ...(isVideo ? { videos: generatedUrls } : { images: generatedUrls }),
+              cu: cu,
               request_id: taskId,
               imageInfo: {
                 width: width,
@@ -613,6 +620,11 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
       } else if (status === 'failed' || status === 'error') {
         console.log('task failed');
 
+        let errorMessage = statusResponse.data.error;
+        if (!errorMessage) {
+          errorMessage = isVideo ? 'video generation failed' : 'image generation failed';
+        }
+
         // 查找对应的生成中消息
         const messageIndex = chatState.messages.findIndex(
           // @ts-ignore
@@ -625,7 +637,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
           const updatedMessages = [...chatState.messages];
           updatedMessages[messageIndex] = {
             ...updatedMessages[messageIndex],
-            content: isVideo ? 'Video generation failed' : 'Image generation failed',
+            content: errorMessage,
             type: 'text', // 改为普通文本消息
             images: undefined, // 清除图片字段
             videos: undefined // 清除视频字段
@@ -649,7 +661,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
             ...chatState,
             messages: [...filterSystemMessages(chatState.messages), {
               role: 'system',
-              content: isVideo ? 'video generation failed' : 'image generation failed',
+              content: errorMessage,
               request_id: taskId
             }],
             workflowRunning: {
@@ -852,6 +864,7 @@ export const sendMessage = atom(
 
       // 当前的工作流相关
       const workflow_id = chatState.currentWorkflow?.id
+      const workflow_provider = chatState.currentWorkflow?.provider;
       const current_workflow_name = chatState.currentWorkflow?.name
       const workflow_input_type = chatState.currentWorkflow?.input_type
       const workflow_cover = chatState.currentWorkflow?.cover;
@@ -891,6 +904,7 @@ export const sendMessage = atom(
         task_type: current_task_type,
         current_task_status,
         workflow_id,
+        workflow_provider,
         workflow_name: current_workflow_name,
         workflow_input_type,
         workflow_cover,
@@ -1133,7 +1147,8 @@ export const sendMessage = atom(
       console.log('request_id:', request_id, 'content_id:', content_id, 'isVideo:', isVideo);
       if (request_id) {
         // 根据任务类型传递正确的参数
-        pollImageGenerationTask(request_id, content_id, set, get, isWorkflow, isVideo).catch(err => {
+        const cu = isVideo ? 300 : 35; // flux 35
+        pollImageGenerationTask(request_id, content_id, cu, set, get, isWorkflow, isVideo).catch(err => {
           console.error('poll Image Generation Task Failed:', err);
         });
       }
@@ -1930,9 +1945,11 @@ export const createWorkflow = atom(
     });
 
     try {
+      // 只有非kling模型时才添加参考图片
+      const isKlingProvider = chatState.aiProviders.selectedProvider?.toLowerCase().includes('kling')
       // 准备API参数
       const reference_images = []
-      if (chatState.workflowReferenceImage.uploadedUrl) {
+      if (!isKlingProvider && chatState.workflowReferenceImage.uploadedUrl) {
         reference_images.push(chatState.workflowReferenceImage.uploadedUrl);
       }
 
@@ -2186,7 +2203,7 @@ export const runWorkflow = atom(
           workflowRunningState: workflowRunningState
         });
 
-        pollImageGenerationTask(response.data.task_id, response.data.content_id || 0, set, get, true).catch(err => {
+        pollImageGenerationTask(response.data.task_id, response.data.content_id || 0, 100, set, get, true).catch(err => {
           console.error('Poll Image Generation Task Failed:', err);
         });
       } else {
@@ -2417,6 +2434,7 @@ export const runWorkflowFromChatInput = atom(
       // 检查当前工作流的输出类型
       const currentWorkflow = chatState.currentWorkflow;
       const isVideoOutput = currentWorkflow?.output_type?.includes('video') || false;
+      const cu = isVideoOutput ? 300 : 50; // GPT 50, Kling 300
 
       // 添加消息到聊天记录
       const messages = [...filterSystemMessages(chatState.messages)];
@@ -2510,7 +2528,7 @@ export const runWorkflowFromChatInput = atom(
         });
 
         // 根据输出类型启动不同的轮询
-        pollImageGenerationTask(response.data.task_id, response.data.content_id || 0, set, get, true, isVideoOutput).catch(err => {
+        pollImageGenerationTask(response.data.task_id, response.data.content_id || 0, cu, set, get, true, isVideoOutput).catch(err => {
           console.error('Poll Generation Task Failed:', err);
         });
       } else {
@@ -2886,7 +2904,7 @@ export async function pollTokenizationTask(contentId: number, set: any, get: any
           console.log('Found minting message, updating to success');
           const updatedMessages = [...chatState.messages];
           const tokenId = statusResponse.data.token_id;
-          
+
           updatedMessages[messageIndex] = {
             ...updatedMessages[messageIndex],
             content: 'NFT minted successfully!',
@@ -2958,7 +2976,7 @@ export async function pollTokenizationTask(contentId: number, set: any, get: any
   // 达到最大轮询次数，添加超时消息
   console.log('Tokenization polling timeout');
   const finalChatState = get(chatAtom);
-  
+
   set(chatAtom, {
     ...finalChatState,
     messages: [...filterSystemMessages(finalChatState.messages), {
@@ -2970,7 +2988,7 @@ export async function pollTokenizationTask(contentId: number, set: any, get: any
       }
     }],
   });
-  
+
   set(showToastAtom, {
     message: 'NFT minting timed out, please check again later',
     severity: 'warning'
@@ -3041,7 +3059,7 @@ export const retryPolling = atom(
     const updatedMessages = chatState.messages.filter((_, index) => index !== messageIndex);
 
     if (message.type === 'generation_timeout' && message.retryParams) {
-      const { taskId, contentId, isWorkflow, isVideo } = message.retryParams;
+      const { taskId, contentId, cu, isWorkflow, isVideo } = message.retryParams;
 
       // 重新添加生成中消息
       const generatingMessage = {
@@ -3058,7 +3076,7 @@ export const retryPolling = atom(
       });
 
       // 重新启动轮询
-      pollImageGenerationTask(taskId, contentId, set, get, isWorkflow, isVideo).catch(err => {
+      pollImageGenerationTask(taskId, contentId, cu, set, get, isWorkflow, isVideo).catch(err => {
         console.error('Retry Poll Image Generation Task Failed:', err);
       });
 

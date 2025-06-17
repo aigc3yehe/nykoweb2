@@ -47,6 +47,7 @@ export interface Workflow {
   cu: number;
   usage: number;
   flag: string | null;
+  provider: string | null;
   public?: number; // 1 为可视, 0为由所有者设置为不可视，-1则是系统管理员设置的不可见，级别最高
   workflow_tokenization: WorkflowToken | null;
   workflow_community_tokenization: CommunityWorkflowToken[] | null;
