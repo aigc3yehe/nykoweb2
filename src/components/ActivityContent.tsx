@@ -183,7 +183,7 @@ const ActivityContent: React.FC = () => {
   };
 
   // 根据条件确定要显示的周信息
-  const weekInfo = { week: 'Week 6 (6.10-6.16)', rewards: '2,500,000', mindshare_points: 'X3' }
+  const weekInfo = { week: 'Week 7 (6.17-6.23)', rewards: '2,500,000', mindshare_points: 'X3' }
 
   // 更新滚动状态
   useEffect(() => {
