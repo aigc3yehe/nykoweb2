@@ -60,6 +60,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
   const [containerHeight, setContainerHeight] = useState(0);
   const [imagePositions, setImagePositions] = useState<{top: number, left: number, height: number}[]>([]);
   const [galleryContainerWidth, setGalleryContainerWidth] = useState(0);
+  const [cardWidth, setCardWidth] = useState(0);
 
   // 引用
   const observer = useRef<IntersectionObserver | null>(null);
@@ -108,9 +109,21 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     // 设置初始宽度
     setGalleryContainerWidth(element.clientWidth);
 
+    // 添加窗口大小变化监听器以重新计算布局
+    const handleResize = () => {
+      setGalleryContainerWidth(element.clientWidth);
+      setCardWidth(calculateCardWidth());
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // 设置初始卡片宽度
+    setCardWidth(calculateCardWidth());
+
     return () => {
       // 清理 observer
       observer.unobserve(element);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -146,15 +159,32 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     }
   }, [currentModel, setCurrentModelInChat]);
 
+  // 计算卡片宽度的工具函数
+  const calculateCardWidth = () => {
+    const isMobile = window.innerWidth <= 768;
+    const columnGap = 0.625; // 10px
+    const columnCount = isMobile ? 2 : 4;
+    
+    if (isMobile) {
+      // 移动端动态计算：(屏幕宽度 - 父容器边距 - 图片间距) / 列数
+      const screenWidth = window.innerWidth / 16; // 转换为rem
+      const containerPadding = 1.25; // ContentDisplay的padding: 0.625rem * 2 = 1.25rem (20px)
+      const totalGaps = (columnCount - 1) * columnGap; // 图片间距总和
+      return (screenWidth - containerPadding - totalGaps) / columnCount;
+    } else {
+      return 13.9375; // 桌面端: 223px
+    }
+  };
+
   // 计算瀑布流布局
   useEffect(() => {
     if (images.length === 0) return;
 
-    // const containerWidth = 57.625; // 922px 转换为 rem (假设 16px 基准)
-    const cardWidth = 13.9375; // 223px 转换为 rem
-    const columnGap = 0.625; // 10px 转换为 rem
-
-    const columnCount = 4;
+    // 响应式参数设置
+    const isMobile = window.innerWidth <= 768;
+    const columnGap = 0.625; // 10px
+    const columnCount = isMobile ? 2 : 4;
+    const currentCardWidth = cardWidth || calculateCardWidth();
     const columnHeights = Array(columnCount).fill(0);
     const positions: {top: number, left: number, height: number}[] = [];
 
@@ -164,10 +194,10 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
 
       // 计算图片高度 (基于原始宽高比)
       const aspectRatio = image.width && image.height ? image.height / image.width : 1;
-      const imageHeight = cardWidth * aspectRatio;
+      const imageHeight = currentCardWidth * aspectRatio;
 
       // 计算位置
-      const left = minHeightColumn * (cardWidth + columnGap);
+      const left = minHeightColumn * (currentCardWidth + columnGap);
       const top = columnHeights[minHeightColumn];
 
       // 保存位置信息
@@ -188,7 +218,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
     if (JSON.stringify(newImagePositions) !== JSON.stringify(imagePositions)) {
       setImagePositions(newImagePositions);
     }
-  }, [images, galleryContainerWidth, containerHeight]);
+  }, [images, galleryContainerWidth, containerHeight, cardWidth]);
 
   // 修改loadMoreTriggerRef回调函数，保持root为null（使用viewport）
   const loadMoreTriggerRef = useCallback((node: HTMLDivElement | null) => {
@@ -332,7 +362,7 @@ const ModelDetail: React.FC<ModelDetailProps> = ({ modelId }) => {
                     position: 'absolute',
                     top: `${imagePositions[index].top}rem`,
                     left: `${imagePositions[index].left}rem`,
-                    width: '13.9375rem', // 223px
+                    width: `${cardWidth || calculateCardWidth()}rem`,
                     height: `${imagePositions[index].height}rem`
                   }}
                 >

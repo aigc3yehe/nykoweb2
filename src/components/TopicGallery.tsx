@@ -28,6 +28,7 @@ const TopicGallery: React.FC<TopicGalleryProps> = ({
   const [containerHeight, setContainerHeight] = useState(0);
   const [imagePositions, setImagePositions] = useState<{top: number, left: number, height: number}[]>([]);
   const [galleryContainerWidth, setGalleryContainerWidth] = useState(0);
+  const [cardWidth, setCardWidth] = useState(0);
   const galleryContainerRef = useRef<HTMLDivElement>(null);
 
   // 复用WorkflowDetail的ResizeObserver逻辑
@@ -44,18 +45,49 @@ const TopicGallery: React.FC<TopicGalleryProps> = ({
     observer.observe(element);
     setGalleryContainerWidth(element.clientWidth);
 
+    // 添加窗口大小变化监听器以重新计算布局
+    const handleResize = () => {
+      setGalleryContainerWidth(element.clientWidth);
+      setCardWidth(calculateCardWidth());
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // 设置初始卡片宽度
+    setCardWidth(calculateCardWidth());
+
     return () => {
       observer.unobserve(element);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  // 计算卡片宽度的工具函数
+  const calculateCardWidth = () => {
+    const isMobile = window.innerWidth <= 768;
+    const columnGap = 0.625; // 10px
+    const columnCount = isMobile ? 2 : 4;
+    
+    if (isMobile) {
+      // 移动端动态计算：(屏幕宽度 - 父容器边距 - 图片间距) / 列数
+      const screenWidth = window.innerWidth / 16; // 转换为rem
+      const containerPadding = 1.25; // ContentDisplay的padding: 0.625rem * 2 = 1.25rem (20px)
+      const totalGaps = (columnCount - 1) * columnGap; // 图片间距总和
+      return (screenWidth - containerPadding - totalGaps) / columnCount;
+    } else {
+      return 13.9375; // 桌面端: 223px
+    }
+  };
 
   // 复用WorkflowDetail的瀑布流计算逻辑
   useEffect(() => {
     if (contentsList.length === 0) return;
 
-    const cardWidth = 13.9375; // 223px
+    // 响应式参数设置
+    const isMobile = window.innerWidth <= 768;
     const columnGap = 0.625; // 10px
-    const columnCount = 4;
+    const columnCount = isMobile ? 2 : 4;
+    const currentCardWidth = cardWidth || calculateCardWidth();
     const columnHeights = Array(columnCount).fill(0);
     const positions: {top: number, left: number, height: number}[] = [];
 
@@ -64,8 +96,8 @@ const TopicGallery: React.FC<TopicGalleryProps> = ({
       const contentWidth = content.width || 1;
       const contentHeight = content.height || 1;
       const aspectRatio = contentWidth && contentHeight ? contentHeight / contentWidth : 1;
-      const imageHeight = cardWidth * aspectRatio;
-      const left = minHeightColumn * (cardWidth + columnGap);
+      const imageHeight = currentCardWidth * aspectRatio;
+      const left = minHeightColumn * (currentCardWidth + columnGap);
       const top = columnHeights[minHeightColumn];
 
       positions.push({ top, left, height: imageHeight });
@@ -81,7 +113,7 @@ const TopicGallery: React.FC<TopicGalleryProps> = ({
     if (JSON.stringify(newImagePositions) !== JSON.stringify(imagePositions)) {
       setImagePositions(newImagePositions);
     }
-  }, [contentsList, galleryContainerWidth, containerHeight]);
+  }, [contentsList, galleryContainerWidth, containerHeight, cardWidth]);
 
   if (contentsList.length === 0 && !isLoading) {
     return (
@@ -132,7 +164,7 @@ const TopicGallery: React.FC<TopicGalleryProps> = ({
                 position: 'absolute',
                 top: `${imagePositions[index].top}rem`,
                 left: `${imagePositions[index].left}rem`,
-                width: '13.9375rem',
+                width: `${cardWidth || calculateCardWidth()}rem`,
                 height: `${imagePositions[index].height}rem`
               }}
             >

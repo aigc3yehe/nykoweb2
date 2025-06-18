@@ -313,6 +313,10 @@
     flex: 1; /* 填充剩余空间 */
   }
 
+  .detailRow {
+    width: 100%; /* 移动端适应父容器宽度 */
+  }
+
   .actionsContainer {
     width: 100%;
   }
