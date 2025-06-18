@@ -1147,7 +1147,7 @@ export const sendMessage = atom(
       console.log('request_id:', request_id, 'content_id:', content_id, 'isVideo:', isVideo);
       if (request_id) {
         // 根据任务类型传递正确的参数
-        const cu = isWorkflow ? (isVideo ? 300 : 35) : 5; // flux 35
+        const cu = isWorkflow ? (isVideo ? 900 : 35) : 5; // kling 900 : flux 35 : model: 5
         pollImageGenerationTask(request_id, content_id, cu, set, get, isWorkflow, isVideo).catch(err => {
           console.error('poll Image Generation Task Failed:', err);
         });
@@ -2440,7 +2440,7 @@ export const runWorkflowFromChatInput = atom(
       // 检查当前工作流的输出类型
       const currentWorkflow = chatState.currentWorkflow;
       const isVideoOutput = currentWorkflow?.output_type?.includes('video') || false;
-      const cu = isVideoOutput ? 300 : 50; // GPT 50, Kling 300
+      const cu = isVideoOutput ? 900 : 50; // GPT 50, Kling 900
 
       // 添加消息到聊天记录
       const messages = [...filterSystemMessages(chatState.messages)];
