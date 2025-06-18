@@ -245,4 +245,79 @@
 /* 为未选中的标签添加悬停效果 */
 .inactive:hover {
   border: 1px solid #6366F1;
+}
+
+/* 移动端tab下拉选择器样式 */
+.mobileTabDropdown {
+  display: none; /* 桌面端隐藏 */
+  position: relative;
+}
+
+.tabDropdownButton {
+  min-width: 10rem; /* 160px */
+  height: 2.1875rem; /* 35px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem; /* 8px */
+  padding: 0.5rem 0.875rem; /* 8px 14px */
+  border-radius: 0.25rem; /* 4px */
+  border: 1px solid rgba(55, 65, 81, 0.5); /* #37415180 */
+  font-family: 'Jura', sans-serif;
+  font-weight: 700;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: #FFFFFF;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tabDropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 10rem; /* 160px */
+  margin-top: 0.25rem; /* 4px */
+  background: #1F2937;
+  border: 1px solid rgba(55, 65, 81, 0.5);
+  border-radius: 0.25rem; /* 4px */
+  overflow: hidden;
+  z-index: 10;
+}
+
+.tabDropdownItem {
+  padding: 0.5rem 0.875rem; /* 8px 14px */
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 1rem; /* 16px */
+  line-height: 100%;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tabDropdownItem:hover {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.tabDropdownItemActive {
+  background: rgba(99, 102, 241, 0.3);
+  font-weight: 700;
+  color: #6366F1;
+}
+
+/* 移动端响应式样式 */
+@media (max-width: 768px) {
+  /* 显示移动端tab下拉选择器 */
+  .mobileTabDropdown {
+    display: block;
+  }
+  
+  /* 隐藏桌面端tab组 */
+  .tabGroup {
+    display: none;
+  }
 } 

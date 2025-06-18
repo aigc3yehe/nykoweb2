@@ -45,7 +45,9 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   onEditClick
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [tabDropdownOpen, setTabDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const tabDropdownRef = useRef<HTMLDivElement>(null);
   const [modelDetailState] = useAtom(modelDetailAtom);
   const [workflowDetailState] = useAtom(workflowDetailAtom);
 
@@ -56,6 +58,26 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   // hashtag点击处理函数
   const handleTagClick = (tag: string) => {
     navigate(`/?topic=${encodeTopicName(tag)}`);
+  };
+
+  // 移动端tab选项配置
+  const tabOptions = [
+    { key: 'workflows', label: 'Workflows' },
+    { key: 'models', label: 'Models' },
+    { key: 'images', label: 'Images' },
+    { key: 'agentApps', label: 'Agent Apps' }
+  ] as const;
+
+  // 获取当前选中tab的显示文本
+  const getCurrentTabLabel = () => {
+    const currentTab = tabOptions.find(tab => tab.key === activeTab);
+    return currentTab?.label || 'Select Tab';
+  };
+
+  // 处理移动端tab选择
+  const handleTabSelect = (tabKey: 'models' | 'workflows' | 'images' | 'agentApps') => {
+    setActiveTab(tabKey);
+    setTabDropdownOpen(false);
   };
 
   useEffect(() => {
@@ -76,6 +98,9 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
+      }
+      if (tabDropdownRef.current && !tabDropdownRef.current.contains(event.target as Node)) {
+        setTabDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -129,6 +154,31 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   // 正常模式显示标签和控制
   return (
     <div className={styles.contentHeader}>
+      {/* 移动端tab下拉选择器 */}
+      <div className={styles.mobileTabDropdown} ref={tabDropdownRef}>
+        <button
+          className={styles.tabDropdownButton}
+          onClick={() => setTabDropdownOpen(!tabDropdownOpen)}
+        >
+          {getCurrentTabLabel()} <img src={dropdownIcon} alt="dropdown" width={16} height={16} />
+        </button>
+
+        {tabDropdownOpen && (
+          <div className={styles.tabDropdownMenu}>
+            {tabOptions.map((option) => (
+              <div
+                key={option.key}
+                className={`${styles.tabDropdownItem} ${activeTab === option.key ? styles.tabDropdownItemActive : ''}`}
+                onClick={() => handleTabSelect(option.key)}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 桌面端tab组 */}
       <div className={styles.tabGroup}>
         <div
             className={`${styles.tab} ${activeTab === 'workflows' ? styles.active : styles.inactive}`}

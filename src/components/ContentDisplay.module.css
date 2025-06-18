@@ -46,6 +46,17 @@
 
 /* 在移动端显示提示 */
 @media (max-width: 768px) {
+  .contentDisplay {
+    padding: 0.625rem; /* 10px */
+    width: 100vw;
+    box-sizing: border-box;
+  }
+  
+  .contentContainer {
+    width: 100%;
+    max-width: none;
+  }
+
   .stickyHeader .headerWrapper {
     background-color: transparent;
     backdrop-filter: none;
