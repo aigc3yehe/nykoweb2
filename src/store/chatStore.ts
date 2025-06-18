@@ -386,7 +386,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
 
       // 如果没有状态信息，继续轮询
       if (!statusResponse?.data?.status) {
-        console.log('status is null，keep task');
+        console.log('Status is null, keep task');
         continue;
       }
 
@@ -441,7 +441,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
           );
 
           if (messageIndex !== -1) {
-            console.log('find message，update message');
+            console.log('Find message, update message');
             const aspectRatio = actualIsWorkflow ? chatState.selectedWorkflowAspectRatio : chatState.selectedAspectRatio;
             let width = 512;
             let height = 512;
@@ -531,7 +531,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
               latestGeneratedImage: latestGeneratedImage // 更新：保存最新生成内容状态（包含aicc_type）
             });
           } else {
-            console.log('not found message，create new message');
+            console.log('Not found message, create new message');
             // 如果找不到对应消息，创建新消息（兜底方案）
             const aspectRatio = actualIsWorkflow ? chatState.selectedWorkflowAspectRatio : chatState.selectedAspectRatio;
             let width = 512;
@@ -600,12 +600,12 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
 
           // 如果有当前模型，重新加载与模型相关的图片
           if (chatState.currentModel?.id) {
-            console.log('reset model images，model id:', chatState.currentModel.id);
+            console.log('Reset model images, model id:', chatState.currentModel.id);
             // 使用 fetchImages 重新加载图片
             set(fetchImages, { reset: true, model_id: chatState.currentModel.id });
           }
           if (actualIsWorkflow && chatState.currentWorkflow?.id) {
-            console.log('reset model images，workflow id:', chatState.currentWorkflow.id);
+            console.log('Reset model images, workflow id:', chatState.currentWorkflow.id);
             // 使用 fetchImages 重新加载图片
             set(fetchImages, { reset: true, workflow_id: chatState.currentWorkflow.id });
           }
@@ -632,7 +632,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
         );
 
         if (messageIndex !== -1) {
-          console.log('find message，update failed message');
+                      console.log('Find message, update failed message');
           // 更新现有消息为失败消息
           const updatedMessages = [...chatState.messages];
           updatedMessages[messageIndex] = {
@@ -655,7 +655,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
             workflowImageFile: null // 清除文件对象
           });
         } else {
-          console.log('not found message，create new failed message');
+                      console.log('Not found message, create new failed message');
           // 如果找不到对应消息，添加失败消息
           set(chatAtom, {
             ...chatState,

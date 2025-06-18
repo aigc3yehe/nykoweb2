@@ -36,6 +36,7 @@
   width: 29.5rem; /* 472px */
   border-left: 1px solid rgba(55, 65, 81, 0.3);
   overflow: auto; /* 保持聊天部分可滚动 */
+  position: relative; /* 为切换按钮提供定位基准 */
 }
 
 .relatedTweetsSection {
@@ -53,6 +54,79 @@
   display: none; /* Chrome, Safari, Opera */
 }
 
+/* 移动端chat切换按钮 */
+.mobileChatToggle {
+  display: none; /* 桌面端隐藏 */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: #6366F1;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.mobileChatToggle:hover {
+  background: #4F46E5;
+}
+
+/* 切换按钮位置 */
+.toggleTop {
+  top: 1rem;
+}
+
+.toggleBottom {
+  bottom: 1rem;
+}
+
+/* 浮动切换按钮（chat收起时） */
+.floatingToggle {
+  position: fixed !important;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+}
+
+/* 移动端提示文案 */
+.mobileNotice {
+  display: none; /* 桌面端隐藏 */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #FF3C3D;
+  color: white;
+  font-family: 'Jura', sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem; /* 12px */
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  text-align: center;
+  white-space: nowrap;
+  z-index: 1000;
+}
+
+/* 展开状态下的提示文案位置（在按钮下方） */
+.chatSection .mobileNotice {
+  top: 4rem; /* 在toggleTop按钮下方 */
+}
+
+/* 收起状态下的浮动提示文案 */
+.floatingNotice {
+  position: fixed !important;
+  bottom: 0.25rem; /* 在floatingToggle按钮下方 */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+}
+
 @media (max-width: 768px) {
   .mainLayout {
     flex-direction: column;
@@ -61,6 +135,7 @@
 
   .contentContainer {
     flex-direction: row; /* 保持水平布局 */
+    position: relative; /* 为移动端chat定位提供基准 */
   }
 
   .contentSection {
@@ -69,7 +144,38 @@
   }
 
   .chatSection {
-    display: none; /* 小屏幕下隐藏右侧区域 */
+    /* 移动端chat样式 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    border-left: none;
+    background: #0E111B; /* 添加背景色 */
+  }
+
+  /* 移动端chat展开状态 */
+  .mobileChatOpen {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 移动端chat收起状态 */
+  .mobileChatClosed {
+    display: none;
+  }
+
+  /* 移动端显示切换按钮 */
+  .mobileChatToggle {
+    display: block;
+  }
+
+  /* 移动端显示提示文案 */
+  .mobileNotice {
+    display: block;
   }
 
   .relatedTweetsSection {

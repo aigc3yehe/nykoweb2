@@ -245,20 +245,20 @@ const ChatWindow: React.FC = () => {
 
     // 当连接状态变为活跃时启动心跳
     if ((isActive || inQueue) && !chatState.heartbeatId) {
-      console.log('start heartbeat');
+      console.log('Start heartbeat');
       startHeartbeatAction();
     }
 
     // 当连接状态变为非活跃时停止心跳
     if ((!isActive && !inQueue) && chatState.heartbeatId) {
-      console.log('stop heartbeat');
+      console.log('Stop heartbeat');
       stopHeartbeatAction();
     }
 
     // 组件卸载时清理心跳
     return () => {
       if (chatState.heartbeatId) {
-        console.log('remove heartbeat');
+        console.log('Remove heartbeat');
         stopHeartbeatAction();
       }
     };

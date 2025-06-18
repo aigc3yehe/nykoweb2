@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './Header';
 import ChatWindow from './ChatWindow';
@@ -18,6 +18,16 @@ const MainLayout: React.FC = () => {
   
   // 检查是否是 collection 页面
   const hasCollection = searchParams.has('collection') && searchParams.has('name') && searchParams.has('description');
+
+  // 移动端chat状态管理
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(true); // 默认展开
+
+  const toggleMobileChat = () => {
+    setIsMobileChatOpen(!isMobileChatOpen);
+  };
+
+  // 检查是否应该显示chat（只在首页显示）
+  const shouldShowChat = !hasCollection && !hasTopic;
 
   return (
     <div className={styles.mainLayout}>
@@ -39,40 +49,73 @@ const MainLayout: React.FC = () => {
           </div>
         } />
         <Route path="*" element={
-          hasCollection ? (
-            <div className={styles.fullWidthContent}>
-              <CollectionPage
-                contractAddress={searchParams.get('collection')!}
-                name={searchParams.get('name')!}
-                description={searchParams.get('description')!}
-                onBack={() => window.history.back()}
-              />
-            </div>
-          ) : hasTopic ? (
-          <div className={styles.contentContainer}>
-            <div className={styles.contentSection}>
-                <div className={styles.centeredContent}>
-              <TokenMarquee />
-                  <TopicPageRouter />
-                </div>
+          <>
+            {hasCollection ? (
+              <div className={styles.fullWidthContent}>
+                <CollectionPage
+                  contractAddress={searchParams.get('collection')!}
+                  name={searchParams.get('name')!}
+                  description={searchParams.get('description')!}
+                  onBack={() => window.history.back()}
+                />
               </div>
-              <div className={styles.relatedTweetsSection}>
-                <TopicRelatedTweets topicName={searchParams.get('topic') || ''} />
-              </div>
-            </div>
-          ) : (
+            ) : hasTopic ? (
             <div className={styles.contentContainer}>
               <div className={styles.contentSection}>
-                <div className={styles.centeredContent}>
-                  <TokenMarquee />
-                  <TopicPageRouter />
+                  <div className={styles.centeredContent}>
+                <TokenMarquee />
+                    <TopicPageRouter />
+                  </div>
                 </div>
+                <div className={styles.relatedTweetsSection}>
+                  <TopicRelatedTweets topicName={searchParams.get('topic') || ''} />
+                </div>
+              </div>
+            ) : (
+              <div className={styles.contentContainer}>
+                <div className={styles.contentSection}>
+                  <div className={styles.centeredContent}>
+                    <TokenMarquee />
+                    <TopicPageRouter />
+                  </div>
+              </div>
+              <div className={`${styles.chatSection} ${isMobileChatOpen ? styles.mobileChatOpen : styles.mobileChatClosed}`}>
+                {/* 移动端chat切换按钮 - 只在chat展开时显示在顶部 */}
+                {isMobileChatOpen && (
+                  <>
+                    <button 
+                      className={`${styles.mobileChatToggle} ${styles.toggleTop}`}
+                      onClick={toggleMobileChat}
+                    >
+                      Close Chat
+                    </button>
+                    {/* 移动端提示文案 */}
+                    <div className={styles.mobileNotice}>
+                      Please use a desktop or use a mobile device in landscape mode
+                    </div>
+                  </>
+                )}
+                <ChatWindow />
+              </div>
             </div>
-            <div className={styles.chatSection}>
-              <ChatWindow />
-            </div>
-          </div>
-          )
+            )}
+            
+            {/* 移动端chat收起时的展开按钮 - 只在首页且chat收起时显示 */}
+            {shouldShowChat && !isMobileChatOpen && (
+              <>
+                <button 
+                  className={`${styles.mobileChatToggle} ${styles.toggleBottom} ${styles.floatingToggle}`}
+                  onClick={toggleMobileChat}
+                >
+                  Open Chat
+                </button>
+                {/* 移动端提示文案 */}
+                <div className={`${styles.mobileNotice} ${styles.floatingNotice}`}>
+                  Please use a desktop or use a mobile device in landscape mode
+                </div>
+              </>
+            )}
+          </>
         } />
       </Routes>
     </div>
