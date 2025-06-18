@@ -1183,7 +1183,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               rel="noopener noreferrer"
               className={styles.serviceProviderLink}
             >
-              @virtuals_misato
+              @misato_virtuals
             </a>
           </span>
           <div className={styles.serviceProviderIcons} onClick={() => window.open('https://x.com/Misato_virtuals', '_blank')}>
