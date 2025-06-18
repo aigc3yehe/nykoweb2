@@ -323,7 +323,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 className={styles.extensionButton}
                 onClick={onAnimate}
               >
-                Animate (300 credits)
+                Animate (900 credits)
               </button>
               <button
                 className={styles.extensionButton}
@@ -1126,13 +1126,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 className={styles.extensionButton}
                 onClick={onAnimate}
               >
-                Animate (100 credits)
+                Animate (900 credits)
               </button>
               <button
                 className={styles.extensionButton}
                 onClick={onMintNFT}
               >
-                mint as NFT (20 credits)
+                mint as NFT (50 credits)
               </button>
             </div>
           </div>
