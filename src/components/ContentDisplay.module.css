@@ -37,7 +37,7 @@
   position: fixed;
   top: 6.375rem; /* 原来的3.125rem加上TokenMarquee的高度3.25rem */
   width: 57.625rem; /* 与contentContainer宽度一致 */
-  background-color: rgba(17, 24, 39, 0.95); /* 半透明背景 */
+  background-color: #0E111B; /* 与页面底部背景颜色一致 */
   padding: 0.75rem 0;
   z-index: 100;
   border-bottom: 1px solid rgba(55, 65, 81, 0.3);
