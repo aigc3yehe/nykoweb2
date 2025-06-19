@@ -1,0 +1,40 @@
+import React, { useEffect } from 'react'
+import { useSetAtom } from 'jotai'
+import { initThemeAtom } from '../../store/themeStore'
+import { initLanguageAtom } from '../../store/i18nStore'
+import Header from './Header'
+import Sidebar from './Sidebar'
+import MainContent from './MainContent'
+
+interface AppLayoutProps {
+  children: React.ReactNode
+}
+
+const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+  const initTheme = useSetAtom(initThemeAtom)
+  const initLanguage = useSetAtom(initLanguageAtom)
+  
+  useEffect(() => {
+    initTheme()
+    initLanguage()
+  }, [])
+  
+  return (
+    <div className="h-screen flex flex-col bg-background text-foreground">
+      {/* 顶部标题栏 */}
+      <Header />
+      
+      <div className="flex flex-1 overflow-hidden">
+        {/* 左侧边栏 */}
+        <Sidebar />
+        
+        {/* 主内容区 */}
+        <MainContent>
+          {children}
+        </MainContent>
+      </div>
+    </div>
+  )
+}
+
+export default AppLayout
