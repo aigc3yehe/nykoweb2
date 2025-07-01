@@ -99,4 +99,4 @@ const TrendingStyles: React.FC = () => {
   )
 }
 
-export default TrendingStyles 
+export default TrendingStyles

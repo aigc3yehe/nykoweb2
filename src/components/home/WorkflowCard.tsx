@@ -11,14 +11,43 @@ interface WorkflowCardProps {
   item: FeaturedItem
   onClick?: () => void
   onUseClick?: () => void
+  variant?: 'workflow' | 'style'
 }
 
-const WorkflowCard: React.FC<WorkflowCardProps> = ({ item, onClick, onUseClick }) => {
+const WorkflowCard: React.FC<WorkflowCardProps> = ({ 
+  item, 
+  onClick, 
+  onUseClick,
+  variant = 'workflow'
+}) => {
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   // 判断是否为视频
   const isVideo = item.cover?.includes('.mp4') || item.cover?.includes('.webm')
+
+  // 根据variant和屏幕尺寸确定尺寸
+  const getCardDimensions = () => {
+    if (variant === 'style') {
+      // Trending Styles: PC和移动端都是 224x356
+      return {
+        card: 'w-56 h-[22.25rem]', // 224x356
+        cover: 'w-56 h-[19.25rem]', // 224x308
+        container: 'w-56 h-12', // 224x48 (356-308=48)
+        showDescription: false
+      }
+    } else {
+      // Popular Workflows: PC 288x306, 移动端 224x266
+      return {
+        card: 'w-56 md:w-72 h-[16.625rem] md:h-[19.125rem]', // 移动端: 224x266, PC端: 288x306
+        cover: 'w-56 md:w-72 h-[13.75rem] md:h-[13.75rem]', // 移动端: 224x220, PC端: 288x220
+        container: 'w-56 md:w-72 h-[2.875rem] md:h-[5.375rem]', // 移动端: 46px(266-220), PC端: 86px(306-220)
+        showDescription: true // PC端显示，移动端通过CSS隐藏
+      }
+    }
+  }
+
+  const dimensions = getCardDimensions()
 
   // 获取用户头像
   const getAvatarUrl = () => {
@@ -48,13 +77,19 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ item, onClick, onUseClick }
 
   return (
     <div 
-      className="w-72 h-[19.125rem] rounded-xl overflow-hidden cursor-pointer flex-shrink-0 group"
+      className={cn(
+        "rounded-xl overflow-hidden cursor-pointer flex-shrink-0 group",
+        dimensions.card
+      )}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Cover 区域 */}
-      <div className="relative w-72 h-[13.75rem] rounded-xl overflow-hidden bg-[#E8E8E8] dark:bg-gray-700">
+      <div className={cn(
+        "relative rounded-xl overflow-hidden bg-[#E8E8E8] dark:bg-gray-700",
+        dimensions.cover
+      )}>
         {item.cover && !imageError ? (
           isVideo ? (
             <video
@@ -86,9 +121,15 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ item, onClick, onUseClick }
           </div>
         )}
 
+        {/* Hover 遮罩 */}
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-b from-transparent to-black/40 transition-opacity duration-200",
+          isHovered ? "opacity-100" : "opacity-0"
+        )} />
+
         {/* Hover 信息 */}
         <div className={cn(
-          "absolute bottom-4 left-0 right-0 px-[0.875rem] flex items-center justify-between transition-opacity duration-200",
+          "absolute bottom-4 left-0 right-0 px-[0.875rem] flex items-center justify-between transition-opacity duration-200 z-10",
           isHovered ? "opacity-100" : "opacity-0"
         )}>
           {/* Use 按钮 */}
@@ -110,7 +151,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ item, onClick, onUseClick }
               </span>
             </div>
 
-            {/* 点赞数 - 暂时显示0，因为FeaturedItem中没有likes字段 */}
+            {/* 点赞数 */}
             <div className="flex items-center gap-1">
               <img src={LikeIcon} alt="Likes" className="w-4 h-4" />
               <span className="font-lexend text-xs text-design-bg-light-gray">0</span>
@@ -119,22 +160,38 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ item, onClick, onUseClick }
         </div>
       </div>
 
-      {/* Container 区域 */}
-      <div className="w-72 pt-2.5">
+      {/* Container 区域 - 修复布局 */}
+      <div className={cn(
+        "pt-3 px-0 flex flex-col", // padding-top: 12px
+        dimensions.container
+      )}>
         {/* Name */}
-        <h3 className="font-lexend font-semibold text-base text-design-main-text dark:text-design-dark-main-text truncate">
-          {item.name}
-        </h3>
+        <div className="flex-shrink-0">
+          <h3 className="font-lexend font-semibold text-base leading-none text-design-main-text dark:text-design-dark-main-text truncate">
+            {item.name}
+          </h3>
+        </div>
 
-        {/* Description */}
-        {item.description && (
-          <p className="font-lexend text-xs leading-[140%] text-design-medium-gray dark:text-design-dark-medium-gray line-clamp-2">
-            {item.description}
-          </p>
+        {/* Description - 根据variant和屏幕尺寸决定是否显示 */}
+        {dimensions.showDescription && item.description && (
+          <div className="mt-1 flex-shrink-0 hidden md:block"> {/* gap: 4px */}
+            <p 
+              className="font-lexend text-xs leading-[140%] text-design-medium-gray dark:text-design-dark-medium-gray overflow-hidden"
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                lineHeight: '1.4',
+                maxHeight: 'calc(2 * 1.4 * 0.75rem)', // 2行 * line-height * font-size
+              }}
+            >
+              {item.description}
+            </p>
+          </div>
         )}
 
         {/* User 信息 */}
-        <div className="flex items-center gap-1.5 pt-1">
+        <div className="mt-1 flex items-center gap-1.5 flex-shrink-0"> {/* gap: 4px */}
           <img
             src={getAvatarUrl()}
             alt={getDisplayName()}
@@ -143,7 +200,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ item, onClick, onUseClick }
               (e.target as HTMLImageElement).src = avatarSvg
             }}
           />
-          <span className="font-lexend text-xs text-design-dark-gray dark:text-design-dark-dark-gray truncate">
+          <span className="font-lexend text-xs leading-none text-design-dark-gray dark:text-design-dark-dark-gray truncate">
             {getDisplayName()}
           </span>
         </div>
@@ -152,4 +209,4 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ item, onClick, onUseClick }
   )
 }
 
-export default WorkflowCard 
+export default WorkflowCard
