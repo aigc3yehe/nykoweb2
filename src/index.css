@@ -120,7 +120,7 @@ html {
 /* 针对特小屏幕的额外调整 */
 @media screen and (max-width: 768px) {
   html {
-    font-size: 14px; /* 可根据需要调整小屏幕的基础字体大小 */
+    font-size: 16px; /* 可根据需要调整小屏幕的基础字体大小 */
   }
   
   /* 针对移动设备的额外高度调整 */

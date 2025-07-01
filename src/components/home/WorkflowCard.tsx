@@ -31,9 +31,9 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
     if (variant === 'style') {
       // Trending Styles: PC和移动端都是 224x356
       return {
-        card: 'w-56 h-[22.25rem]', // 224x356
+        card: 'w-56 h-[22.5rem]', // 224x356
         cover: 'w-56 h-[19.25rem]', // 224x308
-        container: 'w-56 h-12', // 224x48 (356-308=48)
+        container: 'w-56',
         showDescription: false
       }
     } else {
@@ -41,7 +41,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
       return {
         card: 'w-56 md:w-72 h-[16.625rem] md:h-[19.125rem]', // 移动端: 224x266, PC端: 288x306
         cover: 'w-56 md:w-72 h-[13.75rem] md:h-[13.75rem]', // 移动端: 224x220, PC端: 288x220
-        container: 'w-56 md:w-72 h-[2.875rem] md:h-[5.375rem]', // 移动端: 46px(266-220), PC端: 86px(306-220)
+        container: 'w-56 md:w-72',
         showDescription: true // PC端显示，移动端通过CSS隐藏
       }
     }
@@ -162,45 +162,41 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
 
       {/* Container 区域 - 修复布局 */}
       <div className={cn(
-        "pt-3 px-0 flex flex-col", // padding-top: 12px
+        "pt-3 flex flex-col gap-0.5", // padding-top: 12px, gap: 4px
         dimensions.container
       )}>
         {/* Name */}
-        <div className="flex-shrink-0">
-          <h3 className="font-lexend font-semibold text-base leading-none text-design-main-text dark:text-design-dark-main-text truncate">
-            {item.name}
-          </h3>
-        </div>
+        <h3 className="font-lexend font-semibold text-base leading-tight text-design-main-text dark:text-design-dark-main-text truncate">
+          {item.name}
+        </h3>
 
         {/* Description - 根据variant和屏幕尺寸决定是否显示 */}
         {dimensions.showDescription && item.description && (
-          <div className="mt-1 flex-shrink-0 hidden md:block"> {/* gap: 4px */}
-            <p 
-              className="font-lexend text-xs leading-[140%] text-design-medium-gray dark:text-design-dark-medium-gray overflow-hidden"
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                lineHeight: '1.4',
-                maxHeight: 'calc(2 * 1.4 * 0.75rem)', // 2行 * line-height * font-size
-              }}
-            >
-              {item.description}
-            </p>
-          </div>
+          <p 
+            className="font-lexend text-xs leading-[140%] text-design-medium-gray dark:text-design-dark-medium-gray overflow-hidden hidden md:block"
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              lineHeight: '1.4',
+              maxHeight: 'calc(2 * 1.4 * 0.75rem)', // 2行 * line-height * font-size
+            }}
+          >
+            {item.description}
+          </p>
         )}
 
-        {/* User 信息 */}
-        <div className="mt-1 flex items-center gap-1.5 flex-shrink-0"> {/* gap: 4px */}
+        {/* User 信息 - 修复字符裁切问题 */}
+        <div className="flex items-center gap-1.5 h-4"> {/* 固定高度确保显示完整 */}
           <img
             src={getAvatarUrl()}
             alt={getDisplayName()}
-            className="w-4 h-4 rounded-full"
+            className="w-4 h-4 rounded-full flex-shrink-0"
             onError={(e) => {
               (e.target as HTMLImageElement).src = avatarSvg
             }}
           />
-          <span className="font-lexend text-xs leading-none text-design-dark-gray dark:text-design-dark-dark-gray truncate">
+          <span className="font-lexend text-xs leading-4 text-design-dark-gray dark:text-design-dark-dark-gray truncate">
             {getDisplayName()}
           </span>
         </div>
