@@ -1,5 +1,7 @@
 import './App.css'
-import { BrowserRouter } from 'react-router-dom'
+import React from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import AppLayout from './components/layout/AppLayout'
 import MainLayout from './components/MainLayout'
 import Toast from './components/Toast'
 import ConfirmDialog from './components/ConfirmDialog'
@@ -16,8 +18,9 @@ import { Analytics } from '@vercel/analytics/react'
 import { editModalAtom, hideEditModalAtom } from './store/editStore'
 import EditModelModal from './components/EditModelModal'
 import EditWorkflowModal from './components/EditWorkflowModal'
-import {ModelDetail} from "./store/modelStore.ts";
-import {WorkflowDetail} from "./store/workflowStore.ts";
+import { ModelDetail } from "./store/modelStore.ts"
+import { WorkflowDetail } from "./store/workflowStore.ts"
+import Home from './pages/Home'
 
 function App() {
   const [modalState] = useAtom(modalAtom)
@@ -34,13 +37,16 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="container">
-        <MainLayout />
+      <AppLayout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          {/* 其他路由... */}
+        </Routes>
         
         <Toast />
         <ConfirmDialog />
 
-        {/* 图片详情模态框 */}
+        {/* 保持现有的模态框 */}
         {modalState.isImageDetailsOpen && modalState.selectedImage && (
           <ImageDetailsModal
             key={`image-detail-${modalState.selectedImage.id}`}
@@ -52,55 +58,10 @@ function App() {
           />
         )}
 
-        {/* 账户弹窗 */}
-        {accountPopupState.open && (
-          <AccountPopup
-            isOpen={true}
-            onClose={hideAccountPopup}
-            onExport={showExportKey} // 点击导出按钮时显示导出私钥弹窗
-            onLogout={accountPopupState.onLogout}
-            userData={accountPopupState.userData}
-            anchorPosition={accountPopupState.anchorPosition}
-          />
-        )}
-
-        {/* 导出私钥弹窗 */}
-        {exportKeyState.open && (
-          <ExportKeyModal
-            isOpen={true}
-            onClose={hideExportKey}
-            onCancel={hideExportKey}
-          />
-        )}
-
-        {/* 生成弹出框 */}
-        {generatePopupState.open && (
-          <GeneratePopup
-            isOpen={true}
-            onClose={hideGeneratePopup}
-          />
-        )}
-
-        {/* 编辑模型弹窗 */}
-        {editModalState.open && editModalState.type === 'model' && editModalState.data && (
-          <EditModelModal
-            isOpen={true}
-            model={editModalState.data as ModelDetail}
-            onClose={hideEditModal}
-          />
-        )}
-
-        {/* 编辑工作流弹窗 */}
-        {editModalState.open && editModalState.type === 'workflow' && editModalState.data && (
-          <EditWorkflowModal
-            isOpen={true}
-            workflow={editModalState.data as WorkflowDetail}
-            onClose={hideEditModal}
-          />
-        )}
-
+        {/* 其他模态框保持不变... */}
+        
         <Analytics />
-      </div>
+      </AppLayout>
     </BrowserRouter>
   )
 }

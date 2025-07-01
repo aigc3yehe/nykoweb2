@@ -8,7 +8,11 @@ import { themeAtom } from '../../store/themeStore'
 import Activity from '../Activity'
 import Pricing from '../Pricing'
 
-const MainContent: React.FC = () => {
+interface MainContentProps {
+  children: React.ReactNode
+}
+
+const MainContent: React.FC<MainContentProps> = ({ children }) => {
   const [theme] = useAtom(themeAtom)
   const location = useLocation()
 
@@ -41,12 +45,15 @@ const MainContent: React.FC = () => {
 
   return (
     <main className={cn(
-      "flex-1 overflow-auto",
+      "flex-1 overflow-y-auto overflow-x-hidden",
       "bg-background text-foreground",
-      "transition-colors duration-200"
+      "transition-colors duration-200",
+      // 隐藏滚动条但保持可滚动
+      "scrollbar-hide"
     )}>
-      <div className="h-full">
-        {renderContent()}
+      {/* 内容容器 - 最大宽度1184px，居中显示 */}
+      <div className="w-full max-w-[74rem] mx-auto h-full">
+        {children}
       </div>
     </main>
   )

@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    /* 原有语义化颜色 */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -25,6 +26,17 @@
 
     --radius: 0.5rem;
 
+    /* 设计稿颜色变量 - 亮色主题 */
+    --design-main-text: 31 41 55; /* #1F2937 */
+    --design-medium-gray: 107 114 128; /* #6B7280 */
+    --design-dark-gray: 75 85 99; /* #4B5563 */
+    --design-lightest-gray: 156 163 175; /* #9CA3AF */
+    --design-main-blue: 9 0 255; /* #0900FF */
+    --design-light-green: 0 255 72; /* #00FF48 */
+    --design-line-light-gray: 229 231 235; /* #E5E7EB */
+    --design-bg-light-blue: 238 242 255; /* #EEF2FF */
+    --design-bg-light-gray: 243 244 246; /* #F3F4F6 */
+
     /* 设计稿宽度 */
     --design-width: 1440px;
     /* 基础字体大小 */
@@ -32,6 +44,7 @@
   }
 
   .dark {
+    /* 原有语义化颜色 - 暗色主题 */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
@@ -49,7 +62,18 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --ring: 224.3 76.3% 94.1%;
+
+    /* 设计稿颜色变量 - 暗色主题 */
+    --design-main-text: 249 250 251; /* #F9FAFB */
+    --design-medium-gray: 156 163 175; /* #9CA3AF */
+    --design-dark-gray: 209 213 219; /* #D1D5DB */
+    --design-lightest-gray: 107 114 128; /* #6B7280 */
+    --design-main-blue: 59 130 246; /* #3B82F6 */
+    --design-light-green: 16 185 129; /* #10B981 */
+    --design-line-light-gray: 55 65 81; /* #374151 */
+    --design-bg-light-blue: 30 41 59; /* #1E293B */
+    --design-bg-light-gray: 17 24 39; /* #111827 */
   }
 }
 
@@ -60,9 +84,14 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    /* 添加径向渐变背景 */
+    /* 根据主题切换背景 */
     background: radial-gradient(circle at 35.69% 103.83%, #181E31 0%, #090B12 100%);
     min-height: 100vh;
+  }
+  
+  /* 暗色主题下的背景 */
+  .dark body {
+    background: radial-gradient(circle at 35.69% 103.83%, #0F172A 0%, #020617 100%);
   }
 }
 
@@ -101,6 +130,33 @@ html {
   }
 }
 
+/* 设计稿颜色工具类 */
+@layer utilities {
+  .text-design-main { @apply text-design-main-text dark:text-design-dark-main-text; }
+  .text-design-medium { @apply text-design-medium-gray dark:text-design-dark-medium-gray; }
+  .text-design-dark { @apply text-design-dark-gray dark:text-design-dark-dark-gray; }
+  .text-design-light { @apply text-design-lightest-gray dark:text-design-dark-lightest-gray; }
+  
+  .bg-design-light-blue { @apply bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue; }
+  .bg-design-light-gray { @apply bg-design-bg-light-gray dark:bg-design-dark-bg-light-gray; }
+  
+  .border-design-light { @apply border-design-line-light-gray dark:border-design-dark-line-light-gray; }
+
+  /* Chrome, Safari and Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* IE and Edge */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+  }
+
+  /* Firefox */
+  .scrollbar-hide {
+    scrollbar-width: none;
+  }
+}
 .no-spinner::-webkit-outer-spin-button,
 .no-spinner::-webkit-inner-spin-button {
   -webkit-appearance: none;

@@ -1,7 +1,7 @@
 {
-  "name": "niyoko-agent",
+  "name": "niko-web",
   "private": true,
-  "version": "0.0.2",
+  "version": "1.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -28,6 +28,7 @@
     "@vercel/analytics": "^1.5.0",
     "@wagmi/core": "^2.16.5",
     "alchemy-sdk": "^3.6.0",
+    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "ethers": "^5.8.0",
     "jotai": "^2.12.2",
@@ -40,6 +41,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.3.0",
     "recharts": "^2.15.3",
+    "tailwind-merge": "^3.3.1",
     "viem": "^2.28.0",
     "vite-plugin-node-polyfills": "^0.23.0",
     "wagmi": "^2.14.13"
