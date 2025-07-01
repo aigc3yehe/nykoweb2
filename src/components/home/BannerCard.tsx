@@ -48,8 +48,8 @@ const BannerCard: React.FC<BannerCardProps> = ({
           {title}
         </h2>
         
-        {/* 描述 */}
-        <p className="font-lexend font-normal text-sm leading-[120%] text-white/80">
+        {/* 描述 padding bottom 8px*/}
+        <p className="font-lexend font-normal text-sm leading-[120%] text-white/80 pb-2">
           {description}
         </p>
         

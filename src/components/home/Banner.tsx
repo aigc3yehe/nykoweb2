@@ -91,7 +91,7 @@ const Banner: React.FC = () => {
   return (
     <div className="w-full">
       {/* 桌面端 - 并排显示 */}
-      <div className="hidden md:flex gap-[0.875rem] h-[12.4375rem]"> {/* gap: 14px, height: 199px */}
+      <div className="hidden md:flex gap-[1.5rem] h-[12.4375rem]"> {/* gap: 24px, height: 199px */}
         {banners.map((banner) => (
           <BannerCard key={banner.id} {...banner} />
         ))}

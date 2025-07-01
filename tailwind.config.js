@@ -56,7 +56,9 @@ export default {
             'bg-light-blue': '#1E293B',
             'bg-light-gray': '#111827',
           }
-        }
+        },
+        // 新增主内容区背景色
+        'main-bg': '#F9FAFB',
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -46,7 +46,7 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
   return (
     <main className={cn(
       "flex-1 overflow-y-auto overflow-x-hidden",
-      "bg-background text-foreground",
+      "bg-main-bg dark:bg-gray-900 text-foreground",
       "transition-colors duration-200",
       // 隐藏滚动条但保持可滚动
       "scrollbar-hide"
