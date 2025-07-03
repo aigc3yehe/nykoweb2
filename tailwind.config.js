@@ -69,6 +69,22 @@ export default {
       },
       screens: {
         pc: '744px',
+      },
+      spacing: {
+        '7.5': '1.875rem', // 30px
+        '3.5': '0.875rem', // 14px
+        '45': '11.25rem', // 180px
+      },
+      height: {
+        '7.5': '1.875rem', // 30px
+        '3.5': '0.875rem', // 14px
+        '45': '11.25rem', // 180px
+      },
+      width: {
+        '16.8125': '16.8125rem', // 269px
+      },
+      fontFamily: {
+        'lexend': ['Lexend', 'sans-serif'],
       }
     },
   },

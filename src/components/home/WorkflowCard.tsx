@@ -11,7 +11,7 @@ interface WorkflowCardProps {
   item: FeaturedItem
   onClick?: () => void
   onUseClick?: () => void
-  variant?: 'workflow' | 'style'
+  variant?: 'workflow' | 'style' | 'recipes_workflow' | 'recipes_style'
 }
 
 const WorkflowCard: React.FC<WorkflowCardProps> = ({ 
@@ -34,6 +34,22 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         card: 'w-56 h-[22.5rem]', // 224x356
         cover: 'w-56 h-[19.25rem]', // 224x308
         container: 'w-56',
+        showDescription: false
+      }
+    } else if (variant === 'recipes_workflow') {
+      // Recipes Workflows页面: 269x306
+      return {
+        card: 'w-16.8125 h-[19.125rem]', // 269x306
+        cover: 'w-16.8125 h-[13.75rem]', // 269x220
+        container: 'w-16.8125',
+        showDescription: true
+      }
+    } else if (variant === 'recipes_style') {
+      // Recipes Styles页面: 269x418，不显示描述
+      return {
+        card: 'w-16.8125 h-[26.125rem]', // 269x418
+        cover: 'w-16.8125 h-[23.125rem]', // 269x370
+        container: 'w-16.8125',
         showDescription: false
       }
     } else {

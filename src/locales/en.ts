@@ -1,11 +1,10 @@
 export const en = {
   nav: {
-    discover: 'Discover', // 缺失
-    creativeTools: 'Creative Tools', // 缺失
-    my: 'My', // 缺失
-    home: 'Home',
-    workflows: 'Workflows',
-    styles: 'Styles',
+    discover: 'Discover',
+    creativeTools: 'Creative Tools',
+    my: 'My',
+    home: 'Sparks',
+    recipes: 'Recipes',
     creators: 'Creators',
     generator: 'Generator',
     workflowBuilder: 'Workflow Builder',

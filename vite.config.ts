@@ -26,6 +26,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       },
+      '/mavae_api': {
+        target: 'https://api.mavae.ai',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/mavae_api/, '')
+      },
       '/beta-api': {
         target: 'http://43.153.57.123:8086',
         changeOrigin: true,

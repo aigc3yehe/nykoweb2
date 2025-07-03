@@ -8,10 +8,8 @@ import { cn } from '../../utils/cn'
 // 导入SVG图标
 import HomeIcon from '../../assets/web2/home.svg'
 import HomeSelectedIcon from '../../assets/web2/home_selected.svg'
-import WorkflowsIcon from '../../assets/web2/workflows.svg'
-import WorkflowsSelectedIcon from '../../assets/web2/workflows_selected.svg'
-import StylesIcon from '../../assets/web2/styles.svg'
-import StylesSelectedIcon from '../../assets/web2/styles_selected.svg'
+import RecipesIcon from '../../assets/web2/recipes_normal.svg'
+import RecipesSelectedIcon from '../../assets/web2/recipes_selected.svg'
 import CreatorsIcon from '../../assets/web2/creators.svg'
 import CreatorsSelectedIcon from '../../assets/web2/creators_selected.svg'
 import GeneratorIcon from '../../assets/web2/generator.svg'
@@ -55,26 +53,12 @@ const Sidebar: React.FC = () => {
       path: '/'
     },
     {
-      key: 'workflows',
-      label: t('nav.workflows'), // en: Workflows / zh: 工作流
-      icon: <img src={WorkflowsIcon} alt="Workflows" className="w-5 h-5" />,
-      selectedIcon: <img src={WorkflowsSelectedIcon} alt="Workflows" className="w-5 h-5" />,
-      path: '/workflows'
+      key: 'recipes',
+      label: t('nav.recipes'), // en: Recipes / zh: 组合
+      icon: <img src={RecipesIcon} alt="Recipes" className="w-5 h-5" />,
+      selectedIcon: <img src={RecipesSelectedIcon} alt="Recipes" className="w-5 h-5" />,
+      path: '/recipes'
     },
-    {
-      key: 'styles',
-      label: t('nav.styles'), // en: Styles / zh: 风格
-      icon: <img src={StylesIcon} alt="Styles" className="w-5 h-5" />,
-      selectedIcon: <img src={StylesSelectedIcon} alt="Styles" className="w-5 h-5" />,
-      path: '/styles'
-    },
-    {
-      key: 'creators',
-      label: t('nav.creators'), // en: Creators / zh: 创作者
-      icon: <img src={CreatorsIcon} alt="Creators" className="w-5 h-5" />,
-      selectedIcon: <img src={CreatorsSelectedIcon} alt="Styles" className="w-5 h-5" />,
-      path: '/creators'
-    }
   ]
 
   // Creative tools 组 - 32x32 图标
@@ -168,10 +152,10 @@ const Sidebar: React.FC = () => {
                   {section.title}
                 </h3>
 
-                {/* 分组导航项 - 第一组高度194px，间距6px；第二组高度180px，间距6px */}
+                {/* 分组导航项 - 第一组高度94px，间距6px；第二组高度180px，间距6px */}
                 <div className={cn(
                   "space-y-1.5",
-                  sectionIndex === 0 && "h-48", // 194px ≈ h-48
+                  sectionIndex === 0 && "h-24", // 94px ≈ h-24
                   sectionIndex === 1 && "h-45" // 180px ≈ h-45
                 )}>
                   {section.items.map((item) => (

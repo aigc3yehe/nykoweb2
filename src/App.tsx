@@ -21,6 +21,7 @@ import EditWorkflowModal from './components/EditWorkflowModal'
 import { ModelDetail } from "./store/modelStore.ts"
 import { WorkflowDetail } from "./store/workflowStore.ts"
 import Home from './pages/Home'
+import Recipes from './pages/Recipes'
 
 function App() {
   const [modalState] = useAtom(modalAtom)
@@ -40,9 +41,11 @@ function App() {
       <AppLayout>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/recipes" element={<Recipes />} />
+          <Route path="/recipes/:tab" element={<Recipes />} />
           {/* 其他路由... */}
         </Routes>
-        
+
         <Toast />
         <ConfirmDialog />
 
@@ -59,7 +62,7 @@ function App() {
         )}
 
         {/* 其他模态框保持不变... */}
-        
+
         <Analytics />
       </AppLayout>
     </BrowserRouter>

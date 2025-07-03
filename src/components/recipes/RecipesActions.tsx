@@ -1,0 +1,102 @@
+import React, { useState, useRef, useEffect } from 'react'
+import { RecipeType } from '../../pages/Recipes'
+import DropdownIcon from '../../assets/web2/drop_down.svg'
+import SearchIcon from '../../assets/web2/search.svg'
+import AddIcon from '../../assets/web2/add.svg'
+
+interface RecipesActionsProps {
+  activeTab: RecipeType
+}
+
+const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab }) => {
+  const [selectedOption, setSelectedOption] = useState('All')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState('')
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const options = ['All', 'Featured', 'Popular', 'Recent']
+
+  const handleOptionSelect = (option: string) => {
+    setSelectedOption(option)
+    setIsDropdownOpen(false)
+  }
+
+  // 处理点击外部关闭下拉菜单
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  return (
+    <div className="h-9 flex justify-between items-center">
+      {/* 左侧选项按钮 */}
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="min-w-[101px] h-9 flex items-center justify-between gap-1 px-3.5 py-2.5 rounded-md border border-gray-200 bg-white"
+        >
+          <span className="font-lexend font-normal text-sm leading-none text-[#4B5563]">
+            {selectedOption}
+          </span>
+          <img src={DropdownIcon} alt="Dropdown" className="w-4 h-4" />
+        </button>
+
+        {/* 下拉菜单 */}
+        {isDropdownOpen && (
+          <div className="absolute top-full left-0 mt-1 min-w-[101px] bg-white border border-[#3741514D] rounded-md shadow-lg z-10">
+            <div className="p-2 flex flex-col gap-1.5">
+              {options.map(option => (
+                <button
+                  key={option}
+                  onClick={() => handleOptionSelect(option)}
+                  className={`
+                    h-7.5 px-2.5 py-2 rounded-md text-sm font-lexend font-normal leading-none capitalize
+                    ${selectedOption === option 
+                      ? 'bg-[#EEF2FF] text-[#0900FF]' 
+                      : 'text-[#4B5563] hover:bg-gray-50'
+                    }
+                  `}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 右侧操作区域 */}
+      <div className="h-9 flex items-center gap-3">
+        {/* 搜索框 */}
+        <div className="w-[218px] h-9 flex items-center gap-1.5 px-3.5 py-2.5 border border-gray-200 rounded-md bg-white">
+          <img src={SearchIcon} alt="Search" className="w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            className="w-[168px] h-3.5 font-lexend font-normal text-sm leading-none text-[#9CA3AF] placeholder-[#9CA3AF] bg-transparent border-none outline-none"
+          />
+        </div>
+
+        {/* 新建按钮 */}
+        <button className="h-9 flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-[#0900FF] rounded-md">
+          <img src={AddIcon} alt="Add" className="w-4 h-4" />
+          <span className="font-lexend font-normal text-sm leading-none text-white">
+            New {activeTab === 'workflows' ? 'Workflow' : 'Style'}
+          </span>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default RecipesActions
