@@ -7,6 +7,20 @@ import UseCountIcon from '../../assets/web2/use_2.svg'
 import LikeIcon from '../../assets/web2/like.svg'
 import avatarSvg from '../../assets/Avatar.svg'
 
+interface MobileStyle {
+  width: string
+  height: string
+  coverHeight: string
+}
+
+interface CardDimensions {
+  card: string
+  cover: string
+  container: string
+  showDescription: boolean
+  mobileStyle?: MobileStyle
+}
+
 interface WorkflowCardProps {
   item: FeaturedItem
   onClick?: () => void
@@ -27,7 +41,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
   const isVideo = item.cover?.includes('.mp4') || item.cover?.includes('.webm')
 
   // 根据variant和屏幕尺寸确定尺寸
-  const getCardDimensions = () => {
+  const getCardDimensions = (): CardDimensions => {
     if (variant === 'style') {
       // Trending Styles: PC和移动端都是 224x356
       return {
@@ -37,20 +51,32 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         showDescription: false
       }
     } else if (variant === 'recipes_workflow') {
-      // Recipes Workflows页面: 269x306
+      // Recipes Workflows页面: 移动端动态计算，PC端固定269x306
       return {
-        card: 'w-16.8125 h-[19.125rem]', // 269x306
-        cover: 'w-16.8125 h-[13.75rem]', // 269x220
+        card: 'w-16.8125 h-[19.125rem]', // PC端: 269x306
+        cover: 'w-16.8125 h-[13.75rem]', // PC端: 269x220
         container: 'w-16.8125',
-        showDescription: true
+        showDescription: true,
+        mobileStyle: {
+          // 移动端：宽度=(100vw-60px)/2，cover高度=宽度*(154/165)，文本区域2.875rem
+          width: 'calc((100vw - 60px) / 2)',
+          height: 'calc(((100vw - 60px) / 2) * (154/165) + 2.875rem)',
+          coverHeight: 'calc(((100vw - 60px) / 2) * (154/165))' // cover宽高比 165:154
+        }
       }
     } else if (variant === 'recipes_style') {
-      // Recipes Styles页面: 269x418，不显示描述
+      // Recipes Styles页面: 移动端动态计算，PC端固定269x418
       return {
-        card: 'w-16.8125 h-[26.125rem]', // 269x418
-        cover: 'w-16.8125 h-[23.125rem]', // 269x370
+        card: 'w-16.8125 h-[26.125rem]', // PC端: 269x418
+        cover: 'w-16.8125 h-[23.125rem]', // PC端: 269x370
         container: 'w-16.8125',
-        showDescription: false
+        showDescription: false,
+        mobileStyle: {
+          // 移动端：宽度=(100vw-60px)/2，cover高度=宽度*(228/165)，文本区域2.875rem
+          width: 'calc((100vw - 60px) / 2)',
+          height: 'calc(((100vw - 60px) / 2) * (228/165) + 2.875rem)',
+          coverHeight: 'calc(((100vw - 60px) / 2) * (228/165))' // cover宽高比 165:228
+        }
       }
     } else {
       // Popular Workflows: PC 288x306, 移动端 224x266
@@ -95,17 +121,35 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
     <div 
       className={cn(
         "rounded-xl overflow-hidden cursor-pointer flex-shrink-0 group",
-        dimensions.card
+        // 根据variant决定是否有移动端样式覆盖
+        !dimensions.mobileStyle && dimensions.card,
+        dimensions.mobileStyle && "[width:var(--mobile-width)] [height:var(--mobile-height)] lg:w-16.8125",
+        variant === 'recipes_workflow' && dimensions.mobileStyle && "lg:h-[19.125rem]",
+        variant === 'recipes_style' && dimensions.mobileStyle && "lg:h-[26.125rem]"
       )}
+      style={
+        dimensions.mobileStyle ? {
+          // 通过CSS变量设置，CSS类中通过媒体查询控制
+          '--mobile-width': dimensions.mobileStyle.width,
+          '--mobile-height': dimensions.mobileStyle.height,
+          '--mobile-cover-height': dimensions.mobileStyle.coverHeight,
+        } as React.CSSProperties : undefined
+      }
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Cover 区域 */}
-      <div className={cn(
-        "relative rounded-xl overflow-hidden bg-[#E8E8E8] dark:bg-gray-700",
-        dimensions.cover
-      )}>
+      <div 
+        className={cn(
+          "relative rounded-xl overflow-hidden bg-[#E8E8E8] dark:bg-gray-700",
+          // 根据variant决定是否有移动端样式覆盖
+          !dimensions.mobileStyle && dimensions.cover,
+          dimensions.mobileStyle && "[width:var(--mobile-width)] [height:var(--mobile-cover-height)] lg:w-16.8125",
+          variant === 'recipes_workflow' && dimensions.mobileStyle && "lg:h-[13.75rem]",
+          variant === 'recipes_style' && dimensions.mobileStyle && "lg:h-[23.125rem]"
+        )}
+      >
         {item.cover && !imageError ? (
           isVideo ? (
             <video
@@ -177,12 +221,16 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
       </div>
 
       {/* Container 区域 - 修复布局 */}
-      <div className={cn(
-        "pt-3 flex flex-col gap-0.5", // padding-top: 12px, gap: 4px
-        dimensions.container
-      )}>
+      <div 
+        className={cn(
+          "pt-3 flex flex-col gap-0.5", // padding-top: 12px, gap: 4px
+          // 根据variant决定是否有移动端样式覆盖
+          !dimensions.mobileStyle && dimensions.container,
+          dimensions.mobileStyle && "[width:var(--mobile-width)] h-[2.875rem] lg:h-auto lg:w-16.8125"
+        )}
+      >
         {/* Name */}
-        <h3 className="font-lexend font-semibold text-base leading-tight text-design-main-text dark:text-design-dark-main-text truncate">
+        <h3 className="font-lexend font-semibold text-sm md:text-base leading-none md:leading-tight text-design-main-text dark:text-design-dark-main-text truncate">
           {item.name}
         </h3>
 

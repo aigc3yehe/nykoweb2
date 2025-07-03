@@ -66,8 +66,8 @@ const WorkflowsList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* 工作流网格列表 - PC端4列，每个卡片269px宽度，gap 20px */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* 工作流网格列表 - 移动端2列，PC端4列，每个卡片269px宽度，gap 20px */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {workflowState.workflows.map((workflow, index) => (
           <div key={`${workflow.id}-${index}`} className="flex justify-center">
             <WorkflowCard

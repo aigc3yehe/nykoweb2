@@ -66,8 +66,8 @@ const StylesList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* 风格网格列表 - PC端4列，每个卡片269px宽度，gap 20px */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* 风格网格列表 - 移动端2列，PC端4列，每个卡片269px宽度，gap 20px */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {modelState.models.map((model, index) => (
           <div key={`${model.id}-${index}`} className="flex justify-center">
             <WorkflowCard

@@ -38,7 +38,7 @@ const Recipes: React.FC = () => {
   }, [tab, navigate])
 
   return (
-    <div className="p-6">
+    <div className="p-5 md:p-6">
       <div className="flex flex-col gap-5">
         {/* Tab 导航 */}
         <RecipesTab activeTab={activeTab} onTabChange={handleTabChange} />
