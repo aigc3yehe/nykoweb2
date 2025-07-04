@@ -14,7 +14,7 @@ export const toggleSidebarAtom = atom(
 // 关闭侧边栏
 export const closeSidebarAtom = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(sidebarOpenAtom, false)
   }
 )
@@ -22,7 +22,7 @@ export const closeSidebarAtom = atom(
 // 打开侧边栏
 export const openSidebarAtom = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(sidebarOpenAtom, true)
   }
-) 
+)

@@ -1,29 +1,60 @@
 import React, { useEffect, useCallback, useRef } from 'react'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import WorkflowCard from '../home/WorkflowCard'
-import { workflowListAtom, fetchWorkflows } from '../../store/workflowStore'
+import { 
+  recipesWorkflowsAtom, 
+  fetchRecipesWorkflowsAtom, 
+  loadMoreRecipesWorkflowsAtom 
+} from '../../store/recipesWorkflowStore'
+import { userStateAtom, showLoginModalAtom } from '../../store/loginStore'
+import type { WorkflowDto } from '../../services/api/types'
+import type { FeaturedItem } from '../../store/featuredStore'
+
+// 数据转换器：将 WorkflowDto 转换为 FeaturedItem 格式
+const convertWorkflowToFeaturedItem = (workflow: WorkflowDto): FeaturedItem => ({
+  id: workflow.workflow_id,
+  source: 'workflow' as const,
+  name: workflow.name || '',
+  tags: workflow.tags || [],
+  usage: workflow.usage || 0,
+  cover: workflow.cover || '',
+  description: workflow.description,
+  user: workflow.user || {
+    did: '',
+    name: 'Anonymous',
+    avatar: '',
+    email: ''
+  }
+})
 
 const WorkflowsList: React.FC = () => {
-  const [workflowState] = useAtom(workflowListAtom)
-  const [, fetchData] = useAtom(fetchWorkflows)
+  const [workflowState] = useAtom(recipesWorkflowsAtom)
+  const [userState] = useAtom(userStateAtom)
+  const [, fetchData] = useAtom(fetchRecipesWorkflowsAtom)
+  const [, loadMore] = useAtom(loadMoreRecipesWorkflowsAtom)
+  const showLoginModal = useSetAtom(showLoginModalAtom)
   const isLoadingRef = useRef(false)
 
-  // 初始加载数据
+  // 初始加载数据（仅当用户已登录）
   useEffect(() => {
-    if (workflowState.workflows.length === 0) {
-      fetchData({ reset: true, view: true })
+    if (userState.isAuthenticated && workflowState.items.length === 0 && !workflowState.isLoading) {
+      console.log('WorkflowsList: Starting initial load')
+      fetchData({ reset: true }).catch(error => {
+        console.error('WorkflowsList: Initial load failed:', error)
+      })
     }
-  }, [fetchData, workflowState.workflows.length])
+  }, [fetchData, workflowState.items.length, workflowState.isLoading, userState.isAuthenticated])
 
   // 处理加载更多
   const handleLoadMore = useCallback(() => {
     if (workflowState.hasMore && !workflowState.isLoading && !isLoadingRef.current) {
       isLoadingRef.current = true
-      fetchData({ reset: false, view: true }).finally(() => {
+      console.log('WorkflowsList: Loading more workflows')
+      loadMore().finally(() => {
         isLoadingRef.current = false
       })
     }
-  }, [workflowState.hasMore, workflowState.isLoading, fetchData])
+  }, [workflowState.hasMore, workflowState.isLoading, loadMore])
 
   // 监听滚动，当接近底部时加载更多
   const handleScroll = useCallback(() => {
@@ -48,7 +79,30 @@ const WorkflowsList: React.FC = () => {
     }
   }, [handleScroll])
 
-  if (workflowState.isLoading && workflowState.workflows.length === 0) {
+  // 未登录状态
+  if (!userState.isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="text-center max-w-md">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Login Required
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Please log in to view and use workflows. Create amazing content with our AI-powered tools.
+          </p>
+          <button
+            onClick={() => showLoginModal()}
+            className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Log In
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // 加载状态
+  if (workflowState.isLoading && workflowState.items.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="text-gray-500">Loading workflows...</div>
@@ -56,10 +110,28 @@ const WorkflowsList: React.FC = () => {
     )
   }
 
-  if (workflowState.error) {
+  // 错误状态
+  if (workflowState.error && workflowState.items.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-red-500">Error loading workflows: {workflowState.error}</div>
+        <div className="text-center">
+          <p className="text-red-500 mb-2">Error loading workflows: {workflowState.error}</p>
+          <button 
+            onClick={() => fetchData({ reset: true })}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // 空状态
+  if (workflowState.items.length === 0 && !workflowState.isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="text-gray-500">No workflows found</div>
       </div>
     )
   }
@@ -68,18 +140,18 @@ const WorkflowsList: React.FC = () => {
     <div className="space-y-6">
       {/* 工作流网格列表 - 移动端2列，PC端4列，每个卡片269px宽度，gap 20px */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        {workflowState.workflows.map((workflow, index) => (
-          <div key={`${workflow.id}-${index}`} className="flex justify-center">
+        {workflowState.items.map((workflow, index) => (
+          <div key={`${workflow.workflow_id}-${index}`} className="flex justify-center">
             <WorkflowCard
-              item={workflow as any}
+              item={convertWorkflowToFeaturedItem(workflow)}
               variant="recipes_workflow"
               onClick={() => {
                 // TODO: 导航到工作流详情页
-                console.log('Navigate to workflow:', workflow.id)
+                console.log('Navigate to workflow:', workflow.workflow_id)
               }}
               onUseClick={() => {
                 // TODO: 使用工作流
-                console.log('Use workflow:', workflow.id)
+                console.log('Use workflow:', workflow.workflow_id)
               }}
             />
           </div>
@@ -87,23 +159,28 @@ const WorkflowsList: React.FC = () => {
       </div>
 
       {/* 加载更多状态 */}
-      {workflowState.isLoading && workflowState.workflows.length > 0 && (
+      {workflowState.isLoading && workflowState.items.length > 0 && (
         <div className="flex justify-center py-6">
           <div className="text-gray-500">Loading more workflows...</div>
         </div>
       )}
 
-      {/* 无更多数据提示 */}
-      {!workflowState.hasMore && workflowState.workflows.length > 0 && (
+      {/* 手动加载更多按钮 */}
+      {workflowState.hasMore && !workflowState.isLoading && workflowState.items.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-400">No more workflows to load</div>
+          <button
+            onClick={handleLoadMore}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Load More
+          </button>
         </div>
       )}
 
-      {/* 空状态 */}
-      {workflowState.workflows.length === 0 && !workflowState.isLoading && (
-        <div className="flex justify-center items-center py-12">
-          <div className="text-gray-500">No workflows found</div>
+      {/* 无更多数据提示 */}
+      {!workflowState.hasMore && workflowState.items.length > 0 && (
+        <div className="flex justify-center py-6">
+          <div className="text-gray-400">No more workflows to load</div>
         </div>
       )}
     </div>

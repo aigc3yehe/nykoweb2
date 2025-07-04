@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useI18n } from '../hooks/useI18n'
 import RecipesTab from '../components/recipes/RecipesTab'
 import RecipesActions from '../components/recipes/RecipesActions'
 import WorkflowsList from '../components/recipes/WorkflowsList'
@@ -9,7 +8,7 @@ import StylesList from '../components/recipes/StylesList'
 export type RecipeType = 'workflows' | 'styles'
 
 const Recipes: React.FC = () => {
-  const { t } = useI18n()
+  //const { t } = useI18n()
   const navigate = useNavigate()
   const { tab } = useParams<{ tab?: string }>()
   const [activeTab, setActiveTab] = useState<RecipeType>('workflows')

@@ -58,46 +58,46 @@ export const fetchFeaturedWorkflowsAtom = atom(
   null,
   async (get, set, refresh: boolean = false) => {
     const currentState = get(featuredWorkflowsAtom)
-    
+
     // 检查缓存是否有效
     const now = Date.now()
-    const cacheValid = currentState.lastFetch && 
+    const cacheValid = currentState.lastFetch &&
                       (now - currentState.lastFetch) < CACHE_DURATION
-    
+
     if (!refresh && cacheValid && currentState.items.length > 0) {
       return currentState.items
     }
-    
+
     // 设置加载状态
     set(featuredWorkflowsAtom, {
       ...currentState,
       isLoading: true,
       error: null
     })
-    
+
     try {
       console.log('Fetching featured workflows...')
       const items = await dashboardApi.getFeaturedWorkflows(refresh)
-      
+
       set(featuredWorkflowsAtom, {
         items,
         isLoading: false,
         error: null,
         lastFetch: now
       })
-      
+
       console.log('Featured workflows fetched successfully:', items.length)
       return items
     } catch (error) {
       console.error('Failed to fetch featured workflows:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch featured workflows'
-      
+
       set(featuredWorkflowsAtom, {
         ...currentState,
         isLoading: false,
         error: errorMessage
       })
-      
+
       throw error
     }
   }
@@ -108,46 +108,46 @@ export const fetchFeaturedModelsAtom = atom(
   null,
   async (get, set, refresh: boolean = false) => {
     const currentState = get(featuredModelsAtom)
-    
+
     // 检查缓存是否有效
     const now = Date.now()
-    const cacheValid = currentState.lastFetch && 
+    const cacheValid = currentState.lastFetch &&
                       (now - currentState.lastFetch) < CACHE_DURATION
-    
+
     if (!refresh && cacheValid && currentState.items.length > 0) {
       return currentState.items
     }
-    
+
     // 设置加载状态
     set(featuredModelsAtom, {
       ...currentState,
       isLoading: true,
       error: null
     })
-    
+
     try {
       console.log('Fetching featured models...')
       const items = await dashboardApi.getFeaturedModels(refresh)
-      
+
       set(featuredModelsAtom, {
         items,
         isLoading: false,
         error: null,
         lastFetch: now
       })
-      
+
       console.log('Featured models fetched successfully:', items.length)
       return items
     } catch (error) {
       console.error('Failed to fetch featured models:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch featured models'
-      
+
       set(featuredModelsAtom, {
         ...currentState,
         isLoading: false,
         error: errorMessage
       })
-      
+
       throw error
     }
   }
@@ -156,7 +156,7 @@ export const fetchFeaturedModelsAtom = atom(
 // 刷新精选工作流数据
 export const refreshFeaturedWorkflowsAtom = atom(
   null,
-  async (get, set) => {
+  async (_, set) => {
     return set(fetchFeaturedWorkflowsAtom, true)
   }
 )
@@ -164,7 +164,7 @@ export const refreshFeaturedWorkflowsAtom = atom(
 // 刷新精选模型数据
 export const refreshFeaturedModelsAtom = atom(
   null,
-  async (get, set) => {
+  async (_, set) => {
     return set(fetchFeaturedModelsAtom, true)
   }
 )
@@ -172,14 +172,14 @@ export const refreshFeaturedModelsAtom = atom(
 // 清除精选数据（保留这个函数，但现在主要用于其他场景，比如数据刷新）
 export const clearFeaturedDataAtom = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(featuredWorkflowsAtom, {
       items: [],
       isLoading: false,
       error: null,
       lastFetch: null
     })
-    
+
     set(featuredModelsAtom, {
       items: [],
       isLoading: false,
@@ -187,4 +187,4 @@ export const clearFeaturedDataAtom = atom(
       lastFetch: null
     })
   }
-) 
+)

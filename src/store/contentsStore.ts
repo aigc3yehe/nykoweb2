@@ -87,9 +87,9 @@ export const fetchContentsAtom = atom(
     order?: ContentOrderType
     desc?: 'desc' | 'asc'
   } = {}) => {
-    const userState = get(userStateAtom)
+    //const userState = get(userStateAtom)
     const currentState = get(contentsAtom)
-    
+
     const {
       reset = false,
       typeFilter = currentState.typeFilter,
@@ -98,7 +98,7 @@ export const fetchContentsAtom = atom(
     } = options
 
     // 如果是新的筛选条件，重置状态
-    const shouldReset = reset || 
+    const shouldReset = reset ||
                        typeFilter !== currentState.typeFilter ||
                        order !== currentState.order ||
                        desc !== currentState.desc
@@ -159,7 +159,7 @@ export const fetchContentsAtom = atom(
 
       // 调用API
       const response = await contentsApi.getContentsList(params)
-      
+
       const newItems = response.contents || []
       const totalCount = response.total_count || 0
       const allItems = shouldReset ? newItems : [...existingItems, ...newItems]
@@ -185,13 +185,13 @@ export const fetchContentsAtom = atom(
     } catch (error) {
       console.error('Contents: Failed to fetch contents:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch contents'
-      
+
       set(contentsAtom, {
         ...currentState,
         isLoading: false,
         error: errorMessage
       })
-      
+
       throw error
     }
   }
@@ -200,7 +200,7 @@ export const fetchContentsAtom = atom(
 // 按类型筛选内容
 export const filterContentsByTypeAtom = atom(
   null,
-  async (get, set, typeFilter: ContentTypeFilter) => {
+  async (_, set, typeFilter: ContentTypeFilter) => {
     return set(fetchContentsAtom, { reset: true, typeFilter })
   }
 )
@@ -210,12 +210,12 @@ export const loadMoreContentsAtom = atom(
   null,
   async (get, set) => {
     const currentState = get(contentsAtom)
-    
+
     if (currentState.hasMore && !currentState.isLoading) {
       console.log('Contents: Loading more...', 'page', currentState.page)
       return set(fetchContentsAtom, { reset: false })
     } else {
-      console.log('Contents: Cannot load more -', 
+      console.log('Contents: Cannot load more -',
         currentState.hasMore ? 'already loading' : 'no more items')
     }
   }
@@ -224,7 +224,7 @@ export const loadMoreContentsAtom = atom(
 // 刷新内容列表
 export const refreshContentsAtom = atom(
   null,
-  async (get, set) => {
+  async (_, set) => {
     return set(fetchContentsAtom, { reset: true })
   }
 )
@@ -232,7 +232,7 @@ export const refreshContentsAtom = atom(
 // 重置内容列表
 export const resetContentsAtom = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(contentsAtom, initialState)
   }
 )
@@ -242,14 +242,14 @@ export const likeContentAtom = atom(
   null,
   async (get, set, contentId: number, isLiked: boolean) => {
     const userState = get(userStateAtom)
-    
+
     if (!userState.isAuthenticated) {
       throw new Error('User not authenticated')
     }
-    
+
     try {
       await contentsApi.likeContent(contentId, { is_liked: isLiked })
-      
+
       // 更新本地状态
       const currentState = get(contentsAtom)
       const updatedItems = currentState.items.map(item => {
@@ -257,23 +257,23 @@ export const likeContentAtom = atom(
           return {
             ...item,
             is_liked: isLiked,
-            like_count: isLiked 
-              ? (item.like_count || 0) + 1 
+            like_count: isLiked
+              ? (item.like_count || 0) + 1
               : Math.max((item.like_count || 0) - 1, 0)
           }
         }
         return item
       })
-      
+
       set(contentsAtom, {
         ...currentState,
         items: updatedItems
       })
-      
+
       return true
     } catch (error) {
       console.error('Failed to like content:', error)
       throw error
     }
   }
-) 
+)

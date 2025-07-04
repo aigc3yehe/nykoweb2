@@ -48,7 +48,7 @@ export const loginModalAtom = atom<LoginModalState>({
 // 显示登录模态框
 export const showLoginModalAtom = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(loginModalAtom, { isOpen: true })
   }
 )
@@ -56,7 +56,7 @@ export const showLoginModalAtom = atom(
 // 隐藏登录模态框
 export const hideLoginModalAtom = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(loginModalAtom, { isOpen: false })
   }
 )
@@ -64,7 +64,7 @@ export const hideLoginModalAtom = atom(
 // 初始化用户状态（从localStorage恢复）
 export const initUserStateAtom = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     const user = authService.getCurrentUser()
     if (user && authService.isAuthenticated()) {
       // 重新设置Bearer Token - 修复重新打开应用时token丢失的问题
@@ -90,7 +90,7 @@ export const initUserStateAtom = atom(
 // 登录处理
 export const loginAtom = atom(
   null,
-  async (get, set, { code, state }: { code: string; state: string }) => {
+  async (_, set, { code, state }: { code: string; state: string }) => {
     set(userStateAtom, {
       isAuthenticated: false,
       user: null,
@@ -174,7 +174,7 @@ export const fetchUserDetailsAtom = atom(
 // 登出处理
 export const logoutAtom = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     authService.logout()
 
     set(userStateAtom, {

@@ -81,9 +81,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className }) => {
           }
 
           // 调用创建用户API
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          await createUser(userData);
+          await createUser();
           console.log("user update or create success");
 
           // 特别处理新用户

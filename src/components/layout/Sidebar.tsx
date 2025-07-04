@@ -10,8 +10,6 @@ import HomeIcon from '../../assets/web2/home.svg'
 import HomeSelectedIcon from '../../assets/web2/home_selected.svg'
 import RecipesIcon from '../../assets/web2/recipes_normal.svg'
 import RecipesSelectedIcon from '../../assets/web2/recipes_selected.svg'
-import CreatorsIcon from '../../assets/web2/creators.svg'
-import CreatorsSelectedIcon from '../../assets/web2/creators_selected.svg'
 import GeneratorIcon from '../../assets/web2/generator.svg'
 import WorkflowBuilderIcon from '../../assets/web2/workflows_builder.svg'
 import StyleTrainerIcon from '../../assets/web2/style_trainer.svg'
@@ -116,12 +114,12 @@ const Sidebar: React.FC = () => {
     <>
       {/* 遮罩层 - 移动端显示 */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
           onClick={() => closeSidebar()}
         />
       )}
-      
+
       {/* 侧边栏 */}
       <aside className={cn(
         "fixed md:relative inset-y-0 left-0 z-50 md:z-auto",
@@ -142,7 +140,7 @@ const Sidebar: React.FC = () => {
             </svg>
           </button>
         </div>
-        
+
         <div className="flex flex-col h-full">
           <nav className="flex-1 space-y-4">
             {sections.map((section, sectionIndex) => (

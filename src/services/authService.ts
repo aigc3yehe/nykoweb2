@@ -164,21 +164,6 @@ class AuthService {
     return data
   }
 
-  // 获取Google用户信息
-  private async fetchGoogleUserInfo(accessToken: string): Promise<GoogleUserInfo> {
-    const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch user info')
-    }
-
-    return response.json()
-  }
-
   // 从JWT id_token中解析用户信息
   private async parseUserInfoFromToken(idToken: string, tokens: AuthTokens): Promise<GoogleUserInfo> {
     try {

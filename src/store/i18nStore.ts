@@ -10,7 +10,7 @@ export const languageAtom = atom<Language>('en')
 
 export const setLanguageAtom = atom(
   null,
-  (get, set, language: Language) => {
+  (_, set, language: Language) => {
     set(languageAtom, language)
     localStorage.setItem('language', language)
   }
@@ -19,7 +19,7 @@ export const setLanguageAtom = atom(
 // 初始化语言
 export const initLanguageAtom = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     const savedLang = localStorage.getItem('language') as Language
     const browserLang = navigator.language.split('-')[0] as Language
     const supportedLangs: Language[] = ['en', 'zh', 'ja', 'ko']

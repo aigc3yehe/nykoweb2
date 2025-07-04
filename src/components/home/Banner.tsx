@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import BannerCard from './BannerCard'
 import { cn } from '../../utils/cn'
 
@@ -43,7 +43,7 @@ const Banner: React.FC = () => {
   const handleEnd = () => {
     if (!isDragging) return
     setIsDragging(false)
-    
+
     // 判断滑动方向和距离
     if (Math.abs(translateX) > 50) {
       if (translateX > 0 && currentIndex > 0) {
@@ -52,7 +52,7 @@ const Banner: React.FC = () => {
         setCurrentIndex(currentIndex + 1)
       }
     }
-    
+
     setTranslateX(0)
   }
 
@@ -100,7 +100,7 @@ const Banner: React.FC = () => {
       {/* 移动端 - 轮播显示 */}
       <div className="md:hidden flex flex-col gap-[0.875rem] h-[13.0625rem]"> {/* height: 209px, gap: 14px */}
         {/* 轮播容器 */}
-        <div 
+        <div
           ref={containerRef}
           className="relative overflow-hidden h-[11.9375rem]" // height: 191px
           onTouchStart={handleTouchStart}
@@ -111,7 +111,7 @@ const Banner: React.FC = () => {
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
         >
-          <div 
+          <div
             className="flex transition-transform duration-300 ease-out"
             style={{
               transform: `translateX(calc(${-currentIndex * 100}% + ${translateX}px))`,
@@ -134,8 +134,8 @@ const Banner: React.FC = () => {
               onClick={() => setCurrentIndex(index)}
               className={cn(
                 "h-1 transition-all duration-300",
-                index === currentIndex 
-                  ? "w-10 bg-design-main-blue dark:bg-design-dark-main-blue" 
+                index === currentIndex
+                  ? "w-10 bg-design-main-blue dark:bg-design-dark-main-blue"
                   : "w-10 bg-design-line-light-gray dark:bg-design-dark-line-light-gray"
               )}
               aria-label={`Go to slide ${index + 1}`}
@@ -147,4 +147,4 @@ const Banner: React.FC = () => {
   )
 }
 
-export default Banner 
+export default Banner

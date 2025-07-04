@@ -1,13 +1,4 @@
 import api from './api'
-import type { 
-  UserBaseInfo, 
-  PlanState, 
-  FetchPointResponse,
-  FetchLeaderboardDto,
-  BindReferralCodeRequest,
-  UserShowDto,
-  PointsRewardListItemDto
-} from './api'
 
 // 保持向后兼容的接口定义
 export interface Twitter {
@@ -193,18 +184,11 @@ const convertUserPermissions = (permission?: any): UserPermission => {
 }
 
 // 创建用户 - 暂时保持原有实现，因为新API没有对应接口
-export const createUser = async (userData: {
-  did: string
-  address?: string
-  username?: string
-  subject?: string
-  name?: string
-  profilePictureUrl?: string
-}): Promise<CreateUserResponse> => {
+export const createUser = async (): Promise<CreateUserResponse> => {
   // 这个功能在新API中可能通过认证流程自动处理
   // 暂时保持警告，建议使用新的认证流程
   console.warn('createUser is deprecated, use auth.login instead')
-  
+
   // 返回成功响应（实际可能需要调用注册接口）
   return {
     message: 'success',
@@ -219,7 +203,7 @@ export const queryUser = async (params: {
 }): Promise<QueryUserResponse> => {
   try {
     const userInfo = await api.users.getUserInfo(params.did)
-    
+
     return {
       message: 'success',
       data: {
@@ -260,7 +244,7 @@ export const queryUser = async (params: {
 
 // 查询质押代币 - 暂时保持原有警告
 export const queryStakedToken = async (params: { did: string }) => {
-  console.warn('queryStakedToken is not implemented in new API')
+  console.warn('queryStakedToken is not implemented in new API', params.did)
   return {
     message: 'Not implemented',
     data: null
@@ -269,7 +253,7 @@ export const queryStakedToken = async (params: { did: string }) => {
 
 // 更新计划 - 暂时保持原有警告
 export const updatePlan = async (params: { did: string }) => {
-  console.warn('updatePlan is not implemented in new API')
+  console.warn('updatePlan is not implemented in new API', params.did)
   return {
     message: 'Not implemented',
     data: null
@@ -278,7 +262,7 @@ export const updatePlan = async (params: { did: string }) => {
 
 // 充值积分 - 暂时保持原有警告
 export const chargeCredit = async (params: { tx_hash?: string }) => {
-  console.warn('chargeCredit is not implemented in new API')
+  console.warn('chargeCredit is not implemented in new API', params.tx_hash)
   return {
     message: 'Not implemented',
     data: null
@@ -291,7 +275,7 @@ export const queryUserPlan = async (params: {
 }): Promise<QueryPlanResponse> => {
   try {
     const planState = await api.users.getUserPlan(params.did, true)
-    
+
     return {
       message: 'success',
       data: {
@@ -329,7 +313,7 @@ export const queryUserPoints = async (params: {
 }): Promise<QueryPointsResponse> => {
   try {
     const pointsInfo = await api.points.getCurrentPoints(params.user, true)
-    
+
     return {
       message: 'success',
       data: {
@@ -360,7 +344,7 @@ export const getLeaderboard = async (params: {
       page_size: params.pageSize,
       season: params.season
     })
-    
+
     return {
       message: 'success',
       data: leaderboard.map(item => ({
@@ -383,7 +367,7 @@ export const getLeaderboard = async (params: {
 
 // 编辑模型函数 - 暂时保持原有实现，因为新API使用不同的端点
 export const editModelRequest = async (params: EditModelRequest): Promise<EditModelResponse> => {
-  console.warn('editModelRequest should use the new model API endpoints')
+  console.warn('editModelRequest should use the new model API endpoints', params.model_id)
   // 这里可以调用新的模型更新API，但需要确认具体的接口
   return {
     message: 'success',
@@ -400,7 +384,7 @@ export const bindReferralCode = async (params: {
     const result = await api.referrals.bindReferralCode(params.referrer_code, {
       user: params.user
     })
-    
+
     return {
       statusCode: 200,
       message: 'success',
@@ -423,7 +407,7 @@ export const getInviteList = async (params: {
       page: params.page,
       page_size: params.pageSize
     })
-    
+
     return {
       message: 'success',
       data: invitesList.map(user => ({
@@ -455,7 +439,7 @@ export const getInviteRewards = async (params: {
       page_size: params.pageSize,
       season: params.season
     })
-    
+
     return {
       message: 'success',
       data: rewardsList.map(reward => ({
@@ -488,7 +472,7 @@ export const getUserByInviteCode = async (params: {
       page: 1,
       page_size: 1
     })
-    
+
     if (invitesList.length > 0) {
       const user = invitesList[0]
       return {
@@ -504,7 +488,7 @@ export const getUserByInviteCode = async (params: {
         }
       }
     }
-    
+
     return {
       message: 'success',
       data: null

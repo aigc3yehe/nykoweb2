@@ -20,7 +20,7 @@ export const toggleThemeAtom = atom(
 // 初始化主题
 export const initThemeAtom = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     const savedTheme = localStorage.getItem('theme') as Theme
     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     const theme = savedTheme || systemTheme
