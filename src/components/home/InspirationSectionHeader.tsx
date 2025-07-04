@@ -1,24 +1,25 @@
 import React from 'react'
 import { cn } from '../../utils/cn'
-
-interface FilterOption {
-  id: string
-  label: string
-}
+import { ContentTypeFilter } from '../../store/contentsStore'
 
 interface InspirationSectionHeaderProps {
   title: string
-  filterOptions: FilterOption[]
-  selectedFilter: string
-  onFilterChange: (filterId: string) => void
+  selectedFilter: ContentTypeFilter
+  onFilterChange: (filterId: ContentTypeFilter) => void
 }
 
 const InspirationSectionHeader: React.FC<InspirationSectionHeaderProps> = ({
   title,
-  filterOptions,
   selectedFilter,
   onFilterChange
 }) => {
+  // 固定的过滤选项
+  const filterOptions = [
+    { id: 'all' as ContentTypeFilter, label: 'All' },
+    { id: 'image' as ContentTypeFilter, label: 'Images' },
+    { id: 'video' as ContentTypeFilter, label: 'Videos' }
+  ]
+
   return (
     <div className="w-full">
       {/* 桌面端 - 单行布局 */}

@@ -4,46 +4,49 @@ import PopularWorkflows from '../components/home/PopularWorkflows'
 import TrendingStyles from '../components/home/TrendingStyles'
 import InspirationFeed from '../components/home/InspirationFeed'
 import { useAtom } from 'jotai'
-import { imageListAtom, fetchImages } from '../store/imageStore'
+import { contentsAtom, loadMoreContentsAtom } from '../store/contentsStore'
 
 const Home: React.FC = () => {
-  const [imageState] = useAtom(imageListAtom)
-  const [, fetchData] = useAtom(fetchImages)
+  const [contentsState] = useAtom(contentsAtom)
+  const [, loadMore] = useAtom(loadMoreContentsAtom)
   const isLoadingRef = useRef(false)
 
   // 监听滚动，当接近底部时加载更多
   const handleScroll = useCallback(() => {
     // 获取MainContent的滚动容器
     const mainContent = document.querySelector('main')
-    if (!mainContent) return
+    if (!mainContent) {
+      return
+    }
 
     const scrollTop = mainContent.scrollTop
     const scrollHeight = mainContent.scrollHeight
     const clientHeight = mainContent.clientHeight
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight
 
     // 当滚动到距离底部200px时触发加载
-    if (scrollHeight - scrollTop <= clientHeight + 200 && 
-        imageState.hasMore && 
-        !imageState.isLoading &&
-        !isLoadingRef.current) {
-      
+    const shouldLoad = distanceFromBottom <= 200 && 
+        contentsState.hasMore && 
+        !contentsState.isLoading &&
+        !isLoadingRef.current
+
+    if (shouldLoad) {
+      console.log('Home: Auto loading more content...')
       isLoadingRef.current = true
-      fetchData({ 
-        reset: false, 
-        state: 'success',
-        view: true
-      }).finally(() => {
+      loadMore().finally(() => {
         isLoadingRef.current = false
       })
     }
-  }, [imageState.hasMore, imageState.isLoading, fetchData])
+  }, [contentsState.hasMore, contentsState.isLoading, loadMore])
 
   useEffect(() => {
     // 监听MainContent的滚动
     const mainContent = document.querySelector('main')
     if (mainContent) {
       mainContent.addEventListener('scroll', handleScroll)
-      return () => mainContent.removeEventListener('scroll', handleScroll)
+      return () => {
+        mainContent.removeEventListener('scroll', handleScroll)
+      }
     }
   }, [handleScroll])
 

@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
-import { Image } from '../../store/imageStore'
+import { ContentItem, likeContentAtom } from '../../store/contentsStore'
 import { useAtom } from 'jotai'
-import { likeImageAtom } from '../../store/imageStore'
-import { accountAtom } from '../../store/accountStore'
+import { userStateAtom } from '../../store/loginStore'
 import VideoIcon from '../../assets/web2/video.svg'
 import RecreateIcon from '../../assets/web2/use.svg'
 import LikeIcon from '../../assets/web2/like.svg'
@@ -11,7 +10,7 @@ import LikedIcon from '../../assets/web2/liked.svg'
 import avatarSvg from '../../assets/Avatar.svg'
 
 interface InspirationImageCardProps {
-  image: Image
+  content: ContentItem & { calculatedHeight?: number }
   imageHeightRem?: number
   imageWidthRem?: number
   onClick?: () => void
@@ -19,7 +18,7 @@ interface InspirationImageCardProps {
 }
 
 const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
-  image,
+  content,
   imageHeightRem,
   imageWidthRem,
   onClick,
@@ -28,20 +27,21 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [isLiking, setIsLiking] = useState(false)
-  const [localImage, setLocalImage] = useState(image)
-  const [, likeImage] = useAtom(likeImageAtom)
-  const [accountState] = useAtom(accountAtom)
+  const [localContent, setLocalContent] = useState(content)
+  const [, likeContent] = useAtom(likeContentAtom)
+  const [userState] = useAtom(userStateAtom)
 
   // 判断是否为视频
-  const isVideo = image.type === 'video'
+  const isVideo = content.type === 'video'
 
   // 如果没有传入高度，则计算高度
   const getImageHeight = () => {
     if (imageHeightRem) return imageHeightRem
+    if (content.calculatedHeight) return content.calculatedHeight
     
     const cardWidthRem = 17.1875 // 275px in rem
-    if (image.width && image.height) {
-      return (cardWidthRem * image.height) / image.width
+    if (content.width && content.height) {
+      return (cardWidthRem * content.height) / content.width
     }
     return 12.5 // 默认200px in rem
   }
@@ -50,20 +50,16 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
 
   // 获取用户头像
   const getAvatarUrl = () => {
-    if (image.users?.twitter?.profilePictureUrl) {
-      return image.users.twitter.profilePictureUrl
-    } else if (image.users?.twitter?.username) {
-      return `https://unavatar.io/twitter/${image.users.twitter.username}`
+    if (content.user?.avatar) {
+      return content.user.avatar
     }
     return avatarSvg
   }
 
   // 获取用户显示名称
   const getDisplayName = () => {
-    if (image.users?.twitter?.name) {
-      return image.users.twitter.name
-    } else if (image.users?.twitter?.username) {
-      return image.users.twitter.username
+    if (content.user?.name) {
+      return content.user.name
     }
     return "Anonymous"
   }
@@ -72,14 +68,14 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
   const handleLikeClick = async (e: React.MouseEvent) => {
     e.stopPropagation()
     
-    if (isLiking || !accountState.did) return
+    if (isLiking || !userState.isAuthenticated) return
 
     setIsLiking(true)
     try {
-      const newIsLiked = !localImage.is_liked
-      await likeImage(localImage.id, newIsLiked)
+      const newIsLiked = !localContent.is_liked
+      await likeContent(localContent.content_id, newIsLiked)
       
-      setLocalImage(prev => ({
+      setLocalContent(prev => ({
         ...prev,
         is_liked: newIsLiked,
         like_count: newIsLiked 
@@ -100,9 +96,18 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
   }
 
   const getScaledImageUrl = () => {
-    const url = localImage.url
+    const url = localContent.url
+    if (!url) return ''
+    
     const width = imageWidthRem ? imageWidthRem : 17.1875
     const widthPx = width * 16
+    
+    // 如果URL已经是完整的HTTP URL，直接使用
+    if (url.startsWith('http')) {
+      return url
+    }
+    
+    // 否则使用imagekit进行缩放
     return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-${widthPx},q-90`
   }
 
@@ -118,10 +123,10 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
         className="relative w-full rounded-xl overflow-hidden bg-[#E8E8E8] dark:bg-gray-700"
         style={{ height: `${heightRem}rem` }}
       >
-        {localImage.url && !imageError ? (
+        {localContent.url && !imageError ? (
           isVideo ? (
             <video
-              src={localImage.url}
+              src={localContent.url}
               className="w-full h-full object-cover"
               muted
               playsInline
@@ -130,7 +135,7 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
           ) : (
             <img
               src={getScaledImageUrl()}
-              alt={`Image ${localImage.id}`}
+              alt={`Content ${localContent.content_id}`}
               className="w-full h-full object-cover"
               onError={() => setImageError(true)}
             />
@@ -138,13 +143,13 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <span className="text-gray-400">
-              {localImage.state === 0 ? 'Generating...' : localImage.state === -1 ? 'Failed' : 'No preview'}
+              {localContent.state === 0 ? 'Generating...' : localContent.state === 2 ? 'Failed' : 'No preview'}
             </span>
           </div>
         )}
 
         {/* Video 标签 */}
-        {isVideo && localImage.url && (
+        {isVideo && localContent.url && (
           <div className="absolute top-3 right-3 flex items-center gap-1 px-[0.625rem] py-1.5 bg-black/60 rounded-full">
             <img src={VideoIcon} alt="Video" className="w-4 h-4" />
             <span className="font-lexend text-xs text-white">0:05</span>
@@ -174,17 +179,17 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
           {/* 点赞数 */}
           <button
             onClick={handleLikeClick}
-            disabled={isLiking}
+            disabled={isLiking || !userState.isAuthenticated}
             className="flex items-center gap-1 transition-opacity"
             style={{ opacity: isLiking ? 0.6 : 1 }}
           >
             <img 
-              src={localImage.is_liked ? LikedIcon : LikeIcon} 
+              src={localContent.is_liked ? LikedIcon : LikeIcon} 
               alt="Like" 
               className="w-4 h-4" 
             />
             <span className="font-lexend text-xs text-design-bg-light-gray">
-              {localImage.like_count || 0}
+              {localContent.like_count || 0}
             </span>
           </button>
         </div>
