@@ -17,6 +17,10 @@
       "destination": "http://43.153.40.155:4004/:path*"
     },
     {
+      "source": "/mavae_api/:path*",
+      "destination": "https://api.mavae.ai/:path*"
+    },
+    {
       "source": "/:path*",
       "destination": "/index.html"
     }
@@ -24,6 +28,15 @@
   "headers": [
     {
       "source": "/chat-api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
+      ]
+    },
+    {
+      "source": "/mavae_api/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         { "key": "Access-Control-Allow-Origin", "value": "*" },
