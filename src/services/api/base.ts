@@ -40,6 +40,7 @@ export class BaseApiService {
   constructor() {
     this.baseURL = API_CONFIG.BASE_URL
     this.defaultHeaders = { ...API_CONFIG.DEFAULT_HEADERS }
+    console.log('BaseApiService initialized with BASE_URL:', this.baseURL)
   }
 
   // 设置Bearer Token
@@ -92,7 +93,15 @@ export class BaseApiService {
       baseURL = window.location.origin + baseURL
     }
     
-    const url = new URL(endpoint, baseURL)
+    // 确保baseURL以/结尾
+    if (!baseURL.endsWith('/')) {
+      baseURL += '/'
+    }
+    
+    // 去掉endpoint开头的/，避免new URL()忽略baseURL
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint
+    
+    const url = new URL(cleanEndpoint, baseURL)
     
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -101,6 +110,8 @@ export class BaseApiService {
         }
       })
     }
+    
+    console.log(`Building URL - baseURL: ${baseURL}, endpoint: ${cleanEndpoint}, final: ${url.toString()}`)
     
     return url.toString()
   }

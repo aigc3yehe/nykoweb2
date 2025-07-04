@@ -1,8 +1,10 @@
 import React from 'react'
 import { useAtom, useSetAtom } from 'jotai'
+import { useNavigate } from 'react-router-dom'
 import { themeAtom, toggleThemeAtom } from '../../store/themeStore'
 import { languageAtom, setLanguageAtom, Language } from '../../store/i18nStore'
 import { toggleSidebarAtom } from '../../store/sidebarStore'
+import { showLoginModalAtom, userStateAtom } from '../../store/loginStore'
 import { useI18n } from '../../hooks/useI18n'
 import ThemeToggle from '../ui/ThemeToggle'
 import LanguageSelector from '../ui/LanguageSelector'
@@ -10,7 +12,10 @@ import MenuIcon from '../../assets/web2/menu.svg'
 
 const Header: React.FC = React.memo(() => {
   const { t } = useI18n()
+  const navigate = useNavigate()
   const toggleSidebar = useSetAtom(toggleSidebarAtom)
+  const showLoginModal = useSetAtom(showLoginModalAtom)
+  const [userState] = useAtom(userStateAtom)
   
   return (
     <header className="h-14 border-b border-border bg-background dark:bg-background">
@@ -60,12 +65,37 @@ const Header: React.FC = React.memo(() => {
             </span>
           </button>
           
-          {/* Log in 按钮 */}
-          <button className="flex items-center justify-center h-8 px-3 sm:px-4 py-2 bg-[#0900FF] hover:bg-[#0800E6] dark:bg-[#0A00FF] dark:hover:bg-[#0900E6] rounded-md transition-colors">
-            <span className="text-white dark:text-white font-normal text-sm leading-none font-lexend">
-              {t('header.login')}
-            </span>
-          </button>
+          {/* 登录按钮或用户头像 */}
+          {userState.isAuthenticated && userState.user ? (
+            /* 用户头像 - 32*32px (2rem*2rem) 圆形 */
+            <button
+              onClick={() => navigate('/profile')}
+              className="w-8 h-8 rounded-full bg-[#E5E7EB] hover:bg-[#D1D5DB] transition-colors overflow-hidden flex items-center justify-center"
+              aria-label="User profile"
+            >
+              {userState.user.picture ? (
+                <img 
+                  src={userState.user.picture}
+                  alt={userState.user.name || 'User'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-gray-600 text-sm font-medium">
+                  {userState.user.name?.charAt(0)?.toUpperCase() || '?'}
+                </span>
+              )}
+            </button>
+          ) : (
+            /* 登录按钮 */
+            <button 
+              onClick={() => showLoginModal()}
+              className="flex items-center justify-center h-8 px-3 sm:px-4 py-2 bg-[#0900FF] hover:bg-[#0800E6] dark:bg-[#0A00FF] dark:hover:bg-[#0900E6] rounded-md transition-colors"
+            >
+              <span className="text-white dark:text-white font-normal text-sm leading-none font-lexend">
+                {t('header.login')}
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </header>

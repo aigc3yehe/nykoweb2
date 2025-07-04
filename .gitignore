@@ -35,5 +35,6 @@ dist-ssr
 # 开发笔记 - 仅本地使用，不提交到仓库
 DEV_NOTES.md
 API_DOCUMENTATION_ZH.md
+google_client_secret.json
 
 

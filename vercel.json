@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/chat-api/:path*",
       "destination": "http://43.153.57.123:8085/:path*"
     },
     {
@@ -23,7 +23,7 @@
   ],
   "headers": [
     {
-      "source": "/api/(.*)",
+      "source": "/chat-api/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         { "key": "Access-Control-Allow-Origin", "value": "*" },

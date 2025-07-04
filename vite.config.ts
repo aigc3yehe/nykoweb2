@@ -19,12 +19,12 @@ export default defineConfig({
     },
   },
   server: {
-    port: 8001,
+    port: 3000,
     proxy: {
-      '/api': {
+      '/chat-api': {
         target: 'http://43.153.57.123:8085',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/chat-api/, '')
       },
       '/mavae_api': {
         target: 'https://api.mavae.ai',

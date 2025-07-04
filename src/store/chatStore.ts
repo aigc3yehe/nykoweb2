@@ -816,7 +816,7 @@ export const sendMessage = atom(
 
     const chatState = get(chatAtom);
     const betaMode = chatState.betaMode;
-    const apiPrefix = betaMode ? '/beta-api' : '/api';
+    const apiPrefix = betaMode ? '/beta-api' : '/chat-api';
 
     // 添加用户消息到聊天记录
     const userMessage: Message = {
@@ -1531,7 +1531,7 @@ const HEARTBEAT_INTERVAL = 15000; // 15秒发送一次心跳
 
 // 修改心跳检测API函数
 export async function sendHeartbeat(userUuid: string, betaMode: boolean): Promise<ConnectionStatus> {
-  const apiPrefix = betaMode ? '/beta-api' : '/api';
+  const apiPrefix = betaMode ? '/beta-api' : '/chat-api';
 
   try {
     const response = await fetch(`${apiPrefix}/heartbeat`, {
@@ -1689,7 +1689,7 @@ export const checkConnectionStatus = atom(
 
 // 4. 添加获取连接状态的API函数
 export async function fetchConnectionStatus(userUuid: string, betaMode: boolean): Promise<ConnectionStatus> {
-  const apiPrefix = betaMode ? '/beta-api' : '/api';
+  const apiPrefix = betaMode ? '/beta-api' : '/chat-api';
 
   try {
     const response = await fetch(`${apiPrefix}/initial-connection/${userUuid}`, {

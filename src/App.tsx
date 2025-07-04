@@ -16,12 +16,16 @@ import GeneratePopup from './components/GeneratePopup'
 import { generatePopupAtom, hideGeneratePopupAtom } from './store/generatePopupStore'
 import { Analytics } from '@vercel/analytics/react'
 import { editModalAtom, hideEditModalAtom } from './store/editStore'
+import { loginModalAtom } from './store/loginStore'
 import EditModelModal from './components/EditModelModal'
 import EditWorkflowModal from './components/EditWorkflowModal'
+import LoginModal from './components/modals/LoginModal'
 import { ModelDetail } from "./store/modelStore.ts"
 import { WorkflowDetail } from "./store/workflowStore.ts"
 import Home from './pages/Home'
 import Recipes from './pages/Recipes'
+import AuthCallback from './pages/AuthCallback'
+import Profile from './pages/Profile'
 
 function App() {
   const [modalState] = useAtom(modalAtom)
@@ -35,6 +39,7 @@ function App() {
   const handleCloseImageDetails = useSetAtom(closeImageDetails)
   const [editModalState] = useAtom(editModalAtom)
   const hideEditModal = useSetAtom(hideEditModalAtom)
+  const [loginModalState] = useAtom(loginModalAtom)
 
   return (
     <BrowserRouter>
@@ -43,6 +48,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/recipes/:tab" element={<Recipes />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/api/auth/callback/google" element={<AuthCallback />} />
           {/* 其他路由... */}
         </Routes>
 
@@ -60,6 +67,9 @@ function App() {
             onClose={handleCloseImageDetails}
           />
         )}
+
+        {/* 登录模态框 */}
+        <LoginModal />
 
         {/* 其他模态框保持不变... */}
 
