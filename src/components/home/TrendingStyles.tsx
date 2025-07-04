@@ -1,26 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useAtom } from 'jotai'
-import { featureListAtom, fetchFeatures } from '../../store/featureStore'
+import { featuredModelsAtom, fetchFeaturedModelsAtom } from '../../store/featuredStore'
 import SectionHeader from './SectionHeader'
 import WorkflowCard from './WorkflowCard'
-import { SOURCE_TYPE } from '../../types/api.type'
 
 const TrendingStyles: React.FC = () => {
-  const [featureState] = useAtom(featureListAtom)
-  const [, fetchData] = useAtom(fetchFeatures)
+  const [modelsState] = useAtom(featuredModelsAtom)
+  const [, fetchModels] = useAtom(fetchFeaturedModelsAtom)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
 
-  // 获取数据
+  // 获取数据 - 移除用户认证检查，因为接口是公开的
   useEffect(() => {
-    if (featureState.features.length === 0 && !featureState.isLoading) {
-      fetchData()
+    if (modelsState.items.length === 0 && !modelsState.isLoading) {
+      fetchModels(false).catch(error => {
+        console.error('Failed to fetch featured models:', error)
+      })
     }
-  }, [])
-
-  // 过滤出 models (styles)
-  const styles = featureState.features.filter(item => item.source === SOURCE_TYPE.MODEL)
+  }, [modelsState.items.length, modelsState.isLoading])
 
   // 检查滚动状态
   const checkScrollStatus = () => {
@@ -52,9 +50,10 @@ const TrendingStyles: React.FC = () => {
       container.addEventListener('scroll', checkScrollStatus)
       return () => container.removeEventListener('scroll', checkScrollStatus)
     }
-  }, [styles])
+  }, [modelsState.items])
 
-  if (featureState.isLoading && styles.length === 0) {
+  // 加载状态
+  if (modelsState.isLoading && modelsState.items.length === 0) {
     return (
       <div className="w-full">
         <SectionHeader title="Trending Styles" />
@@ -65,8 +64,34 @@ const TrendingStyles: React.FC = () => {
     )
   }
 
-  if (styles.length === 0) {
+  // 错误状态
+  if (modelsState.error && modelsState.items.length === 0) {
+    return (
+      <div className="w-full">
+        <SectionHeader title="Trending Styles" />
+        <div className="h-[22.25rem] flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-500 mb-2">Failed to load styles</p>
+            <button 
+              onClick={() => fetchModels(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 没有数据
+  if (modelsState.items.length === 0) {
     return null
+  }
+
+  const handleViewAll = () => {
+    // 导航到Recipes页面的Styles标签
+    console.log('Navigate to /recipes/styles')
   }
 
   return (
@@ -75,7 +100,7 @@ const TrendingStyles: React.FC = () => {
         title="Trending Styles"
         onPrevious={() => scrollTo('left')}
         onNext={() => scrollTo('right')}
-        onViewAll={() => console.log('View all styles')}
+        onViewAll={handleViewAll}
         canGoPrevious={canScrollLeft}
         canGoNext={canScrollRight}
       />
@@ -85,7 +110,7 @@ const TrendingStyles: React.FC = () => {
         ref={scrollContainerRef}
         className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth"
       >
-        {styles.map((item) => (
+        {modelsState.items.map((item) => (
           <WorkflowCard
             key={item.id}
             item={item}

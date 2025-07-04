@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSetAtom } from 'jotai'
-import { authService } from '../services/authService'
-import { setUserAtom } from '../store/loginStore'
-import { usersApi } from '../services/api/users'
+import { loginAtom, hideLoginModalAtom } from '../store/loginStore'
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [error, setError] = useState<string>('')
-  const setUser = useSetAtom(setUserAtom)
+  const login = useSetAtom(loginAtom)
+  const hideLoginModal = useSetAtom(hideLoginModalAtom)
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -33,30 +32,14 @@ const AuthCallback: React.FC = () => {
           return
         }
 
-        // 处理Google OAuth回调
-        const userInfo = await authService.handleGoogleCallback(code, state)
+        // 使用新的登录流程处理Google OAuth回调
+        // loginAtom会自动处理token设置和用户详细信息获取
+        const userInfo = await login({ code, state })
 
         console.log('Login successful:', userInfo)
 
-        // 获取详细用户信息
-        try {
-          const did = userInfo.tokens.did
-          const detailedUserInfo = await usersApi.getUserInfo(did, true)
-          console.log('Detailed user info:', detailedUserInfo)
-
-          // 合并用户信息
-          const mergedUserInfo = {
-            ...userInfo,
-            ...detailedUserInfo
-          }
-
-          // 更新用户状态
-          setUser(mergedUserInfo)
-        } catch (error) {
-          console.warn('Failed to get detailed user info:', error)
-          // 如果获取详细信息失败，使用基本信息
-          setUser(userInfo)
-        }
+        // 确保登录模态框关闭
+        hideLoginModal()
 
         setStatus('success')
 
@@ -73,7 +56,7 @@ const AuthCallback: React.FC = () => {
     }
 
     handleCallback()
-  }, [searchParams, navigate])
+  }, [searchParams, navigate, login, hideLoginModal])
 
   const handleRetry = () => {
     navigate('/', { replace: true })

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
-import { FeaturedItem } from '../../store/featureStore'
+import { FeaturedItem } from '../../store/featuredStore'
 import VideoIcon from '../../assets/web2/video.svg'
 import UseIcon from '../../assets/web2/use.svg'
 import UseCountIcon from '../../assets/web2/use_2.svg'
@@ -91,22 +91,20 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
 
   const dimensions = getCardDimensions()
 
-  // 获取用户头像
+  // 获取用户头像 - 新的用户数据结构
   const getAvatarUrl = () => {
-    if (item.users?.twitter?.profilePictureUrl) {
-      return item.users.twitter.profilePictureUrl
-    } else if (item.users?.twitter?.username) {
-      return `https://unavatar.io/twitter/${item.users.twitter.username}`
+    // 新的API结构：item.user.avatar
+    if (item.user?.avatar) {
+      return item.user.avatar
     }
     return avatarSvg
   }
 
-  // 获取用户显示名称
+  // 获取用户显示名称 - 新的用户数据结构
   const getDisplayName = () => {
-    if (item.users?.twitter?.name) {
-      return item.users.twitter.name
-    } else if (item.users?.twitter?.username) {
-      return item.users.twitter.username
+    // 新的API结构：item.user.name
+    if (item.user?.name) {
+      return item.user.name
     }
     return "Anonymous"
   }
@@ -234,7 +232,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           {item.name}
         </h3>
 
-        {/* Description - 根据variant和屏幕尺寸决定是否显示 */}
+        {/* Description - 根据variant和屏幕尺寸决定是否显示，并处理可选性 */}
         {dimensions.showDescription && item.description && (
           <p 
             className="font-lexend text-xs leading-[140%] text-design-medium-gray dark:text-design-dark-medium-gray overflow-hidden hidden md:block"

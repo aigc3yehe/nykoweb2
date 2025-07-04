@@ -1,26 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useAtom } from 'jotai'
-import { featureListAtom, fetchFeatures } from '../../store/featureStore'
+import { featuredWorkflowsAtom, fetchFeaturedWorkflowsAtom } from '../../store/featuredStore'
 import SectionHeader from './SectionHeader'
 import WorkflowCard from './WorkflowCard'
-import { SOURCE_TYPE } from '../../types/api.type'
 
 const PopularWorkflows: React.FC = () => {
-  const [featureState] = useAtom(featureListAtom)
-  const [, fetchData] = useAtom(fetchFeatures)
+  const [workflowsState] = useAtom(featuredWorkflowsAtom)
+  const [, fetchWorkflows] = useAtom(fetchFeaturedWorkflowsAtom)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
 
-  // 获取数据
+  // 获取数据 - 移除用户认证检查，因为接口是公开的
   useEffect(() => {
-    if (featureState.features.length === 0 && !featureState.isLoading) {
-      fetchData()
+    if (workflowsState.items.length === 0 && !workflowsState.isLoading) {
+      fetchWorkflows(false).catch(error => {
+        console.error('Failed to fetch featured workflows:', error)
+      })
     }
-  }, [])
-
-  // 过滤出 workflows
-  const workflows = featureState.features.filter(item => item.source === SOURCE_TYPE.WORKFLOW)
+  }, [workflowsState.items.length, workflowsState.isLoading])
 
   // 检查滚动状态
   const checkScrollStatus = () => {
@@ -52,9 +50,10 @@ const PopularWorkflows: React.FC = () => {
       container.addEventListener('scroll', checkScrollStatus)
       return () => container.removeEventListener('scroll', checkScrollStatus)
     }
-  }, [workflows])
+  }, [workflowsState.items])
 
-  if (featureState.isLoading && workflows.length === 0) {
+  // 加载状态
+  if (workflowsState.isLoading && workflowsState.items.length === 0) {
     return (
       <div className="w-full">
         <SectionHeader title="Popular Workflows" />
@@ -65,8 +64,34 @@ const PopularWorkflows: React.FC = () => {
     )
   }
 
-  if (workflows.length === 0) {
+  // 错误状态
+  if (workflowsState.error && workflowsState.items.length === 0) {
+    return (
+      <div className="w-full">
+        <SectionHeader title="Popular Workflows" />
+        <div className="h-[16.625rem] md:h-[19.125rem] flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-500 mb-2">Failed to load workflows</p>
+            <button 
+              onClick={() => fetchWorkflows(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 没有数据
+  if (workflowsState.items.length === 0) {
     return null
+  }
+
+  const handleViewAll = () => {
+    // 导航到Recipes页面的Workflows标签
+    console.log('Navigate to /recipes/workflows')
   }
 
   return (
@@ -75,7 +100,7 @@ const PopularWorkflows: React.FC = () => {
         title="Popular Workflows"
         onPrevious={() => scrollTo('left')}
         onNext={() => scrollTo('right')}
-        onViewAll={() => console.log('View all workflows')}
+        onViewAll={handleViewAll}
         canGoPrevious={canScrollLeft}
         canGoNext={canScrollRight}
       />
@@ -85,7 +110,7 @@ const PopularWorkflows: React.FC = () => {
         ref={scrollContainerRef}
         className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
       >
-        {workflows.map((item) => (
+        {workflowsState.items.map((item) => (
           <WorkflowCard
             key={item.id}
             item={item}

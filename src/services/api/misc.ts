@@ -130,28 +130,26 @@ export class DashboardApiService {
   }
 
   /**
-   * 获取精选工作流列表
+   * 获取精选工作流列表（无需认证）
    * @param refresh 是否刷新缓存
    * @returns 精选工作流列表
    */
   async getFeaturedWorkflows(refresh?: boolean): Promise<FeaturedItem[]> {
     return apiService.get<FeaturedItem[]>(
       API_ENDPOINTS.DASHBOARD.FEATURED_WORKFLOWS,
-      { refresh },
-      { requiresAuth: true }
+      { refresh }
     )
   }
 
   /**
-   * 获取精选模型列表
+   * 获取精选模型列表（无需认证）
    * @param refresh 是否刷新缓存
    * @returns 精选模型列表
    */
   async getFeaturedModels(refresh?: boolean): Promise<FeaturedItem[]> {
     return apiService.get<FeaturedItem[]>(
       API_ENDPOINTS.DASHBOARD.FEATURED_MODELS,
-      { refresh },
-      { requiresAuth: true }
+      { refresh }
     )
   }
 
