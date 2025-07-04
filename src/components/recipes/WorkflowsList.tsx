@@ -1,12 +1,11 @@
 import React, { useEffect, useCallback, useRef } from 'react'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom } from 'jotai'
 import WorkflowCard from '../home/WorkflowCard'
 import { 
   recipesWorkflowsAtom, 
   fetchRecipesWorkflowsAtom, 
   loadMoreRecipesWorkflowsAtom 
 } from '../../store/recipesWorkflowStore'
-import { userStateAtom, showLoginModalAtom } from '../../store/loginStore'
 import type { WorkflowDto } from '../../services/api/types'
 import type { FeaturedItem } from '../../store/featuredStore'
 
@@ -29,21 +28,19 @@ const convertWorkflowToFeaturedItem = (workflow: WorkflowDto): FeaturedItem => (
 
 const WorkflowsList: React.FC = () => {
   const [workflowState] = useAtom(recipesWorkflowsAtom)
-  const [userState] = useAtom(userStateAtom)
   const [, fetchData] = useAtom(fetchRecipesWorkflowsAtom)
   const [, loadMore] = useAtom(loadMoreRecipesWorkflowsAtom)
-  const showLoginModal = useSetAtom(showLoginModalAtom)
   const isLoadingRef = useRef(false)
 
-  // 初始加载数据（仅当用户已登录）
+  // 初始加载数据
   useEffect(() => {
-    if (userState.isAuthenticated && workflowState.items.length === 0 && !workflowState.isLoading) {
+    if (workflowState.items.length === 0 && !workflowState.isLoading) {
       console.log('WorkflowsList: Starting initial load')
       fetchData({ reset: true }).catch(error => {
         console.error('WorkflowsList: Initial load failed:', error)
       })
     }
-  }, [fetchData, workflowState.items.length, workflowState.isLoading, userState.isAuthenticated])
+  }, [fetchData, workflowState.items.length, workflowState.isLoading])
 
   // 处理加载更多
   const handleLoadMore = useCallback(() => {
@@ -78,28 +75,6 @@ const WorkflowsList: React.FC = () => {
       return () => mainContent.removeEventListener('scroll', handleScroll)
     }
   }, [handleScroll])
-
-  // 未登录状态
-  if (!userState.isAuthenticated) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <div className="text-center max-w-md">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Login Required
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Please log in to view and use workflows. Create amazing content with our AI-powered tools.
-          </p>
-          <button
-            onClick={() => showLoginModal()}
-            className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Log In
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   // 加载状态
   if (workflowState.isLoading && workflowState.items.length === 0) {

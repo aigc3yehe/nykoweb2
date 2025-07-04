@@ -1,8 +1,5 @@
 import { authApi } from './api/auth'
-
-// Google 登录配置
-const GOOGLE_CLIENT_ID = "195395049366-lgdlk1ierberaq23g72b8li72k81d9b8.apps.googleusercontent.com"
-const GOOGLE_CLIENT_SECRET = "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"
+import { API_CONFIG } from './api/config'
 
 export interface AuthTokens {
   did: string
@@ -21,14 +18,15 @@ export interface GoogleUserInfo {
   tokens: AuthTokens
 }
 
-
-
 class AuthService {
   private static instance: AuthService
   private currentUser: GoogleUserInfo | null = null
   private tokens: AuthTokens | null = null
 
   private constructor() {
+    // 验证Google OAuth配置
+    this.validateGoogleOAuthConfig()
+    
     // 从localStorage恢复用户信息
     this.loadFromStorage()
   }
@@ -40,10 +38,26 @@ class AuthService {
     return AuthService.instance
   }
 
-    // 构建Google OAuth URL
+  // 验证Google OAuth配置
+  private validateGoogleOAuthConfig(): void {
+    if (!API_CONFIG.GOOGLE_OAUTH.CLIENT_ID || !API_CONFIG.GOOGLE_OAUTH.CLIENT_SECRET) {
+      console.error('Google OAuth configuration is missing. Please set VITE_GOOGLE_CLIENT_ID and VITE_GOOGLE_CLIENT_SECRET in your environment variables.')
+      console.error('Current config:', {
+        CLIENT_ID: API_CONFIG.GOOGLE_OAUTH.CLIENT_ID ? 'SET' : 'MISSING',
+        CLIENT_SECRET: API_CONFIG.GOOGLE_OAUTH.CLIENT_SECRET ? 'SET' : 'MISSING'
+      })
+    }
+  }
+
+  // 构建Google OAuth URL
   public getGoogleAuthUrl(): string {
-    const redirectUri = `${window.location.origin}/api/auth/callback/google`
-    const scope = 'openid email profile'
+    // 检查配置是否完整
+    if (!API_CONFIG.GOOGLE_OAUTH.CLIENT_ID) {
+      throw new Error('Google OAuth Client ID is not configured. Please set VITE_GOOGLE_CLIENT_ID environment variable.')
+    }
+
+    const redirectUri = `${window.location.origin}${API_CONFIG.GOOGLE_OAUTH.REDIRECT_URI}`
+    const scope = API_CONFIG.GOOGLE_OAUTH.SCOPE
     const responseType = 'code'
     const state = Math.random().toString(36).substring(2, 15)
 
@@ -56,8 +70,8 @@ class AuthService {
     }
     localStorage.setItem('oauth_state', JSON.stringify(stateData))
 
-    return `https://accounts.google.com/o/oauth2/auth?` +
-      `client_id=${GOOGLE_CLIENT_ID}&` +
+    return `${API_CONFIG.GOOGLE_OAUTH.OAUTH_URL}?` +
+      `client_id=${API_CONFIG.GOOGLE_OAUTH.CLIENT_ID}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
       `scope=${encodeURIComponent(scope)}&` +
       `response_type=${responseType}&` +
@@ -67,7 +81,7 @@ class AuthService {
       `include_granted_scopes=true`
   }
 
-    // 处理Google OAuth回调
+  // 处理Google OAuth回调
   public async handleGoogleCallback(code: string, state: string): Promise<GoogleUserInfo> {
     console.log('OAuth callback - received state:', state)
 
@@ -137,16 +151,21 @@ class AuthService {
 
   // 交换authorization code获取tokens
   private async exchangeCodeForTokens(code: string): Promise<AuthTokens> {
-    const redirectUri = `${window.location.origin}/api/auth/callback/google`
+    // 检查配置是否完整
+    if (!API_CONFIG.GOOGLE_OAUTH.CLIENT_ID || !API_CONFIG.GOOGLE_OAUTH.CLIENT_SECRET) {
+      throw new Error('Google OAuth configuration is incomplete. Please set VITE_GOOGLE_CLIENT_ID and VITE_GOOGLE_CLIENT_SECRET environment variables.')
+    }
 
-    const response = await fetch('https://oauth2.googleapis.com/token', {
+    const redirectUri = `${window.location.origin}${API_CONFIG.GOOGLE_OAUTH.REDIRECT_URI}`
+
+    const response = await fetch(API_CONFIG.GOOGLE_OAUTH.TOKEN_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
+        client_id: API_CONFIG.GOOGLE_OAUTH.CLIENT_ID,
+        client_secret: API_CONFIG.GOOGLE_OAUTH.CLIENT_SECRET,
         code,
         grant_type: 'authorization_code',
         redirect_uri: redirectUri,

@@ -1,6 +1,5 @@
 import { atom } from 'jotai'
 import { modelsApi } from '../services/api/models'
-import { userStateAtom } from './loginStore'
 import type { FetchModelDto } from '../services/api/types'
 
 // 模型列表状态
@@ -45,20 +44,7 @@ export const fetchRecipesModelsAtom = atom(
     order?: 'created_at' | 'updated_at' | 'usage'
     desc?: 'desc' | 'asc'
   } = {}) => {
-    const userState = get(userStateAtom)
     const currentState = get(recipesModelsAtom)
-
-    // 检查用户认证状态
-    if (!userState.isAuthenticated) {
-      console.warn('RecipesModels: User not authenticated, skipping API call')
-      const errorMessage = 'Please log in to view styles'
-      set(recipesModelsAtom, {
-        ...currentState,
-        isLoading: false,
-        error: errorMessage
-      })
-      throw new Error(errorMessage)
-    }
 
     const {
       reset = false,

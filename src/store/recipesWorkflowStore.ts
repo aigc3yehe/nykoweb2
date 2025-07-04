@@ -1,6 +1,5 @@
 import { atom } from 'jotai'
 import { workflowsApi } from '../services/api/workflows'
-import { userStateAtom } from './loginStore'
 import type { WorkflowDto } from '../services/api/types'
 
 // 工作流列表状态
@@ -45,20 +44,7 @@ export const fetchRecipesWorkflowsAtom = atom(
     order?: 'created_at' | 'updated_at' | 'usage'
     desc?: 'desc' | 'asc'
   } = {}) => {
-    const userState = get(userStateAtom)
     const currentState = get(recipesWorkflowsAtom)
-
-    // 检查用户认证状态
-    if (!userState.isAuthenticated) {
-      console.warn('RecipesWorkflows: User not authenticated, skipping API call')
-      const errorMessage = 'Please log in to view workflows'
-      set(recipesWorkflowsAtom, {
-        ...currentState,
-        isLoading: false,
-        error: errorMessage
-      })
-      throw new Error(errorMessage)
-    }
 
     const {
       reset = false,

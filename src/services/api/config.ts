@@ -33,6 +33,16 @@ export const API_CONFIG = {
     ATTEMPTS: 3,
     DELAY: 1000, // 1秒
   },
+
+  // Google OAuth 配置
+  GOOGLE_OAUTH: {
+    CLIENT_ID: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
+    CLIENT_SECRET: import.meta.env.VITE_GOOGLE_CLIENT_SECRET || '',
+    REDIRECT_URI: '/api/auth/callback/google',
+    SCOPE: 'openid email profile',
+    OAUTH_URL: 'https://accounts.google.com/o/oauth2/auth',
+    TOKEN_URL: 'https://oauth2.googleapis.com/token',
+  },
 } as const
 
 // API 端点路径
