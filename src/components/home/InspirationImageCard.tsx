@@ -3,6 +3,7 @@ import { cn } from '../../utils/cn'
 import { ContentItem, likeContentAtom } from '../../store/contentsStore'
 import { useAtom } from 'jotai'
 import { userStateAtom } from '../../store/loginStore'
+import { getScaledImageUrl } from '../../utils'
 import VideoIcon from '../../assets/web2/video.svg'
 import RecreateIcon from '../../assets/web2/use.svg'
 import LikeIcon from '../../assets/web2/like.svg'
@@ -95,21 +96,7 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
     onRecreateClick?.()
   }
 
-  const getScaledImageUrl = () => {
-    const url = localContent.url
-    if (!url) return ''
-    
-    const width = imageWidthRem ? imageWidthRem : 17.1875
-    const widthPx = width * 16
-    
-    // 如果URL已经是完整的HTTP URL，直接使用
-    if (url.startsWith('http')) {
-      return url
-    }
-    
-    // 否则使用imagekit进行缩放
-    return `https://ik.imagekit.io/xenoai/niyoko/${url}?tr=w-${widthPx},q-90`
-  }
+  const widthPx = (imageWidthRem ? imageWidthRem : 17.1875) * 16
 
   return (
     <div 
@@ -134,7 +121,7 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
             />
           ) : (
             <img
-              src={getScaledImageUrl()}
+              src={getScaledImageUrl(localContent.url, widthPx)}
               alt={`Content ${localContent.content_id}`}
               className="w-full h-full object-cover"
               onError={() => setImageError(true)}

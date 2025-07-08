@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
 import { FeaturedItem } from '../../store/featuredStore'
+import { getScaledImageUrl } from '../../utils'
 import VideoIcon from '../../assets/web2/video.svg'
 import UseIcon from '../../assets/web2/use.svg'
 import UseCountIcon from '../../assets/web2/use_2.svg'
@@ -18,6 +19,7 @@ interface CardDimensions {
   cover: string
   container: string
   showDescription: boolean
+  showUser: boolean
   mobileStyle?: MobileStyle
 }
 
@@ -25,7 +27,7 @@ interface WorkflowCardProps {
   item: FeaturedItem
   onClick?: () => void
   onUseClick?: () => void
-  variant?: 'workflow' | 'style' | 'recipes_workflow' | 'recipes_style'
+  variant?: 'workflow' | 'style' | 'recipes_workflow' | 'recipes_style' | 'profile_workflow' | 'profile_style'
 }
 
 const WorkflowCard: React.FC<WorkflowCardProps> = ({ 
@@ -48,7 +50,8 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         card: 'w-56 h-[22.5rem]', // 224x356
         cover: 'w-56 h-[19.25rem]', // 224x308
         container: 'w-56',
-        showDescription: false
+        showDescription: false,
+        showUser: true
       }
     } else if (variant === 'recipes_workflow') {
       // Recipes Workflows页面: 移动端动态计算，PC端固定269x306
@@ -57,10 +60,26 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         cover: 'w-16.8125 h-[13.75rem]', // PC端: 269x220
         container: 'w-16.8125',
         showDescription: true,
+        showUser: true,
         mobileStyle: {
           // 移动端：宽度=(100vw-60px)/2，cover高度=宽度*(154/165)，文本区域2.875rem
           width: 'calc((100vw - 60px) / 2)',
           height: 'calc(((100vw - 60px) / 2) * (154/165) + 2.875rem)',
+          coverHeight: 'calc(((100vw - 60px) / 2) * (154/165))' // cover宽高比 165:154
+        }
+      }
+    } else if (variant === 'profile_workflow') {
+      // Recipes Workflows页面: 移动端动态计算，PC端固定269x252
+      return {
+        card: 'w-16.8125 h-[15.625rem]', // PC端: 269x252
+        cover: 'w-16.8125 h-[13.75rem]', // PC端: 269x220
+        container: 'w-16.8125',
+        showDescription: false,
+        showUser: false,
+        mobileStyle: {
+          // 移动端：宽度=(100vw-60px)/2，cover高度=宽度*(154/165)，文本区域1.875rem
+          width: 'calc((100vw - 60px) / 2)',
+          height: 'calc(((100vw - 60px) / 2) * (154/165) + 1.875rem)',
           coverHeight: 'calc(((100vw - 60px) / 2) * (154/165))' // cover宽高比 165:154
         }
       }
@@ -71,10 +90,26 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         cover: 'w-16.8125 h-[23.125rem]', // PC端: 269x370
         container: 'w-16.8125',
         showDescription: false,
+        showUser: true,
         mobileStyle: {
           // 移动端：宽度=(100vw-60px)/2，cover高度=宽度*(228/165)，文本区域2.875rem
           width: 'calc((100vw - 60px) / 2)',
           height: 'calc(((100vw - 60px) / 2) * (228/165) + 2.875rem)',
+          coverHeight: 'calc(((100vw - 60px) / 2) * (228/165))' // cover宽高比 165:228
+        }
+      }
+    } else if (variant === 'profile_style') {
+      // Profile Styles页面: 移动端动态计算，PC端固定269x402
+      return {
+        card: 'w-16.8125 h-[25.125rem]', // PC端: 269x402
+        cover: 'w-16.8125 h-[23.125rem]', // PC端: 269x370
+        container: 'w-16.8125',
+        showDescription: false,
+        showUser: false,
+        mobileStyle: {
+          // 移动端：宽度=(100vw-60px)/2，cover高度=宽度*(228/165)，文本区域1.875rem
+          width: 'calc((100vw - 60px) / 2)',
+          height: 'calc(((100vw - 60px) / 2) * (228/165) + 1.875rem)',
           coverHeight: 'calc(((100vw - 60px) / 2) * (228/165))' // cover宽高比 165:228
         }
       }
@@ -84,12 +119,29 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         card: 'w-56 md:w-72 h-[16.625rem] md:h-[19.125rem]', // 移动端: 224x266, PC端: 288x306
         cover: 'w-56 md:w-72 h-[13.75rem] md:h-[13.75rem]', // 移动端: 224x220, PC端: 288x220
         container: 'w-56 md:w-72',
-        showDescription: true // PC端显示，移动端通过CSS隐藏
+        showDescription: true, // PC端显示，移动端通过CSS隐藏
+        showUser: true
       }
     }
   }
 
   const dimensions = getCardDimensions()
+
+  const getCoverWidthInPixels = () => {
+    switch (variant) {
+      case 'workflow':
+        return 288 // From md:w-72
+      case 'style':
+        return 224 // From w-56
+      case 'recipes_workflow':
+      case 'profile_workflow':
+      case 'recipes_style':
+      case 'profile_style':
+        return 269 // From w-16.8125
+      default:
+        return 288 // Default fallback
+    }
+  }
 
   // 获取用户头像 - 新的用户数据结构
   const getAvatarUrl = () => {
@@ -118,12 +170,14 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
   return (
     <div 
       className={cn(
-        "rounded-xl overflow-hidden cursor-pointer flex-shrink-0 group",
+        "rounded-xl cursor-pointer flex-shrink-0 group",
         // 根据variant决定是否有移动端样式覆盖
         !dimensions.mobileStyle && dimensions.card,
         dimensions.mobileStyle && "[width:var(--mobile-width)] [height:var(--mobile-height)] lg:w-16.8125",
         variant === 'recipes_workflow' && dimensions.mobileStyle && "lg:h-[19.125rem]",
-        variant === 'recipes_style' && dimensions.mobileStyle && "lg:h-[26.125rem]"
+        variant === 'profile_workflow' && dimensions.mobileStyle && "lg:h-[15.625rem]",
+        variant === 'recipes_style' && dimensions.mobileStyle && "lg:h-[26.125rem]",
+        variant === 'profile_style' && dimensions.mobileStyle && "lg:h-[25.125rem]"
       )}
       style={
         dimensions.mobileStyle ? {
@@ -145,7 +199,9 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           !dimensions.mobileStyle && dimensions.cover,
           dimensions.mobileStyle && "[width:var(--mobile-width)] [height:var(--mobile-cover-height)] lg:w-16.8125",
           variant === 'recipes_workflow' && dimensions.mobileStyle && "lg:h-[13.75rem]",
-          variant === 'recipes_style' && dimensions.mobileStyle && "lg:h-[23.125rem]"
+          variant === 'profile_workflow' && dimensions.mobileStyle && "lg:h-[13.75rem]",
+          variant === 'recipes_style' && dimensions.mobileStyle && "lg:h-[23.125rem]",
+          variant === 'profile_style' && dimensions.mobileStyle && "lg:h-[23.125rem]"
         )}
       >
         {item.cover && !imageError ? (
@@ -159,7 +215,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
             />
           ) : (
             <img
-              src={item.cover}
+              src={getScaledImageUrl(item.cover, getCoverWidthInPixels())}
               alt={item.name}
               className="w-full h-full object-cover"
               onError={() => setImageError(true)}
@@ -224,11 +280,16 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           "pt-3 flex flex-col gap-0.5", // padding-top: 12px, gap: 4px
           // 根据variant决定是否有移动端样式覆盖
           !dimensions.mobileStyle && dimensions.container,
-          dimensions.mobileStyle && "[width:var(--mobile-width)] h-[2.875rem] lg:h-auto lg:w-16.8125"
+          dimensions.mobileStyle && `[width:var(--mobile-width)] [height:var(--mobile-text-height)] lg:h-auto lg:w-16.8125`
         )}
+        style={
+          dimensions.mobileStyle ? {
+            '--mobile-text-height': `calc(${dimensions.mobileStyle.height} - ${dimensions.mobileStyle.coverHeight})`
+          } as React.CSSProperties : undefined
+        }
       >
         {/* Name */}
-        <h3 className="font-lexend font-semibold text-sm md:text-base leading-none md:leading-tight text-design-main-text dark:text-design-dark-main-text truncate">
+        <h3 className="font-lexend font-semibold text-sm md:text-base leading-snug text-design-main-text dark:text-design-dark-main-text truncate">
           {item.name}
         </h3>
 
@@ -249,19 +310,21 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         )}
 
         {/* User 信息 - 修复字符裁切问题 */}
-        <div className="flex items-center gap-1.5 h-4"> {/* 固定高度确保显示完整 */}
-          <img
-            src={getAvatarUrl()}
-            alt={getDisplayName()}
-            className="w-4 h-4 rounded-full flex-shrink-0"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = avatarSvg
-            }}
-          />
-          <span className="font-lexend text-xs leading-4 text-design-dark-gray dark:text-design-dark-dark-gray truncate">
-            {getDisplayName()}
-          </span>
-        </div>
+        {dimensions.showUser && (
+          <div className="flex items-center gap-1.5 h-4"> {/* 固定高度确保显示完整 */}
+            <img
+              src={getAvatarUrl()}
+              alt={getDisplayName()}
+              className="w-4 h-4 rounded-full flex-shrink-0"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = avatarSvg
+              }}
+            />
+            <span className="font-lexend text-xs leading-4 text-design-dark-gray dark:text-design-dark-dark-gray truncate">
+              {getDisplayName()}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   )

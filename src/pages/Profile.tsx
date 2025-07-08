@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { userStateAtom, initUserStateAtom, logoutAtom } from '../store/loginStore'
+import ProfileWorkflowsList from '../components/profile/ProfileWorkflowsList'
+import ProfileModelsList from '../components/profile/ProfileModelsList'
+import ProfileContentsList from '../components/profile/ProfileContentsList'
 import { cn } from '../utils/cn'
 
 // Tab 类型
@@ -13,7 +16,7 @@ const Profile: React.FC = () => {
   const [userState] = useAtom(userStateAtom)
   const initUserState = useSetAtom(initUserStateAtom)
   const logout = useSetAtom(logoutAtom)
-  
+
   // 本地状态
   const [activeTab, setActiveTab] = useState<ProfileTab>('published')
   const [selectedFilter, setSelectedFilter] = useState<ContentTypeFilter>('workflows')
@@ -59,22 +62,38 @@ const Profile: React.FC = () => {
     { id: 'videos' as ContentTypeFilter, label: 'Videos' }
   ]
 
+  // 渲染列表内容
+  const renderListContent = () => {
+    if (selectedFilter === 'workflows') {
+      return <ProfileWorkflowsList tab={activeTab} />
+    }
+    if (selectedFilter === 'models') {
+      return <ProfileModelsList tab={activeTab} />
+    }
+    if (selectedFilter === 'images') {
+      return <ProfileContentsList type="image" tab={activeTab} />
+    }
+    if (selectedFilter === 'videos') {
+      return <ProfileContentsList type="video" tab={activeTab} />
+    }
+    return null
+  }
+
   return (
-    <div className="flex flex-col gap-[1.875rem] p-6"> {/* gap: 30px, padding: 24px */}
-      
+    <div className="flex flex-col gap-3 md:gap-[1.875rem] p-5 md:p-6"> {/* 移动端: gap 12px, padding 20px; PC端: gap 30px, padding 24px */}
+
       {/* 用户信息区域 */}
-      <div 
-        className="h-[5.875rem] pt-3 pb-3"
-        style={{ height: '5.875rem' }} // height: 94px
+      <div
+        className="h-[3.375rem] md:h-[5.875rem] pt-3 pb-3" // 移动端: 54px, PC端: 94px
       >
-        <div className="h-full flex items-center justify-between px-6">
+        <div className="h-full flex items-center justify-between">
           {/* 左侧：用户信息 */}
           <div className="flex items-center gap-[0.875rem]"> {/* gap: 14px */}
-            
-            {/* 用户头像 - 70*70px */}
-            <div className="w-[4.375rem] h-[4.375rem] rounded-full bg-[#E5E7EB] overflow-hidden flex items-center justify-center flex-shrink-0">
+
+            {/* 用户头像 - 移动端54*54px, PC端70*70px */}
+            <div className="w-[3.375rem] h-[3.375rem] md:w-[4.375rem] md:h-[4.375rem] rounded-full bg-[#E5E7EB] overflow-hidden flex items-center justify-center flex-shrink-0">
               {user.picture ? (
-                <img 
+                <img
                   src={user.picture}
                   alt={user.name || 'User'}
                   className="w-full h-full object-cover"
@@ -88,14 +107,14 @@ const Profile: React.FC = () => {
 
             {/* 用户信息文本 */}
             <div className="flex flex-col gap-[0.375rem]"> {/* gap: 6px */}
-              
+
               {/* 用户名 */}
-              <h1 className="font-lexend font-semibold text-[1.5rem] leading-[120%] text-[#1F2937] dark:text-white">
+              <h1 className="font-lexend font-semibold text-[1.25rem] md:text-[1.5rem] leading-[120%] text-[#1F2937] dark:text-white">
                 {user.name || 'Unknown User'}
               </h1>
 
               {/* 邮箱 */}
-              <p className="font-lexend font-normal text-[0.875rem] leading-[120%] text-[#6B7280] dark:text-gray-400">
+              <p className="font-lexend font-normal text-sm leading-[120%] text-[#6B7280] dark:text-gray-400">
                 {user.email || 'No email provided'}
               </p>
             </div>
@@ -112,9 +131,9 @@ const Profile: React.FC = () => {
       </div>
 
       {/* 内容区域 */}
-      <div className="flex-1 p-6">
-        <div className="flex flex-col gap-5"> {/* gap: 20px */}
-          
+      <div className="flex-1">
+        <div className="flex flex-col gap-3 md:gap-5"> {/* gap: 20px 移动端 gap: 12px*/}
+
           {/* 第一行：Tabs */}
           <div className="w-full">
             {/* 桌面端 - 单行布局 */}
@@ -125,8 +144,8 @@ const Profile: React.FC = () => {
                     key={option.id}
                     onClick={() => setActiveTab(option.id)}
                     className={cn(
-                      "h-11 px-0 pb-3 relative transition-colors", // height: 44px
-                      "font-lexend text-[1.25rem] leading-none", // 20px font
+                      "h-[2.375rem] md:h-11 px-0 pb-3 relative transition-colors", // 移动端: 38px, PC端: 44px
+                      "font-lexend text-[1.125rem] md:text-[1.25rem] leading-none", // 移动端: 18px, PC端: 20px
                       activeTab === option.id
                         ? "font-medium text-design-main-text dark:text-design-dark-main-text"
                         : "font-normal text-design-medium-gray dark:text-design-dark-medium-gray hover:text-design-dark-gray dark:hover:text-design-dark-dark-gray"
@@ -150,8 +169,8 @@ const Profile: React.FC = () => {
                     key={option.id}
                     onClick={() => setActiveTab(option.id)}
                     className={cn(
-                      "h-11 px-0 pb-3 relative transition-colors", // height: 44px
-                      "font-lexend text-[1.25rem] leading-none", // 20px font
+                      "h-[2.375rem] md:h-11 px-0 pb-3 relative transition-colors", // 移动端: 38px, PC端: 44px
+                      "font-lexend text-[1.125rem] md:text-[1.25rem] leading-none", // 移动端: 18px, PC端: 20px
                       activeTab === option.id
                         ? "font-medium text-design-main-text dark:text-design-dark-main-text"
                         : "font-normal text-design-medium-gray dark:text-design-dark-medium-gray"
@@ -169,16 +188,16 @@ const Profile: React.FC = () => {
           </div>
 
           {/* 第二行：内容类型过滤器 */}
-          <div className="flex items-center gap-2"> {/* gap: 8px */}
+          <div className="flex items-center gap-1 md:gap-2 md:justify-start justify-between"> {/* 移动端：平分间距，PC端：gap 8px */}
             {filterOptions.map((option) => (
               <button
                 key={option.id}
                 onClick={() => setSelectedFilter(option.id)}
                 className={cn(
-                  "h-[2.125rem] px-[1.125rem] rounded-md transition-colors",
+                  "h-[2.125rem] px-4 rounded-md transition-colors flex-1 md:flex-none", // 移动端平分宽度
                   selectedFilter === option.id
                     ? "bg-design-main-blue dark:bg-design-dark-main-blue"
-                    : "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                    : "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
                 )}
               >
                 <span className={cn(
@@ -193,16 +212,9 @@ const Profile: React.FC = () => {
             ))}
           </div>
 
-          {/* 第三行：列表区域（占位） */}
-          <div className="flex-1 min-h-[200px] flex items-center justify-center">
-            <div className="text-center text-gray-500 dark:text-gray-400">
-              <p className="text-lg font-medium mb-2">
-                {activeTab === 'published' ? 'Published' : 'Liked'} {selectedFilter}
-              </p>
-              <p className="text-sm">
-                Content list will be implemented here
-              </p>
-            </div>
+          {/* 第三行：列表区域 */}
+          <div className="flex-1">
+            {renderListContent()}
           </div>
         </div>
       </div>
@@ -210,4 +222,4 @@ const Profile: React.FC = () => {
   )
 }
 
-export default Profile 
+export default Profile

@@ -110,6 +110,13 @@ const Sidebar: React.FC = () => {
     }
   ]
 
+  const isLocation = (pathname: string, path: string) => {
+    if (path === "/") {
+      return pathname === path
+    }
+    return pathname.startsWith(path)
+  }
+
   return (
     <>
       {/* 遮罩层 - 移动端显示 */}
@@ -167,7 +174,7 @@ const Sidebar: React.FC = () => {
                           ? "gap-2 h-14 rounded-xl p-3 border border-design-line-light-gray dark:border-design-dark-line-light-gray text-design-main-text dark:text-design-dark-main-text font-normal hover:bg-gray-50 dark:hover:bg-gray-800"
                           : "gap-1 h-11 rounded-xl p-3",
                         // 第一组和第三组的选中效果
-                        sectionIndex !== 1 && location.pathname === item.path
+                        sectionIndex !== 1 && isLocation(location.pathname, item.path)
                           ? "bg-design-bg-light-blue font-bold text-design-main-blue"
                           : sectionIndex !== 1
                           ? "text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 font-normal"
@@ -175,7 +182,7 @@ const Sidebar: React.FC = () => {
                       )}
                     >
                       <div className="flex-shrink-0">
-                        {sectionIndex !== 1 && location.pathname === item.path ? item.selectedIcon : item.icon}
+                        {sectionIndex !== 1 && isLocation(location.pathname, item.path) ? item.selectedIcon : item.icon}
                       </div>
                       <span className="flex-1">{item.label}</span>
                       {item.badge && (
