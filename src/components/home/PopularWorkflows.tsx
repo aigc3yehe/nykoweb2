@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAtom } from 'jotai'
 import { featuredWorkflowsAtom, fetchFeaturedWorkflowsAtom } from '../../store/featuredStore'
 import SectionHeader from './SectionHeader'
 import WorkflowCard from './WorkflowCard'
 
 const PopularWorkflows: React.FC = () => {
+  const navigate = useNavigate()
   const [workflowsState] = useAtom(featuredWorkflowsAtom)
   const [, fetchWorkflows] = useAtom(fetchFeaturedWorkflowsAtom)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -52,6 +54,17 @@ const PopularWorkflows: React.FC = () => {
     }
   }, [workflowsState.items])
 
+  // 处理工作流点击 - 导航到详情页面
+  const handleWorkflowClick = (workflowId: number) => {
+    navigate(`/workflow/${workflowId}`)
+  }
+
+  // 处理使用工作流
+  const handleUseWorkflow = (workflowId: number) => {
+    console.log('Use workflow:', workflowId)
+    // TODO: 实现使用工作流的逻辑
+  }
+
   // 加载状态
   if (workflowsState.isLoading && workflowsState.items.length === 0) {
     return (
@@ -91,7 +104,7 @@ const PopularWorkflows: React.FC = () => {
 
   const handleViewAll = () => {
     // 导航到Recipes页面的Workflows标签
-    console.log('Navigate to /recipes/workflows')
+    navigate('/recipes/workflows')
   }
 
   return (
@@ -115,8 +128,8 @@ const PopularWorkflows: React.FC = () => {
             key={item.id}
             item={item}
             variant="workflow"
-            onClick={() => console.log('Workflow clicked:', item.id)}
-            onUseClick={() => console.log('Use workflow:', item.id)}
+            onClick={() => handleWorkflowClick(item.id)}
+            onUseClick={() => handleUseWorkflow(item.id)}
           />
         ))}
       </div>

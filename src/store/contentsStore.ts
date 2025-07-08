@@ -86,6 +86,8 @@ export const fetchContentsAtom = atom(
     typeFilter?: ContentTypeFilter
     order?: ContentOrderType
     desc?: 'desc' | 'asc'
+    source?: 'model' | 'workflow'
+    source_id?: number
   } = {}) => {
     //const userState = get(userStateAtom)
     const currentState = get(contentsAtom)
@@ -94,7 +96,9 @@ export const fetchContentsAtom = atom(
       reset = false,
       typeFilter = currentState.typeFilter,
       order = currentState.order,
-      desc = currentState.desc
+      desc = currentState.desc,
+      source,
+      source_id
     } = options
 
     // 如果是新的筛选条件，重置状态
@@ -156,6 +160,9 @@ export const fetchContentsAtom = atom(
       if (typeFilter !== 'all') {
         params.type = typeFilter
       }
+      // 新增：透传 source/source_id
+      if (source) params.source = source
+      if (source_id) params.source_id = source_id
 
       // 调用API
       const response = await contentsApi.getContentsList(params)

@@ -8,8 +8,9 @@ import {
   loadMorePublishedWorkflowsAtom,
   type TimeGroup 
 } from '../../store/profileWorkflowStore'
-import type { WorkflowDto } from '../../services/api/types'
+import type { WorkflowDto } from '../../services/api'
 import type { FeaturedItem } from '../../store/featuredStore'
+import { useNavigate } from 'react-router-dom'
 
 interface ProfileWorkflowsListProps {
   tab: 'published' | 'liked'
@@ -38,7 +39,7 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
   const [, fetchLiked] = useAtom(fetchLikedWorkflowsAtom)
   const [, loadMorePublished] = useAtom(loadMorePublishedWorkflowsAtom)
   const isLoadingRef = useRef(false)
-
+  const navigate = useNavigate()
   // 初始加载数据
   useEffect(() => {
     if (tab === 'published') {
@@ -62,6 +63,13 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
       })
     }
   }, [tab, state.publishedHasMore, state.isLoading, loadMorePublished])
+
+  const handleWorkflowClick = (workflowId: number) => {
+    navigate(`/workflow/${workflowId}`)
+  }
+  const handleUseWorkflow = (workflowId: number) => {
+    console.log('Use workflow:', workflowId)
+  }
 
   // 监听滚动，当接近底部时加载更多
   const handleScroll = useCallback(() => {
@@ -163,14 +171,8 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
                 <WorkflowCard
                   item={convertWorkflowToFeaturedItem(workflow)}
                   variant="profile_workflow"
-                  onClick={() => {
-                    // TODO: 导航到工作流详情页
-                    console.log('Navigate to workflow:', workflow.workflow_id)
-                  }}
-                  onUseClick={() => {
-                    // TODO: 使用工作流
-                    console.log('Use workflow:', workflow.workflow_id)
-                  }}
+                  onClick={() => handleWorkflowClick(workflow.workflow_id)}
+                  onUseClick={() => handleUseWorkflow(workflow.workflow_id)}
                 />
               </div>
             ))}

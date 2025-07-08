@@ -1,7 +1,7 @@
 import { atom } from 'jotai'
 import { workflowsApi } from '../services/api/workflows'
 import { userStateAtom } from './loginStore'
-import type { WorkflowDto } from '../services/api/types'
+import type { WorkflowDto } from '../services/api'
 
 // 时间分组类型
 export interface TimeGroup {
@@ -67,10 +67,10 @@ const getTimeGroupLabel = (date: Date): string => {
     return `${weeks} Weeks ago`
   } else {
     // 超过30天，使用具体日期格式：19 Nov 2024
-    return date.toLocaleDateString('en-GB', { 
-      day: 'numeric', 
-      month: 'short', 
-      year: 'numeric' 
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
     })
   }
 }
@@ -83,7 +83,7 @@ const groupWorkflowsByTime = (workflows: WorkflowDto[]): TimeGroup[] => {
     if (!workflow.created_at) return // 跳过没有创建时间的项目
     const createdDate = new Date(workflow.created_at)
     const dateKey = createdDate.toDateString() // 用于分组的key
-    
+
     if (!groups[dateKey]) {
       groups[dateKey] = []
     }
@@ -101,7 +101,7 @@ const groupWorkflowsByTime = (workflows: WorkflowDto[]): TimeGroup[] => {
         return bTime - aTime
       })
     }))
-    .sort((a, b) => 
+    .sort((a, b) =>
       new Date(b.groupKey).getTime() - new Date(a.groupKey).getTime()
     )
 }
@@ -109,12 +109,12 @@ const groupWorkflowsByTime = (workflows: WorkflowDto[]): TimeGroup[] => {
 // 合并分组数据
 const mergeGroupedWorkflows = (existingGroups: TimeGroup[], newGroups: TimeGroup[]): TimeGroup[] => {
   const groupsMap = new Map<string, WorkflowDto[]>()
-  
+
   // 添加现有工作流
   existingGroups.forEach(group => {
     groupsMap.set(group.groupKey, [...group.workflows])
   })
-  
+
   // 添加新工作流，避免重复
   newGroups.forEach(group => {
     const existing = groupsMap.get(group.groupKey) || []
@@ -122,13 +122,13 @@ const mergeGroupedWorkflows = (existingGroups: TimeGroup[], newGroups: TimeGroup
     const newItems = group.workflows.filter(item => !existingIds.has(item.workflow_id))
     groupsMap.set(group.groupKey, [...existing, ...newItems])
   })
-  
+
   // 重新分组并排序
   const allWorkflows: WorkflowDto[] = []
   groupsMap.forEach(workflows => {
     allWorkflows.push(...workflows)
   })
-  
+
   return groupWorkflowsByTime(allWorkflows)
 }
 
@@ -159,7 +159,7 @@ export const fetchPublishedWorkflowsAtom = atom(
         return currentState.publishedGroups
       }
     }
-    
+
     const currentPage = reset ? 1 : currentState.publishedCurrentPage
 
     console.log('ProfileWorkflows: Fetching published workflows')
@@ -183,10 +183,10 @@ export const fetchPublishedWorkflowsAtom = atom(
 
       const response = await workflowsApi.getWorkflowsList(params)
       const workflows = response.workflows || []
-      
+
       // 按时间分组
       const newGroups = groupWorkflowsByTime(workflows)
-      
+
       const hasMore = workflows.length === currentState.pageSize && (currentPage * currentState.pageSize) < (response.total_count || 0)
       const finalGroups = reset ? newGroups : mergeGroupedWorkflows(currentState.publishedGroups, newGroups)
 
@@ -305,4 +305,4 @@ export const resetProfileWorkflowsAtom = atom(
   (_, set) => {
     set(profileWorkflowsAtom, initialState)
   }
-) 
+)

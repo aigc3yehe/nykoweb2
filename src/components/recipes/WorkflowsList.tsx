@@ -1,12 +1,13 @@
 import React, { useEffect, useCallback, useRef } from 'react'
 import { useAtom } from 'jotai'
 import WorkflowCard from '../home/WorkflowCard'
-import { 
-  recipesWorkflowsAtom, 
-  fetchRecipesWorkflowsAtom, 
-  loadMoreRecipesWorkflowsAtom 
+import {
+  recipesWorkflowsAtom,
+  fetchRecipesWorkflowsAtom,
+  loadMoreRecipesWorkflowsAtom
 } from '../../store/recipesWorkflowStore'
-import type { WorkflowDto } from '../../services/api/types'
+import { useNavigate } from 'react-router-dom'
+import type { WorkflowDto } from '../../services/api'
 import type { FeaturedItem } from '../../store/featuredStore'
 
 // 数据转换器：将 WorkflowDto 转换为 FeaturedItem 格式
@@ -31,7 +32,7 @@ const WorkflowsList: React.FC = () => {
   const [, fetchData] = useAtom(fetchRecipesWorkflowsAtom)
   const [, loadMore] = useAtom(loadMoreRecipesWorkflowsAtom)
   const isLoadingRef = useRef(false)
-
+  const navigate = useNavigate()
   // 初始加载数据
   useEffect(() => {
     if (workflowState.items.length === 0 && !workflowState.isLoading) {
@@ -52,6 +53,17 @@ const WorkflowsList: React.FC = () => {
       })
     }
   }, [workflowState.hasMore, workflowState.isLoading, loadMore])
+
+  // 处理工作流点击 - 导航到详情页面
+  const handleWorkflowClick = (workflowId: number) => {
+    navigate(`/workflow/${workflowId}`)
+  }
+
+  // 处理使用工作流
+  const handleUseWorkflow = (workflowId: number) => {
+    console.log('Use workflow:', workflowId)
+    // TODO: 实现使用工作流的逻辑
+  }
 
   // 监听滚动，当接近底部时加载更多
   const handleScroll = useCallback(() => {
@@ -91,7 +103,7 @@ const WorkflowsList: React.FC = () => {
       <div className="flex justify-center items-center py-12">
         <div className="text-center">
           <p className="text-red-500 mb-2">Error loading workflows: {workflowState.error}</p>
-          <button 
+          <button
             onClick={() => fetchData({ reset: true })}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
@@ -120,14 +132,8 @@ const WorkflowsList: React.FC = () => {
             <WorkflowCard
               item={convertWorkflowToFeaturedItem(workflow)}
               variant="recipes_workflow"
-              onClick={() => {
-                // TODO: 导航到工作流详情页
-                console.log('Navigate to workflow:', workflow.workflow_id)
-              }}
-              onUseClick={() => {
-                // TODO: 使用工作流
-                console.log('Use workflow:', workflow.workflow_id)
-              }}
+              onClick={() => handleWorkflowClick(workflow.workflow_id)}
+              onUseClick={() => handleUseWorkflow(workflow.workflow_id)}
             />
           </div>
         ))}
@@ -162,4 +168,4 @@ const WorkflowsList: React.FC = () => {
   )
 }
 
-export default WorkflowsList 
+export default WorkflowsList
