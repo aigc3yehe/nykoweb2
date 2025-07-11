@@ -83,8 +83,14 @@ export default {
       width: {
         '16.8125': '16.8125rem', // 269px
       },
+      maxWidth: {
+        '31.5': '31.5rem', // 504px - 聊天输入框最大宽度
+      },
       fontFamily: {
         'lexend': ['Lexend', 'sans-serif'],
+      },
+      lineHeight: {
+        '140': '1.4', // 140% line height
       }
     },
   },

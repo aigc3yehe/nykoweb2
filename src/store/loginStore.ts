@@ -3,6 +3,8 @@ import { authService } from '../services/authService'
 import { usersApi } from '../services/api/users'
 import { authApi } from '../services/api/auth'
 import {ApiError, UserBaseInfo} from '../services/api'
+import { chatAtom } from './assistantStore.ts'
+import { setAgentTokenAtom } from './assistantStore.ts'
 
 export interface GoogleUserInfo {
   id: string
@@ -71,6 +73,7 @@ export const initUserStateAtom = atom(
       if (user.tokens && user.tokens.access_token) {
         authApi.setBearerToken(user.tokens.access_token)
         console.log('Bearer token restored from localStorage')
+        set(setAgentTokenAtom, user.tokens.access_token)
       }
 
       set(userStateAtom, {
@@ -142,6 +145,7 @@ export const fetchUserDetailsAtom = atom(
     }
 
     try {
+      const agentToken = currentState.user.tokens.access_token
       const did = currentState.user.tokens.did
       const userDetails = await usersApi.getUserInfo(did, true)
 
@@ -150,6 +154,14 @@ export const fetchUserDetailsAtom = atom(
         userDetails,
         error: null
       })
+
+      // 新增：更新assistantStore的chatState
+      set(chatAtom, prev => ({
+        ...prev,
+        userUuid: userDetails.did || '',
+        did: userDetails.did,
+        agentToken: agentToken
+      }));
 
       console.log('User details fetched successfully:', userDetails)
     } catch (error) {
@@ -185,7 +197,12 @@ export const logoutAtom = atom(
       error: null
     })
 
-    // 精选数据是公开的，不需要在登出时清除
+    // 新增：清空assistantStore的chatState相关字段
+    set(chatAtom, prev => ({
+      ...prev,
+      userUuid: '',
+      did: undefined
+    }));
 
     console.log('User logged out successfully')
   }

@@ -294,7 +294,7 @@ export interface AigcProcesserResponse {
 // 模型相关类型
 export interface ModelTrainingInfo {
   version: number
-  train_state: number
+  train_state: number // 训练状态 (0为排队中, 1为进行中, 2 为完成, -1 为失败)
   task_id?: string
   base_model?: string
   lora_name?: string

@@ -36,7 +36,7 @@ export class ModelsApiService {
     return apiService.get<FetchModelDto>(
       API_ENDPOINTS.MODELS.GET_BY_ID(id),
       { refresh },
-      { requiresAuth: true }
+      { requiresAuth: false }
     )
   }
 

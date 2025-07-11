@@ -8,6 +8,7 @@ import {
 } from '../../store/recipesModelStore'
 import type { FetchModelDto } from '../../services/api/types'
 import type { FeaturedItem } from '../../store/featuredStore'
+import { useNavigate } from 'react-router-dom'
 
 // 数据转换器：将 FetchModelDto 转换为 FeaturedItem 格式
 const convertModelToFeaturedItem = (model: FetchModelDto): FeaturedItem => ({
@@ -31,7 +32,7 @@ const StylesList: React.FC = () => {
   const [, fetchData] = useAtom(fetchRecipesModelsAtom)
   const [, loadMore] = useAtom(loadMoreRecipesModelsAtom)
   const isLoadingRef = useRef(false)
-
+  const navigate = useNavigate()
   // 初始加载数据
   useEffect(() => {
     if (modelState.items.length === 0 && !modelState.isLoading) {
@@ -41,6 +42,14 @@ const StylesList: React.FC = () => {
       })
     }
   }, [fetchData, modelState.items.length, modelState.isLoading])
+
+  const handleStyleClick = (styleId: number) => {
+    navigate(`/model/${styleId}`)
+  }
+
+  const handleUseClick = (styleId: number) => {
+    navigate(`/model/${styleId}`)
+  }
 
   // 处理加载更多
   const handleLoadMore = useCallback(() => {
@@ -120,14 +129,8 @@ const StylesList: React.FC = () => {
             <WorkflowCard
               item={convertModelToFeaturedItem(model)}
               variant="recipes_style"
-              onClick={() => {
-                // TODO: 导航到模型详情页
-                console.log('Navigate to model:', model.model_id)
-              }}
-              onUseClick={() => {
-                // TODO: 使用模型
-                console.log('Use model:', model.model_id)
-              }}
+              onClick={() => handleStyleClick(model.model_id)}
+              onUseClick={() => handleUseClick(model.model_id)}
             />
           </div>
         ))}

@@ -19,9 +19,9 @@ export const workflowDetailAtom = atom<WorkflowDetailState>({
 // 获取工作流详情的原子
 export const fetchWorkflowDetailAtom = atom(
   null,
-  async (get, set, { workflowId, refresh = false }: { workflowId: number; refresh?: boolean }) => {
+  async (_, set, { workflowId, refresh = false }: { workflowId: number; refresh?: boolean }) => {
     set(workflowDetailAtom, prev => ({ ...prev, isLoading: true, error: null }))
-    
+
     try {
       const workflow = await workflowsApi.getWorkflowById(workflowId, refresh)
       set(workflowDetailAtom, {
@@ -52,11 +52,11 @@ export const fetchWorkflowDetailAtom = atom(
 // 清除工作流详情的原子
 export const clearWorkflowDetailAtom = atom(
   null,
-  (get, set) => {
+  (_, set) => {
     set(workflowDetailAtom, {
       workflow: null,
       isLoading: false,
       error: null
     })
   }
-) 
+)

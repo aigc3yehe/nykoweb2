@@ -15,6 +15,7 @@ import Recipes from './pages/Recipes'
 import AuthCallback from './pages/AuthCallback'
 import Profile from './pages/Profile'
 import WorkflowDetail from './pages/WorkflowDetail'
+import ModelDetail from './pages/ModelDetail'
 
 function App() {
   const [modalState] = useAtom(modalAtom)
@@ -37,6 +38,7 @@ function App() {
           <Route path="/recipes/:tab" element={<Recipes />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/workflow/:id" element={<WorkflowDetail />} />
+          <Route path="/model/:id" element={<ModelDetail />} />
           <Route path="/api/auth/callback/google" element={<AuthCallback />} />
           {/* 其他路由... */}
         </Routes>

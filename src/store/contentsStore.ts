@@ -78,7 +78,10 @@ export const contentsAtom = atom<ContentsState>(initialState)
 // 缓存有效期：2分钟
 const CACHE_DURATION = 2 * 60 * 1000
 
-// 获取内容列表的atom
+/**
+ * 获取内容列表的atom
+ * @param options.disableCache 是否禁用缓存，true 时每次都强制请求接口
+ */
 export const fetchContentsAtom = atom(
   null,
   async (get, set, options: {
@@ -88,6 +91,7 @@ export const fetchContentsAtom = atom(
     desc?: 'desc' | 'asc'
     source?: 'model' | 'workflow'
     source_id?: number
+    disableCache?: boolean
   } = {}) => {
     //const userState = get(userStateAtom)
     const currentState = get(contentsAtom)
@@ -98,7 +102,8 @@ export const fetchContentsAtom = atom(
       order = currentState.order,
       desc = currentState.desc,
       source,
-      source_id
+      source_id,
+      disableCache = false
     } = options
 
     // 如果是新的筛选条件，重置状态
@@ -110,6 +115,7 @@ export const fetchContentsAtom = atom(
     // 检查缓存（仅在重置且参数相同时使用缓存）
     const now = Date.now()
     const cacheValid = shouldReset && // 只有重置时才考虑缓存
+                      !disableCache &&
                       currentState.lastFetch &&
                       (now - currentState.lastFetch) < CACHE_DURATION &&
                       typeFilter === currentState.typeFilter &&

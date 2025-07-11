@@ -5,6 +5,8 @@ import { initLanguageAtom } from '../../store/i18nStore'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import MainContent from './MainContent'
+import ChatButton from '../ui/ChatButton'
+import ChatSidebar from './ChatSidebar'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -32,6 +34,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <MainContent>
           {children}
         </MainContent>
+        
+        {/* 聊天按钮 */}
+        <ChatButton />
+        
+        {/* 聊天侧边栏 */}
+        <ChatSidebar />
       </div>
     </div>
   )

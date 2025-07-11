@@ -3,6 +3,7 @@ import { useAtom } from 'jotai'
 import { featuredModelsAtom, fetchFeaturedModelsAtom } from '../../store/featuredStore'
 import SectionHeader from './SectionHeader'
 import WorkflowCard from './WorkflowCard'
+import { useNavigate } from 'react-router-dom'
 
 const TrendingStyles: React.FC = () => {
   const [modelsState] = useAtom(featuredModelsAtom)
@@ -10,7 +11,7 @@ const TrendingStyles: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
-
+  const navigate = useNavigate()
   // 获取数据 - 移除用户认证检查，因为接口是公开的
   useEffect(() => {
     if (modelsState.items.length === 0 && !modelsState.isLoading) {
@@ -94,6 +95,10 @@ const TrendingStyles: React.FC = () => {
     console.log('Navigate to /recipes/styles')
   }
 
+  const handleStyleClick = (styleId: number) => {
+    navigate(`/model/${styleId}`)
+  }
+
   return (
     <div className="w-full">
       <SectionHeader
@@ -115,7 +120,7 @@ const TrendingStyles: React.FC = () => {
             key={item.id}
             item={item}
             variant="style"
-            onClick={() => console.log('Style clicked:', item.id)}
+            onClick={() => handleStyleClick(item.id)}
             onUseClick={() => console.log('Use style:', item.id)}
           />
         ))}

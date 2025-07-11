@@ -22,7 +22,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/chat-api': {
-        target: 'http://43.153.57.123:8085',
+        target: 'http://0.0.0.0:8084',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/chat-api/, '')
       },

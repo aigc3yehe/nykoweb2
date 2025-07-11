@@ -1,37 +1,37 @@
 import React, { useEffect, useCallback, useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
-import { contentsAtom, loadMoreContentsAtom, fetchContentsAtom, ContentItem } from '../../store/contentsStore.ts'
-import InspirationImageCard from '../home/InspirationImageCard.tsx'
+import { contentsAtom, loadMoreContentsAtom, fetchContentsAtom, ContentItem } from '../../store/contentsStore'
+import InspirationImageCard from '../home/InspirationImageCard'
 
-interface WorkflowGalleryProps {
-  workflowId: number
+interface ModelGalleryProps {
+  modelId: number
 }
 
-const WorkflowGallery: React.FC<WorkflowGalleryProps> = ({ workflowId }) => {
+const ModelGallery: React.FC<ModelGalleryProps> = ({ modelId }) => {
   const [contentsState] = useAtom(contentsAtom)
   const setFetchContents = useSetAtom(fetchContentsAtom)
   const [, loadMore] = useAtom(loadMoreContentsAtom)
   const isLoadingRef = useRef(false)
 
-  // 加载指定workflow的内容
+  // 加载指定model的内容
   const loadContents = useCallback(async (reset = true) => {
     try {
       await setFetchContents({
         reset,
         typeFilter: 'all',
-        source: 'workflow',
-        source_id: workflowId,
+        source: 'model',
+        source_id: modelId,
       })
     } catch (error) {
-      console.error('WorkflowGallery: Failed to load contents:', error)
+      console.error('ModelGallery: Failed to load contents:', error)
     }
-  }, [setFetchContents, workflowId])
+  }, [setFetchContents, modelId])
 
   // 初始加载
   useEffect(() => {
     loadContents(true)
     // eslint-disable-next-line
-  }, [workflowId])
+  }, [modelId])
 
   // 加载更多
   const handleLoadMore = useCallback(() => {
@@ -163,4 +163,4 @@ const WorkflowGallery: React.FC<WorkflowGalleryProps> = ({ workflowId }) => {
   )
 }
 
-export default WorkflowGallery
+export default ModelGallery 
