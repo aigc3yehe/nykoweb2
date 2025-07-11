@@ -4,7 +4,7 @@ import { useAtom, useSetAtom } from 'jotai'
 import { getScaledImageUrl } from '../utils'
 import { modelDetailAtom, fetchModelDetailAtom, clearModelDetailAtom } from '../store/modelDetailStore'
 import { userStateAtom } from '../store/loginStore'
-import { setCurrentDetailModelAtom } from '../store/assistantStore'
+import { setCurrentDetailModelAtom, sendMessage } from '../store/assistantStore'
 import CloseIcon from '../assets/web2/close.svg'
 import avatarSvg from '../assets/Avatar.svg'
 import usageSvg from '../assets/web2/usage.svg'
@@ -13,6 +13,7 @@ import shareSvg from '../assets/web2/share.svg'
 import editSvg from '../assets/web2/edit.svg'
 import { formatNumber } from '../utils'
 import ModelGallery from '../components/model/ModelGallery'
+import { openChatSidebar } from '../store/chatSidebarStore'
 
 const ModelDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -22,7 +23,8 @@ const ModelDetail: React.FC = () => {
   const [, clearModelDetail] = useAtom(clearModelDetailAtom)
   const [userState] = useAtom(userStateAtom)
   const setCurrentDetailModel = useSetAtom(setCurrentDetailModelAtom)
-
+  const sendMessageAction = useSetAtom(sendMessage)
+  const openSidebar = useSetAtom(openChatSidebar)
   const modelId = id ? parseInt(id, 10) : null
   const userDid = userState.user?.tokens?.did || userState.userDetails?.did || ''
   const userRole = userState.userDetails?.role || ''
@@ -103,6 +105,13 @@ const ModelDetail: React.FC = () => {
       return 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400'
     }
     return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400'
+  }
+
+  const handleUseNow = () => {
+    // 1. 打开右侧聊天窗口
+    // 2. 发送消息：I want to generate an image.
+    openSidebar()
+    sendMessageAction('I want to generate an image.')
   }
 
   // 如果没有有效的模型ID，显示错误
@@ -302,7 +311,9 @@ const ModelDetail: React.FC = () => {
                   {/* 下半部分：按钮组 */}
                   <div className="flex items-center justify-between h-[3rem] w-full">
                     {/* Use Now按钮 */}
-                    <button className="w-[16.6875rem] h-[3rem] flex items-center justify-center gap-1.5 rounded-[6px] bg-design-main-blue dark:bg-design-dark-main-blue hover:bg-blue-800 transition-colors">
+                    <button 
+                      onClick={handleUseNow}
+                      className="w-[16.6875rem] h-[3rem] flex items-center justify-center gap-1.5 rounded-[6px] bg-design-main-blue dark:bg-design-dark-main-blue hover:bg-blue-800 transition-colors">
                       <img src={use2Svg} alt="Use Now" className="w-6 h-6" />
                       <span className="font-lexend font-normal text-lg leading-[100%] text-white">Use Now</span>
                     </button>

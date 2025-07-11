@@ -127,7 +127,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
             {/* 第一行 - 显示当前工作流或模型 */}
             <div className="flex gap-1.5">
               {/* 工作流详情显示 */}
-              {chatState.currentDetailWorkflow && (
+              {chatState.currentDetailWorkflow && chatState.task_type === "use_workflow" && (
                 <div className="flex items-center gap-2.5 h-[4.125rem] px-2 py-2 pr-3.5 pl-2 bg-design-bg-light-blue rounded-[0.625rem]">
                   {/* 工作流封面 */}
                   <div className="w-[3.125rem] h-[3.125rem] rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
@@ -155,7 +155,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
               )}
 
               {/* 模型详情显示 */}
-              {chatState.currentDetailModel && (
+              {chatState.currentDetailModel && chatState.task_type === "generation" && (
                 <div className="flex items-center gap-2.5 h-[4.25rem] px-2 py-2 pr-3.5 pl-2 bg-design-bg-light-blue rounded-[0.625rem]">
                   {/* 模型封面 */}
                   <div className="w-[3.125rem] h-[3.125rem] rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
@@ -214,7 +214,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
               )}
 
               {/* 工作流图片上传组件 */}
-              {chatState.currentDetailWorkflow &&
+              {chatState.currentDetailWorkflow && chatState.task_type === "use_workflow" &&
                chatState.currentDetailWorkflow.input_type &&
                chatState.currentDetailWorkflow.input_type.includes('image') && (
                 <>
@@ -246,7 +246,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
                       {/* 删除按钮 - 鼠标悬停时显示，位置在右上角 */}
                       <button
                         onClick={removeWorkflowReferenceImageAction}
-                        className="absolute top-0 right-0 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        className="absolute top-0 right-0 w-5 h-5 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200"
                         style={{ transform: 'translate(50%, -50%)' }}
                       >
                         <img src={ImageCloseIcon} alt="Remove" className="w-5 h-5" />
@@ -267,8 +267,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
                 disabled={isDisabled}
                 placeholder="What do you want to create?"
                 rows={1}
-                className="w-full min-h-5 h-5 max-h-[120px] overflow-hidden resize-none border-none outline-none bg-transparent font-lexend font-normal text-sm leading-none p-0 text-design-dark-gray placeholder:text-design-lightest-gray disabled:opacity-50"
-                style={{ lineHeight: '20px' }}
+                className="w-full min-h-5 h-5 max-h-[7.5rem] overflow-hidden resize-none border-none outline-none bg-transparent font-lexend font-normal text-sm leading-none p-0 text-design-dark-gray placeholder:text-design-lightest-gray disabled:opacity-50"
+                style={{ lineHeight: '1.25rem' }}
               />
             </div>
           </div>
@@ -278,25 +278,34 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
             {/* 左侧选项组 */}
             <div className="flex items-center h-full gap-3">
               {/* 类型标签 */}
-              {(chatState.currentDetailWorkflow || chatState.currentDetailModel) && (
+              {chatState.currentDetailModel && chatState.task_type === "generation" && (
                 <div className="flex items-center gap-1 h-8 px-3.5 bg-white border border-design-main-blue rounded-full">
                   <img src={AiccTypeIcon} alt="Type" className="w-4 h-4" />
                   <span className="font-lexend font-normal text-sm leading-none text-center text-design-main-blue">
-                    {chatState.currentDetailWorkflow ? 'Workflow' : 'Style'}
+                    Style
+                  </span>
+                </div>
+              )}
+
+              {chatState.currentDetailWorkflow && chatState.task_type === "use_workflow" && (
+                <div className="flex items-center gap-1 h-8 px-3.5 bg-white border border-design-main-blue rounded-full">
+                  <img src={AiccTypeIcon} alt="Type" className="w-4 h-4" />
+                  <span className="font-lexend font-normal text-sm leading-none text-center text-design-main-blue">
+                    Workflow
                   </span>
                 </div>
               )}
 
               {/* 宽高比下拉菜单（只显示一个，优先工作流） */}
               <div className="flex gap-2">
-              {chatState.currentDetailWorkflow && (
+              {chatState.currentDetailWorkflow && chatState.task_type === "use_workflow" && (
                 <AspectRatioDropdown
                   options={workflowAspectRatios}
                   selected={chatState.selectedWorkflowAspectRatio}
                   onSelect={setWorkflowAspectRatioAction}
                 />
               )}
-              {chatState.currentDetailModel && !chatState.currentDetailWorkflow && (
+              {chatState.currentDetailModel && chatState.task_type === "generation" && (
                 <AspectRatioDropdown
                   options={aspectRatios}
                   selected={chatState.selectedAspectRatio}

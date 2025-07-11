@@ -3,7 +3,8 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
 import Toast from './components/Toast'
-import ConfirmDialog from './components/ConfirmDialog'
+import ConfirmDialog from './components/ui/ConfirmDialog'
+import { dialogAtom } from './store/dialogStore';
 import { useAtom, useSetAtom } from 'jotai'
 import { modalAtom, closeImageDetails } from './store/modalStore'
 import ImageDetailsModal from './components/ImageDetailsModal'
@@ -19,6 +20,7 @@ import ModelDetail from './pages/ModelDetail'
 
 function App() {
   const [modalState] = useAtom(modalAtom)
+  const [dialog] = useAtom(dialogAtom);
   const handleCloseImageDetails = useSetAtom(closeImageDetails)
 
   // 初始化用户状态
@@ -44,7 +46,19 @@ function App() {
         </Routes>
 
         <Toast />
-        <ConfirmDialog />
+        {/* 新 ConfirmDialog 通用弹窗 */}
+        {dialog.open && (
+          <ConfirmDialog
+            open={dialog.open}
+            title={dialog.title || 'Tips'}
+            message={dialog.message}
+            onConfirm={dialog.onConfirm}
+            onCancel={dialog.onCancel}
+            confirmText={dialog.confirmText}
+            cancelText={dialog.cancelText}
+          />
+        )}
+
 
         {/* 保持现有的模态框 */}
         {modalState.isImageDetailsOpen && modalState.selectedImage && (

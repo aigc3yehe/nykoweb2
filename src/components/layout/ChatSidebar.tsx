@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { chatSidebarAtom, closeChatSidebar } from '../../store/chatSidebarStore'
-import { chatAtom, clearChat, sendHeartbeat, fetchConnectionStatus } from '../../store/assistantStore'
+import { chatAtom, clearChat, sendHeartbeat, fetchConnectionStatus, sendMessage } from '../../store/assistantStore'
+import { showDialogAtom } from '../../store/dialogStore';
 import ChatInput from '../chat/ChatInput'
 import ClearIcon from '../../assets/web2/clear.svg'
 import CloseChatIcon from '../../assets/web2/close_chat.svg'
@@ -12,6 +13,8 @@ const ChatSidebar: React.FC = () => {
   const [chatState, setChatState] = useAtom(chatAtom)
   const closeSidebar = useSetAtom(closeChatSidebar)
   const clearChatMessages = useSetAtom(clearChat)
+  const showDialog = useSetAtom(showDialogAtom);
+  const sendMessageAction = useSetAtom(sendMessage)
 
   // 添加useRef和useEffect for scrolling - 必须在条件渲染之前
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -64,7 +67,7 @@ const ChatSidebar: React.FC = () => {
           }));
         }
       }
-    }, 3000);
+    }, 20000);
 
     return () => {
       clearInterval(heartbeatInterval);
@@ -108,11 +111,34 @@ const ChatSidebar: React.FC = () => {
   const connectionStatus = getConnectionStatus()
 
   const handleClear = () => {
-    clearChatMessages()
+    showDialog({
+      open: true,
+      title: 'Clear Chat History?',
+      message: 'Are you sure you want to clear the chat history?',
+      onConfirm: () => {
+        clearChatMessages()
+        showDialog({ open: false, title: '', message: '', onConfirm: () => {}, onCancel: () => {} })
+      },
+      onCancel: () => {
+        showDialog({ open: false, title: '', message: '', onConfirm: () => {}, onCancel: () => {} })
+      },
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
   }
 
   const handleClose = () => {
     closeSidebar()
+  }
+
+  const handleAnimate = () => {
+    sendMessageAction('I want to animate this image.');
+    console.log('handleAnimate')
+  }
+
+  const handlePartiallyModify = () => {
+    sendMessageAction('I want to partially modify this image.');
+    console.log('handlePartiallyModify')
   }
 
   return (
@@ -160,6 +186,8 @@ const ChatSidebar: React.FC = () => {
                imageWidth={message.imageInfo?.width || 256}
                imageHeight={message.imageInfo?.height || 256}
                isLastMessage={index === chatState.messages.length - 1}
+               onAnimate={handleAnimate}
+               onPartiallyModify={handlePartiallyModify}
              />
            ))}
            <div ref={messagesEndRef} />

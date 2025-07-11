@@ -2,6 +2,7 @@ import { atom } from 'jotai';
 
 export interface DialogState {
   open: boolean;
+  title?: string;
   message: string;
   onConfirm: () => void;
   onCancel: () => void;
@@ -13,6 +14,7 @@ export interface DialogState {
 
 const initialDialogState: DialogState = {
   open: false,
+  title: '',
   message: '',
   onConfirm: () => {},
   onCancel: () => {},

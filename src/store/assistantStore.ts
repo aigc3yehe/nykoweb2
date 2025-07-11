@@ -167,6 +167,8 @@ export interface ChatState {
     isVideo?: boolean;
   };
   agentToken: string | null;
+  // 新增：延迟发送消息功能
+  pendingMessage: string | null; // 等待发送的消息
 }
 
 // 添加最新生成图片的接口 - 新增aicc_type字段
@@ -318,6 +320,7 @@ const initialState: ChatState = {
   // 新增：初始化轮询重试状态
   pollingRetryState: {},
   agentToken: null,
+  pendingMessage: null,
 };
 
 // 创建原子状态
@@ -332,6 +335,17 @@ export const setCurrentDetailModelAtom = atom(
       ...chatState,
       currentDetailModel: model
     });
+    
+    // 如果有待发送的消息且模型已设置，自动发送消息
+    if (model && chatState.pendingMessage) {
+      const messageToSend = chatState.pendingMessage;
+      // 清除待发送消息
+      set(chatAtom, prev => ({ ...prev, pendingMessage: null }));
+      // 发送消息
+      setTimeout(() => {
+        set(sendMessage, messageToSend);
+      }, 100); // 小延迟确保状态更新完成
+    }
   }
 );
 
@@ -344,6 +358,17 @@ export const setCurrentDetailWorkflowAtom = atom(
       ...chatState,
       currentDetailWorkflow: workflow
     });
+    
+    // 如果有待发送的消息且工作流已设置，自动发送消息
+    if (workflow && chatState.pendingMessage) {
+      const messageToSend = chatState.pendingMessage;
+      // 清除待发送消息
+      set(chatAtom, prev => ({ ...prev, pendingMessage: null }));
+      // 发送消息
+      setTimeout(() => {
+        set(sendMessage, messageToSend);
+      }, 100); // 小延迟确保状态更新完成
+    }
   }
 );
 
@@ -471,7 +496,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
             provider: actualIsWorkflow ? (isVideo ? 'kling' : 'gpt-4o') : 'sd',
             model: actualIsWorkflow ? (isVideo ? 'kling-video-v1' : 'gpt-image-1-vip') : 'sd',
             source: actualIsWorkflow ? 'workflow' : 'model',
-            source_id: actualIsWorkflow ? chatState.workflowRunningState.workflow?.id : chatState.currentModel?.id,
+            source_id: actualIsWorkflow ? chatState.workflowRunningState.workflow?.id : chatState.currentDetailModel?.model_id,
             reference: generatedUrls[0], // 使用第一个生成的内容
             aicc_width: actualIsWorkflow ? chatState.workflowRunningState.width : chatState.selectedAspectRatio?.width,
             aicc_height: actualIsWorkflow ? chatState.workflowRunningState.height : chatState.selectedAspectRatio?.height,
@@ -644,19 +669,22 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
             severity: 'success'
           });
 
-          // 如果有当前模型，重新加载与模型相关的图片
+          // 如果有当前模型，静默刷新内容（获取第1页新内容并与现有内容合并）
           if (chatState.currentDetailModel?.model_id) {
             set(fetchContentsAtom, {
-              reset: true,
+              reset: false,
+              silentRefresh: true, // 静默刷新：获取第1页并去重合并
               typeFilter: 'all',
               source: 'model',
               source_id: chatState.currentDetailModel.model_id,
               disableCache: true
             });
           }
+          // 如果是工作流，静默刷新内容（获取第1页新内容并与现有内容合并）
           if (actualIsWorkflow && chatState.currentDetailWorkflow?.workflow_id) {
             set(fetchContentsAtom, {
-              reset: true,
+              reset: false,
+              silentRefresh: true, // 静默刷新：获取第1页并去重合并
               typeFilter: 'all',
               source: 'workflow',
               source_id: chatState.currentDetailWorkflow.workflow_id,
@@ -709,7 +737,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
             workflowImageFile: null // 清除文件对象
           });
         } else {
-                      console.log('Not found message, create new failed message');
+          console.log('Not found message, create new failed message');
           // 如果找不到对应消息，添加失败消息
           set(chatAtom, {
             ...chatState,
@@ -3113,5 +3141,17 @@ export const setAgentTokenAtom = atom(
   null,
   (_, set, token: string | null) => {
     set(chatAtom, prev => ({...prev, agentToken: token}));
+  }
+);
+
+// 新增：设置延迟发送消息的 atom
+export const setPendingMessageAtom = atom(
+  null,
+  (get, set, message: string | null) => {
+    const chatState = get(chatAtom);
+    set(chatAtom, {
+      ...chatState,
+      pendingMessage: message
+    });
   }
 );

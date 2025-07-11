@@ -51,7 +51,6 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
 
   // 获取用户头像
   const getAvatarUrl = () => {
-    console.log('content.user', content.user)
     if (content.user?.avatar) {
       return content.user.avatar
     }

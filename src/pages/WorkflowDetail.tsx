@@ -4,7 +4,7 @@ import { useAtom, useSetAtom } from 'jotai'
 import { getScaledImageUrl } from '../utils'
 import { workflowDetailAtom, fetchWorkflowDetailAtom, clearWorkflowDetailAtom } from '../store/workflowDetailStore'
 import { userStateAtom } from '../store/loginStore'
-import { setCurrentDetailWorkflowAtom } from '../store/assistantStore'
+import { setCurrentDetailWorkflowAtom, sendMessage } from '../store/assistantStore'
 import CloseIcon from '../assets/web2/close.svg'
 import avatarSvg from '../assets/Avatar.svg'
 import usageSvg from '../assets/web2/usage.svg'
@@ -13,6 +13,7 @@ import shareSvg from '../assets/web2/share.svg'
 import editSvg from '../assets/web2/edit.svg'
 import { formatNumber } from '../utils'
 import WorkflowGallery from '../components/workflow/WorkflowGallery.tsx'
+import { openChatSidebar } from '../store/chatSidebarStore'
 
 const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -22,7 +23,8 @@ const WorkflowDetail: React.FC = () => {
   const [, clearWorkflowDetail] = useAtom(clearWorkflowDetailAtom)
   const [userState] = useAtom(userStateAtom)
   const setCurrentDetailWorkflow = useSetAtom(setCurrentDetailWorkflowAtom)
-
+  const sendMessageAction = useSetAtom(sendMessage)
+  const openSidebar = useSetAtom(openChatSidebar)
   const workflowId = id ? parseInt(id, 10) : null
   const userDid = userState.user?.tokens?.did || userState.userDetails?.did || ''
   const userRole = userState.userDetails?.role || ''
@@ -70,6 +72,13 @@ const WorkflowDetail: React.FC = () => {
   // 处理关闭/返回
   const handleClose = () => {
     navigate(-1) // 返回上一页
+  }
+
+  const handleUseNow = () => {
+    // 1. 打开右侧聊天窗口
+    // 2. 发送消息：I want to use this workflow.
+    openSidebar()
+    sendMessageAction('I want to use this workflow.')
   }
 
   // 如果没有有效的工作流ID，显示错误
@@ -271,7 +280,9 @@ const WorkflowDetail: React.FC = () => {
                   {/* 下半部分：按钮组 */}
                   <div className="flex items-center justify-between h-[3rem] w-full"> {/* 48px=3rem */}
                     {/* Use Now按钮 */}
-                    <button className="w-[16.6875rem] h-[3rem] flex items-center justify-center gap-1.5 rounded-[6px] bg-design-main-blue dark:bg-design-dark-main-blue hover:bg-blue-800 transition-colors"> {/* 267px=16.6875rem */}
+                    <button 
+                      onClick={handleUseNow}
+                    className="w-[16.6875rem] h-[3rem] flex items-center justify-center gap-1.5 rounded-[6px] bg-design-main-blue dark:bg-design-dark-main-blue hover:bg-blue-800 transition-colors"> {/* 267px=16.6875rem */}
                       <img src={use2Svg} alt="Use Now" className="w-6 h-6" />
                       <span className="font-lexend font-normal text-lg leading-[100%] text-white">Use Now</span>
                     </button>

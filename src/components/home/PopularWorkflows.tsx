@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { featuredWorkflowsAtom, fetchFeaturedWorkflowsAtom } from '../../store/featuredStore'
 import SectionHeader from './SectionHeader'
+import { sendMessage, setPendingMessageAtom } from '../../store/assistantStore'
 import WorkflowCard from './WorkflowCard'
+import { openChatSidebar } from '../../store/chatSidebarStore'
 
 const PopularWorkflows: React.FC = () => {
   const navigate = useNavigate()
@@ -12,7 +14,9 @@ const PopularWorkflows: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
-
+  const openSidebar = useSetAtom(openChatSidebar)
+  const sendMessageAction = useSetAtom(sendMessage)
+  const setPendingMessage = useSetAtom(setPendingMessageAtom)
   // 获取数据 - 移除用户认证检查，因为接口是公开的
   useEffect(() => {
     if (workflowsState.items.length === 0 && !workflowsState.isLoading) {
@@ -62,7 +66,12 @@ const PopularWorkflows: React.FC = () => {
   // 处理使用工作流
   const handleUseWorkflow = (workflowId: number) => {
     console.log('Use workflow:', workflowId)
-    // TODO: 实现使用工作流的逻辑
+    // 1. 设置延迟发送的消息
+    setPendingMessage('I want to use this workflow.')
+    // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
+    navigate(`/workflow/${workflowId}`)
+    // 3. 打开右侧聊天窗口
+    openSidebar()
   }
 
   // 加载状态

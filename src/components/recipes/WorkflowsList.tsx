@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useRef } from 'react'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import WorkflowCard from '../home/WorkflowCard'
 import {
   recipesWorkflowsAtom,
@@ -9,6 +9,8 @@ import {
 import { useNavigate } from 'react-router-dom'
 import type { WorkflowDto } from '../../services/api'
 import type { FeaturedItem } from '../../store/featuredStore'
+import { openChatSidebar } from '../../store/chatSidebarStore'
+import { setPendingMessageAtom } from '../../store/assistantStore'
 
 // 数据转换器：将 WorkflowDto 转换为 FeaturedItem 格式
 const convertWorkflowToFeaturedItem = (workflow: WorkflowDto): FeaturedItem => ({
@@ -33,6 +35,8 @@ const WorkflowsList: React.FC = () => {
   const [, loadMore] = useAtom(loadMoreRecipesWorkflowsAtom)
   const isLoadingRef = useRef(false)
   const navigate = useNavigate()
+  const openSidebar = useSetAtom(openChatSidebar)
+  const setPendingMessage = useSetAtom(setPendingMessageAtom)
   // 初始加载数据
   useEffect(() => {
     if (workflowState.items.length === 0 && !workflowState.isLoading) {
@@ -62,7 +66,12 @@ const WorkflowsList: React.FC = () => {
   // 处理使用工作流
   const handleUseWorkflow = (workflowId: number) => {
     console.log('Use workflow:', workflowId)
-    // TODO: 实现使用工作流的逻辑
+    // 1. 设置延迟发送的消息
+    setPendingMessage('I want to use this workflow.')
+    // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
+    navigate(`/workflow/${workflowId}`)
+    // 3. 打开右侧聊天窗口
+    openSidebar()
   }
 
   // 监听滚动，当接近底部时加载更多
