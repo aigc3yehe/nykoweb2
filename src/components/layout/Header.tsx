@@ -7,6 +7,8 @@ import { useI18n } from '../../hooks/useI18n'
 import ThemeToggle from '../ui/ThemeToggle'
 import LanguageSelector from '../ui/LanguageSelector'
 import MenuIcon from '../../assets/web2/menu.svg'
+import CuIcon from '../../assets/web2/cu.svg'
+import { formatNumber } from '../../utils/format'
 
 const Header: React.FC = React.memo(() => {
   const { t } = useI18n()
@@ -50,6 +52,16 @@ const Header: React.FC = React.memo(() => {
           <div className="hidden sm:block">
             <LanguageSelector />
           </div>
+
+          {/* 分数显示 - 登录后显示 */}
+          {userState.isAuthenticated && userState.user && (
+            <div className="h-8 rounded-[6px] gap-1.5 px-3 border border-[#E5E7EB] flex items-center mr-1">
+              <img src={CuIcon} alt="CU" className="w-[0.875rem] h-4" />
+              <span className="font-lexend font-normal text-sm leading-[100%] text-[#1F2937] ml-1">
+                {formatNumber(userState.userDetails?.credit || 0)}
+              </span>
+            </div>
+          )}
 
           {/* Upgrade 按钮 - 移动端只显示图标 */}
           <button className="flex items-center justify-center gap-1.5 h-8 px-3 sm:px-4 py-2 bg-[#00FF48] hover:bg-[#00E041] dark:bg-[#00CC39] dark:hover:bg-[#00B833] rounded-md transition-colors">
