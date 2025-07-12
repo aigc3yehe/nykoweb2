@@ -335,7 +335,7 @@ export const setCurrentDetailModelAtom = atom(
       ...chatState,
       currentDetailModel: model
     });
-    
+
     // 如果有待发送的消息且模型已设置，自动发送消息
     if (model && chatState.pendingMessage) {
       const messageToSend = chatState.pendingMessage;
@@ -358,7 +358,7 @@ export const setCurrentDetailWorkflowAtom = atom(
       ...chatState,
       currentDetailWorkflow: workflow
     });
-    
+
     // 如果有待发送的消息且工作流已设置，自动发送消息
     if (workflow && chatState.pendingMessage) {
       const messageToSend = chatState.pendingMessage;
@@ -384,7 +384,7 @@ export type CheckStatsResponse = {
 };
 
 // 查询图片生成状态的API - 使用新的接口
-export async function checkImageGenerationStatus(request_id: string, agentToken: string | null = null): Promise<FetchGenerateContentStateResponse> {
+export async function checkImageGenerationStatus(request_id: string): Promise<FetchGenerateContentStateResponse> {
   try {
 
     const request: FetchGenerateContentStateRequest = {
@@ -449,10 +449,9 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
 
       // 在调用前获取chatState
       const chatState = get(chatAtom);
-      const agentToken = chatState.agentToken;
 
       // 查询任务状态
-      const statusResponse = await checkImageGenerationStatus(taskId, agentToken);
+      const statusResponse = await checkImageGenerationStatus(taskId);
       console.log('task status:', statusResponse);
 
       // 如果没有状态信息，继续轮询
@@ -673,7 +672,6 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
           if (chatState.currentDetailModel?.model_id) {
             set(fetchContentsAtom, {
               reset: false,
-              silentRefresh: true, // 静默刷新：获取第1页并去重合并
               typeFilter: 'all',
               source: 'model',
               source_id: chatState.currentDetailModel.model_id,
@@ -684,7 +682,6 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
           if (actualIsWorkflow && chatState.currentDetailWorkflow?.workflow_id) {
             set(fetchContentsAtom, {
               reset: false,
-              silentRefresh: true, // 静默刷新：获取第1页并去重合并
               typeFilter: 'all',
               source: 'workflow',
               source_id: chatState.currentDetailWorkflow.workflow_id,

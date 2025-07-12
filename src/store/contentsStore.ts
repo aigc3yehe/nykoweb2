@@ -1,6 +1,7 @@
 import { atom } from 'jotai'
 import { contentsApi } from '../services/api/contents'
 import { userStateAtom } from './loginStore'
+import type {ContentQueryParams} from "../services/api";
 
 // 内容项类型
 export interface ContentItem {
@@ -55,8 +56,8 @@ export interface ContentsState {
   error: string | null
   hasMore: boolean
   lastFetch: number | null
-  source: 'model' | 'workflow'
-  source_id: number
+  source?: 'model' | 'workflow'
+  source_id?: number
 }
 
 // 初始状态
@@ -72,8 +73,8 @@ const initialState: ContentsState = {
   error: null,
   hasMore: true,
   lastFetch: null,
-  source: 'model',
-  source_id: 0
+  source: undefined,
+  source_id: undefined
 }
 
 // 内容列表状态atom
@@ -87,236 +88,221 @@ const CACHE_DURATION = 2 * 60 * 1000
  * @param options.disableCache 是否禁用缓存，true 时每次都强制请求接口
  */
 export const fetchContentsAtom = atom(
-  null,
-  async (get, set, options: {
-    reset?: boolean
-    typeFilter?: ContentTypeFilter
-    order?: ContentOrderType
-    desc?: 'desc' | 'asc'
-    source?: 'model' | 'workflow'
-    source_id?: number
-    disableCache?: boolean
-    silentRefresh?: boolean // 新增：静默刷新标志
-  } = {}) => {
-    //const userState = get(userStateAtom)
-    const currentState = get(contentsAtom)
+    null,
+    async (get, set, options: {
+      reset?: boolean
+      typeFilter?: ContentTypeFilter
+      order?: ContentOrderType
+      desc?: 'desc' | 'asc'
+      source?: 'model' | 'workflow'
+      source_id?: number
+      disableCache?: boolean
+    } = {}) => {
+      //const userState = get(userStateAtom)
+      const currentState = get(contentsAtom)
 
-    const {
-      reset = false,
-      typeFilter = currentState.typeFilter,
-      order = currentState.order,
-      desc = currentState.desc,
-      source,
-      source_id,
-      disableCache = false,
-      silentRefresh = false
-    } = options
+      const {
+        reset = false,
+        typeFilter = currentState.typeFilter,
+        order = currentState.order,
+        desc = currentState.desc,
+        source,
+        source_id,
+        disableCache = false
+      } = options
 
-    // 如果是新的筛选条件，重置状态
-    const shouldReset = reset ||
-                       typeFilter !== currentState.typeFilter ||
-                       order !== currentState.order ||
-                       desc !== currentState.desc ||
-                       source !== currentState.source ||
-                       source_id !== currentState.source_id
+      // 如果是新的筛选条件，重置状态
+      const shouldReset = reset ||
+          typeFilter !== currentState.typeFilter ||
+          order !== currentState.order ||
+          desc !== currentState.desc
 
-    // 检查缓存（仅在重置且参数相同时使用缓存）
-    const now = Date.now()
-    const cacheValid = shouldReset && // 只有重置时才考虑缓存
-                      !disableCache &&
-                      currentState.lastFetch &&
-                      (now - currentState.lastFetch) < CACHE_DURATION &&
-                      typeFilter === currentState.typeFilter &&
-                      order === currentState.order &&
-                      desc === currentState.desc &&
-                      source === currentState.source &&
-                      source_id === currentState.source_id
+      // 检查缓存（仅在重置且参数相同时使用缓存）
+      const now = Date.now()
+      // 取当前state的source/source_id（如果有）
+      const currentSource = currentState.source
+      const currentSourceId = currentState.source_id
+      const cacheValid = shouldReset && // 只有重置时才考虑缓存
+          !disableCache &&
+          currentState.lastFetch &&
+          (now - currentState.lastFetch) < CACHE_DURATION &&
+          typeFilter === currentState.typeFilter &&
+          order === currentState.order &&
+          desc === currentState.desc &&
+          source === currentSource &&
+          source_id === currentSourceId
 
-    console.log('Contents: Cache check -', {
-      shouldReset,
-      cacheValid,
-      hasExistingData: currentState.items.length > 0,
-      willUseCache: cacheValid && currentState.items.length > 0
-    })
+      console.log('Contents: Cache check -', {
+        shouldReset,
+        cacheValid,
+        hasExistingData: currentState.items.length > 0,
+        willUseCache: cacheValid && currentState.items.length > 0
+      })
 
-    if (cacheValid && currentState.items.length > 0) {
-      console.log('Contents: Using cached data')
-      return currentState.items
-    }
-
-    // 静默刷新时获取第1页，其他情况按原逻辑
-    const newPage = shouldReset ? 1 : (silentRefresh ? 1 : currentState.page)
-    const existingItems = shouldReset ? [] : currentState.items
-
-    console.log('Contents: Fetching page', newPage, shouldReset ? '(reset)' : (silentRefresh ? '(silent refresh)' : '(load more)'), { typeFilter })
-
-    // 设置加载状态
-    set(contentsAtom, {
-      ...currentState,
-      isLoading: true,
-      error: null,
-      page: newPage,
-      typeFilter,
-      order,
-      desc,
-      source: source || currentState.source,
-      source_id: source_id || currentState.source_id, 
-      items: existingItems
-    })
-
-    try {
-      // 构建查询参数
-      const params: any = {
-        page: newPage,
-        page_size: currentState.pageSize,
-        order,
-        desc,
-        view: true, // 只获取公开可见的内容
-        state: 'success' // 只获取生成成功的内容
+      if (cacheValid && currentState.items.length > 0) {
+        console.log('Contents: Using cached data')
+        return currentState.items
       }
 
-      // 添加类型过滤（除了 'all'）
-      if (typeFilter !== 'all') {
-        params.type = typeFilter
-      }
-      // 新增：透传 source/source_id
-      if (source) params.source = source
-      if (source_id) params.source_id = source_id
+      const newPage = shouldReset ? 1 : currentState.page
+      const existingItems = shouldReset ? [] : currentState.items
 
-      // 调用API
-      const response = await contentsApi.getContentsList(params)
+      console.log('Contents: Fetching page', newPage, shouldReset ? '(reset)' : '(load more)', { typeFilter })
 
-      const newItems = response.contents || []
-      const totalCount = response.total_count || 0
-      
-      // 合并内容时进行去重
-      let allItems: ContentItem[]
-      if (shouldReset) {
-        allItems = newItems
-      } else if (silentRefresh) {
-        // 静默刷新：将新内容（第1页）与现有内容合并并去重
-        const existingIds = new Set(existingItems.map(item => item.content_id))
-        const uniqueNewItems = newItems.filter(item => !existingIds.has(item.content_id))
-        console.log('Contents: Silent refresh - existing:', existingItems.length, 'new:', newItems.length, 'unique new:', uniqueNewItems.length)
-        allItems = [...uniqueNewItems, ...existingItems]
-      } else {
-        // 普通加载更多：直接追加到后面
-        allItems = [...existingItems, ...newItems]
-      }
-      
-      const hasMore = allItems.length < totalCount
-
-      console.log('Contents: Loaded', newItems.length, 'items, total:', allItems.length, '/', totalCount, 'hasMore:', hasMore)
-
+      // 设置加载状态
       set(contentsAtom, {
         ...currentState,
-        items: allItems,
-        totalCount,
-        page: silentRefresh ? currentState.page : (newPage + 1), // 静默刷新时保持当前页码，其他情况准备下一页
+        isLoading: true,
+        error: null,
+        page: newPage,
         typeFilter,
         order,
         desc,
-        source: source || currentState.source,
-        source_id: source_id || currentState.source_id,
-        isLoading: false,
-        error: null,
-        hasMore: hasMore,
-        lastFetch: shouldReset ? now : currentState.lastFetch // 只有重置时才更新缓存时间
+        items: existingItems,
+        source,
+        source_id
       })
 
-      return allItems
-    } catch (error) {
-      console.error('Contents: Failed to fetch contents:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch contents'
+      try {
+        // 构建查询参数
+        const params: ContentQueryParams = {
+          page: newPage,
+          page_size: currentState.pageSize,
+          order,
+          desc,
+          view: true, // 只获取公开可见的内容
+          state: 'success' // 只获取生成成功的内容
+        }
 
-      set(contentsAtom, {
-        ...currentState,
-        isLoading: false,
-        error: errorMessage
-      })
+        // 添加类型过滤（除了 'all'）
+        if (typeFilter !== 'all') {
+          params.type = typeFilter
+        }
+        // 新增：透传 source/source_id
+        if (source) params.source = source
+        if (source_id) params.source_id = source_id
 
-      throw error
+        // 调用API
+        const response = await contentsApi.getContentsList(params)
+
+        const newItems = response.contents || []
+        const totalCount = response.total_count || 0
+        const allItems = shouldReset ? newItems : [...existingItems, ...newItems]
+        const hasMore = allItems.length < totalCount
+
+        console.log('Contents: Loaded', newItems.length, 'items, total:', allItems.length, '/', totalCount, 'hasMore:', hasMore)
+
+        set(contentsAtom, {
+          ...currentState,
+          items: allItems,
+          totalCount,
+          page: newPage + 1, // 准备下一页
+          typeFilter,
+          order,
+          desc,
+          isLoading: false,
+          error: null,
+          hasMore: hasMore,
+          lastFetch: shouldReset ? now : currentState.lastFetch, // 只有重置时才更新缓存时间
+          source,
+          source_id
+        })
+
+        return allItems
+      } catch (error) {
+        console.error('Contents: Failed to fetch contents:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch contents'
+
+        set(contentsAtom, {
+          ...currentState,
+          isLoading: false,
+          error: errorMessage,
+          source,
+          source_id
+        })
+
+        throw error
+      }
     }
-  }
 )
 
 // 按类型筛选内容
 export const filterContentsByTypeAtom = atom(
-  null,
-  async (_, set, typeFilter: ContentTypeFilter) => {
-    return set(fetchContentsAtom, { reset: true, typeFilter })
-  }
+    null,
+    async (_, set, typeFilter: ContentTypeFilter) => {
+      return set(fetchContentsAtom, { reset: true, typeFilter })
+    }
 )
 
 // 加载更多内容
 export const loadMoreContentsAtom = atom(
-  null,
-  async (get, set) => {
-    const currentState = get(contentsAtom)
+    null,
+    async (get, set) => {
+      const currentState = get(contentsAtom)
 
-    if (currentState.hasMore && !currentState.isLoading) {
-      console.log('Contents: Loading more...', 'page', currentState.page)
-      return set(fetchContentsAtom, { reset: false })
-    } else {
-      console.log('Contents: Cannot load more -',
-        currentState.hasMore ? 'already loading' : 'no more items')
+      if (currentState.hasMore && !currentState.isLoading) {
+        console.log('Contents: Loading more...', 'page', currentState.page)
+        return set(fetchContentsAtom, { reset: false })
+      } else {
+        console.log('Contents: Cannot load more -',
+            currentState.hasMore ? 'already loading' : 'no more items')
+      }
     }
-  }
 )
 
 // 刷新内容列表
 export const refreshContentsAtom = atom(
-  null,
-  async (_, set) => {
-    return set(fetchContentsAtom, { reset: true })
-  }
+    null,
+    async (_, set) => {
+      return set(fetchContentsAtom, { reset: true })
+    }
 )
 
 // 重置内容列表
 export const resetContentsAtom = atom(
-  null,
-  (_, set) => {
-    set(contentsAtom, initialState)
-  }
+    null,
+    (_, set) => {
+      set(contentsAtom, initialState)
+    }
 )
 
 // 点赞内容
 export const likeContentAtom = atom(
-  null,
-  async (get, set, contentId: number, isLiked: boolean) => {
-    const userState = get(userStateAtom)
+    null,
+    async (get, set, contentId: number, isLiked: boolean) => {
+      const userState = get(userStateAtom)
 
-    if (!userState.isAuthenticated) {
-      throw new Error('User not authenticated')
-    }
+      if (!userState.isAuthenticated) {
+        throw new Error('User not authenticated')
+      }
 
-    try {
-      await contentsApi.likeContent(contentId, { is_liked: isLiked })
+      try {
+        await contentsApi.likeContent(contentId, { is_liked: isLiked })
 
-      // 更新本地状态
-      const currentState = get(contentsAtom)
-      const updatedItems = currentState.items.map(item => {
-        if (item.content_id === contentId) {
-          return {
-            ...item,
-            is_liked: isLiked,
-            like_count: isLiked
-              ? (item.like_count || 0) + 1
-              : Math.max((item.like_count || 0) - 1, 0)
+        // 更新本地状态
+        const currentState = get(contentsAtom)
+        const updatedItems = currentState.items.map(item => {
+          if (item.content_id === contentId) {
+            return {
+              ...item,
+              is_liked: isLiked,
+              like_count: isLiked
+                  ? (item.like_count || 0) + 1
+                  : Math.max((item.like_count || 0) - 1, 0)
+            }
           }
-        }
-        return item
-      })
+          return item
+        })
 
-      set(contentsAtom, {
-        ...currentState,
-        items: updatedItems
-      })
+        set(contentsAtom, {
+          ...currentState,
+          items: updatedItems
+        })
 
-      return true
-    } catch (error) {
-      console.error('Failed to like content:', error)
-      throw error
+        return true
+      } catch (error) {
+        console.error('Failed to like content:', error)
+        throw error
+      }
     }
-  }
 )

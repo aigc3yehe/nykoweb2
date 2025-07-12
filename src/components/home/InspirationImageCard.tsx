@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
 import { ContentItem, likeContentAtom } from '../../store/contentsStore'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { userStateAtom } from '../../store/loginStore'
+import { openContentDetailAtom } from '../../store/contentDetailStore'
 import { getScaledImageUrl } from '../../utils'
 import VideoIcon from '../../assets/web2/video.svg'
 import RecreateIcon from '../../assets/web2/use.svg'
@@ -31,6 +32,7 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
   const [localContent, setLocalContent] = useState(content)
   const [, likeContent] = useAtom(likeContentAtom)
   const [userState] = useAtom(userStateAtom)
+  const openContentDetail = useSetAtom(openContentDetailAtom)
 
   // 判断是否为视频
   const isVideo = content.type === 'video'
@@ -98,10 +100,20 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
 
   const widthPx = (imageWidthRem ? imageWidthRem : 17.1875) * 16
 
+  // 处理卡片点击
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick()
+    } else {
+      // 默认行为：打开内容详情弹窗
+      openContentDetail(content.content_id)
+    }
+  }
+
   return (
     <div 
       className="w-full md:w-[17.1875rem] cursor-pointer" // 移动端全宽，PC端275px
-      onClick={onClick}
+      onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

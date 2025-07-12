@@ -78,7 +78,7 @@ const groupContentsByTime = (contents: ContentItem[]): TimeGroup[] => {
   contents.forEach(item => {
     if (!item.created_at) return // 跳过没有创建时间的项目
     const createdDate = new Date(item.created_at)
-    const dateKey = createdDate.toDateString()
+    const dateKey = createdDate.toDateString() // 统一用 toDateString()
     if (!groups[dateKey]) {
       groups[dateKey] = []
     }
@@ -97,30 +97,45 @@ const groupContentsByTime = (contents: ContentItem[]): TimeGroup[] => {
     .sort((a, b) => new Date(b.groupKey).getTime() - new Date(a.groupKey).getTime())
 }
 
-// 合并分组数据
+// 合并分组数据，保证老 group/contents 的引用不变
 const mergeGroupedContents = (existingGroups: TimeGroup[], newGroups: TimeGroup[]): TimeGroup[] => {
-  const groupsMap = new Map<string, ContentItem[]>()
-  
-  // 添加现有内容
+  // 先把现有 group 放到 map
+  const groupMap = new Map<string, TimeGroup>()
   existingGroups.forEach(group => {
-    groupsMap.set(group.groupKey, [...group.contents])
+    groupMap.set(group.groupKey, group)
   })
-  
-  // 添加新内容，避免重复
-  newGroups.forEach(group => {
-    const existing = groupsMap.get(group.groupKey) || []
-    const existingIds = new Set(existing.map(item => item.content_id))
-    const newItems = group.contents.filter(item => !existingIds.has(item.content_id))
-    groupsMap.set(group.groupKey, [...existing, ...newItems])
+
+  // 合并新 group
+  newGroups.forEach(newGroup => {
+    const oldGroup = groupMap.get(newGroup.groupKey)
+    if (!oldGroup) {
+      // 新 group，直接加
+      groupMap.set(newGroup.groupKey, newGroup)
+    } else {
+      // 已有 group，合并 contents
+      const oldIds = new Set(oldGroup.contents.map(c => c.content_id))
+      const mergedContents = [...oldGroup.contents]
+      newGroup.contents.forEach(item => {
+        if (!oldIds.has(item.content_id)) {
+          mergedContents.push(item)
+        }
+      })
+      // 只新建 contents 数组，group 对象复用
+      groupMap.set(newGroup.groupKey, {
+        ...oldGroup,
+        contents: mergedContents.sort((a, b) => {
+          const aTime = a.created_at ? new Date(a.created_at).getTime() : 0
+          const bTime = b.created_at ? new Date(b.created_at).getTime() : 0
+          return bTime - aTime
+        })
+      })
+    }
   })
-  
-  // 重新分组并排序
-  const allContents: ContentItem[] = []
-  groupsMap.forEach(contents => {
-    allContents.push(...contents)
-  })
-  
-  return groupContentsByTime(allContents)
+
+  // 排序
+  return Array.from(groupMap.values()).sort(
+    (a, b) => new Date(b.groupKey).getTime() - new Date(a.groupKey).getTime()
+  )
 }
 
 export const fetchProfileContentsAtom = atom(

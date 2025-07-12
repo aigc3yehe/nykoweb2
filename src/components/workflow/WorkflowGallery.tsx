@@ -127,7 +127,6 @@ const WorkflowGallery: React.FC<WorkflowGalleryProps> = ({ workflowId }) => {
                     key={content.content_id}
                     content={content}
                     imageHeightRem={content.calculatedHeight}
-                    onClick={() => console.log('Content clicked:', content.content_id)}
                     onRecreateClick={() => console.log('Recreate clicked:', content.content_id)}
                   />
                 ))}

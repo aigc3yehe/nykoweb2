@@ -146,10 +146,12 @@ export interface Content {
   source_info?: {
     id?: number
     name?: string
+    cover?: string
   }
   source?: string
   url?: string
   text?: string
+  prompt?: string
   task_id?: string
   created_at?: string
   height?: number

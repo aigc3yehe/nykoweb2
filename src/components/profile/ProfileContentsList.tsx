@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import {
   profileContentsAtom,
   fetchProfileContentsAtom,
@@ -11,6 +11,7 @@ import type { ContentItem } from '../../services/api/types'
 import RecreateIcon from '../../assets/web2/recreate.svg'
 import LikeIcon from '../../assets/web2/like.svg'
 import { getScaledImageUrl } from '../../utils'
+import { openContentDetailAtom } from '../../store/contentDetailStore'
 
 interface ProfileContentsListProps {
   type: ContentType // 'image' | 'video'
@@ -111,16 +112,19 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type }) => {
     const [isHovered, setIsHovered] = useState(false)
     const [imageLoaded, setImageLoaded] = useState(false)
     const [imageError, setImageError] = useState(false)
+    const openContentDetail = useSetAtom(openContentDetailAtom)
+
+    // 处理卡片点击
+    const handleCardClick = () => {
+      openContentDetail(item.content_id)
+    }
 
     return (
       <div 
         className="relative cursor-pointer group w-[10.3125rem] h-[10.3125rem] md:w-[13.6875rem] md:h-[13.6875rem]" // 219px = 13.6875rem
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={() => {
-          // TODO: 点击查看详情
-          console.log('View content:', item.content_id)
-        }}
+        onClick={handleCardClick}
       >
         {/* 主内容区域 */}
         <div 
@@ -214,8 +218,8 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type }) => {
 
           {/* 内容网格 - PC端5列，移动端2列，间隔10px */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 justify-items-center lg:justify-items-start"> {/* gap-2.5 = 10px */}
-            {group.contents.map((item, index) => (
-              <ContentCard key={item.content_id || index} item={item} />
+            {group.contents.map((item) => (
+              <ContentCard key={`${item.content_id}`} item={item} />
             ))}
           </div>
         </div>

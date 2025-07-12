@@ -8,6 +8,7 @@ import { dialogAtom } from './store/dialogStore';
 import { useAtom, useSetAtom } from 'jotai'
 import { modalAtom, closeImageDetails } from './store/modalStore'
 import ImageDetailsModal from './components/ImageDetailsModal'
+import ContentDetailModal from './components/modals/ContentDetailModal'
 import { Analytics } from '@vercel/analytics/react'
 import { initUserStateAtom } from './store/loginStore'
 import LoginModal from './components/modals/LoginModal'
@@ -74,6 +75,9 @@ function App() {
 
         {/* 登录模态框 */}
         <LoginModal />
+
+        {/* 内容详情弹窗 */}
+        <ContentDetailModal />
 
         {/* 其他模态框保持不变... */}
 
