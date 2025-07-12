@@ -137,16 +137,25 @@ const ContentDetailModal: React.FC = () => {
       onClick={handleOverlayClick}
     >
       {/* 外层包裹内容和关闭按钮 */}
-      <div className="relative flex items-start">
+      <div className="relative flex md:items-start items-center md:flex-row flex-col w-full h-full md:w-auto md:h-auto">
+        {/* 移动端关闭按钮 */}
+        <div className="block md:hidden w-full h-[60px] relative">
+          <button
+            onClick={handleClose}
+            className="absolute right-5 top-1/2 -translate-y-1/2 size-8 rounded-[0.625rem] flex items-center justify-center hover:bg-gray-600 transition-colors z-20"
+          >
+            <img src={closeIcon} alt="Close" className="size-8" />
+          </button>
+        </div>
         {/* 内容区域 */}
         <div 
-          className="bg-white rounded-lg border-l border-design-bg-light-gray flex w-[62.25rem] h-[41.125rem] relative"
+          className="bg-white rounded-lg border-l border-design-bg-light-gray flex md:flex-row flex-col md:w-[62.25rem] md:h-[41.125rem] w-full h-[calc(100vh-60px)] relative overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* 左侧内容区域 */}
-          <div className="flex flex-col p-8 gap-6 w-[37.125rem]">
+          {/* 左侧/上方内容区域 */}
+          <div className="flex flex-col md:p-8 md:gap-6 md:w-[37.125rem] w-full p-5 gap-3">
             {/* 媒体展示区域 */}
-            <div className="w-[33.125rem] h-[33.125rem] bg-design-bg-light-gray rounded-lg overflow-hidden">
+            <div className="md:w-[33.125rem] md:h-[33.125rem] w-full aspect-square bg-design-bg-light-gray rounded-lg overflow-hidden flex items-center justify-center">
               {isLoading ? (
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -161,13 +170,13 @@ const ContentDetailModal: React.FC = () => {
             </div>
 
             {/* 操作按钮区域 */}
-            <div className="flex items-center justify-between w-[33.125rem] h-10">
+            <div className="flex items-center justify-between md:w-[33.125rem] w-full h-10">
               {/* 左侧操作按钮 */}
               <div className="flex items-center gap-2 h-10">
                 {/* Recreate 按钮 */}
                 <button
                   onClick={handleRecreateClick}
-                  className="flex items-center gap-1 h-10 px-5 bg-design-main-blue text-white rounded-md hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-1 h-10 px-3 md:px-5 bg-design-main-blue text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
                   <img src={recreateWhiteIcon} alt="Recreate" className="w-4 h-4" />
                   <span className="font-lexend font-normal text-sm leading-none">Recreate</span>
@@ -176,19 +185,19 @@ const ContentDetailModal: React.FC = () => {
                 {/* Modify 按钮 */}
                 <button
                   onClick={handleModifyClick}
-                  className="flex items-center gap-1 h-10 px-5 bg-design-bg-light-blue text-design-main-text rounded-md hover:bg-blue-100 transition-colors"
+                  className="flex items-center justify-center size-10 md:w-auto md:gap-1 md:h-10 md:px-5 bg-design-bg-light-blue text-design-main-text rounded-md hover:bg-blue-100 transition-colors"
                 >
                   <img src={modifyIcon} alt="Modify" className="w-4 h-4" />
-                  <span className="font-lexend font-normal text-sm leading-none">Modify</span>
+                  <span className="md:block hidden font-lexend font-normal text-sm leading-none">Modify</span>
                 </button>
 
                 {/* Animate 按钮 */}
                 <button
                   onClick={handleAnimateClick}
-                  className="flex items-center gap-1 h-10 px-5 bg-design-bg-light-blue text-design-main-text rounded-md hover:bg-blue-100 transition-colors"
+                  className="flex items-center justify-center size-10 md:w-auto md:gap-1 md:h-10 md:px-5 bg-design-bg-light-blue text-design-main-text rounded-md hover:bg-blue-100 transition-colors"
                 >
                   <img src={animateIcon} alt="Animate" className="w-4 h-4" />
-                  <span className="font-lexend font-normal text-sm leading-none">Animate</span>
+                  <span className="md:block hidden font-lexend font-normal text-sm leading-none">Animate</span>
                 </button>
               </div>
 
@@ -197,7 +206,7 @@ const ContentDetailModal: React.FC = () => {
                 {/* 点赞按钮 */}
                 <button
                   onClick={handleLikeClick}
-                  className="flex items-center gap-1 h-10 px-5 bg-design-bg-light-blue rounded-md hover:bg-blue-100 transition-colors"
+                  className="flex items-center gap-1 h-10 px-3 md:px-5 bg-design-bg-light-blue rounded-md hover:bg-blue-100 transition-colors"
                 >
                   <img 
                     src={content?.is_liked ? likedIcon : nolikeIcon} 
@@ -212,7 +221,7 @@ const ContentDetailModal: React.FC = () => {
                 {/* 更多按钮 */}
                 <button
                   onClick={handleMoreClick}
-                  className="flex items-center gap-1 h-10 px-5 bg-design-bg-light-blue rounded-md hover:bg-blue-100 transition-colors"
+                  className="flex items-center justify-center size-10 md:w-auto md:gap-1 md:h-10 md:px-5 bg-design-bg-light-blue rounded-md hover:bg-blue-100 transition-colors"
                 >
                   <img src={moreIcon} alt="More" className="w-4 h-4" />
                 </button>
@@ -221,7 +230,7 @@ const ContentDetailModal: React.FC = () => {
           </div>
 
           {/* 右侧信息区域 */}
-          <div className="flex flex-col gap-6 pt-8 pr-16 pb-8 w-[25.125rem] relative">
+          <div className="flex flex-col gap-3 px-5 pb-5 md:gap-6 md:pt-8 md:pr-16 md:pb-8 md:w-[25.125rem] w-full relative">
             {/* 作者信息和创建时间 */}
             <div className="flex items-center justify-between h-8">
               {/* 作者信息 */}
@@ -331,10 +340,10 @@ const ContentDetailModal: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* 关闭按钮 - 内容区域外侧右上角，ml-4 mt-2，32x32 */}
+        {/* PC端关闭按钮 - 内容区域外侧右上角，ml-4 mt-2，32x32 */}
         <button
           onClick={handleClose}
-          className="size-8 rounded-[0.625rem] ml-4 mt-0 flex items-center justify-center hover:bg-gray-600 transition-colors z-20"
+          className="ml-4 mt-2 size-8 flex items-center justify-center hover:bg-gray-600 rounded-[0.625rem] transition-colors z-20 hidden md:flex"
         >
           <img src={closeIcon} alt="Close" className="size-8" />
         </button>
