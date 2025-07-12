@@ -86,6 +86,9 @@ const ModelDetail: React.FC = () => {
     return 'Training'
   }
 
+  // 是否ready
+  const isReady = getTrainStatusText() === 'Ready'
+
   // 获取训练状态颜色
   const getTrainStatusClasses = () => {
     if (!state.model?.model_tran || state.model.model_tran.length === 0) {
@@ -272,34 +275,6 @@ const ModelDetail: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Model Info 区块 - 模型特有信息 */}
-                    <div className="flex flex-col gap-3 h-[7.375rem] rounded-xl bg-design-bg-light-gray dark:bg-design-dark-bg-light-gray p-4">
-                      <span className="font-lexend font-medium text-sm leading-[100%] text-design-main-text dark:text-design-dark-main-text">Model Info</span>
-                      <div className="flex gap-3.5">
-                        {/* Version */}
-                        <div className="flex flex-col gap-1.5 w-[12.1875rem] h-[3.75rem] rounded-xl bg-white dark:bg-gray-800 p-3.5">
-                          <span className="font-lexend font-normal text-xs leading-[100%] text-design-dark-gray dark:text-design-dark-dark-gray">Version</span>
-                          <span className="font-lexend font-medium text-sm leading-4 text-design-main-text dark:text-design-dark-main-text">
-                            {state.model.model_tran && state.model.model_tran.length > 0 ? `v${state.model.model_tran.length}` : 'v1'}
-                          </span>
-                        </div>
-                        {/* Base Model */}
-                        <div className="flex flex-col gap-1.5 w-[12.1875rem] h-[3.75rem] rounded-xl bg-white dark:bg-gray-800 p-3.5">
-                          <span className="font-lexend font-normal text-xs leading-[100%] text-design-dark-gray dark:text-design-dark-dark-gray">Base Model</span>
-                          <span className="font-lexend font-medium text-sm leading-4 text-design-main-text dark:text-design-dark-main-text truncate">
-                            {state.model.model_tran && state.model.model_tran.length > 0 ? state.model.model_tran[state.model.model_tran.length - 1].base_model || 'SDXL' : 'SDXL'}
-                          </span>
-                        </div>
-                        {/* CU Cost */}
-                        <div className="flex flex-col gap-1.5 w-[12.1875rem] h-[3.75rem] rounded-xl bg-white dark:bg-gray-800 p-3.5">
-                          <span className="font-lexend font-normal text-xs leading-[100%] text-design-dark-gray dark:text-design-dark-dark-gray">CU Cost</span>
-                          <span className="font-lexend font-medium text-sm leading-4 text-design-main-text dark:text-design-dark-main-text">
-                            {state.model.cu || '--'} CU
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
                     {/* 描述 */}
                     {state.model.description && (
                       <div className="font-lexend font-normal text-sm leading-[140%] text-design-dark-gray dark:text-design-dark-dark-gray line-clamp-4">
@@ -311,11 +286,13 @@ const ModelDetail: React.FC = () => {
                   {/* 下半部分：按钮组 */}
                   <div className="flex items-center justify-between h-[3rem] w-full">
                     {/* Use Now按钮 */}
-                    <button 
-                      onClick={handleUseNow}
-                      className="w-[16.6875rem] h-[3rem] flex items-center justify-center gap-1.5 rounded-[6px] bg-design-main-blue dark:bg-design-dark-main-blue hover:bg-blue-800 transition-colors">
+                    <button
+                      onClick={isReady ? handleUseNow : undefined}
+                      disabled={!isReady}
+                      className={`w-[16.6875rem] h-[3rem] flex items-center justify-center gap-1.5 rounded-[6px] ${isReady ? 'bg-design-main-blue dark:bg-design-dark-main-blue hover:bg-blue-800' : 'bg-[#B9BECC] cursor-not-allowed'} transition-colors`}
+                    >
                       <img src={use2Svg} alt="Use Now" className="w-6 h-6" />
-                      <span className="font-lexend font-normal text-lg leading-[100%] text-white">Use Now</span>
+                      <span className="font-lexend font-normal text-lg leading-[100%] text-white">{isReady ? 'Use Now' : 'Training'}</span>
                     </button>
                     {/* 右侧按钮组 */}
                     <div className="flex items-center gap-3.5 h-[3rem]">
@@ -337,9 +314,130 @@ const ModelDetail: React.FC = () => {
 
             {/* 移动端布局 - 待后续实现 */}
             <div className="block md:hidden">
-              {/* 移动端布局将在后续实现 */}
-              <div className="text-center py-8">
-                <p className="text-gray-500">Mobile layout coming soon...</p>
+              {/* 标题栏+关闭按钮 */}
+              <div className="flex justify-between items-center h-12">
+                <h1 className="font-lexend font-bold text-xl md:text-[2rem] leading-[100%] text-design-main-text dark:text-design-dark-main-text">
+                  {state.model.name}
+                </h1>
+                <button
+                  onClick={handleClose}
+                  className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                >
+                  <img src={CloseIcon} alt="Close" className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="flex flex-col gap-3 w-full pb-[64px]"> {/* 增加底部padding */}
+                {/* 标签组 */}
+                {state.model.tags && state.model.tags.length > 0 && (
+                  <div className="flex items-center gap-3 h-6">
+                    {state.model.tags.map((tag, index) => (
+                      <div
+                        key={index}
+                        className="h-6 px-3 py-1 bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue rounded-full flex items-center"
+                      >
+                        <span className="font-lexend font-normal text-xs leading-4 text-center text-design-dark-gray dark:text-design-dark-dark-gray">
+                          {tag}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* 封面 */}
+                <div
+                  className="w-full aspect-square flex-shrink-0 bg-gray-200 dark:bg-gray-700 rounded-xl overflow-hidden"
+                >
+                  {state.model.cover ? (
+                    <img
+                      src={getScaledImageUrl(state.model.cover, 450)}
+                      alt={state.model.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/path/to/fallback-image.png'
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-gray-400">No cover image</span>
+                    </div>
+                  )}
+                </div>
+                {/* 用户信息 */}
+                <div className="flex items-center gap-1.5 h-6">
+                  <img
+                    src={getAvatarUrl()}
+                    alt={getDisplayName()}
+                    className="w-6 h-6 rounded-full flex-shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = avatarSvg
+                    }}
+                  />
+                  <span className="font-lexend font-normal text-sm leading-4 text-design-dark-gray dark:text-design-dark-dark-gray">
+                    {getDisplayName()}
+                  </span>
+                </div>
+                {/* 顶部信息条 */}
+                <div className="flex flex-col border-t border-[#E5E7EB] dark:border-design-dark-line-light-gray py-3 gap-3">
+                  {/* 左侧：Type/Status/Usage */}
+                  <div className="flex items-center gap-5 h-6">
+                    {/* Type */}
+                    <div className="flex items-center gap-1.5 h-6">
+                      <span className="font-lexend font-normal text-sm leading-[100%] text-design-medium-gray dark:text-design-dark-medium-gray align-middle">Type</span>
+                      <span className="h-6 rounded-[6px] px-3 py-1 bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue font-lexend font-normal text-xs leading-4 text-center align-middle text-design-main-blue dark:text-design-dark-main-blue">Model</span>
+                    </div>
+                    {/* Status */}
+                    <div className="flex items-center gap-1.5 h-6">
+                      <span className="font-lexend font-normal text-sm leading-[100%] text-design-medium-gray dark:text-design-dark-medium-gray align-middle">Status</span>
+                      <span className={`h-6 rounded-[6px] px-3 py-1 font-lexend font-normal text-xs leading-4 text-center align-middle ${getTrainStatusClasses()}`}>
+                        {getTrainStatusText()}
+                      </span>
+                    </div>
+                    {/* Usage */}
+                    <div className="flex items-center gap-1.5 h-6 rounded-[10px]">
+                      <img src={usageSvg} alt="usage" className="w-4 h-4" />
+                      <span className="font-lexend font-normal text-sm leading-4 text-center align-middle text-design-main-text dark:text-design-dark-main-text">
+                        {typeof state.model.usage === 'number' ? formatNumber(state.model.usage) : '--'}
+                      </span>
+                    </div>
+                  </div>
+                  {/* 右侧：更新时间 */}
+                  <div className="flex items-center gap-1.5 w-[8.375rem] h-6 rounded-[10px]">
+                    <span className="font-lexend font-normal text-sm leading-[100%] text-design-medium-gray dark:text-design-dark-medium-gray align-middle">Updated</span>
+                    <span className="font-lexend font-normal text-sm leading-4 text-center align-middle text-design-main-text dark:text-design-dark-main-text">
+                      {state.model.created_at ? new Date(state.model.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.') : '--'}
+                    </span>
+                  </div>
+                </div>
+                {/* 描述 */}
+                {state.model.description && (
+                  <div className="font-lexend font-normal text-sm leading-[140%] text-design-dark-gray dark:text-design-dark-dark-gray line-clamp-4">
+                    {state.model.description}
+                  </div>
+                )}
+              </div>
+              {/* 移动端底部按钮组 */}
+              <div className="fixed bottom-0 left-0 w-full bg-white px-5 py-3 z-20 border-t flex items-center justify-between md:hidden">
+                {/* Use Now按钮 */}
+                <button
+                  onClick={isReady ? handleUseNow : undefined}
+                  disabled={!isReady}
+                  className={`w-[10rem] h-[3rem] flex items-center justify-center gap-1.5 rounded-[6px] ${isReady ? 'bg-design-main-blue dark:bg-design-dark-main-blue hover:bg-blue-800' : 'bg-[#B9BECC] cursor-not-allowed'} transition-colors`}
+                >
+                  <img src={use2Svg} alt="Use Now" className="w-6 h-6" />
+                  <span className="font-lexend font-normal text-base leading-[100%] text-white">{isReady ? 'Use Now' : 'Training'}</span>
+                </button>
+                {/* 右侧按钮组 */}
+                <div className="flex items-center gap-3.5 h-[3rem]">
+                  {/* 分享按钮 */}
+                  <button className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">
+                    <img src={shareSvg} alt="Share" className="w-6 h-6" />
+                  </button>
+                  {/* 编辑按钮（仅作者或admin可见） */}
+                  {(state.model.user?.did === userDid || userRole === 'admin') && (
+                    <button className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">
+                      <img src={editSvg} alt="Edit" className="w-6 h-6" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

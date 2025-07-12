@@ -326,7 +326,7 @@ const WorkflowDetail: React.FC = () => {
                   <img src={CloseIcon} alt="Close" className="w-6 h-6" />
                 </button>
               </div>
-              <div className="flex flex-col gap-3 w-full">
+              <div className="flex flex-col gap-3 w-full pb-[64px]"> {/* 增加底部padding */}
                 {/* 标签组 */}
                 {state.workflow.tags && state.workflow.tags.length > 0 && (
                     <div className="flex items-center gap-3 h-6">
@@ -442,7 +442,29 @@ const WorkflowDetail: React.FC = () => {
                     </div>
                 )}
               </div>
-
+              {/* 移动端底部按钮组 */}
+              <div className="fixed bottom-0 left-0 w-full bg-white px-5 py-3 z-20 border-t flex items-center justify-between md:hidden">
+                {/* Use Now按钮 */}
+                <button 
+                  onClick={handleUseNow}
+                  className="w-[10rem] h-[3rem] flex items-center justify-center gap-1.5 rounded-[6px] bg-design-main-blue dark:bg-design-dark-main-blue hover:bg-blue-800 transition-colors">
+                  <img src={use2Svg} alt="Use Now" className="w-6 h-6" />
+                  <span className="font-lexend font-normal text-base leading-[100%] text-white">Use Now</span>
+                </button>
+                {/* 右侧按钮组 */}
+                <div className="flex items-center gap-3.5 h-[3rem]">
+                  {/* 分享按钮 */}
+                  <button className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">
+                    <img src={shareSvg} alt="Share" className="w-6 h-6" />
+                  </button>
+                  {/* 编辑按钮（仅作者或admin可见） */}
+                  {(state.workflow.user?.did === userDid || userRole === 'admin') && (
+                    <button className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">
+                      <img src={editSvg} alt="Edit" className="w-6 h-6" />
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         )}
