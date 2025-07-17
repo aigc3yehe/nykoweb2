@@ -73,7 +73,7 @@ const Sidebar: React.FC = () => {
       label: t('nav.workflowBuilder'), // en: Workflow Builder / zh: 工作流构建器
       icon: <img src={WorkflowBuilderIcon} alt="Workflow Builder" className="w-8 h-8" />,
       selectedIcon: <img src={WorkflowBuilderIcon} alt="Workflow Builder" className="w-8 h-8" />,
-      path: '/workflow-builder'
+      path: '/workflow/builder'
     },
     {
       key: 'style-trainer',

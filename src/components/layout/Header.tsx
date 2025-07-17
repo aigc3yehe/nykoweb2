@@ -1,6 +1,6 @@
 import React from 'react'
 import { useAtom, useSetAtom } from 'jotai'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { toggleSidebarAtom } from '../../store/sidebarStore'
 import { showLoginModalAtom, userStateAtom } from '../../store/loginStore'
 import { useI18n } from '../../hooks/useI18n'
@@ -8,11 +8,13 @@ import ThemeToggle from '../ui/ThemeToggle'
 import LanguageSelector from '../ui/LanguageSelector'
 import MenuIcon from '../../assets/web2/menu.svg'
 import CuIcon from '../../assets/web2/cu.svg'
+import BackIcon from '../../assets/web2/back.svg'
 import { formatNumber } from '../../utils/format'
 
 const Header: React.FC = React.memo(() => {
   const { t } = useI18n()
   const navigate = useNavigate()
+  const location = useLocation()
   const toggleSidebar = useSetAtom(toggleSidebarAtom)
   const showLoginModal = useSetAtom(showLoginModalAtom)
   const [userState] = useAtom(userStateAtom)
@@ -22,25 +24,41 @@ const Header: React.FC = React.memo(() => {
       <div className="flex h-full items-center justify-between px-4 md:px-6">
         {/* Logo和菜单按钮 */}
         <div className="flex items-center gap-3">
-          {/* 移动端菜单按钮 */}
-          <button
-            onClick={() => toggleSidebar()}
-            className="flex md:hidden items-center justify-center w-8 h-8 rounded-md hover:bg-accent transition-colors"
-            aria-label="Toggle menu"
-          >
-            <img
-              src={MenuIcon}
-              alt="Menu"
-              className="w-5 h-5 dark:invert"
-            />
-          </button>
-
-          {/* Logo */}
-          <img
-            src="/src/assets/web2/Logo.png"
-            alt="Logo"
-            className="w-[4.4375rem] h-8"
-          />
+          {location.pathname === '/workflow/builder' ? (
+            <>
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center justify-center w-6 h-6 md:w-6 md:h-6 mr-2"
+                aria-label="Back"
+              >
+                <img src={BackIcon} alt="Back" className="w-6 h-6" />
+              </button>
+              <span className="font-lexend font-normal text-[20px] leading-[100%] text-[#1F2937] select-none">
+                Workflow Builder
+              </span>
+            </>
+          ) : (
+            <>
+              {/* 移动端菜单按钮 */}
+              <button
+                onClick={() => toggleSidebar()}
+                className="flex md:hidden items-center justify-center w-8 h-8 rounded-md hover:bg-accent transition-colors"
+                aria-label="Toggle menu"
+              >
+                <img
+                  src={MenuIcon}
+                  alt="Menu"
+                  className="w-5 h-5 dark:invert"
+                />
+              </button>
+              {/* Logo */}
+              <img
+                src="/src/assets/web2/Logo.png"
+                alt="Logo"
+                className="w-[4.4375rem] h-8"
+              />
+            </>
+          )}
         </div>
 
         {/* 右侧按钮组 */}

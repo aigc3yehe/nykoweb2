@@ -104,7 +104,7 @@ const mergeGroupedContents = (existingGroups: TimeGroup[], newGroups: TimeGroup[
   existingGroups.forEach(group => {
     groupMap.set(group.groupKey, group)
   })
-
+  
   // 合并新 group
   newGroups.forEach(newGroup => {
     const oldGroup = groupMap.get(newGroup.groupKey)

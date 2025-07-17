@@ -7,6 +7,8 @@ import Sidebar from './Sidebar'
 import MainContent from './MainContent'
 import ChatButton from '../ui/ChatButton'
 import ChatSidebar from './ChatSidebar'
+import PublishSidebar from './PublishSidebar'
+import { useLocation } from 'react-router-dom'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -15,6 +17,7 @@ interface AppLayoutProps {
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const initTheme = useSetAtom(initThemeAtom)
   const initLanguage = useSetAtom(initLanguageAtom)
+  const location = useLocation()
   
   useEffect(() => {
     initTheme()
@@ -27,8 +30,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <Header />
       
       <div className="flex flex-1 overflow-hidden relative">
-        {/* 左侧边栏 */}
-        <Sidebar />
+        {/* 左侧边栏：WorkflowBuilder页面时显示新PublishSidebar，否则显示原Sidebar */}
+        {location.pathname === '/workflow/builder' ? (
+          <PublishSidebar />
+        ) : (
+          <Sidebar />
+        )}
         
         {/* 主内容区 */}
         <MainContent>
