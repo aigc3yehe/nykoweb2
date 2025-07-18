@@ -80,7 +80,7 @@ const Sidebar: React.FC = () => {
       label: t('nav.styleTrainer'), // en: Style Trainer / zh: 风格训练器
       icon: <img src={StyleTrainerIcon} alt="Style Trainer" className="w-8 h-8" />,
       selectedIcon: <img src={StyleTrainerIcon} alt="Style Trainer" className="w-8 h-8" />,
-      path: '/style-trainer'
+      path: '/style/trainer'
     }
   ]
 

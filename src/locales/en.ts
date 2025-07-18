@@ -23,5 +23,13 @@ export const en = {
     retry: 'Retry',
     cancel: 'Cancel',
     confirm: 'Confirm'
+  },
+  workflow: {
+    namePlaceholder: 'name',
+    descriptionPlaceholder: 'Describe your Workflow',
+    coverImage: 'Cover Image',
+    publish: 'Publish',
+    publishing: 'Publishing...',
+    uploadCover: 'Click to upload Or drag here'
   }
 }

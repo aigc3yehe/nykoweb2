@@ -19,6 +19,7 @@ import Profile from './pages/Profile'
 import WorkflowDetail from './pages/WorkflowDetail'
 import ModelDetail from './pages/ModelDetail'
 import WorkflowBuilder from './pages/WorkflowBuilder'
+import StyleTrainer from './pages/StyleTrainer'
 
 function App() {
   const [modalState] = useAtom(modalAtom)
@@ -43,6 +44,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/workflow/:id" element={<WorkflowDetail />} />
           <Route path="/workflow/builder" element={<WorkflowBuilder />} />
+          <Route path="/style/trainer" element={<StyleTrainer />} />
           <Route path="/model/:id" element={<ModelDetail />} />
           <Route path="/api/auth/callback/google" element={<AuthCallback />} />
           {/* 其他路由... */}

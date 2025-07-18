@@ -161,7 +161,7 @@ export class DashboardApiService {
     return apiService.get<AiProviderDto[]>(
       API_ENDPOINTS.DASHBOARD.AI_PROVIDERS,
       undefined,
-      { requiresAuth: true }
+      { requiresAuth: false }
     )
   }
 }

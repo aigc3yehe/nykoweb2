@@ -268,6 +268,7 @@ export interface CreateWorkflowRequest {
   provider: AIProvider
   model: AIModel
   reference_images?: string[]
+  cover?: string
 }
 
 export interface CreateWorkflowResponse {
@@ -547,4 +548,4 @@ export interface PointsQueryParams extends PaginationParams {
 // 推荐查询参数
 export interface ReferralQueryParams extends PaginationParams {
   season?: number
-} 
+}

@@ -23,5 +23,13 @@ export const zh = {
     retry: '重试',
     cancel: '取消',
     confirm: '确认'
+  },
+  workflow: {
+    namePlaceholder: '名称',
+    descriptionPlaceholder: '描述你的工作流',
+    coverImage: '封面图片',
+    publish: '发布',
+    publishing: '发布中...',
+    uploadCover: '点击上传或拖拽到这里'
   }
 }

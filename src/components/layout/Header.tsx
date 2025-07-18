@@ -24,7 +24,7 @@ const Header: React.FC = React.memo(() => {
       <div className="flex h-full items-center justify-between px-4 md:px-6">
         {/* Logo和菜单按钮 */}
         <div className="flex items-center gap-3">
-          {location.pathname === '/workflow/builder' ? (
+          {location.pathname === '/workflow/builder' || location.pathname === '/style/trainer' ? (
             <>
               <button
                 onClick={() => navigate(-1)}
@@ -33,8 +33,8 @@ const Header: React.FC = React.memo(() => {
               >
                 <img src={BackIcon} alt="Back" className="w-6 h-6" />
               </button>
-              <span className="font-lexend font-normal text-[20px] leading-[100%] text-[#1F2937] select-none">
-                Workflow Builder
+              <span className="font-lexend font-normal text-xl leading-[100%] text-[#1F2937] select-none">
+                {location.pathname === '/workflow/builder' ? "Workflow Builder" : "Style Trainer"}
               </span>
             </>
           ) : (
