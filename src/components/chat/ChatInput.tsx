@@ -19,7 +19,7 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
   const [message, setMessage] = useState('')
-  const [chatState, setChatState] = useAtom(chatAtom)
+  const [chatState] = useAtom(chatAtom)
   const sendMsg = useSetAtom(sendMessage)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const loraWeight = chatState.loraWeight ?? 0.5

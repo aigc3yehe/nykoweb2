@@ -289,6 +289,92 @@ export interface RetryGenerateRequest {
   content_id: number
 }
 
+// 模型点赞相关类型
+export interface ModelLikeRequest {
+  is_liked: boolean
+}
+
+export interface FetchLikeModelResponse {
+  is_liked: boolean
+  updated_at: Date
+}
+
+// 创建模型相关类型
+export interface CreateModelRequest {
+  name: string
+  user: string
+  cover?: string
+  description?: string
+  //tags?: string[]
+  urls: string[]
+  //params?: Record<string, any>
+  //lora_name?: string
+  //base_model?: string
+  //negative_prompt?: string
+}
+
+export interface CreateModelResponse {
+  model_id: number
+  model_train_id?: number
+  train_result?: TrainModelResponse
+}
+
+// 训练模型相关类型
+export interface TrainModelRequest {
+  user: string
+  model_id: number
+  version?: number
+}
+
+export interface TrainModelResponse {
+  model_id?: number
+  model_train_id?: number
+}
+
+export interface FetchTrainStateResponse {
+  status?: string
+  op_type?: string | number
+  lora_url?: string
+}
+
+export interface RefreshTrainModelsStateResponse {
+  all?: number
+  refreshed?: number
+}
+
+// 更新模型相关类型
+export interface UpdateModelRequest {
+  user?: string
+  name?: string
+  description?: string
+  tags?: string[]
+}
+
+export interface UpdateModelCarouselRequest {
+  user?: string
+  carousel: string[]
+}
+
+export interface UpdateModelCoverRequest {
+  user?: string
+  cover: string
+}
+
+export interface UpdateModelFlagRequest {
+  user?: string
+  flag: string
+}
+
+export interface UpdateModelVisibilityRequest {
+  user?: string
+  visibility: boolean
+}
+
+export interface UpdateModelTagsRequest {
+  user?: string
+  tags: string[]
+}
+
 export interface AigcProcesserResponse {
   task_id?: string
   content_id?: number

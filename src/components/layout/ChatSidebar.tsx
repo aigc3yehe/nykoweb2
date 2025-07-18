@@ -2,7 +2,9 @@ import React, { useRef, useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { chatSidebarAtom, closeChatSidebar } from '../../store/chatSidebarStore'
 import { chatAtom, clearChat, sendHeartbeat, fetchConnectionStatus, sendMessage } from '../../store/assistantStore'
+import { userStateAtom, showLoginModalAtom } from '../../store/loginStore'
 import { showDialogAtom } from '../../store/dialogStore';
+import { useI18n } from '../../hooks/useI18n'
 import ChatInput from '../chat/ChatInput'
 import ClearIcon from '../../assets/web2/clear.svg'
 import CloseChatIcon from '../../assets/web2/close_chat.svg'
@@ -11,10 +13,13 @@ import ChatMessage from '../chat/ChatMessage'
 const ChatSidebar: React.FC = () => {
   const [sidebarState] = useAtom(chatSidebarAtom)
   const [chatState, setChatState] = useAtom(chatAtom)
+  const [userState] = useAtom(userStateAtom)
   const closeSidebar = useSetAtom(closeChatSidebar)
   const clearChatMessages = useSetAtom(clearChat)
   const showDialog = useSetAtom(showDialogAtom);
+  const showLoginModal = useSetAtom(showLoginModalAtom)
   const sendMessageAction = useSetAtom(sendMessage)
+  const { t } = useI18n()
 
   // 添加useRef和useEffect for scrolling - 必须在条件渲染之前
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -177,29 +182,53 @@ const ChatSidebar: React.FC = () => {
       </div>
 
       {/* 消息列表区域 */}
-             <div className="flex-1 overflow-y-auto p-6">
-         <div className="flex flex-col min-h-full">
-           {chatState.messages.map((message, index) => (
-             <ChatMessage 
-               key={index} 
-               {...message}
-               imageWidth={message.imageInfo?.width || 256}
-               imageHeight={message.imageInfo?.height || 256}
-               isLastMessage={index === chatState.messages.length - 1}
-               onAnimate={handleAnimate}
-               onPartiallyModify={handlePartiallyModify}
-             />
-           ))}
-           <div ref={messagesEndRef} />
-           {/* 留白div，高度与输入框一致 */}
-          <div style={{ height: inputHeight, minHeight: 0, pointerEvents: 'none' }} aria-hidden />
-         </div>
-       </div>
+      <div className="flex-1 overflow-y-auto p-6">
+        {!userState.isAuthenticated ? (
+          // 未登录状态 - 显示登录提示
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <div className="max-w-sm mx-auto">
+              <h3 className="text-lg font-medium text-design-main-text dark:text-white mb-4">
+                {t('auth.loginRequired')} {/* en: Login Required / zh: 需要登录 */}
+              </h3>
+              <p className="text-design-secondary-text dark:text-gray-300 mb-6">
+                {t('auth.chatLoginMessage')} {/* en: Please log in to start chatting with Mavae / zh: 请登录后开始与 Mavae 聊天 */}
+              </p>
+              <button
+                onClick={() => {
+                  showLoginModal()
+                  closeSidebar() // 关闭侧边栏，让用户专注于登录
+                }}
+                className="px-6 py-3 bg-design-main text-white rounded-lg hover:bg-design-main-hover transition-colors font-medium"
+              >
+                {t('auth.loginNow')} {/* en: Login Now / zh: 立即登录 */}
+              </button>
+            </div>
+          </div>
+        ) : (
+          // 已登录状态 - 显示聊天界面
+          <div className="flex flex-col min-h-full">
+            {chatState.messages.map((message, index) => (
+              <ChatMessage 
+                key={index} 
+                {...message}
+                imageWidth={message.imageInfo?.width || 256}
+                imageHeight={message.imageInfo?.height || 256}
+                isLastMessage={index === chatState.messages.length - 1}
+                onAnimate={handleAnimate}
+                onPartiallyModify={handlePartiallyModify}
+              />
+            ))}
+            <div ref={messagesEndRef} />
+            {/* 留白div，高度与输入框一致 */}
+            <div style={{ height: inputHeight, minHeight: 0, pointerEvents: 'none' }} aria-hidden />
+          </div>
+        )}
+      </div>
 
-      {/* 聊天输入框 - 悬浮在底部 */}
-      <ChatInput onHeightChange={setInputHeight} />
+      {/* 聊天输入框 - 悬浮在底部 - 只在已登录时显示 */}
+      {userState.isAuthenticated && <ChatInput onHeightChange={setInputHeight} />}
     </div>
   )
 }
 
-export default ChatSidebar 
+export default ChatSidebar

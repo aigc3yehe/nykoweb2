@@ -9,7 +9,7 @@ import {
 import type { FetchModelDto } from '../../services/api/types'
 import type { FeaturedItem } from '../../store/featuredStore'
 import { useNavigate } from 'react-router-dom'
-import { openChatSidebar } from '../../store/chatSidebarStore'
+import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { setPendingMessageAtom } from '../../store/assistantStore'
 
 // 数据转换器：将 FetchModelDto 转换为 FeaturedItem 格式
@@ -35,7 +35,7 @@ const StylesList: React.FC = () => {
   const [, loadMore] = useAtom(loadMoreRecipesModelsAtom)
   const isLoadingRef = useRef(false)
   const navigate = useNavigate()
-  const openSidebar = useSetAtom(openChatSidebar)
+  const { openChat } = useChatSidebar()
   const setPendingMessage = useSetAtom(setPendingMessageAtom)
   // 初始加载数据
   useEffect(() => {
@@ -56,8 +56,8 @@ const StylesList: React.FC = () => {
     setPendingMessage('I want to generate an image.')
     // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
     navigate(`/model/${styleId}`)
-    // 3. 打开右侧聊天窗口
-    openSidebar()
+    // 3. 打开右侧聊天窗口（包含登录检查）
+    openChat()
   }
 
   // 处理加载更多
@@ -174,4 +174,4 @@ const StylesList: React.FC = () => {
   )
 }
 
-export default StylesList 
+export default StylesList

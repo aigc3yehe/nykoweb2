@@ -13,7 +13,7 @@ import shareSvg from '../assets/web2/share.svg'
 import editSvg from '../assets/web2/edit.svg'
 import { formatNumber } from '../utils'
 import ModelGallery from '../components/model/ModelGallery'
-import { openChatSidebar } from '../store/chatSidebarStore'
+import { useChatSidebar } from '../hooks/useChatSidebar'
 
 const ModelDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -24,7 +24,7 @@ const ModelDetail: React.FC = () => {
   const [userState] = useAtom(userStateAtom)
   const setCurrentDetailModel = useSetAtom(setCurrentDetailModelAtom)
   const sendMessageAction = useSetAtom(sendMessage)
-  const openSidebar = useSetAtom(openChatSidebar)
+  const { openChat } = useChatSidebar()
   const modelId = id ? parseInt(id, 10) : null
   const userDid = userState.user?.tokens?.did || userState.userDetails?.did || ''
   const userRole = userState.userDetails?.role || ''
@@ -111,9 +111,9 @@ const ModelDetail: React.FC = () => {
   }
 
   const handleUseNow = () => {
-    // 1. 打开右侧聊天窗口
+    // 1. 打开右侧聊天窗口（包含登录检查）
     // 2. 发送消息：I want to generate an image.
-    openSidebar()
+    openChat()
     sendMessageAction('I want to generate an image.')
   }
 
@@ -451,4 +451,4 @@ const ModelDetail: React.FC = () => {
   )
 }
 
-export default ModelDetail 
+export default ModelDetail

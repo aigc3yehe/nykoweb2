@@ -4,8 +4,8 @@ import { featuredModelsAtom, fetchFeaturedModelsAtom } from '../../store/feature
 import SectionHeader from './SectionHeader'
 import WorkflowCard from './WorkflowCard'
 import { useNavigate } from 'react-router-dom'
-import { openChatSidebar } from '../../store/chatSidebarStore'
-import { sendMessage, setPendingMessageAtom } from '../../store/assistantStore'
+import { useChatSidebar } from '../../hooks/useChatSidebar'
+import { setPendingMessageAtom } from '../../store/assistantStore'
 
 const TrendingStyles: React.FC = () => {
   const [modelsState] = useAtom(featuredModelsAtom)
@@ -14,8 +14,7 @@ const TrendingStyles: React.FC = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
   const navigate = useNavigate()
-  const openSidebar = useSetAtom(openChatSidebar)
-  const sendMessageAction = useSetAtom(sendMessage)
+  const { openChat } = useChatSidebar()
   const setPendingMessage = useSetAtom(setPendingMessageAtom)
   // 获取数据 - 移除用户认证检查，因为接口是公开的
   useEffect(() => {
@@ -109,8 +108,8 @@ const TrendingStyles: React.FC = () => {
     setPendingMessage('I want to generate an image.')
     // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
     navigate(`/model/${styleId}`)
-    // 3. 打开右侧聊天窗口
-    openSidebar()
+    // 3. 打开右侧聊天窗口（包含登录检查）
+    openChat()
   }
 
   return (

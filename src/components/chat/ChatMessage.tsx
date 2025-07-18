@@ -1,25 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
-import imageIcon from "../../assets/image.svg";
-import closeIcon from "../../assets/close.svg";
-import uploadingIcon from "../../assets/uploading.svg";
-import okIcon from "../../assets/ok.svg";
+import React from "react";
 import checkAgreeIcon from "../../assets/check_agree.svg";
 import checkedAgreeIcon from "../../assets/checked_agree.svg";
-import selectModelIcon from "../../assets/select_model.svg";
-import uploadIcon from "../../assets/upload.svg";
-import createWorkflowIcon from "../../assets/create_workflow.svg";
-import deleteIcon from "../../assets/delete.svg";
-import deleteDisableIcon from "../../assets/delete_disable.svg";
-import {
-  TRAIN_MODEL_SERVICE_CONFIG,
-} from "../../utils/plan";
 import { WorkflowDetail } from '../../store/workflowStore';
-import xIcon from "../../assets/x.svg";
 import { getScaledImageUrl } from '../../utils/image';
 import modifyIcon from '../../assets/web2/modify.svg';
 import animateIcon from '../../assets/web2/animate.svg';
 import generatingIcon from '../../assets/web2/generating.svg';
-import videoIcon from '../../assets/web2/video.svg';
 
 interface ImageUploadState {
   totalCount: number;
@@ -123,68 +109,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   role,
   content,
   type = "text",
-  imageUploadState = {
-    totalCount: 0,
-    uploadedCount: 0,
-    isUploading: false,
-    finishUpload: false,
-  },
-  uploadedFiles = [],
-  modelParam = { modelName: undefined, description: undefined },
   agree = false,
   images = [],
   videos = [],
-  cu = 0,
   imageWidth = 256,
   imageHeight = 256,
-  request_id = "",
-  workflow_name = "",
-  workflow_description = "",
-  workflow_prompt = "",
-  workflow_input = "",
-  workflow_output = "",
-  token_id,
-  onAddImage,
-  onConfirmImages,
-  onRemoveImage,
   onAgree,
-  onUpdatePrompt,
-  onChangeInput,
-  onChangeOutput,
-  isCreatingWorkflow = false,
-  creationSuccess = false,
-  onCreateWorkflow,
-  workflowImageValue = '',
-  isRunningWorkflow = false,
-  onSelectWorkflowImage,
-  onRunWorkflow,
-  isConfirmedWorkflow = false,
-  onNavigateToWorkflow,
-  workflowReferenceImage,
-  onUploadReferenceImage,
-  onRemoveReferenceImage,
-  workflow_extra_prompt,
-  onUpdateWorkflowExtraPrompt,
-  currentWorkflow,
   isLastMessage = false,
   onPartiallyModify,
   onAnimate,
-  onMintNFT,
-  aiProviders,
-  onSelectProvider,
   onRetryPolling,
 }) => {
-  // 格式化文件名以适应显示
-  const formatFileName = (name: string): string => {
-    if (name.length <= 9) return name;
-
-    const extension = name.split(".").pop() || "";
-    const baseName = name.substring(0, name.length - extension.length - 1);
-
-    return `${baseName.substring(0, 3)}...${baseName.substring(
-      baseName.length - 2
-    )}.${extension}`;
-  };
 
   // 添加图片生成中组件
   const renderGeneratingImageComponent = () => {
@@ -269,10 +204,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
 
-  const renderGenerateResultComponent = (cu: number) => {
+  const renderGenerateResultComponent = () => {
     // 图片宽度固定为 276px (17.25rem)，高度根据宽高比计算
     const fixedWidth = 17.25; // 276px / 16 = 17.25rem
-    let displayWidth = fixedWidth;
+    const displayWidth = fixedWidth;
     let displayHeight = fixedWidth; // 默认正方形
 
     if (images.length > 0 && imageWidth && imageHeight) {
@@ -355,7 +290,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   };
 
   // 视频生成结果组件
-  const renderVideoResultComponent = (cu: number) => {
+  const renderVideoResultComponent = () => {
     return (
       <div className="w-full flex flex-col gap-12 mt-2">
         <div className="flex justify-center items-center w-full">
@@ -439,14 +374,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       {/* 助手消息的组件渲染 - 添加间距 */}
       {role === "assistant" && (
         <div className="flex flex-col gap-3 max-w-sm">
-          {type === "generate_result" && renderGenerateResultComponent(cu)}
-          {type === "workflow_generate_result" && renderGenerateResultComponent(cu)}
+          {type === "generate_result" && renderGenerateResultComponent()}
+          {type === "workflow_generate_result" && renderGenerateResultComponent()}
           {type === "generating_image" && renderGeneratingImageComponent()}
           {type === "modify_image" && renderModifyImageComponent()}
           {type === "tokenization_agreement" && renderTokenizationAgreementComponent()}
           {type === "generating_video" && renderGeneratingVideoComponent()}
           {type === "animating_image" && renderAnimatingImageComponent()}
-          {type === "video_generate_result" && renderVideoResultComponent(cu)}
+          {type === "video_generate_result" && renderVideoResultComponent()}
           {(type === 'generation_timeout' || type === 'tokenization_timeout') && renderTimeoutRetryComponent()}
         </div>
       )}

@@ -199,6 +199,7 @@ export const fetchLikedModelsAtom = atom(
       return
     }
     const { reset = false } = options
+    console.log('reset', reset)
     
     set(profileModelsAtom, {
       ...currentState,

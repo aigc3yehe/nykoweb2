@@ -13,7 +13,7 @@ import shareSvg from '../assets/web2/share.svg'
 import editSvg from '../assets/web2/edit.svg'
 import { formatNumber } from '../utils'
 import WorkflowGallery from '../components/workflow/WorkflowGallery.tsx'
-import { openChatSidebar } from '../store/chatSidebarStore'
+import { useChatSidebar } from '../hooks/useChatSidebar'
 
 const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -24,7 +24,7 @@ const WorkflowDetail: React.FC = () => {
   const [userState] = useAtom(userStateAtom)
   const setCurrentDetailWorkflow = useSetAtom(setCurrentDetailWorkflowAtom)
   const sendMessageAction = useSetAtom(sendMessage)
-  const openSidebar = useSetAtom(openChatSidebar)
+  const { openChat } = useChatSidebar()
   const workflowId = id ? parseInt(id, 10) : null
   const userDid = userState.user?.tokens?.did || userState.userDetails?.did || ''
   const userRole = userState.userDetails?.role || ''
@@ -75,9 +75,9 @@ const WorkflowDetail: React.FC = () => {
   }
 
   const handleUseNow = () => {
-    // 1. 打开右侧聊天窗口
+    // 1. 打开右侧聊天窗口（包含登录检查）
     // 2. 发送消息：I want to use this workflow.
-    openSidebar()
+    openChat()
     sendMessageAction('I want to use this workflow.')
   }
 

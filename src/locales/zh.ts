@@ -24,6 +24,13 @@ export const zh = {
     cancel: '取消',
     confirm: '确认'
   },
+  auth: {
+    loginRequired: '需要登录',
+    pleaseLogin: '请登录后访问此页面',
+    loginNow: '立即登录',
+    verifyingLogin: '正在验证登录状态...',
+    chatLoginMessage: '请登录后开始与 Mavae 聊天'
+  },
   workflow: {
     namePlaceholder: '名称',
     descriptionPlaceholder: '描述你的工作流',

@@ -6,7 +6,21 @@ import type {
   ModelGenerateRequest,
   AigcProcesserResponse,
   RetryGenerateRequest,
-  ModelQueryParams
+  ModelQueryParams,
+  ModelLikeRequest,
+  FetchLikeModelResponse,
+  CreateModelRequest,
+  CreateModelResponse,
+  TrainModelRequest,
+  TrainModelResponse,
+  FetchTrainStateResponse,
+  RefreshTrainModelsStateResponse,
+  UpdateModelRequest,
+  UpdateModelCarouselRequest,
+  UpdateModelCoverRequest,
+  UpdateModelFlagRequest,
+  UpdateModelVisibilityRequest,
+  UpdateModelTagsRequest
 } from './types'
 
 /**
@@ -65,7 +79,182 @@ export class ModelsApiService {
       { requiresAuth: true }
     )
   }
+
+  /**
+   * 点赞或取消点赞模型
+   * @param id 模型ID
+   * @param data 点赞请求数据
+   * @returns 操作结果
+   */
+  async likeModel(id: number, data: ModelLikeRequest): Promise<boolean> {
+    return apiService.post<boolean>(
+      `/models/${id}/like`,
+      data,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 获取模型点赞状态
+   * @param id 模型ID
+   * @param params 查询参数
+   * @returns 点赞状态
+   */
+  async getModelLikeStatus(id: number, params?: { user?: string }): Promise<FetchLikeModelResponse> {
+    return apiService.get<FetchLikeModelResponse>(
+      `/models/${id}/like`,
+      params,
+      { requiresAuth: false }
+    )
+  }
+
+  /**
+   * 创建模型
+   * @param data 创建模型请求数据
+   * @returns 创建结果
+   */
+  async createModel(data: CreateModelRequest): Promise<CreateModelResponse> {
+    return apiService.post<CreateModelResponse>(
+      '/model/create',
+      data,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 手动训练模型
+   * @param data 训练请求数据
+   * @returns 训练结果
+   */
+  async trainModel(data: TrainModelRequest): Promise<TrainModelResponse> {
+    return apiService.post<TrainModelResponse>(
+      '/model/train',
+      data,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 获取训练状态
+   * @param taskId 任务ID
+   * @returns 训练状态
+   */
+  async getTrainState(taskId: string): Promise<FetchTrainStateResponse> {
+    return apiService.get<FetchTrainStateResponse>(
+      '/model/train/state',
+      { task_id: taskId },
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 刷新所有模型训练状态
+   * @returns 刷新结果
+   */
+  async refreshTrainModelsState(): Promise<RefreshTrainModelsStateResponse> {
+    return apiService.get<RefreshTrainModelsStateResponse>(
+      '/model/train/refresh',
+      undefined,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 获取训练队列大小
+   * @returns 队列大小
+   */
+  async getTrainQueueSize(): Promise<number> {
+    return apiService.get<number>(
+      '/model/train/queue-size',
+      undefined,
+      { requiresAuth: false }
+    )
+  }
+
+  /**
+   * 更新模型
+   * @param id 模型ID
+   * @param data 更新数据
+   * @returns 更新结果
+   */
+  async updateModel(id: number, data: UpdateModelRequest): Promise<boolean> {
+    return apiService.put<boolean>(
+      `/models/${id}`,
+      data,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 更新模型轮播图
+   * @param id 模型ID
+   * @param data 轮播图数据
+   * @returns 更新后的轮播图
+   */
+  async updateModelCarousel(id: number, data: UpdateModelCarouselRequest): Promise<string[]> {
+    return apiService.patch<string[]>(
+      `/models/${id}/carousel`,
+      data,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 更新模型封面
+   * @param id 模型ID
+   * @param data 封面数据
+   * @returns 更新结果
+   */
+  async updateModelCover(id: number, data: UpdateModelCoverRequest): Promise<boolean> {
+    return apiService.patch<boolean>(
+      `/models/${id}/cover`,
+      data,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 更新模型标记
+   * @param id 模型ID
+   * @param data 标记数据
+   * @returns 更新结果
+   */
+  async updateModelFlag(id: number, data: UpdateModelFlagRequest): Promise<boolean> {
+    return apiService.patch<boolean>(
+      `/models/${id}/flag`,
+      data,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 切换模型可见性
+   * @param id 模型ID
+   * @param data 可见性数据
+   * @returns 更新结果
+   */
+  async updateModelVisibility(id: number, data: UpdateModelVisibilityRequest): Promise<boolean> {
+    return apiService.patch<boolean>(
+      `/models/${id}/visibility`,
+      data,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 更新模型标签
+   * @param id 模型ID
+   * @param data 标签数据
+   * @returns 更新结果
+   */
+  async updateModelTags(id: number, data: UpdateModelTagsRequest): Promise<boolean> {
+    return apiService.patch<boolean>(
+      `/models/${id}/tags`,
+      data,
+      { requiresAuth: true }
+    )
+  }
 }
 
 // 导出单例实例
-export const modelsApi = new ModelsApiService() 
+export const modelsApi = new ModelsApiService()

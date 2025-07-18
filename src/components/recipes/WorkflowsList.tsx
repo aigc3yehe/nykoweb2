@@ -9,7 +9,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import type { WorkflowDto } from '../../services/api'
 import type { FeaturedItem } from '../../store/featuredStore'
-import { openChatSidebar } from '../../store/chatSidebarStore'
+import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { setPendingMessageAtom } from '../../store/assistantStore'
 
 // 数据转换器：将 WorkflowDto 转换为 FeaturedItem 格式
@@ -35,7 +35,7 @@ const WorkflowsList: React.FC = () => {
   const [, loadMore] = useAtom(loadMoreRecipesWorkflowsAtom)
   const isLoadingRef = useRef(false)
   const navigate = useNavigate()
-  const openSidebar = useSetAtom(openChatSidebar)
+  const { openChat } = useChatSidebar()
   const setPendingMessage = useSetAtom(setPendingMessageAtom)
   // 初始加载数据
   useEffect(() => {
@@ -70,8 +70,8 @@ const WorkflowsList: React.FC = () => {
     setPendingMessage('I want to use this workflow.')
     // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
     navigate(`/workflow/${workflowId}`)
-    // 3. 打开右侧聊天窗口
-    openSidebar()
+    // 3. 打开右侧聊天窗口（包含登录检查）
+    openChat()
   }
 
   // 监听滚动，当接近底部时加载更多

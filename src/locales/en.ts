@@ -24,6 +24,13 @@ export const en = {
     cancel: 'Cancel',
     confirm: 'Confirm'
   },
+  auth: {
+    loginRequired: 'Login Required',
+    pleaseLogin: 'Please log in to access this page',
+    loginNow: 'Login Now',
+    verifyingLogin: 'Verifying login status...',
+    chatLoginMessage: 'Please log in to start chatting with Mavae'
+  },
   workflow: {
     namePlaceholder: 'name',
     descriptionPlaceholder: 'Describe your Workflow',

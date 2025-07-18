@@ -1,92 +1,69 @@
-import React, { useState, useRef } from 'react'
-import InputIcon from '../assets/web2/input.svg'
-import ModelIcon from '../assets/web2/model.svg'
-import OutputIcon from '../assets/web2/output.svg'
-import GptIcon from '../assets/web2/gpt.svg'
-import DownIcon from '../assets/web2/down.svg'
-import CoverSelectIcon from '../assets/web2/cover_select.svg'
-import CloseIcon from '../assets/web2/close.svg'
+import React, { useRef } from 'react'
+import { useAtom } from 'jotai'
 import CheckIcon from '../assets/web2/check.svg'
 import UploadSmallIcon from '../assets/web2/upload_small.svg'
 import RemoveAllIcon from '../assets/web2/remove_all.svg'
 import AddImageIcon from '../assets/web2/add_image.svg'
 import RemoveIcon from '../assets/web2/remove.svg'
-import { useAtom } from 'jotai'
-import { imageUploadAtom, uploadImages, setImageUploadStateAtom } from '../store/imagesStore'
+
+import {
+  styleTrainerFormAtom,
+  imageUploadStateAtom,
+  uploadImagesAtom,
+  removeImageAtom,
+  removeAllImagesAtom,
+  styleTrainerStatusAtom
+} from '../store/styleTrainerStore'
 
 const MAX_IMAGES = 30
 
 const StyleTrainer: React.FC = () => {
-  const [inputType, setInputType] = useState<'Image' | 'Text' | 'Image+Text'>('Image')
-  const [outputType, setOutputType] = useState<'Style' | 'Model' | 'Preset'>('Style')
-  const [prompt, setPrompt] = useState('')
-  const [imageFiles, setImageFiles] = useState<File[]>([])
-  const [uploadedUrls, setUploadedUrls] = useState<string[]>([])
-  const [isUploading, setIsUploading] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [uploadSuccess, setUploadSuccess] = useState(false)
-  const [uploadCount, setUploadCount] = useState(0)
-  const [totalFiles, setTotalFiles] = useState(0)
-  const [imageUploadState] = useAtom(imageUploadAtom)
+  const [formData] = useAtom(styleTrainerFormAtom)
+  const [imageUploadState] = useAtom(imageUploadStateAtom)
+  const [status] = useAtom(styleTrainerStatusAtom)
+  const [, uploadImages] = useAtom(uploadImagesAtom)
+  const [, removeImage] = useAtom(removeImageAtom)
+  const [, removeAllImages] = useAtom(removeAllImagesAtom)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // 上传图片到S3
   const handleRefImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const files = Array.from(e.target.files).slice(0, MAX_IMAGES - uploadedUrls.length)
-      setTotalFiles(files.length)
-      setIsUploading(true)
-      setUploadSuccess(false)
-      setProgress(0)
-      setUploadCount(0)
+      const files = Array.from(e.target.files).slice(0, MAX_IMAGES - formData.referenceImages.length)
       try {
-        // 上传到S3
-        let completed = 0
-        const urls: string[] = []
-        for (const file of files) {
-          const url = await uploadImages(Date.now(), [file], (state) => {
-            setProgress(state.progress || 0)
-          }, () => {}, () => {})
-          urls.push(...url)
-          completed++
-          setUploadCount(completed)
-        }
-        setUploadedUrls(prev => [...prev, ...urls])
-        setUploadSuccess(true)
+        await uploadImages(files)
       } catch (err) {
-        // 错误处理
-      } finally {
-        setIsUploading(false)
+        console.error('Upload failed:', err)
       }
     }
   }
 
   // 移除所有图片
   const handleRemoveAll = () => {
-    setUploadedUrls([])
-    setUploadCount(0)
-    setUploadSuccess(false)
+    removeAllImages()
   }
 
   // 移除单张图片
-  const handleRemoveOne = (idx: number) => {
-    setUploadedUrls(prev => prev.filter((_, i) => i !== idx))
-    if (uploadedUrls.length <= 1) {
-      setUploadSuccess(false)
-    }
+  const handleRemoveOne = (imageUrl: string) => {
+    removeImage(imageUrl)
   }
 
   // 上传中蒙版 - 只遮住主内容区域
-  const renderUploadingMask = () => (
-    <div className="absolute inset-0 z-100 flex items-center justify-center" style={{background: '#FFFFFFB2', backdropFilter: 'blur(20px)'}}>
-      <div className="flex flex-col items-center w-[27.375rem] h-[3.125rem] gap-5">
-        <span className="font-lexend font-normal text-2xl leading-[100%] text-[#1F2937]">Uploading {uploadCount}/{totalFiles}</span>
-        <div className="w-[27.375rem] h-1.5 rounded-[1.875rem] bg-[#E5E7EB] overflow-hidden">
-          <div className="h-full rounded-[1.875rem] bg-[#0900FF] transition-all" style={{width: `${progress}%`}}></div>
+  const renderUploadingMask = () => {
+    const totalToUpload = imageUploadState.totalFilesToUpload
+    const currentIndex = imageUploadState.currentUploadIndex
+    
+    return (
+      <div className="absolute inset-0 z-50 flex items-center justify-center" style={{background: '#FFFFFFB2', backdropFilter: 'blur(20px)'}}>
+        <div className="flex flex-col items-center w-[27.375rem] h-[3.125rem] gap-5">
+          <span className="font-lexend font-normal text-2xl leading-[100%] text-[#1F2937]">Uploading {currentIndex}/{totalToUpload}</span>
+          <div className="w-[27.375rem] h-1.5 rounded-[1.875rem] bg-[#E5E7EB] overflow-hidden">
+            <div className="h-full rounded-[1.875rem] bg-[#0900FF] transition-all" style={{width: `${status.uploadProgress}%`}}></div>
+          </div>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   // 上传成功后的内容 - 在主内容区域显示
   const renderUploadedContent = () => (
@@ -95,7 +72,7 @@ const StyleTrainer: React.FC = () => {
       <div className="flex items-center justify-between h-8">
         <div className="flex items-center gap-2.5 h-6">
           <span className="font-lexend font-semibold text-2xl leading-[100%] text-[#1F2937]">Image Uploaded</span>
-          <span className="font-lexend font-normal text-sm leading-[100%] text-[#4B5563]">({uploadedUrls.length})</span>
+          <span className="font-lexend font-normal text-sm leading-[100%] text-[#4B5563]">({formData.referenceImages.length})</span>
         </div>
         <div className="flex items-center gap-2 h-8">
           <button className="flex items-center gap-1 h-8 rounded-[0.375rem] px-3 bg-white border border-[#E5E7EB] hover:bg-gray-50 transition-colors" onClick={handleRemoveAll}>
@@ -110,11 +87,11 @@ const StyleTrainer: React.FC = () => {
       </div>
       {/* 图片集展示区域 */}
       <div className="flex flex-wrap gap-5">
-        {uploadedUrls.map((url, idx) => (
+        {formData.referenceImages.map((url) => (
           <div key={url} className="relative w-[8.5625rem] h-[8.5625rem] rounded-xl bg-[#E8E8E8] overflow-hidden group">
             <img src={url} alt="uploaded" className="w-full h-full object-cover rounded-xl" />
             <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-start justify-end p-1">
-              <button className="w-6 h-6 flex items-center justify-center" onClick={() => handleRemoveOne(idx)}>
+              <button className="w-6 h-6 flex items-center justify-center" onClick={() => handleRemoveOne(url)}>
                 <img src={RemoveIcon} alt="remove" className="w-6 h-6" />
               </button>
             </div>
@@ -196,18 +173,18 @@ const StyleTrainer: React.FC = () => {
   )
 
   return (
-    <div className="flex h-full w-full p-6 gap-6">
+    <div className="flex h-full w-full">
       {/* 主内容区域 */}
-      <div className={`flex-1 flex relative ${uploadSuccess && uploadedUrls.length > 0 ? '' : 'items-center justify-center'}`}>
-        {/* 上传中蒙版 - 只遮住主内容区域 */}
-        {isUploading && renderUploadingMask()}
-        
+      <div className={`flex-1 flex relative ${formData.referenceImages.length > 0 ? 'p-6' : 'items-center justify-center'}`}>
         {/* 根据状态显示不同内容 */}
-        {uploadSuccess && uploadedUrls.length > 0 ? (
+        {formData.referenceImages.length > 0 ? (
           renderUploadedContent()
         ) : (
           renderEmptyUploadContent()
         )}
+        
+        {/* 上传中蒙版 - 覆盖在内容之上 */}
+        {status.isUploading && renderUploadingMask()}
         
         {/* 隐藏的文件输入 */}
         <input
@@ -219,6 +196,8 @@ const StyleTrainer: React.FC = () => {
           onChange={handleRefImageChange}
         />
       </div>
+      
+
     </div>
   )
 }

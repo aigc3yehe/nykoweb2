@@ -1,11 +1,12 @@
 import React from 'react'
-import { useAtom, useSetAtom } from 'jotai'
-import { chatSidebarAtom, openChatSidebar } from '../../store/chatSidebarStore'
+import { useAtom } from 'jotai'
+import { chatSidebarAtom } from '../../store/chatSidebarStore'
+import { useChatSidebar } from '../../hooks/useChatSidebar'
 import ChatBtnIcon from '../../assets/web2/chatbtn.svg'
 
 const ChatButton: React.FC = () => {
   const [chatSidebar] = useAtom(chatSidebarAtom)
-  const openSidebar = useSetAtom(openChatSidebar)
+  const { openChat } = useChatSidebar()
 
   // 判断是否在workflow或model详情页
   const isDetailPage = (() => {
@@ -23,7 +24,7 @@ const ChatButton: React.FC = () => {
 
   return (
     <button
-      onClick={() => openSidebar()}
+      onClick={openChat}
       className={`fixed ${isDetailPage ? 'bottom-24' : 'bottom-7.5'} right-6 z-40 w-[3.375rem] h-[3.375rem] flex items-center justify-center`}
       aria-label="Open chat"
     >
@@ -32,4 +33,4 @@ const ChatButton: React.FC = () => {
   )
 }
 
-export default ChatButton 
+export default ChatButton

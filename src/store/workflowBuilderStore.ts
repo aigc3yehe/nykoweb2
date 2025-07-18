@@ -1,7 +1,7 @@
 import { atom } from 'jotai'
 import { dashboardApi } from '../services/api/misc'
 import { workflowsApi } from '../services/api/workflows'
-import type { AiProviderDto, CreateWorkflowRequest, CreateWorkflowResponse, Model, Provider } from '../services/api/types'
+import type { AiProviderDto, CreateWorkflowRequest, CreateWorkflowResponse, AIProvider, AIModel } from '../services/api/types'
 
 // 扩展的模型类型，包含provider信息
 export interface ModelWithProvider {
@@ -44,7 +44,7 @@ export const workflowFormAtom = atom({
 // 获取AI提供商列表的异步action
 export const fetchAiProvidersAtom = atom(
   null,
-  async (get, set) => {
+  async (_, set) => {
     set(isLoadingProvidersAtom, true)
     set(providersErrorAtom, null)
     
@@ -152,8 +152,8 @@ export const createWorkflowAtom = atom(
         prompt: form.prompt,
         input_type: [inputType],
         output_type: [outputType],
-        provider: selectedModel.provider as Provider, // 类型转换
-        model: selectedModel.name as Model, // 类型转换
+        provider: selectedModel.provider as AIProvider, // 类型转换
+        model: selectedModel.name as AIModel, // 类型转换
         reference_images: form.referenceImages,
         cover: form.cover || undefined
       }

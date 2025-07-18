@@ -12,6 +12,7 @@ import ContentDetailModal from './components/modals/ContentDetailModal'
 import { Analytics } from '@vercel/analytics/react'
 import { initUserStateAtom } from './store/loginStore'
 import LoginModal from './components/modals/LoginModal'
+import ProtectedRoute from './components/auth/ProtectedRoute'
 import Home from './pages/Home'
 import Recipes from './pages/Recipes'
 import AuthCallback from './pages/AuthCallback'
@@ -38,15 +39,21 @@ function App() {
     <BrowserRouter>
       <AppLayout>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/recipes" element={<Recipes />} />
-          <Route path="/recipes/:tab" element={<Recipes />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/workflow/:id" element={<WorkflowDetail />} />
-          <Route path="/workflow/builder" element={<WorkflowBuilder />} />
-          <Route path="/style/trainer" element={<StyleTrainer />} />
-          <Route path="/model/:id" element={<ModelDetail />} />
+          {/* 公开页面 - 不需要登录 */}
+          <Route path="/" element={<ProtectedRoute requireAuth={false}><Home /></ProtectedRoute>} />
+          <Route path="/recipes" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
+          <Route path="/recipes/:tab" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
           <Route path="/api/auth/callback/google" element={<AuthCallback />} />
+          
+          {/* 公开详情页面 - 不需要登录 */}
+          <Route path="/workflow/:id" element={<ProtectedRoute requireAuth={false}><WorkflowDetail /></ProtectedRoute>} />
+          <Route path="/model/:id" element={<ProtectedRoute requireAuth={false}><ModelDetail /></ProtectedRoute>} />
+          
+          {/* 需要登录的页面 */}
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/workflow/builder" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />
+          <Route path="/style/trainer" element={<ProtectedRoute><StyleTrainer /></ProtectedRoute>} />
+          
           {/* 其他路由... */}
         </Routes>
 
