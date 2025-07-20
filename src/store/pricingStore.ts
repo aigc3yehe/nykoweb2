@@ -149,3 +149,12 @@ export const setOperationLoading = atom(
     });
   }
 );
+
+// 新增：支付方式类型定义
+export type PaymentMethod = 'stripe' | 'hel'
+
+// 新增：支付方式选择状态
+export const selectedPaymentMethodAtom = atom<PaymentMethod>('stripe')
+
+// 新增：支付方式下拉菜单显示状态
+export const showPaymentDropdownAtom = atom<boolean>(false)

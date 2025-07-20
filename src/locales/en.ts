@@ -38,5 +38,9 @@ export const en = {
     publish: 'Publish',
     publishing: 'Publishing...',
     uploadCover: 'Click to upload Or drag here'
+  },
+  pricing: {
+    title: 'Plans & pricing',
+    subtitle: 'Upgrade to gain access to Premium features'
   }
 }

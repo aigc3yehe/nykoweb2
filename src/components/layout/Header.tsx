@@ -82,7 +82,10 @@ const Header: React.FC = React.memo(() => {
           )}
 
           {/* Upgrade 按钮 - 移动端只显示图标 */}
-          <button className="flex items-center justify-center gap-1.5 h-8 px-3 sm:px-4 py-2 bg-[#00FF48] hover:bg-[#00E041] dark:bg-[#00CC39] dark:hover:bg-[#00B833] rounded-md transition-colors">
+          <button 
+            onClick={() => navigate('/pricing')}
+            className="flex items-center justify-center gap-1.5 h-8 px-3 sm:px-4 py-2 bg-[#00FF48] hover:bg-[#00E041] dark:bg-[#00CC39] dark:hover:bg-[#00B833] rounded-md transition-colors"
+          >
             <img
               src="/src/assets/web2/upgrade.svg"
               alt="Upgrade"

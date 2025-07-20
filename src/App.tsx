@@ -21,6 +21,7 @@ import WorkflowDetail from './pages/WorkflowDetail'
 import ModelDetail from './pages/ModelDetail'
 import WorkflowBuilder from './pages/WorkflowBuilder'
 import StyleTrainer from './pages/StyleTrainer'
+import Pricing from './pages/Pricing'
 
 function App() {
   const [modalState] = useAtom(modalAtom)
@@ -43,6 +44,7 @@ function App() {
           <Route path="/" element={<ProtectedRoute requireAuth={false}><Home /></ProtectedRoute>} />
           <Route path="/recipes" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
           <Route path="/recipes/:tab" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
+          <Route path="/pricing" element={<ProtectedRoute requireAuth={false}><Pricing /></ProtectedRoute>} />
           <Route path="/api/auth/callback/google" element={<AuthCallback />} />
           
           {/* 公开详情页面 - 不需要登录 */}

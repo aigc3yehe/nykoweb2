@@ -38,5 +38,9 @@ export const zh = {
     publish: '发布',
     publishing: '发布中...',
     uploadCover: '点击上传或拖拽到这里'
+  },
+  pricing: {
+    title: '套餐与定价',
+    subtitle: '升级以获得高级功能'
   }
 }

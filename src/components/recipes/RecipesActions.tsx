@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { RecipeType } from '../../pages/Recipes'
 import DropdownIcon from '../../assets/web2/drop_down.svg'
 import SearchIcon from '../../assets/web2/search.svg'
@@ -9,6 +10,7 @@ interface RecipesActionsProps {
 }
 
 const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab }) => {
+  const navigate = useNavigate()
   const [selectedOption, setSelectedOption] = useState('All')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [searchValue, setSearchValue] = useState('')
@@ -19,6 +21,17 @@ const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab }) => {
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option)
     setIsDropdownOpen(false)
+  }
+
+  // 处理新建按钮点击事件
+  const handleNewClick = () => {
+    if (activeTab === 'workflows') {
+      // 导航到工作流构建器页面
+      navigate('/workflow/builder')
+    } else if (activeTab === 'styles') {
+      // 导航到风格训练器页面
+      navigate('/style/trainer')
+    }
   }
 
   // 处理点击外部关闭下拉菜单
@@ -89,7 +102,10 @@ const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab }) => {
       </div>
 
       {/* 新建按钮 - 移动端44*36px */}
-      <button className="w-11 h-9 md:w-auto md:h-9 flex items-center justify-center gap-1.5 md:px-3.5 py-2.5 bg-[#0900FF] rounded-md">
+      <button 
+        onClick={handleNewClick}
+        className="w-11 h-9 md:w-auto md:h-9 flex items-center justify-center gap-1.5 md:px-3.5 py-2.5 bg-[#0900FF] rounded-md hover:bg-[#0800E6] transition-colors"
+      >
         <img src={AddIcon} alt="Add" className="w-4 h-4" />
         <span className="hidden md:inline font-lexend font-normal text-sm leading-none text-white">
           New {activeTab === 'workflows' ? 'Workflow' : 'Style'}
