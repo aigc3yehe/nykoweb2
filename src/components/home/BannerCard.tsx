@@ -27,12 +27,15 @@ const BannerCard: React.FC<BannerCardProps> = ({
         // 移动端样式
         isMobile && "w-full h-[11.9375rem] p-6" // height: 191px, padding: 24px
       )}
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }}
     >
+      {/* 背景图片 */}
+      <img
+        src={backgroundImage}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
+        aria-hidden="true"
+      />
+      
       {/* 内容区域 */}
       <div className={cn(
         "relative z-10 flex flex-col gap-[0.625rem]", // gap: 10px

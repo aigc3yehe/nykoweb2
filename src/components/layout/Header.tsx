@@ -9,6 +9,8 @@ import LanguageSelector from '../ui/LanguageSelector'
 import MenuIcon from '../../assets/web2/menu.svg'
 import CuIcon from '../../assets/web2/cu.svg'
 import BackIcon from '../../assets/web2/back.svg'
+import LogoImage from '../../assets/web2/Logo.png'
+import UpgradeIcon from '../../assets/web2/upgrade.svg'
 import { formatNumber } from '../../utils/format'
 
 const Header: React.FC = React.memo(() => {
@@ -53,7 +55,7 @@ const Header: React.FC = React.memo(() => {
               </button>
               {/* Logo */}
               <img
-                src="/src/assets/web2/Logo.png"
+                src={LogoImage}
                 alt="Logo"
                 className="w-[4.4375rem] h-8"
               />
@@ -87,7 +89,7 @@ const Header: React.FC = React.memo(() => {
             className="flex items-center justify-center gap-1.5 h-8 px-3 sm:px-4 py-2 bg-[#00FF48] hover:bg-[#00E041] dark:bg-[#00CC39] dark:hover:bg-[#00B833] rounded-md transition-colors"
           >
             <img
-              src="/src/assets/web2/upgrade.svg"
+              src={UpgradeIcon}
               alt="Upgrade"
               className="w-4 h-4"
             />
