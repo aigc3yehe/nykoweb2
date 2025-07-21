@@ -11,6 +11,20 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
   // const [theme] = useAtom(themeAtom)
   // const location = useLocation()
   const location = useLocation()
+  
+  // 根据路由获取背景样式
+  const getBackgroundStyle = () => {
+    switch (location.pathname) {
+      case '/pricing':
+        return 'bg-white dark:bg-gray-900'
+      case '/workflow/builder':
+      case '/style/trainer':
+        return 'bg-main-bg dark:bg-gray-900'
+      default:
+        return 'bg-main-bg dark:bg-gray-900'
+    }
+  }
+
   // 圆点背景样式
   const dotBg = {
     backgroundImage: 'radial-gradient(circle, #E5E7EB 1px, transparent 2px)',
@@ -23,7 +37,8 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
     <main
       className={cn(
         "flex-1 overflow-y-auto overflow-x-hidden",
-        "bg-main-bg dark:bg-gray-900 text-foreground",
+        getBackgroundStyle(),
+        "text-foreground",
         "transition-colors duration-200",
         // 隐藏滚动条但保持可滚动
         "scrollbar-hide"

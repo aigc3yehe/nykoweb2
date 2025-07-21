@@ -1,6 +1,6 @@
 // 通用类型
 export type UserRole = 'admin' | 'user' | 'whitelist' | 'banned'
-export type PlanType = 'FREE' | 'PRO' | 'PREMIUM'
+export type PlanType = 'free' | 'premium' | 'premium_plus'
 export type PaymentMode = 'subscription' | 'payment'
 export type ContentState = 'success' | 'pending' | 'failed'
 export type ContentType = 'image' | 'video' | 'text' | 'audio'
@@ -510,6 +510,75 @@ export interface CancelSubscriptionResponseDto {
 
 export interface StripeWebhookEventResponseDto {
   received: boolean
+}
+
+// Hel支付相关类型
+export interface HelWebhookEventResponseDto {
+  received: boolean
+}
+
+export interface TransactionObjectDto {
+  id: string
+  paylinkId: string
+  quantity: number
+  createdAt: string
+  paymentType: 'PAYLINK' | 'PAYSTREAM'
+  meta: TransactionMetaDto
+}
+
+export interface TransactionMetaDto {
+  id: string
+  amount: string
+  senderPK: string
+  recipientPK: string
+  customerDetails: CustomerDetailsDto
+  productDetails: any
+  transactionSignature: string
+  transactionStatus: string
+  splitRevenue: boolean
+  remainingAccounts: any[]
+  totalAmount: string
+  affiliateAmount: string
+  affiliateCode?: string
+  affiliatePublicKey?: string
+  tokenQuote: TokenQuoteDto
+  submitGeolocation: string
+  currency: CurrencyDto
+}
+
+export interface CustomerDetailsDto {
+  country: string
+  deliveryAddress: string
+  email: string
+  fullName: string
+  phoneNumber: string
+  discordUsername?: string
+  discordUser?: DiscordUserDto
+  twitterUsername?: string
+  state: string
+  street: string
+  streetNumber: string
+  areaCode: string
+  city: string
+  additionalJSON?: string
+}
+
+export interface DiscordUserDto {
+  id: string
+  username: string
+  avatar?: string
+}
+
+export interface TokenQuoteDto {
+  from: string
+  fromAmountDecimal: string
+  to: string
+  toAmountMinimal: string
+}
+
+export interface CurrencyDto {
+  id: string
+  blockchain: string | null
 }
 
 // 标签相关类型

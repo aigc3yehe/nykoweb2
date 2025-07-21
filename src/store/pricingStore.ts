@@ -43,7 +43,7 @@ const initialState: PricingState = {
     {
       id: "free",
       name: "Free",
-      price: "0 $NYKO",
+      price: "$0",
       description: "For starter",
       features: [
         {
@@ -52,7 +52,15 @@ const initialState: PricingState = {
           supported: true,
         },
         {
-          title: "Not Eligible For Primedata Rewards",
+          title: "Model training not supported",
+          supported: false,
+        },
+        {
+          title: "Not Eligible For Rewards",
+          supported: false,
+        },
+        {
+          title: "Not Eligible For Rewards",
           supported: false,
         },
       ],
@@ -60,8 +68,8 @@ const initialState: PricingState = {
     },
     {
       id: "premium",
-      name: "Premium",
-      price: "75,000 $NYKO",
+      name: "Plus",
+      price: "$19.9",
       description: "For expert-level AI players",
       features: [
         {
@@ -70,40 +78,48 @@ const initialState: PricingState = {
           supported: true,
         },
         {
-          title: "Eligible For Primedata Rewards",
-          supported: true,
+          title: "Model training not supported",
+          supported: false,
+        },
+        {
+          title: "Not Eligible For Rewards",
+          supported: false,
+        },
+        {
+          title: "Not Eligible For Rewards",
+          supported: false,
         },
       ],
-      buttonText: "Stake to Subscribe",
-      tips: "*You can unstake to cancel your subscription. Withdrawable after a 14-day cooldown",
+      buttonText: "Subscribe",
+      tips: "*You can cancel your subscription at any time",
       staked: 75_000,
     },
     {
-      id: "premiumPlus",
-      name: "Premium+",
-      price: "300,000 $NYKO",
+      id: "premium_plus",
+      name: "Pro",
+      price: "$29.9",
       description: "For Revolutionary AI creators",
       features: [
         {
-          title: "8,200 Credits Every Week",
+          title: "8,000 Credits Every Week",
           subtitle: "On Website & X",
           supported: true,
         },
         {
-          title: "Eligible for Primedata Rewards",
-          supported: true,
+          title: "Model training not supported",
+          supported: false,
         },
         {
-          title: "Access to Premium+ Creators Channel",
-          supported: true,
+          title: "Not Eligible For Rewards",
+          supported: false,
         },
         {
-          title: "Voting Rights for Sponsorships",
-          supported: true,
+          title: "Not Eligible For Rewards",
+          supported: false,
         },
       ],
-      buttonText: "Stake to Subscribe",
-      tips: "*You can unstake to cancel your subscription. Withdrawable after a 14-day cooldown",
+      buttonText: "Subscribe",
+      tips: "*You can cancel your subscription at any time",
       staked: 300_000,
     },
   ],

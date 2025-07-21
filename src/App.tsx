@@ -44,7 +44,6 @@ function App() {
           <Route path="/" element={<ProtectedRoute requireAuth={false}><Home /></ProtectedRoute>} />
           <Route path="/recipes" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
           <Route path="/recipes/:tab" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
-          <Route path="/pricing" element={<ProtectedRoute requireAuth={false}><Pricing /></ProtectedRoute>} />
           <Route path="/api/auth/callback/google" element={<AuthCallback />} />
           
           {/* 公开详情页面 - 不需要登录 */}
@@ -53,6 +52,7 @@ function App() {
           
           {/* 需要登录的页面 */}
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
           <Route path="/workflow/builder" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />
           <Route path="/style/trainer" element={<ProtectedRoute><StyleTrainer /></ProtectedRoute>} />
           

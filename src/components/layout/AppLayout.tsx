@@ -31,14 +31,15 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <Header />
 
       <div className="flex flex-1 overflow-hidden relative">
-        {/* 左侧边栏：WorkflowBuilder页面时显示新PublishSidebar，否则显示原Sidebar */}
-        {location.pathname === '/workflow/builder' ? (
-          <PublishSidebar />
-        ) : location.pathname === '/style/trainer' ? (
-          <TrainerSidebar />
-        ):(
-          <Sidebar />
-        )}
+        {/* 左侧边栏：Pricing页面不显示侧边栏，WorkflowBuilder页面时显示新PublishSidebar，StyleTrainer页面显示TrainerSidebar，否则显示原Sidebar */}
+        {location.pathname === '/pricing' ? null : 
+          location.pathname === '/workflow/builder' ? (
+            <PublishSidebar />
+          ) : location.pathname === '/style/trainer' ? (
+            <TrainerSidebar />
+          ) : (
+            <Sidebar />
+          )}
 
         {/* 主内容区 */}
         <MainContent>

@@ -112,6 +112,20 @@ export const API_ENDPOINTS = {
 
   // 支付模块
   PAYMENTS: {
+    // Stripe支付
+    STRIPE: {
+      CREATE_SESSION: '/payments/stripe/checkout-sessions',
+      VERIFY_SESSION: (sessionId: string) => `/payments/stripe/checkout-sessions/${sessionId}/verify`,
+      GET_INFO: (userId: string) => `/payments/stripe/subscriptions/${userId}`,
+      CANCEL: (userId: string) => `/payments/stripe/subscriptions/${userId}`,
+      WEBHOOK: '/payments/stripe/webhooks',
+    },
+    // Hel支付
+    HEL: {
+      WEBHOOK: '/payments/hel/webhooks',
+      GET_TRANSACTION: (signature: string) => `/payments/hel/transactions/signature/${signature}`,
+    },
+    // 兼容旧版本
     CREATE_SESSION: '/payments/checkout-sessions',
     VERIFY_SESSION: (sessionId: string) => `/payments/checkout-sessions/${sessionId}/verify`,
     GET_INFO: (userId: string) => `/payments/subscriptions/${userId}`,

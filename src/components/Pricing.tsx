@@ -119,7 +119,7 @@ const Pricing: React.FC = () => {
       stakeState?.amount + stakeState?.virtuals_amount >=
       plans[2].staked
     ) {
-      setCurrentPlan("premiumPlus");
+      setCurrentPlan("premium_plus");
     } else {
       setCurrentPlan("premium");
     }

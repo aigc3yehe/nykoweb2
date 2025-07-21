@@ -32,7 +32,7 @@ const PlanCard = ({
       key={plan.id}
       className={`${styles.planCard} ${
         plan.id === "premium" ? styles.premium : ""
-      } ${plan.id === "premiumPlus" ? styles.premiumPlus : ""}`}
+      } ${plan.id === "premium_plus" ? styles.premiumPlus : ""}`}
     >
       <div className={styles.planCardContent}>
         <div className={styles.planTitleRow}>

@@ -97,6 +97,11 @@ export default {
       },
       lineHeight: {
         '140': '1.4', // 140% line height
+      },
+      // 新增自定义渐变背景
+      backgroundImage: {
+        'premium-gradient': 'linear-gradient(180deg, rgba(9, 0, 255, 0) 68.81%, rgba(9, 0, 255, 0.1) 100%)',
+        'premium-plus-gradient': 'linear-gradient(180deg, rgba(0, 255, 72, 0) 68.81%, rgba(0, 255, 72, 0.1) 100%)',
       }
     },
   },
