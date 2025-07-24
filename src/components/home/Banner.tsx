@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react'
 import BannerCard from './BannerCard'
 import { cn } from '../../utils/cn'
+import Banner1Image from '../../assets/web2/banner_1.png'
+import Banner2Image from '../../assets/web2/banner_2.png'
 
 const Banner: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -15,7 +17,7 @@ const Banner: React.FC = () => {
       title: "Bring your ideas to life",
       description: "Generate Creations through conversational canvas",
       buttonText: "Generate",
-      backgroundImage: "/src/assets/web2/banner_1.png",
+      backgroundImage: Banner1Image,
       onClick: () => console.log('Generate clicked')
     },
     {
@@ -23,7 +25,7 @@ const Banner: React.FC = () => {
       title: "Build Custom Workflows",
       description: "Efficient tasks with custom AI workflows",
       buttonText: "Create",
-      backgroundImage: "/src/assets/web2/banner_2.png",
+      backgroundImage: Banner2Image,
       onClick: () => console.log('Create clicked')
     }
   ]
