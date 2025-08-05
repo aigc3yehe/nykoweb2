@@ -32,7 +32,10 @@ export const zh = {
     chatLoginMessage: '请登录后开始与 Mavae 聊天'
   },
   workflow: {
+    name: '工作流',
+    info: '工作流信息',
     namePlaceholder: '名称',
+    description: '描述',
     descriptionPlaceholder: '描述你的工作流',
     coverImage: '封面图片',
     publish: '发布',

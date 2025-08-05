@@ -69,6 +69,11 @@ export default {
       },
       screens: {
         pc: '744px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
       },
       spacing: {
         '7.5': '1.875rem', // 30px

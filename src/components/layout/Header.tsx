@@ -36,7 +36,17 @@ const Header: React.FC = React.memo(() => {
                 <img src={BackIcon} alt="Back" className="w-6 h-6" />
               </button>
               <span className="font-lexend font-normal text-xl leading-[100%] text-[#1F2937] select-none">
-                {location.pathname === '/workflow/builder' ? "Workflow Builder" : "Style Trainer"}
+                {location.pathname === '/workflow/builder' ? (
+                  <>
+                    <span className="hidden lg:inline">Workflow Builder</span>
+                    <span className="lg:hidden">Builder</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="hidden lg:inline">Style Trainer</span>
+                    <span className="lg:hidden">Trainer</span>
+                  </>
+                )}
               </span>
             </>
           ) : (

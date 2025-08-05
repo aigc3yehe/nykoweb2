@@ -32,7 +32,10 @@ export const en = {
     chatLoginMessage: 'Please log in to start chatting with Mavae'
   },
   workflow: {
+    name: 'Workflow',
+    info: 'Workflow Info',
     namePlaceholder: 'name',
+    description: 'Description',
     descriptionPlaceholder: 'Describe your Workflow',
     coverImage: 'Cover Image',
     publish: 'Publish',

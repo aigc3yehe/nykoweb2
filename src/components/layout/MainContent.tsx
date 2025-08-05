@@ -41,7 +41,9 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
         "text-foreground",
         "transition-colors duration-200",
         // 隐藏滚动条但保持可滚动
-        "scrollbar-hide"
+        "scrollbar-hide",
+        // 移动端底部padding，避免被BottomBar遮挡
+        (location.pathname === '/workflow/builder' || location.pathname === '/style/trainer') ? "pb-24 lg:pb-0" : ""
       )}
       style={location.pathname === '/workflow/builder' || location.pathname === '/style/trainer' ? dotBg : undefined}
       id="main-content" // 添加id便于查找
