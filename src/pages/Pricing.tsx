@@ -101,13 +101,13 @@ const Pricing: React.FC = React.memo(() => {
   const getPlanStyle = (planId: string) => {
     switch (planId) {
       case 'free':
-        return 'w-[21.25rem] h-[33.125rem] border border-design-line-light-gray bg-white dark:bg-gray-800'
+        return 'w-full md:w-[21.25rem] h-[33.125rem] border border-design-line-light-gray bg-white dark:bg-gray-800'
       case 'premium':
-        return 'w-[21.25rem] h-[33.125rem] border border-design-main-blue bg-premium-gradient'
+        return 'w-full md:w-[21.25rem] h-[33.125rem] border border-design-main-blue bg-premium-gradient'
       case 'premium_plus':
-        return 'w-[21.25rem] h-[33.125rem] border border-[#00D13B] bg-premium-plus-gradient'
+        return 'w-full md:w-[21.25rem] h-[33.125rem] border border-[#00D13B] bg-premium-plus-gradient'
       default:
-        return 'w-[21.25rem] h-[33.125rem] border border-design-line-light-gray bg-white dark:bg-gray-800'
+        return 'w-full md:w-[21.25rem] h-[33.125rem] border border-design-line-light-gray bg-white dark:bg-gray-800'
     }
   }
 
@@ -115,7 +115,7 @@ const Pricing: React.FC = React.memo(() => {
     <div className="min-h-screen bg-background dark:bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-[1100px] flex flex-col gap-10">
         {/* 标题区域 */}
-        <div className="relative w-full h-16 flex flex-col gap-2">
+        <div className="relative w-full flex flex-col gap-2">
           {/* 主标题 */}
           <h1 className="font-lexend font-bold text-4xl leading-[100%] text-center text-[#1F2937] dark:text-white capitalize">
             {t('pricing.title')} {/* en: Plans & pricing / zh: 套餐与定价 */}
@@ -126,8 +126,8 @@ const Pricing: React.FC = React.memo(() => {
             {t('pricing.subtitle')} {/* en: Upgrade to gain access to Premium features / zh: 升级以获得高级功能 */}
           </p>
           
-          {/* 支付方式选择器 - 绝对定位到右下角 */}
-          <div className="absolute bottom-0 right-0">
+          {/* 支付方式选择器 - 移动端显示在副标题下面，PC端绝对定位到右下角 */}
+          <div className="flex justify-center md:absolute md:bottom-0 md:right-0 md:justify-start">
             <div className="relative">
               <button
                 onClick={() => setShowPaymentDropdown(!showPaymentDropdown)}
@@ -146,7 +146,7 @@ const Pricing: React.FC = React.memo(() => {
               
               {/* 下拉菜单 */}
               {showPaymentDropdown && (
-                <div className="absolute top-full right-0 mt-1.5 w-[110px] bg-white dark:bg-gray-800 border border-[#3741514D] dark:border-gray-600 rounded-md p-2 shadow-lg z-10">
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 md:left-auto md:right-0 md:transform-none mt-1.5 w-[110px] bg-white dark:bg-gray-800 border border-[#3741514D] dark:border-gray-600 rounded-md p-2 shadow-lg z-10">
                   {paymentMethods.map((method) => (
                     <button
                       key={method.id}
@@ -170,7 +170,7 @@ const Pricing: React.FC = React.memo(() => {
         </div>
 
         {/* 套餐列表 */}
-        <div className="w-full flex gap-6 justify-center">
+        <div className="w-full flex flex-col md:flex-row gap-6 justify-center">
           {pricingState.plans.map((plan) => (
             <div
               key={plan.id}
