@@ -77,10 +77,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         {location.pathname === '/style/trainer' && (
           <StyleTrainerBottomBar
             onOpenSettings={() => setIsStyleTrainerSettingsModalOpen(true)}
-            onOpenTraining={() => {
-              // 这里可以触发训练逻辑，或者打开一个训练模态框
-              console.log('Start training clicked')
-            }}
           />
         )}
 

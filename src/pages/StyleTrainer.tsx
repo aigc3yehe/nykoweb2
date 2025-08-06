@@ -67,9 +67,9 @@ const StyleTrainer: React.FC = () => {
 
   // 上传成功后的内容 - 在主内容区域显示
   const renderUploadedContent = () => (
-    <div className="flex w-full flex-col gap-6 p-6">
+    <div className="flex w-full flex-col gap-6 p-6 pb-24 lg:pb-6">
       {/* Heading 区域 */}
-      <div className="flex items-center justify-between h-8">
+      <div className="flex flex-col md:flex-row gap-4 items-center md:justify-between md:h-8">
         <div className="flex items-center gap-2.5 h-6">
           <span className="font-lexend font-semibold text-2xl leading-[100%] text-[#1F2937]">Image Uploaded</span>
           <span className="font-lexend font-normal text-sm leading-[100%] text-[#4B5563]">({formData.referenceImages.length})</span>
@@ -86,9 +86,9 @@ const StyleTrainer: React.FC = () => {
         </div>
       </div>
       {/* 图片集展示区域 */}
-      <div className="flex flex-wrap gap-5">
+      <div className="grid grid-cols-2 gap-5 lg:flex lg:flex-wrap">
         {formData.referenceImages.map((url) => (
-          <div key={url} className="relative w-[8.5625rem] h-[8.5625rem] rounded-xl bg-[#E8E8E8] overflow-hidden group">
+          <div key={url} className="relative w-full aspect-square rounded-xl bg-[#E8E8E8] overflow-hidden group lg:w-[8.5625rem] lg:h-[8.5625rem]">
             <img src={url} alt="uploaded" className="w-full h-full object-cover rounded-xl" />
             <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-start justify-end p-1">
               <button className="w-6 h-6 flex items-center justify-center" onClick={() => handleRemoveOne(url)}>
@@ -123,13 +123,13 @@ const StyleTrainer: React.FC = () => {
       {/* 第二个区域：文本提示 */}
       <div className="flex flex-col items-center gap-[0.875rem]">
         {/* 第一行文本 */}
-        <div className="text-center">
+        <div className="text-center px-5 md:px-0">
           <span className="font-lexend font-semibold text-2xl leading-[100%] text-[#1F2937]">
             Upload 10 more images to build Your style
           </span>
         </div>
-        {/* 第二行：提示列表 */}
-        <div className="flex items-center gap-4">
+        {/* 第二行：提示列表 - 移动端一行一个 */}
+        <div className="flex flex-col items-center gap-4 md:flex-row md:gap-4">
           <div className="flex items-center gap-[0.375rem] h-5">
             <img src={CheckIcon} alt="check" className="w-4 h-4" />
             <span className="font-lexend font-normal text-sm leading-[140%] text-[#4B5563]">
@@ -173,9 +173,9 @@ const StyleTrainer: React.FC = () => {
   )
 
   return (
-    <div className="flex h-full w-full">
+    <div className="flex h-full w-full overflow-y-auto">
       {/* 主内容区域 */}
-      <div className={`flex-1 flex relative ${formData.referenceImages.length > 0 ? 'p-6' : 'items-center justify-center'}`}>
+      <div className={`flex-1 flex relative ${formData.referenceImages.length > 0 ? 'md:p-6' : 'items-center justify-center'}`}>
         {/* 根据状态显示不同内容 */}
         {formData.referenceImages.length > 0 ? (
           renderUploadedContent()

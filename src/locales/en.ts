@@ -42,6 +42,16 @@ export const en = {
     publishing: 'Publishing...',
     uploadCover: 'Click to upload Or drag here'
   },
+  style: {
+    name: 'Style',
+    info: 'Style Info',
+    namePlaceholder: 'name',
+    description: 'Description',
+    descriptionPlaceholder: 'Describe your Style',
+    coverImage: 'Cover Image',
+    uploadCover: 'Click to upload Or drag here',
+    startTraining: 'Start Training'
+  },
   pricing: {
     title: 'Plans & pricing',
     subtitle: 'Upgrade to gain access to Premium features'
