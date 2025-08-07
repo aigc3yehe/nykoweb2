@@ -1,16 +1,15 @@
 import React, { useEffect, useCallback, useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
-import { contentsAtom, loadMoreContentsAtom, fetchContentsAtom, ContentItem } from '../../store/contentsStore.ts'
-import InspirationImageCard from '../home/InspirationImageCard.tsx'
+import { workflowGalleryAtom, fetchWorkflowGalleryAtom, ContentItem } from '../../store/contentsStore'
+import InspirationImageCard from '../home/InspirationImageCard'
 
 interface WorkflowGalleryProps {
   workflowId: number
 }
 
 const WorkflowGallery: React.FC<WorkflowGalleryProps> = ({ workflowId }) => {
-  const [contentsState] = useAtom(contentsAtom)
-  const setFetchContents = useSetAtom(fetchContentsAtom)
-  const [, loadMore] = useAtom(loadMoreContentsAtom)
+  const [contentsState] = useAtom(workflowGalleryAtom)
+  const setFetchContents = useSetAtom(fetchWorkflowGalleryAtom)
   const isLoadingRef = useRef(false)
 
   // 加载指定workflow的内容
@@ -18,9 +17,7 @@ const WorkflowGallery: React.FC<WorkflowGalleryProps> = ({ workflowId }) => {
     try {
       await setFetchContents({
         reset,
-        typeFilter: 'all',
-        source: 'workflow',
-        source_id: workflowId,
+        workflowId,
       })
     } catch (error) {
       console.error('WorkflowGallery: Failed to load contents:', error)
@@ -35,8 +32,8 @@ const WorkflowGallery: React.FC<WorkflowGalleryProps> = ({ workflowId }) => {
 
   // 加载更多
   const handleLoadMore = useCallback(() => {
-    loadMore()
-  }, [loadMore])
+    setFetchContents({ reset: false, workflowId })
+  }, [setFetchContents, workflowId])
 
   // 自动加载更多（监听main滚动）
   const handleScroll = useCallback(() => {
@@ -127,7 +124,6 @@ const WorkflowGallery: React.FC<WorkflowGalleryProps> = ({ workflowId }) => {
                     key={content.content_id}
                     content={content}
                     imageHeightRem={content.calculatedHeight}
-                    onRecreateClick={() => console.log('Recreate clicked:', content.content_id)}
                   />
                 ))}
               </div>

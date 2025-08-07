@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
-import { contentsAtom, loadMoreContentsAtom, fetchContentsAtom, ContentItem } from '../../store/contentsStore'
+import { modelGalleryAtom, fetchModelGalleryAtom, ContentItem } from '../../store/contentsStore'
 import InspirationImageCard from '../home/InspirationImageCard'
 
 interface ModelGalleryProps {
@@ -8,9 +8,8 @@ interface ModelGalleryProps {
 }
 
 const ModelGallery: React.FC<ModelGalleryProps> = ({ modelId }) => {
-  const [contentsState] = useAtom(contentsAtom)
-  const setFetchContents = useSetAtom(fetchContentsAtom)
-  const [, loadMore] = useAtom(loadMoreContentsAtom)
+  const [contentsState] = useAtom(modelGalleryAtom)
+  const setFetchContents = useSetAtom(fetchModelGalleryAtom)
   const isLoadingRef = useRef(false)
 
   // 加载指定model的内容
@@ -18,9 +17,7 @@ const ModelGallery: React.FC<ModelGalleryProps> = ({ modelId }) => {
     try {
       await setFetchContents({
         reset,
-        typeFilter: 'all',
-        source: 'model',
-        source_id: modelId,
+        modelId,
       })
     } catch (error) {
       console.error('ModelGallery: Failed to load contents:', error)
@@ -35,8 +32,8 @@ const ModelGallery: React.FC<ModelGalleryProps> = ({ modelId }) => {
 
   // 加载更多
   const handleLoadMore = useCallback(() => {
-    loadMore()
-  }, [loadMore])
+    setFetchContents({ reset: false, modelId })
+  }, [setFetchContents, modelId])
 
   // 自动加载更多（监听main滚动）
   const handleScroll = useCallback(() => {
@@ -127,7 +124,6 @@ const ModelGallery: React.FC<ModelGalleryProps> = ({ modelId }) => {
                     key={content.content_id}
                     content={content}
                     imageHeightRem={content.calculatedHeight}
-                    onRecreateClick={() => console.log('Recreate clicked:', content.content_id)}
                   />
                 ))}
               </div>

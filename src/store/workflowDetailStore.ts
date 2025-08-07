@@ -25,14 +25,7 @@ export const fetchWorkflowDetailAtom = atom(
     try {
       const workflow = await workflowsApi.getWorkflowById(workflowId, refresh)
       set(workflowDetailAtom, {
-        workflow: {
-          ...workflow,
-          tags: [
-            "tag1",
-            "tag2",
-            "tag3"
-          ],
-        },
+        workflow: workflow,
         isLoading: false,
         error: null
       })

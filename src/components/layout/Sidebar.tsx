@@ -91,7 +91,7 @@ const Sidebar: React.FC = () => {
       label: t('nav.assets'), // en: My Assets / zh: 我的资产
       icon: <img src={MyAssetsIcon} alt="My Assets" className="w-4 h-4" />,
       selectedIcon: <img src={MyAssetsSelectedIcon} alt="My Assets" className="w-4 h-4" />,
-      path: '/assets'
+      path: '/profile' // 修改为导航到个人中心
     }
   ]
 
@@ -152,10 +152,6 @@ const Sidebar: React.FC = () => {
           <nav className="flex-1 space-y-4">
             {sections.map((section, sectionIndex) => (
               <div key={section.title}>
-                {/* 分组标题 - 按设计规范样式 */}
-                <h3 className="h-3 px-3 font-lexend font-normal text-xs leading-none tracking-normal text-gray-400 dark:text-gray-500 mb-4">
-                  {section.title}
-                </h3>
 
                 {/* 分组导航项 - 第一组高度94px，间距6px；第二组高度180px，间距6px */}
                 <div className={cn(
@@ -178,7 +174,9 @@ const Sidebar: React.FC = () => {
                           ? "bg-design-bg-light-blue font-bold text-design-main-blue"
                           : sectionIndex !== 1
                           ? "text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 font-normal"
-                          : ""
+                          : "",
+                        // Generator 特殊样式 - 灰色文字表示未实现
+                        item.key === 'generator' && "text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60"
                       )}
                     >
                       <div className="flex-shrink-0">

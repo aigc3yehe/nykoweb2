@@ -63,12 +63,18 @@ const Header: React.FC = React.memo(() => {
                   className="w-5 h-5 dark:invert"
                 />
               </button>
-              {/* Logo */}
-              <img
-                src={LogoImage}
-                alt="Logo"
-                className="w-[4.4375rem] h-8"
-              />
+              {/* Logo - 点击导航到首页 */}
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center"
+                aria-label="Go to home"
+              >
+                <img
+                  src={LogoImage}
+                  alt="Logo"
+                  className="w-[4.4375rem] h-8"
+                />
+              </button>
             </>
           )}
         </div>

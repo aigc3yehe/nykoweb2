@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useAtom } from 'jotai'
 import {
-  contentsAtom,
+  inspirationFeedAtom,
   filterContentsByTypeAtom,
   loadMoreContentsAtom,
   ContentTypeFilter,
@@ -11,7 +11,7 @@ import InspirationSectionHeader from './InspirationSectionHeader'
 import InspirationImageCard from './InspirationImageCard'
 
 const InspirationFeed: React.FC = () => {
-  const [contentsState] = useAtom(contentsAtom)
+  const [contentsState] = useAtom(inspirationFeedAtom)
   const [, filterByType] = useAtom(filterContentsByTypeAtom)
   const [, loadMore] = useAtom(loadMoreContentsAtom)
   const [selectedFilter, setSelectedFilter] = useState<ContentTypeFilter>('all')
@@ -37,7 +37,7 @@ const InspirationFeed: React.FC = () => {
         console.error('InspirationFeed: Initial load failed:', error)
       })
     }
-  }, [filterByType, selectedFilter]) // 添加正确的依赖
+  }, [filterByType, selectedFilter, contentsState.items.length, contentsState.isLoading])
 
   // 筛选变化时重新加载
   const handleFilterChange = (newFilter: ContentTypeFilter) => {
@@ -125,7 +125,6 @@ const InspirationFeed: React.FC = () => {
                     key={content.content_id}
                     content={content}
                     imageHeightRem={content.calculatedHeight}
-                    onRecreateClick={() => console.log('Recreate clicked:', content.content_id)}
                   />
                 ))}
               </div>

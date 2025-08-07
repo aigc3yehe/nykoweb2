@@ -1,14 +1,15 @@
 import React from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { contentDetailAtom, closeContentDetailAtom, toggleLikeContentAtom } from '../../store/contentDetailStore'
+import { openChatSidebar } from '../../store/chatSidebarStore'
+import { clearChat, addMessage, sendMessage } from '../../store/assistantStore'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 // 导入图标
-import recreateWhiteIcon from '../../assets/web2/recreate_white.svg'
 import modifyIcon from '../../assets/web2/modify.svg'
 import animateIcon from '../../assets/web2/animate.svg'
 import nolikeIcon from '../../assets/web2/nolike.svg'
 import likedIcon from '../../assets/web2/liked.svg'
-import moreIcon from '../../assets/web2/more.svg'
 import closeIcon from '../../assets/web2/image_detail_close.svg'
 import copyIcon from '../../assets/web2/copy.svg'
 import goIcon from '../../assets/web2/go.svg'
@@ -17,6 +18,12 @@ const ContentDetailModal: React.FC = () => {
   const [state] = useAtom(contentDetailAtom)
   const closeModal = useSetAtom(closeContentDetailAtom)
   const toggleLike = useSetAtom(toggleLikeContentAtom)
+  const openChat = useSetAtom(openChatSidebar)
+  const clearChatMessages = useSetAtom(clearChat)
+  const addMessageToChat = useSetAtom(addMessage)
+  const sendMessageAction = useSetAtom(sendMessage)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   if (!state.isOpen) return null
 
@@ -38,20 +45,99 @@ const ContentDetailModal: React.FC = () => {
     }
   }
 
-  const handleRecreateClick = () => {
-    console.log('Recreate content:', id)
+  // 检查当前是否在对应的详情页面
+  const isInDetailPage = () => {
+    const pathname = location.pathname
+    
+    if (content?.source === 'model' && content?.source_info?.id) {
+      return pathname === `/model/${content.source_info.id}`
+    } else if (content?.source === 'workflow' && content?.source_info?.id) {
+      return pathname === `/workflow/${content.source_info.id}`
+    }
+    return false
+  }
+
+  // 导航到对应的详情页面
+  const navigateToDetailPage = () => {
+    if (!content?.source_info?.id) return
+    
+    if (content.source === 'model') {
+      navigate(`/model/${content.source_info.id}`)
+    } else if (content.source === 'workflow') {
+      navigate(`/workflow/${content.source_info.id}`)
+    }
   }
 
   const handleModifyClick = () => {
-    console.log('Modify content:', id)
+    if (!content?.url) return
+    
+    // 关闭模态框
+    closeModal()
+    
+    // 如果不在对应的详情页面，先导航到详情页面
+    if (!isInDetailPage()) {
+      navigateToDetailPage()
+    }
+    
+    // 打开聊天侧边栏
+    openChat()
+    
+    // 清空聊天记录
+    clearChatMessages()
+    
+    // 添加图片消息到聊天记录
+    const cu = 500
+    const task_id = content.task_id || ''
+    const messageType = content.source === 'workflow' ? 'workflow_generate_result' : 'generate_result'
+    
+    addMessageToChat(
+      'Here is the image you want to modify:', 
+      messageType, 
+      task_id, 
+      content.url, 
+      cu, 
+      content.width || 1024, 
+      content.height || 1024
+    )
+    
+    // 发送修改消息
+    sendMessageAction('I want to modify this image.')
   }
 
   const handleAnimateClick = () => {
-    console.log('Animate content:', id)
-  }
-
-  const handleMoreClick = () => {
-    console.log('More options:', id)
+    if (!content?.url) return
+    
+    // 关闭模态框
+    closeModal()
+    
+    // 如果不在对应的详情页面，先导航到详情页面
+    if (!isInDetailPage()) {
+      navigateToDetailPage()
+    }
+    
+    // 打开聊天侧边栏
+    openChat()
+    
+    // 清空聊天记录
+    clearChatMessages()
+    
+    // 添加图片消息到聊天记录
+    const cu = 500
+    const task_id = content.task_id || ''
+    const messageType = content.source === 'workflow' ? 'workflow_generate_result' : 'generate_result'
+    
+    addMessageToChat(
+      'Here is the image you want to animate:', 
+      messageType, 
+      task_id, 
+      content.url, 
+      cu, 
+      content.width || 1024, 
+      content.height || 1024
+    )
+    
+    // 发送动画化消息
+    sendMessageAction('I want to animate this image.')
   }
 
   const handleCopyPrompt = () => {
@@ -62,6 +148,14 @@ const ContentDetailModal: React.FC = () => {
 
   const handleGoToSource = () => {
     console.log('Go to source:', content?.source, content?.source_info?.id)
+    const source_id = content?.source_info?.id
+    if (content?.source === 'model') {
+      navigate(`/model/${source_id}`)
+      closeModal()
+    } else if (content?.source === 'workflow') {
+      navigate(`/workflow/${source_id}`)
+      closeModal()
+    }
   }
 
   const formatDate = (dateString?: string) => {
@@ -149,7 +243,7 @@ const ContentDetailModal: React.FC = () => {
         </div>
         {/* 内容区域 */}
         <div 
-          className="bg-white rounded-lg border-l border-design-bg-light-gray flex md:flex-row flex-col md:w-[62.25rem] md:h-[41.125rem] w-full h-[calc(100vh-60px)] relative overflow-y-auto"
+          className="bg-white rounded-lg border-l border-design-bg-light-gray flex md:flex-row flex-col md:w-[62.25rem] md:h-[41.125rem] w-full h-[calc(100vh-60px)] relative overflow-y-auto overflow-x-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* 左侧/上方内容区域 */}
@@ -173,15 +267,6 @@ const ContentDetailModal: React.FC = () => {
             <div className="flex items-center justify-between md:w-[33.125rem] w-full h-10">
               {/* 左侧操作按钮 */}
               <div className="flex items-center gap-2 h-10">
-                {/* Recreate 按钮 */}
-                <button
-                  onClick={handleRecreateClick}
-                  className="flex items-center gap-1 h-10 px-3 md:px-5 bg-design-main-blue text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  <img src={recreateWhiteIcon} alt="Recreate" className="w-4 h-4" />
-                  <span className="font-lexend font-normal text-sm leading-none">Recreate</span>
-                </button>
-
                 {/* Modify 按钮 */}
                 <button
                   onClick={handleModifyClick}
@@ -203,27 +288,16 @@ const ContentDetailModal: React.FC = () => {
 
               {/* 右侧按钮 */}
               <div className="flex items-center gap-2 h-10">
-                {/* 点赞按钮 */}
+                {/* 点赞按钮 - 只显示点赞状态，不显示数量 */}
                 <button
                   onClick={handleLikeClick}
-                  className="flex items-center gap-1 h-10 px-3 md:px-5 bg-design-bg-light-blue rounded-md hover:bg-blue-100 transition-colors"
+                  className="flex items-center justify-center size-10 md:w-auto md:gap-1 md:h-10 md:px-5 bg-design-bg-light-blue rounded-md hover:bg-blue-100 transition-colors"
                 >
                   <img 
                     src={content?.is_liked ? likedIcon : nolikeIcon} 
                     alt="Like" 
                     className="w-4 h-4" 
                   />
-                  <span className="font-lexend font-normal text-base leading-none text-design-main-text">
-                    {content?.like_count || 0}
-                  </span>
-                </button>
-
-                {/* 更多按钮 */}
-                <button
-                  onClick={handleMoreClick}
-                  className="flex items-center justify-center size-10 md:w-auto md:gap-1 md:h-10 md:px-5 bg-design-bg-light-blue rounded-md hover:bg-blue-100 transition-colors"
-                >
-                  <img src={moreIcon} alt="More" className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -280,12 +354,12 @@ const ContentDetailModal: React.FC = () => {
                   </button>
                 </div>
                 
-                {/* Prompt Content */}
-                <div className="w-full rounded-lg p-3 bg-design-bg-light-gray">
-                  <p className="font-lexend font-normal text-xs leading-140 text-design-dark-gray">
-                    {content?.prompt || 'No prompt available'}
-                  </p>
-                </div>
+                 {/* Prompt Content */}
+                 <div className="w-full rounded-lg p-3 bg-design-bg-light-gray overflow-x-hidden">
+                   <p className="font-lexend font-normal text-xs leading-140 text-design-dark-gray break-words whitespace-pre-wrap">
+                     {content?.prompt || 'No prompt available'}
+                   </p>
+                 </div>
               </div>
 
               {/* Dimensions 部分 */}

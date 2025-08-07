@@ -1,46 +1,55 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import {
-  profileContentsAtom,
-  fetchProfileContentsAtom,
-  loadMoreProfileContentsAtom,
-  type ContentType,
+  profileImageAtom,
+  profileVideoAtom,
+  fetchProfileImageAtom,
+  fetchProfileVideoAtom,
+  loadMoreProfileImageAtom,
+  loadMoreProfileVideoAtom,
   type TimeGroup
-} from '../../store/profileContentsStore'
-import type { ContentItem } from '../../services/api/types'
+} from '../../store/contentsStore'
+import type { ContentItem } from '../../store/contentsStore'
 import RecreateIcon from '../../assets/web2/recreate.svg'
 import LikeIcon from '../../assets/web2/like.svg'
 import { getScaledImageUrl } from '../../utils'
 import { openContentDetailAtom } from '../../store/contentDetailStore'
 
 interface ProfileContentsListProps {
-  type: ContentType // 'image' | 'video'
+  type: 'image' | 'video'
   tab: 'published' | 'liked' // 预留，暂只支持published
 }
 
 const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type }) => {
-  const [state] = useAtom(profileContentsAtom)
-  const [, fetchContents] = useAtom(fetchProfileContentsAtom)
-  const [, loadMore] = useAtom(loadMoreProfileContentsAtom)
+  const [imageState] = useAtom(profileImageAtom)
+  const [videoState] = useAtom(profileVideoAtom)
+  const [, fetchImageContents] = useAtom(fetchProfileImageAtom)
+  const [, fetchVideoContents] = useAtom(fetchProfileVideoAtom)
+  const [, loadMoreImage] = useAtom(loadMoreProfileImageAtom)
+  const [, loadMoreVideo] = useAtom(loadMoreProfileVideoAtom)
   const isLoadingRef = useRef(false)
 
+  // 根据类型选择对应的状态和函数
+  const state = type === 'image' ? imageState : videoState
+  const fetchContents = type === 'image' ? fetchImageContents : fetchVideoContents
+  const loadMore = type === 'image' ? loadMoreImage : loadMoreVideo
+
   useEffect(() => {
-    fetchContents({ type, reset: false }).catch(error => {
+    fetchContents({ reset: true }).catch((error: any) => {
       console.error('ProfileContentsList: Failed to fetch contents:', error)
     })
   }, [type, fetchContents])
 
   // 处理加载更多
   const handleLoadMore = useCallback(() => {
-    const hasMore = type === 'image' ? state.imageHasMore : state.videoHasMore
-    if (hasMore && !state.isLoading && !isLoadingRef.current) {
+    if (state.hasMore && !state.isLoading && !isLoadingRef.current) {
       isLoadingRef.current = true
       console.log('ProfileContentsList: Loading more', type)
-      loadMore(type).finally(() => {
+      loadMore().finally(() => {
         isLoadingRef.current = false
       })
     }
-  }, [type, state.imageHasMore, state.videoHasMore, state.isLoading, loadMore])
+  }, [type, state.hasMore, state.isLoading, loadMore])
 
   // 监听滚动，当接近底部时加载更多
   const handleScroll = useCallback(() => {
@@ -65,8 +74,8 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type }) => {
     }
   }, [handleScroll])
 
-  const groups = type === 'image' ? state.imageGroups : state.videoGroups
-  const hasMore = type === 'image' ? state.imageHasMore : state.videoHasMore
+  // 根据类型获取对应的分组数据
+  const groups = type === 'image' ? (state as any).imageGroups : (state as any).videoGroups
 
   if (state.isLoading && groups.length === 0) {
     return (
@@ -82,7 +91,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type }) => {
         <div className="text-center">
           <p className="text-red-500 mb-2">Error loading {type === 'image' ? 'images' : 'videos'}: {state.error}</p>
           <button
-            onClick={() => fetchContents({ type, reset: true })}
+            onClick={() => fetchContents({ reset: true })}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
             Retry
@@ -233,7 +242,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type }) => {
       )}
 
       {/* 手动加载更多按钮 */}
-      {hasMore && !state.isLoading && groups.length > 0 && (
+      {state.hasMore && !state.isLoading && groups.length > 0 && (
         <div className="flex justify-center py-6">
           <button
             onClick={handleLoadMore}
@@ -245,7 +254,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type }) => {
       )}
 
       {/* 无更多数据提示 */}
-      {!hasMore && groups.length > 0 && (
+      {!state.hasMore && groups.length > 0 && (
         <div className="flex justify-center py-6">
           <div className="text-gray-400">No more {type === 'image' ? 'images' : 'videos'} to load</div>
         </div>

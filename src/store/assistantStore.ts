@@ -887,6 +887,70 @@ export function updateAgreeState(messages: Message[], messageIndex: number) {
 
 // ==== 操作函数 ====
 
+// 添加自定方消息
+export const addMessage = atom(
+  null, 
+  async (get, set, content: string, messageType: string, request_id: string, url: string, cu: number, width: number, height: number) => {
+    const chatState = get(chatAtom);
+    
+    // 创建消息对象
+    const receivedMessage: Message = {
+      role: 'assistant',
+      content: content,
+      type: messageType as 'text' | 'upload_image' | 'generating_image' | 'generate_result' | 'tokenization_agreement' | "create_workflow"
+          | "run_workflow" | "workflow_generate_result" | "create_workflow_details" | "modify_image" | "uploaded_image"
+          | "generating_video" | "video_generate_result",
+      imageUploadState: undefined,
+      request_id: request_id || undefined,
+      agree: undefined,
+      images: [url],
+      cu: cu,
+      imageInfo: {
+        width: width,
+        height: height
+      }
+    };
+
+    // 判断是否为工作流生成的图片
+    const isWorkflow = messageType === 'workflow_generate_result';
+    
+    // 构建最新生成内容的状态信息
+    const latestGeneratedImage: LatestGeneratedImage = {
+      aicc_status: 'completed',
+      provider: isWorkflow ? 'gpt-4o' : 'sd',
+      model: isWorkflow ? 'gpt-image-1-vip' : 'sd',
+      source: isWorkflow ? 'workflow' : 'model',
+      source_id: isWorkflow ? chatState.currentDetailWorkflow?.workflow_id || undefined : chatState.currentDetailModel?.model_id || undefined,
+      reference: url,
+      aicc_width: width,
+      aicc_height: height,
+      aicc_prompt: isWorkflow ? chatState.workflowRunningState.prompt || undefined : undefined,
+      aicc_type: 'image',
+      content_id: undefined,
+    };
+
+    // 为工作流任务更新额外的状态
+    let updatedWorkflowRunning = chatState.workflowRunning;
+    
+    if (isWorkflow) {
+      updatedWorkflowRunning = {
+        isRunning: false,
+        isSuccess: true
+      };
+    }
+
+    // 更新状态
+    set(chatAtom, {
+      ...chatState,
+      messages: [...chatState.messages, receivedMessage],
+      isGenerating: false,
+      workflowRunning: updatedWorkflowRunning,
+      workflowImageFile: null,
+      latestGeneratedImage: latestGeneratedImage
+    });
+  }
+)
+
 // 发送消息的操作
 export const sendMessage = atom(
   null,

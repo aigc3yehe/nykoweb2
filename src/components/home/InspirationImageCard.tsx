@@ -6,7 +6,6 @@ import { userStateAtom } from '../../store/loginStore'
 import { openContentDetailAtom } from '../../store/contentDetailStore'
 import { getScaledImageUrl } from '../../utils'
 import VideoIcon from '../../assets/web2/video.svg'
-import RecreateIcon from '../../assets/web2/use.svg'
 import LikeIcon from '../../assets/web2/like.svg'
 import LikedIcon from '../../assets/web2/liked.svg'
 import avatarSvg from '../../assets/Avatar.svg'
@@ -16,15 +15,13 @@ interface InspirationImageCardProps {
   imageHeightRem?: number
   imageWidthRem?: number
   onClick?: () => void
-  onRecreateClick?: () => void
 }
 
 const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
   content,
   imageHeightRem,
   imageWidthRem,
-  onClick,
-  onRecreateClick
+  onClick
 }) => {
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
@@ -92,12 +89,6 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
     }
   }
 
-  // 处理Recreate按钮点击
-  const handleRecreateClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onRecreateClick?.()
-  }
-
   const widthPx = (imageWidthRem ? imageWidthRem : 17.1875) * 16
 
   // 处理卡片点击
@@ -163,17 +154,9 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
 
         {/* Hover 信息 */}
         <div className={cn(
-          "absolute bottom-4 left-0 right-0 px-[0.875rem] flex items-center justify-between transition-opacity duration-200 z-10",
+          "absolute bottom-4 left-0 right-0 px-[0.875rem] flex items-center justify-end transition-opacity duration-200 z-10",
           isHovered ? "opacity-100" : "opacity-0"
         )}>
-          {/* Recreate 按钮 */}
-          <button
-            onClick={handleRecreateClick}
-            className="flex items-center gap-1 h-[1.875rem] px-3 bg-white rounded-md hover:bg-gray-50 transition-colors"
-          >
-            <img src={RecreateIcon} alt="Recreate" className="w-4 h-4" />
-            <span className="font-lexend text-sm text-design-main-text">Recreate</span>
-          </button>
 
           {/* 点赞数 */}
           <button
