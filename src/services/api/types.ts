@@ -133,6 +133,7 @@ export interface ContentItem {
   type?: ContentType
   like_count?: number
   created_at?: string
+  liked_at?: string
 }
 
 export interface ContentsListResponse {
@@ -243,6 +244,9 @@ export interface WorkflowDto {
   cu?: number
   state?: number
   public?: number
+  is_liked?: boolean
+  liked_at?: Date
+  like_count?: number
   created_at?: Date
   provider?: AIProvider
   model?: AIModel
@@ -256,6 +260,20 @@ export interface WorkflowDto {
 export interface FetchWorkflowsResponse {
   workflows?: WorkflowDto[]
   total_count?: number
+}
+
+export interface FetchLikedWorkflowsResponse {
+  workflows?: WorkflowDto[]
+  total_count?: number
+}
+
+export interface LikeWorkflowRequest {
+  is_liked: boolean
+}
+
+export interface FetchLikeWorkflowResponse {
+  is_liked: boolean
+  updated_at: Date
 }
 
 export interface CreateWorkflowRequest {
@@ -403,9 +421,16 @@ export interface FetchModelDto {
   model_tran?: ModelTrainingInfo[]
   user?: UserShowDto
   public?: number
+  is_liked?: boolean
+  like_count?: number
 }
 
 export interface FetchEnableModelsResponse {
+  models?: FetchModelDto[]
+  total_count?: number
+}
+
+export interface FetchLikedModelsResponse {
   models?: FetchModelDto[]
   total_count?: number
 }
@@ -620,6 +645,7 @@ export interface FeaturedItem {
   tags: string[]
   usage: number
   cover: string
+  like_count: number
   description?: string
   user: UserShowDto
 }

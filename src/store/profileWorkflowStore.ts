@@ -75,13 +75,14 @@ const getTimeGroupLabel = (date: Date): string => {
   }
 }
 
-// 分组工具函数
+// 分组工具函数（Liked 优先使用 liked_at）
 const groupWorkflowsByTime = (workflows: WorkflowDto[]): TimeGroup[] => {
   const groups: { [key: string]: WorkflowDto[] } = {}
 
   workflows.forEach(workflow => {
-    if (!workflow.created_at) return // 跳过没有创建时间的项目
-    const createdDate = new Date(workflow.created_at)
+    const ts = (workflow as any).liked_at || workflow.created_at
+    if (!ts) return // 跳过没有时间的项目
+    const createdDate = new Date(ts as any)
     const dateKey = createdDate.toDateString() // 用于分组的key
 
     if (!groups[dateKey]) {
@@ -96,8 +97,10 @@ const groupWorkflowsByTime = (workflows: WorkflowDto[]): TimeGroup[] => {
       groupKey: dateKey,
       groupLabel: getTimeGroupLabel(new Date(dateKey)),
       workflows: workflows.sort((a, b) => {
-        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0
-        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0
+        const aTs = (a as any).liked_at || a.created_at
+        const bTs = (b as any).liked_at || b.created_at
+        const aTime = aTs ? new Date(aTs as any).getTime() : 0
+        const bTime = bTs ? new Date(bTs as any).getTime() : 0
         return bTime - aTime
       })
     }))
@@ -174,7 +177,7 @@ export const fetchPublishedWorkflowsAtom = atom(
     try {
       // 调用API获取用户的工作流
       const params = {
-        // user: userState.user.tokens.did, // 添加用户did参数
+        user: userState.user.tokens.did, // 添加用户did参数
         page: currentPage,
         page_size: currentState.pageSize,
         order: 'created_at' as const,
@@ -246,23 +249,36 @@ export const fetchLikedWorkflowsAtom = atom(
     })
 
     try {
-      // TODO: 这里需要实现获取用户点赞的工作流的API
-      // 目前先返回空数组
-      const likedGroups: TimeGroup[] = []
+      const { reset = false } = options
+      const currentPage = reset ? 1 : currentState.likedCurrentPage
 
-      console.log('ProfileWorkflows: Loaded liked workflows (TODO: implement API)')
+      const response = await workflowsApi.getUserLikedWorkflows({
+        page: currentPage,
+        page_size: currentState.pageSize,
+        order: 'created_at',
+        desc: 'desc',
+        user: userState.user.tokens.did
+      })
+
+      const workflows = response.workflows || []
+      const newGroups = groupWorkflowsByTime(workflows)
+
+      const accumulatedCount = (currentPage - 1) * currentState.pageSize + workflows.length
+      const hasMore = accumulatedCount < (response.total_count || 0)
+      const finalGroups = reset ? newGroups : mergeGroupedWorkflows(currentState.likedGroups, newGroups)
 
       set(profileWorkflowsAtom, {
         ...currentState,
-        likedGroups,
-        totalLiked: 0,
-        likedCurrentPage: 1,
-        likedHasMore: false,
+        likedGroups: finalGroups,
+        totalLiked: response.total_count || 0,
+        likedCurrentPage: currentPage + 1,
+        likedHasMore: hasMore,
         isLoading: false,
-        error: null
+        error: null,
+        lastFetch: Date.now()
       })
 
-      return likedGroups
+      return finalGroups
     } catch (error) {
       console.error('ProfileWorkflows: Failed to fetch liked workflows:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch liked workflows'

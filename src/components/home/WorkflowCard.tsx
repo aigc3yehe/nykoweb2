@@ -268,7 +268,9 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
             {/* 点赞数 */}
             <div className="flex items-center gap-1">
               <img src={LikeIcon} alt="Likes" className="w-4 h-4" />
-              <span className="font-lexend text-xs text-design-bg-light-gray">0</span>
+              <span className="font-lexend text-xs text-design-bg-light-gray">
+                {item.like_count || 0}
+              </span>
             </div>
           </div>
         </div>

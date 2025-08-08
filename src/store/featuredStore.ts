@@ -8,6 +8,7 @@ export interface FeaturedItem {
   name: string
   tags: string[]
   usage: number
+  like_count: number
   cover: string
   description?: string
   user: {

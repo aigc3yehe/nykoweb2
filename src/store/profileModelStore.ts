@@ -73,8 +73,9 @@ const getTimeGroupLabel = (date: Date): string => {
 const groupModelsByTime = (models: FetchModelDto[]): TimeGroup[] => {
   const groups: { [key: string]: FetchModelDto[] } = {}
   models.forEach(model => {
-    if (!model.created_at) return // 跳过没有创建时间的项目
-    const createdDate = new Date(model.created_at)
+    const ts = (model as any).liked_at || model.created_at
+    if (!ts) return // 跳过没有时间的项目
+    const createdDate = new Date(ts as any)
     const dateKey = createdDate.toDateString()
     if (!groups[dateKey]) {
       groups[dateKey] = []
@@ -86,8 +87,10 @@ const groupModelsByTime = (models: FetchModelDto[]): TimeGroup[] => {
       groupKey: dateKey,
       groupLabel: getTimeGroupLabel(new Date(dateKey)),
       models: models.sort((a, b) => {
-        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0
-        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0
+        const aTs = (a as any).liked_at || a.created_at
+        const bTs = (b as any).liked_at || b.created_at
+        const aTime = aTs ? new Date(aTs as any).getTime() : 0
+        const bTime = bTs ? new Date(bTs as any).getTime() : 0
         return bTime - aTime
       })
     }))
@@ -153,7 +156,7 @@ export const fetchPublishedModelsAtom = atom(
     
     try {
       const params = {
-        // user_did: userState.user.tokens.did,
+        user: userState.user.tokens.did,
         page: currentPage,
         page_size: currentState.pageSize,
         order: 'created_at' as const,
@@ -208,18 +211,35 @@ export const fetchLikedModelsAtom = atom(
     })
     
     try {
-      // TODO: 获取用户点赞的模型API
-      const likedGroups: TimeGroup[] = []
+      const { reset = false } = options
+      const currentPage = reset ? 1 : currentState.likedCurrentPage
+
+      const response = await modelsApi.getUserLikedModels({
+        page: currentPage,
+        page_size: currentState.pageSize,
+        order: 'created_at',
+        desc: 'desc',
+        user: userState.user.tokens.did
+      })
+
+      const models = response.models || []
+      const newGroups = groupModelsByTime(models)
+
+      const accumulatedCount = (currentPage - 1) * currentState.pageSize + models.length
+      const hasMore = accumulatedCount < (response.total_count || 0)
+      const finalGroups = reset ? newGroups : mergeGroupedModels(currentState.likedGroups, newGroups)
+
       set(profileModelsAtom, {
         ...currentState,
-        likedGroups,
-        totalLiked: 0,
-        likedCurrentPage: 1,
-        likedHasMore: false,
+        likedGroups: finalGroups,
+        totalLiked: response.total_count || 0,
+        likedCurrentPage: currentPage + 1,
+        likedHasMore: hasMore,
         isLoading: false,
-        error: null
+        error: null,
+        lastFetch: Date.now()
       })
-      return likedGroups
+      return finalGroups
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch liked models'
       set(profileModelsAtom, {

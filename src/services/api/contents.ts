@@ -15,7 +15,8 @@ import type {
   GenerateContentResponse,
   FetchGenerateContentStateRequest,
   FetchGenerateContentStateResponse,
-  ContentQueryParams
+  ContentQueryParams,
+  ContentType
 } from './types'
 
 /**
@@ -126,6 +127,7 @@ export class ContentsApiService {
     order?: string
     desc?: string
     user?: string
+    type?: ContentType
   }): Promise<FetchLikedContentsResponse> {
     return apiService.get<FetchLikedContentsResponse>(
       API_ENDPOINTS.CONTENTS.USER_LIKED,

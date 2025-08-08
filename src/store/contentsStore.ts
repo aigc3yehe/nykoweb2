@@ -82,6 +82,16 @@ export interface ProfileVideoState extends BaseContentsState {
   videoGroups: TimeGroup[]
 }
 
+// Liked Image 状态
+export interface LikedImageState extends BaseContentsState {
+  imageGroups: TimeGroup[]
+}
+
+// Liked Video 状态
+export interface LikedVideoState extends BaseContentsState {
+  videoGroups: TimeGroup[]
+}
+
 // 时间分组接口
 export interface TimeGroup {
   groupKey: string
@@ -114,7 +124,7 @@ const getTimeGroupLabel = (date: Date): string => {
   }
 }
 
-// 按时间分组内容
+// 按时间分组内容（默认使用 created_at）
 const groupContentsByTime = (contents: ContentItem[]): TimeGroup[] => {
   const groups: { [key: string]: ContentItem[] } = {}
   contents.forEach(item => {
@@ -211,6 +221,17 @@ export const profileImageAtom = atom<ProfileImageState>({
 })
 
 export const profileVideoAtom = atom<ProfileVideoState>({
+  ...createInitialState<BaseContentsState>(),
+  videoGroups: []
+})
+
+// Liked 页面的独立状态 atom
+export const likedImageAtom = atom<LikedImageState>({
+  ...createInitialState<BaseContentsState>(),
+  imageGroups: []
+})
+
+export const likedVideoAtom = atom<LikedVideoState>({
   ...createInitialState<BaseContentsState>(),
   videoGroups: []
 })
@@ -645,7 +666,7 @@ export const fetchProfileImageAtom = atom(
         order,
         desc,
         type: 'image',
-        // user: userState.user.tokens.did, // 如果需要获取当前用户的内容
+        user: userState.user.tokens.did, // 如果需要获取当前用户的内容
       }
 
       // 调用API
@@ -762,7 +783,7 @@ export const fetchProfileVideoAtom = atom(
         order,
         desc,
         type: 'video',
-        // user: userState.user.tokens.did, // 如果需要获取当前用户的内容
+        user: userState.user.tokens.did, // 如果需要获取当前用户的内容
       }
 
       // 调用API
@@ -801,6 +822,222 @@ export const fetchProfileVideoAtom = atom(
       })
 
       throw error
+    }
+  }
+)
+
+// Liked Image 的 fetch atom
+export const fetchLikedImageAtom = atom(
+  null,
+  async (get, set, options: {
+    reset?: boolean
+    order?: ContentOrderType
+    desc?: 'desc' | 'asc'
+    disableCache?: boolean
+  } = {}) => {
+    const userState = get(userStateAtom)
+    const currentState = get(likedImageAtom)
+
+    if (!userState.isAuthenticated) {
+      console.warn('LikedImage: User not authenticated')
+      return
+    }
+
+    const {
+      reset = false,
+      order = currentState.order,
+      desc = currentState.desc,
+      disableCache = false
+    } = options
+
+    const shouldReset = reset || order !== currentState.order || desc !== currentState.desc
+
+    const now = Date.now()
+    const cacheValid = shouldReset &&
+      !disableCache &&
+      currentState.lastFetch &&
+      (now - currentState.lastFetch) < CACHE_DURATION &&
+      order === currentState.order &&
+      desc === currentState.desc
+
+    if (cacheValid && currentState.imageGroups.length > 0) {
+      return currentState.imageGroups
+    }
+
+    const newPage = shouldReset ? 1 : currentState.page
+    const existingGroups = shouldReset ? [] : currentState.imageGroups
+
+    set(likedImageAtom, {
+      ...currentState,
+      isLoading: true,
+      error: null,
+      page: newPage,
+      order,
+      desc,
+      imageGroups: existingGroups
+    })
+
+    try {
+      const response = await contentsApi.getUserLikedContents({
+        page: newPage,
+        page_size: currentState.pageSize,
+        order,
+        desc,
+        type: 'image'
+      })
+
+      const newItems = response.contents || []
+      // Liked 列表优先使用 liked_at 进行分组，其次回退到 created_at，再次回退当前时间
+      const itemsForGrouping = newItems.map(item => {
+        const ts = item.liked_at || item.created_at || new Date().toISOString()
+        return { ...item, created_at: ts }
+      })
+      const totalCount = response.total_count || 0
+      const newGroups = groupContentsByTime(itemsForGrouping)
+      const allGroups = shouldReset ? newGroups : mergeGroupedContents(existingGroups, newGroups)
+      const hasMore = newItems.length === currentState.pageSize
+
+      set(likedImageAtom, {
+        ...currentState,
+        imageGroups: allGroups,
+        totalCount,
+        page: newPage + 1,
+        order,
+        desc,
+        isLoading: false,
+        error: null,
+        hasMore,
+        lastFetch: shouldReset ? now : currentState.lastFetch
+      })
+
+      return allGroups
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch liked images'
+      set(likedImageAtom, {
+        ...currentState,
+        isLoading: false,
+        error: errorMessage
+      })
+      throw error
+    }
+  }
+)
+
+// Liked Video 的 fetch atom
+export const fetchLikedVideoAtom = atom(
+  null,
+  async (get, set, options: {
+    reset?: boolean
+    order?: ContentOrderType
+    desc?: 'desc' | 'asc'
+    disableCache?: boolean
+  } = {}) => {
+    const userState = get(userStateAtom)
+    const currentState = get(likedVideoAtom)
+
+    if (!userState.isAuthenticated) {
+      console.warn('LikedVideo: User not authenticated')
+      return
+    }
+
+    const {
+      reset = false,
+      order = currentState.order,
+      desc = currentState.desc,
+      disableCache = false
+    } = options
+
+    const shouldReset = reset || order !== currentState.order || desc !== currentState.desc
+
+    const now = Date.now()
+    const cacheValid = shouldReset &&
+      !disableCache &&
+      currentState.lastFetch &&
+      (now - currentState.lastFetch) < CACHE_DURATION &&
+      order === currentState.order &&
+      desc === currentState.desc
+
+    if (cacheValid && currentState.videoGroups.length > 0) {
+      return currentState.videoGroups
+    }
+
+    const newPage = shouldReset ? 1 : currentState.page
+    const existingGroups = shouldReset ? [] : currentState.videoGroups
+
+    set(likedVideoAtom, {
+      ...currentState,
+      isLoading: true,
+      error: null,
+      page: newPage,
+      order,
+      desc,
+      videoGroups: existingGroups
+    })
+
+    try {
+      const response = await contentsApi.getUserLikedContents({
+        page: newPage,
+        page_size: currentState.pageSize,
+        order,
+        desc,
+        type: 'video'
+      })
+
+      const newItems = response.contents || []
+      // Liked 列表优先使用 liked_at 进行分组，其次回退到 created_at，再次回退当前时间
+      const itemsForGrouping = newItems.map(item => {
+        const ts = item.liked_at || item.created_at || new Date().toISOString()
+        return { ...item, created_at: ts }
+      })
+      const totalCount = response.total_count || 0
+      const newGroups = groupContentsByTime(itemsForGrouping)
+      const allGroups = shouldReset ? newGroups : mergeGroupedContents(existingGroups, newGroups)
+      const hasMore = newItems.length === currentState.pageSize
+
+      set(likedVideoAtom, {
+        ...currentState,
+        videoGroups: allGroups,
+        totalCount,
+        page: newPage + 1,
+        order,
+        desc,
+        isLoading: false,
+        error: null,
+        hasMore,
+        lastFetch: shouldReset ? now : currentState.lastFetch
+      })
+
+      return allGroups
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch liked videos'
+      set(likedVideoAtom, {
+        ...currentState,
+        isLoading: false,
+        error: errorMessage
+      })
+      throw error
+    }
+  }
+)
+
+// 加载更多 Liked Image 内容
+export const loadMoreLikedImageAtom = atom(
+  null,
+  async (get, set) => {
+    const currentState = get(likedImageAtom)
+    if (currentState.hasMore && !currentState.isLoading) {
+      return set(fetchLikedImageAtom, { reset: false })
+    }
+  }
+)
+
+// 加载更多 Liked Video 内容
+export const loadMoreLikedVideoAtom = atom(
+  null,
+  async (get, set) => {
+    const currentState = get(likedVideoAtom)
+    if (currentState.hasMore && !currentState.isLoading) {
+      return set(fetchLikedVideoAtom, { reset: false })
     }
   }
 )
@@ -885,6 +1122,8 @@ export const resetContentsAtom = atom(
     set(workflowGalleryAtom, createInitialState<WorkflowGalleryState>())
     set(profileImageAtom, createInitialState<ProfileImageState>())
     set(profileVideoAtom, createInitialState<ProfileVideoState>())
+    set(likedImageAtom, createInitialState<LikedImageState>())
+    set(likedVideoAtom, createInitialState<LikedVideoState>())
   }
 )
 

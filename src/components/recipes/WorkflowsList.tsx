@@ -20,6 +20,7 @@ const convertWorkflowToFeaturedItem = (workflow: WorkflowDto): FeaturedItem => (
   tags: workflow.tags || [],
   usage: workflow.usage || 0,
   cover: workflow.cover || '',
+  like_count: workflow.like_count || 0,
   description: workflow.description,
   user: workflow.user || {
     did: '',

@@ -11,9 +11,12 @@ import usageSvg from '../assets/web2/usage.svg'
 import use2Svg from '../assets/web2/use_2.svg'
 import shareSvg from '../assets/web2/share.svg'
 import editSvg from '../assets/web2/edit.svg'
+import likeSvg from '../assets/web2/aicc_like.svg'
+import likedSvg from '../assets/web2/aicc_liked.svg'
 import { formatNumber } from '../utils'
 import WorkflowGallery from '../components/workflow/WorkflowGallery.tsx'
 import { useChatSidebar } from '../hooks/useChatSidebar'
+import { toggleLikeWorkflowAtom } from '../store/workflowDetailStore'
 
 const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -25,6 +28,7 @@ const WorkflowDetail: React.FC = () => {
   const setCurrentDetailWorkflow = useSetAtom(setCurrentDetailWorkflowAtom)
   const sendMessageAction = useSetAtom(sendMessage)
   const { openChat } = useChatSidebar()
+  const toggleLikeWorkflow = useSetAtom(toggleLikeWorkflowAtom)
   const workflowId = id ? parseInt(id, 10) : null
   const userDid = userState.user?.tokens?.did || userState.userDetails?.did || ''
   const userRole = userState.userDetails?.role || ''
@@ -289,13 +293,15 @@ const WorkflowDetail: React.FC = () => {
                     {/* 右侧按钮组 */}
                     <div className="flex items-center gap-3.5 h-[3rem]">
                       {/* 点赞按钮 */}
-                      {/*<button className="flex items-center gap-1.5 px-3 h-[3rem] rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">*/}
-                      {/*  <img src={likeSvg} alt="Like" className="w-6 h-6" />*/}
-                      {/*  <span className="font-lexend font-normal text-base leading-[100%] text-design-main-text dark:text-design-dark-main-text">*/}
-                      {/*    /!* TODO: 等后端支持like_count字段后替换为真实数据 *!/*/}
-                      {/*    0*/}
-                      {/*  </span>*/}
-                      {/*</button>*/}
+                      <button
+                        onClick={() => state.workflow && toggleLikeWorkflow(state.workflow.workflow_id)}
+                        className="flex items-center gap-1.5 px-3 h-[3rem] rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue"
+                      >
+                        <img src={state.workflow?.is_liked ? likedSvg : likeSvg} alt="Like" className="w-6 h-6" />
+                        <span className="font-lexend font-normal text-base leading-[100%] text-design-main-text dark:text-design-dark-main-text">
+                          {typeof state.workflow?.like_count === 'number' ? state.workflow.like_count : 0}
+                        </span>
+                      </button>
                       {/* 分享按钮 */}
                       <button className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">
                         <img src={shareSvg} alt="Share" className="w-6 h-6" />

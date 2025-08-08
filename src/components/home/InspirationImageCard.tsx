@@ -96,8 +96,8 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
     if (onClick) {
       onClick()
     } else {
-      // 默认行为：打开内容详情弹窗
-      openContentDetail(content.content_id)
+      // 默认行为：打开内容详情弹窗（state 为 0 时才强制刷新）
+      openContentDetail({ id: content.content_id, state: content.state })
     }
   }
 

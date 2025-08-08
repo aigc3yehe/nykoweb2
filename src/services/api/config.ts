@@ -84,6 +84,8 @@ export const API_ENDPOINTS = {
     CREATE: '/workflow',
     GENERATE: '/workflows/generate',
     RETRY: '/workflows/generate/retry',
+    USER_LIKED: '/workflows/user/liked',
+    LIKE: (id: number) => `/workflows/${id}/like`,
   },
 
   // 模型模块
@@ -92,6 +94,7 @@ export const API_ENDPOINTS = {
     GET_BY_ID: (id: number) => `/models/${id}`,
     GENERATE: '/model/aigc',
     RETRY: '/model/aigc/retry',
+    USER_LIKED: '/models/user/liked',
   },
 
   // AICC模块

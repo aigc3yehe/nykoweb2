@@ -7,38 +7,56 @@ import {
   fetchProfileVideoAtom,
   loadMoreProfileImageAtom,
   loadMoreProfileVideoAtom,
+  likedImageAtom,
+  likedVideoAtom,
+  fetchLikedImageAtom,
+  fetchLikedVideoAtom,
+  loadMoreLikedImageAtom,
+  loadMoreLikedVideoAtom,
   type TimeGroup
 } from '../../store/contentsStore'
 import type { ContentItem } from '../../store/contentsStore'
-import RecreateIcon from '../../assets/web2/recreate.svg'
 import LikeIcon from '../../assets/web2/like.svg'
 import { getScaledImageUrl } from '../../utils'
 import { openContentDetailAtom } from '../../store/contentDetailStore'
 
 interface ProfileContentsListProps {
   type: 'image' | 'video'
-  tab: 'published' | 'liked' // 预留，暂只支持published
+  tab: 'published' | 'liked'
 }
 
-const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type }) => {
+const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) => {
   const [imageState] = useAtom(profileImageAtom)
   const [videoState] = useAtom(profileVideoAtom)
   const [, fetchImageContents] = useAtom(fetchProfileImageAtom)
   const [, fetchVideoContents] = useAtom(fetchProfileVideoAtom)
   const [, loadMoreImage] = useAtom(loadMoreProfileImageAtom)
   const [, loadMoreVideo] = useAtom(loadMoreProfileVideoAtom)
+  const [likedImageState] = useAtom(likedImageAtom)
+  const [likedVideoState] = useAtom(likedVideoAtom)
+  const [, fetchLikedImages] = useAtom(fetchLikedImageAtom)
+  const [, fetchLikedVideos] = useAtom(fetchLikedVideoAtom)
+  const [, loadMoreLikedImages] = useAtom(loadMoreLikedImageAtom)
+  const [, loadMoreLikedVideos] = useAtom(loadMoreLikedVideoAtom)
   const isLoadingRef = useRef(false)
 
   // 根据类型选择对应的状态和函数
-  const state = type === 'image' ? imageState : videoState
-  const fetchContents = type === 'image' ? fetchImageContents : fetchVideoContents
-  const loadMore = type === 'image' ? loadMoreImage : loadMoreVideo
+  const isImage = type === 'image'
+  const state = tab === 'liked'
+    ? (isImage ? likedImageState : likedVideoState)
+    : (isImage ? imageState : videoState)
+  const fetchContents = tab === 'liked'
+    ? (isImage ? fetchLikedImages : fetchLikedVideos)
+    : (isImage ? fetchImageContents : fetchVideoContents)
+  const loadMore = tab === 'liked'
+    ? (isImage ? loadMoreLikedImages : loadMoreLikedVideos)
+    : (isImage ? loadMoreImage : loadMoreVideo)
 
   useEffect(() => {
     fetchContents({ reset: true }).catch((error: any) => {
       console.error('ProfileContentsList: Failed to fetch contents:', error)
     })
-  }, [type, fetchContents])
+  }, [type, tab, fetchContents])
 
   // 处理加载更多
   const handleLoadMore = useCallback(() => {
@@ -75,7 +93,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type }) => {
   }, [handleScroll])
 
   // 根据类型获取对应的分组数据
-  const groups = type === 'image' ? (state as any).imageGroups : (state as any).videoGroups
+  const groups = isImage ? (state as any).imageGroups : (state as any).videoGroups
 
   if (state.isLoading && groups.length === 0) {
     return (
@@ -125,7 +143,8 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type }) => {
 
     // 处理卡片点击
     const handleCardClick = () => {
-      openContentDetail(item.content_id)
+      // 仅当 state 为 0（等待）时强制刷新
+      openContentDetail({ id: item.content_id, state: item.state })
     }
 
     return (
@@ -180,22 +199,10 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type }) => {
 
           {/* Hover 时显示的操作按钮和信息 */}
           <div 
-            className={`absolute bottom-3 left-0 right-0 px-3 flex items-center justify-between transition-opacity duration-200 z-10 ${
+            className={`absolute bottom-3 left-0 right-0 px-3 flex items-center justify-end transition-opacity duration-200 z-10 ${
               isHovered ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            {/* Recreate 按钮 */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                // TODO: 重新创建
-                console.log('Recreate content:', item.content_id)
-              }}
-              className="flex items-center gap-1 h-[1.875rem] px-3 bg-white rounded-md hover:bg-gray-50 transition-colors"
-            >
-              <img src={RecreateIcon} alt="Recreate" className="w-4 h-4" />
-              <span className="font-lexend text-sm text-design-main-text">Recreate</span>
-            </button>
 
             {/* 点赞数 */}
             <div className="flex items-center gap-1">

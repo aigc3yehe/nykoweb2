@@ -20,6 +20,7 @@ const convertModelToFeaturedItem = (model: FetchModelDto): FeaturedItem => ({
   tags: model.tags || [],
   usage: model.usage || 0,
   cover: model.cover || '',
+  like_count: model.like_count || 0,
   description: model.description,
   user: model.user || {
     did: '',

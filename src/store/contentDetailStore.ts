@@ -1,6 +1,7 @@
 import { atom } from 'jotai'
 import { contentsApi } from '../services/api/contents'
 import type { Content } from '../services/api/types'
+import { userStateAtom } from './loginStore'
 
 // 内容详情状态
 export interface ContentDetailState {
@@ -23,12 +24,18 @@ const initialState: ContentDetailState = {
 // 内容详情状态atom
 export const contentDetailAtom = atom<ContentDetailState>(initialState)
 
-// 打开内容详情
+// 打开内容详情（仅当 state 为 0 时强制刷新）
 export const openContentDetailAtom = atom(
   null,
-  async (get, set, contentId: number) => {
+  async (
+    get,
+    set,
+    payload: number | { id: number; state?: number }
+  ) => {
+    const contentId = typeof payload === 'number' ? payload : payload.id
+    const incomingState = typeof payload === 'number' ? undefined : payload.state
     const currentState = get(contentDetailAtom)
-    
+
     // 设置加载状态
     set(contentDetailAtom, {
       ...currentState,
@@ -39,15 +46,34 @@ export const openContentDetailAtom = atom(
     })
 
     try {
-      // 调用API获取内容详情
-      const content = await contentsApi.getContentById(contentId, true)
-      
+      // 只有当生成状态为 0（等待）时才强制刷新
+      const shouldRefresh = incomingState === 0
+      const content = await contentsApi.getContentById(contentId, shouldRefresh)
+
       set(contentDetailAtom, {
         ...get(contentDetailAtom),
         content: content,
         isLoading: false,
         error: null
       })
+
+      // 已登录状态下，静默刷新点赞状态
+      const userState = get(userStateAtom)
+      if (userState.isAuthenticated) {
+        try {
+          const likeStatus = await contentsApi.getLikeStatus(contentId)
+          set(contentDetailAtom, {
+            ...get(contentDetailAtom),
+            content: {
+              ...content,
+              is_liked: likeStatus.is_liked
+            }
+          })
+        } catch (e) {
+          // 静默失败，不影响详情显示
+          console.warn('Silent like status refresh failed:', e)
+        }
+      }
     } catch (error) {
       console.error('Failed to load content detail:', error)
       set(contentDetailAtom, {
@@ -91,9 +117,7 @@ export const toggleLikeContentAtom = atom(
     })
 
     try {
-      // 这里需要调用点赞API，暂时注释
-      // await contentsApi.toggleLike(contentId)
-      console.log('Toggle like for content:', contentId)
+      await contentsApi.likeContent(contentId, { is_liked: !isCurrentlyLiked })
     } catch (error) {
       // 如果失败，回滚状态
       set(contentDetailAtom, {

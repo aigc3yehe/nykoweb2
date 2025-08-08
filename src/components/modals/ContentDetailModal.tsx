@@ -267,23 +267,27 @@ const ContentDetailModal: React.FC = () => {
             <div className="flex items-center justify-between md:w-[33.125rem] w-full h-10">
               {/* 左侧操作按钮 */}
               <div className="flex items-center gap-2 h-10">
-                {/* Modify 按钮 */}
-                <button
-                  onClick={handleModifyClick}
-                  className="flex items-center justify-center size-10 md:w-auto md:gap-1 md:h-10 md:px-5 bg-design-bg-light-blue text-design-main-text rounded-md hover:bg-blue-100 transition-colors"
-                >
-                  <img src={modifyIcon} alt="Modify" className="w-4 h-4" />
-                  <span className="md:block hidden font-lexend font-normal text-sm leading-none">Modify</span>
-                </button>
+                {content?.type !== 'video' && (
+                  <>
+                    {/* Modify 按钮 */}
+                    <button
+                      onClick={handleModifyClick}
+                      className="flex items-center justify-center size-10 md:w-auto md:gap-1 md:h-10 md:px-5 bg-design-bg-light-blue text-design-main-text rounded-md hover:bg-blue-100 transition-colors"
+                    >
+                      <img src={modifyIcon} alt="Modify" className="w-4 h-4" />
+                      <span className="md:block hidden font-lexend font-normal text-sm leading-none">Modify</span>
+                    </button>
 
-                {/* Animate 按钮 */}
-                <button
-                  onClick={handleAnimateClick}
-                  className="flex items-center justify-center size-10 md:w-auto md:gap-1 md:h-10 md:px-5 bg-design-bg-light-blue text-design-main-text rounded-md hover:bg-blue-100 transition-colors"
-                >
-                  <img src={animateIcon} alt="Animate" className="w-4 h-4" />
-                  <span className="md:block hidden font-lexend font-normal text-sm leading-none">Animate</span>
-                </button>
+                    {/* Animate 按钮 */}
+                    <button
+                      onClick={handleAnimateClick}
+                      className="flex items-center justify-center size-10 md:w-auto md:gap-1 md:h-10 md:px-5 bg-design-bg-light-blue text-design-main-text rounded-md hover:bg-blue-100 transition-colors"
+                    >
+                      <img src={animateIcon} alt="Animate" className="w-4 h-4" />
+                      <span className="md:block hidden font-lexend font-normal text-sm leading-none">Animate</span>
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* 右侧按钮 */}

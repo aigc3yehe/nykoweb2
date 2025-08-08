@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useRef } from 'react'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import WorkflowCard from '../home/WorkflowCard'
 import {
   profileModelsAtom,
@@ -10,6 +10,9 @@ import {
 } from '../../store/profileModelStore'
 import type { FetchModelDto } from '../../services/api/types'
 import type { FeaturedItem } from '../../store/featuredStore'
+import { useNavigate } from 'react-router-dom'
+import { useChatSidebar } from '../../hooks/useChatSidebar'
+import { setPendingMessageAtom } from '../../store/assistantStore'
 
 interface ProfileModelsListProps {
   tab: 'published' | 'liked'
@@ -23,6 +26,7 @@ const convertModelToFeaturedItem = (model: FetchModelDto): FeaturedItem => ({
   tags: model.tags || [],
   usage: model.usage || 0,
   cover: model.cover || '',
+  like_count: model.like_count || 0,
   description: model.description,
   user: model.user || {
     did: '',
@@ -38,6 +42,9 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
   const [, fetchLiked] = useAtom(fetchLikedModelsAtom)
   const [, loadMorePublished] = useAtom(loadMorePublishedModelsAtom)
   const isLoadingRef = useRef(false)
+  const navigate = useNavigate()
+  const { openChat } = useChatSidebar()
+  const setPendingMessage = useSetAtom(setPendingMessageAtom)
 
   useEffect(() => {
     if (tab === 'published') {
@@ -154,12 +161,15 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
                   item={convertModelToFeaturedItem(model)}
                   variant="profile_style"
                   onClick={() => {
-                    // TODO: 导航到模型详情页
-                    console.log('Navigate to model:', model.model_id)
+                    navigate(`/model/${model.model_id}`)
                   }}
                   onUseClick={() => {
-                    // TODO: 使用模型
-                    console.log('Use model:', model.model_id)
+                    // 1. 设置延迟发送的消息
+                    setPendingMessage('I want to generate an image.')
+                    // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
+                    navigate(`/model/${model.model_id}`)
+                    // 3. 打开右侧聊天窗口（包含登录检查）
+                    openChat()
                   }}
                 />
               </div>

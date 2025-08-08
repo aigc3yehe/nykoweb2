@@ -20,7 +20,8 @@ import type {
   UpdateModelCoverRequest,
   UpdateModelFlagRequest,
   UpdateModelVisibilityRequest,
-  UpdateModelTagsRequest
+  UpdateModelTagsRequest,
+  FetchLikedModelsResponse
 } from './types'
 
 /**
@@ -35,6 +36,21 @@ export class ModelsApiService {
   async getModelsList(params?: ModelQueryParams): Promise<FetchEnableModelsResponse> {
     return apiService.get<FetchEnableModelsResponse>(
       API_ENDPOINTS.MODELS.LIST,
+      params,
+      { requiresAuth: true }
+    )
+  }
+
+  /** 获取用户点赞的模型列表 */
+  async getUserLikedModels(params?: {
+    page?: number
+    page_size?: number
+    order?: string
+    desc?: string
+    user?: string
+  }): Promise<FetchLikedModelsResponse> {
+    return apiService.get<FetchLikedModelsResponse>(
+      API_ENDPOINTS.MODELS.USER_LIKED,
       params,
       { requiresAuth: true }
     )
@@ -104,7 +120,7 @@ export class ModelsApiService {
     return apiService.get<FetchLikeModelResponse>(
       `/models/${id}/like`,
       params,
-      { requiresAuth: false }
+      { requiresAuth: true }
     )
   }
 

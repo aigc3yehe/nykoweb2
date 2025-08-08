@@ -1,6 +1,7 @@
 import { atom } from 'jotai'
 import { modelsApi } from '../services/api/models'
 import type { FetchModelDto } from '../services/api/types'
+import { userStateAtom } from './loginStore'
 
 // 模型详情状态
 export interface ModelDetailState {
@@ -42,6 +43,20 @@ export const fetchModelDetailAtom = atom(
         error: null
       })
 
+      // 静默刷新点赞状态
+      const userState = get(userStateAtom)
+      if (userState.isAuthenticated) {
+        try {
+          const like = await modelsApi.getModelLikeStatus(modelId)
+          set(modelDetailAtom, prev => ({
+            ...prev,
+            model: prev.model ? { ...prev.model, is_liked: like.is_liked } : prev.model
+          }))
+        } catch (e) {
+          console.warn('Silent model like status refresh failed:', e)
+        }
+      }
+
       return response
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch model details'
@@ -64,3 +79,44 @@ export const clearModelDetailAtom = atom(
     set(modelDetailAtom, initialState)
   }
 ) 
+
+// 点赞/取消点赞（乐观更新并同步数量，数量不小于0）
+export const toggleLikeModelAtom = atom(
+  null,
+  async (get, set, modelId: number) => {
+    const state = get(modelDetailAtom)
+    if (!state.model) return
+
+    const isLiked = !!state.model.is_liked
+    const currentCount = state.model.like_count || 0
+
+    // 乐观更新
+    set(modelDetailAtom, prev => ({
+      ...prev,
+      model: prev.model
+        ? {
+            ...prev.model,
+            is_liked: !isLiked,
+            like_count: !isLiked ? currentCount + 1 : Math.max(currentCount - 1, 0)
+          }
+        : prev.model
+    }))
+
+    try {
+      await modelsApi.likeModel(modelId, { is_liked: !isLiked })
+    } catch (e) {
+      // 回滚
+      set(modelDetailAtom, prev => ({
+        ...prev,
+        model: prev.model
+          ? {
+              ...prev.model,
+              is_liked: isLiked,
+              like_count: currentCount
+            }
+          : prev.model
+      }))
+      throw e
+    }
+  }
+)

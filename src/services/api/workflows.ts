@@ -8,7 +8,10 @@ import type {
   WorkflowGenerateRequest,
   AigcProcesserResponse,
   RetryGenerateRequest,
-  WorkflowQueryParams
+  WorkflowQueryParams,
+  FetchLikedWorkflowsResponse,
+  LikeWorkflowRequest,
+  FetchLikeWorkflowResponse
 } from './types'
 
 /**
@@ -77,6 +80,41 @@ export class WorkflowsApiService {
     return apiService.post<AigcProcesserResponse>(
       API_ENDPOINTS.WORKFLOWS.RETRY,
       request,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 获取用户点赞的工作流
+   */
+  async getUserLikedWorkflows(params?: {
+    page?: number
+    page_size?: number
+    order?: string
+    desc?: string
+    user?: string
+  }): Promise<FetchLikedWorkflowsResponse> {
+    return apiService.get<FetchLikedWorkflowsResponse>(
+      API_ENDPOINTS.WORKFLOWS.USER_LIKED,
+      params,
+      { requiresAuth: true }
+    )
+  }
+
+  /** 点赞/取消点赞工作流 */
+  async likeWorkflow(id: number, request: LikeWorkflowRequest): Promise<boolean> {
+    return apiService.post<boolean>(
+      API_ENDPOINTS.WORKFLOWS.LIKE(id),
+      request,
+      { requiresAuth: true }
+    )
+  }
+
+  /** 获取工作流点赞状态 */
+  async getWorkflowLikeStatus(id: number, user?: string): Promise<FetchLikeWorkflowResponse> {
+    return apiService.get<FetchLikeWorkflowResponse>(
+      API_ENDPOINTS.WORKFLOWS.LIKE(id),
+      { user },
       { requiresAuth: true }
     )
   }
