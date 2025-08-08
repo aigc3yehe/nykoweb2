@@ -16,6 +16,17 @@ import StyleTrainerIcon from '../../assets/web2/style_trainer.svg'
 import MyAssetsIcon from '../../assets/web2/my_assets.svg'
 import MyAssetsSelectedIcon from '../../assets/web2/my_assets_selected.svg'
 
+// 暗色版图标
+import HomeIconDark from '../../assets/web2_dark/home.svg'
+import HomeSelectedIconDark from '../../assets/web2_dark/home_selected.svg'
+import RecipesIconDark from '../../assets/web2_dark/recipes_normal.svg'
+import RecipesSelectedIconDark from '../../assets/web2_dark/recipes_selected.svg'
+import GeneratorIconDark from '../../assets/web2_dark/generator.svg'
+import WorkflowBuilderIconDark from '../../assets/web2_dark/workflows_builder.svg'
+import StyleTrainerIconDark from '../../assets/web2_dark/style_trainer.svg'
+import MyAssetsIconDark from '../../assets/web2_dark/my_assets.svg'
+import MyAssetsSelectedIconDark from '../../assets/web2_dark/my_assets_selected.svg'
+
 interface NavItem {
   key: string
   label: string
@@ -28,6 +39,20 @@ interface NavItem {
 interface NavSection {
   title: string
   items: NavItem[]
+}
+
+const IconSwap: React.FC<{
+  light: string
+  dark: string
+  alt: string
+  className?: string
+}> = ({ light, dark, alt, className }) => {
+  return (
+    <>
+      <img src={light} alt={alt} className={cn(className, 'block dark:hidden')} />
+      <img src={dark} alt={alt} className={cn(className, 'hidden dark:block')} />
+    </>
+  )
 }
 
 const Sidebar: React.FC = () => {
@@ -46,15 +71,15 @@ const Sidebar: React.FC = () => {
     {
       key: 'home',
       label: t('nav.home'), // en: Home / zh: 首页
-      icon: <img src={HomeIcon} alt="Home" className="w-5 h-5" />,
-      selectedIcon: <img src={HomeSelectedIcon} alt="Home" className="w-5 h-5" />,
+      icon: <IconSwap light={HomeIcon} dark={HomeIconDark} alt="Home" className="w-5 h-5" />,
+      selectedIcon: <IconSwap light={HomeSelectedIcon} dark={HomeSelectedIconDark} alt="Home" className="w-5 h-5" />,
       path: '/'
     },
     {
       key: 'recipes',
       label: t('nav.recipes'), // en: Recipes / zh: 组合
-      icon: <img src={RecipesIcon} alt="Recipes" className="w-5 h-5" />,
-      selectedIcon: <img src={RecipesSelectedIcon} alt="Recipes" className="w-5 h-5" />,
+      icon: <IconSwap light={RecipesIcon} dark={RecipesIconDark} alt="Recipes" className="w-5 h-5" />,
+      selectedIcon: <IconSwap light={RecipesSelectedIcon} dark={RecipesSelectedIconDark} alt="Recipes" className="w-5 h-5" />,
       path: '/recipes'
     },
   ]
@@ -64,22 +89,22 @@ const Sidebar: React.FC = () => {
     {
       key: 'generator',
       label: t('nav.generator'), // en: Generator / zh: 生成器
-      icon: <img src={GeneratorIcon} alt="Generator" className="w-8 h-8" />,
-      selectedIcon: <img src={GeneratorIcon} alt="Generator" className="w-8 h-8" />,
+      icon: <IconSwap light={GeneratorIcon} dark={GeneratorIconDark} alt="Generator" className="w-8 h-8" />,
+      selectedIcon: <IconSwap light={GeneratorIcon} dark={GeneratorIconDark} alt="Generator" className="w-8 h-8" />,
       path: '/generator'
     },
     {
       key: 'workflow-builder',
       label: t('nav.workflowBuilder'), // en: Workflow Builder / zh: 工作流构建器
-      icon: <img src={WorkflowBuilderIcon} alt="Workflow Builder" className="w-8 h-8" />,
-      selectedIcon: <img src={WorkflowBuilderIcon} alt="Workflow Builder" className="w-8 h-8" />,
+      icon: <IconSwap light={WorkflowBuilderIcon} dark={WorkflowBuilderIconDark} alt="Workflow Builder" className="w-8 h-8" />,
+      selectedIcon: <IconSwap light={WorkflowBuilderIcon} dark={WorkflowBuilderIconDark} alt="Workflow Builder" className="w-8 h-8" />,
       path: '/workflow/builder'
     },
     {
       key: 'style-trainer',
       label: t('nav.styleTrainer'), // en: Style Trainer / zh: 风格训练器
-      icon: <img src={StyleTrainerIcon} alt="Style Trainer" className="w-8 h-8" />,
-      selectedIcon: <img src={StyleTrainerIcon} alt="Style Trainer" className="w-8 h-8" />,
+      icon: <IconSwap light={StyleTrainerIcon} dark={StyleTrainerIconDark} alt="Style Trainer" className="w-8 h-8" />,
+      selectedIcon: <IconSwap light={StyleTrainerIcon} dark={StyleTrainerIconDark} alt="Style Trainer" className="w-8 h-8" />,
       path: '/style/trainer'
     }
   ]
@@ -89,8 +114,8 @@ const Sidebar: React.FC = () => {
     {
       key: 'assets',
       label: t('nav.assets'), // en: My Assets / zh: 我的资产
-      icon: <img src={MyAssetsIcon} alt="My Assets" className="w-4 h-4" />,
-      selectedIcon: <img src={MyAssetsSelectedIcon} alt="My Assets" className="w-4 h-4" />,
+      icon: <IconSwap light={MyAssetsIcon} dark={MyAssetsIconDark} alt="My Assets" className="w-4 h-4" />,
+      selectedIcon: <IconSwap light={MyAssetsSelectedIcon} dark={MyAssetsSelectedIconDark} alt="My Assets" className="w-4 h-4" />,
       path: '/profile' // 修改为导航到个人中心
     }
   ]

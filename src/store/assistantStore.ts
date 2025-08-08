@@ -3,13 +3,11 @@
 import { atom } from 'jotai';
 import { imageUploadAtom, setImageUploadStateAtom, updateMessageUrlsAtom, showToastAtom, uploadImages } from './imagesStore.ts';
 import { fetchContentsAtom } from './contentsStore';
-import { PRIVY_TOKEN_HEADER } from '../utils';
-import { getAccessToken } from '@privy-io/react-auth';
 import { FetchModelDto, WorkflowDto } from '../services/api';
 import { contentsApi } from '../services/api/contents';
-import type { FetchGenerateContentStateRequest, FetchGenerateContentStateResponse } from '../services/api/types';
+import type { FetchGenerateContentStateRequest, FetchGenerateContentStateResponse } from '../services/api';
 import { workflowsApi } from '../services/api/workflows';
-import type { WorkflowGenerateRequest } from '../services/api/types';
+import type { WorkflowGenerateRequest } from '../services/api';
 
 // 添加宽高比相关接口
 export interface AspectRatio {
@@ -889,10 +887,10 @@ export function updateAgreeState(messages: Message[], messageIndex: number) {
 
 // 添加自定方消息
 export const addMessage = atom(
-  null, 
+  null,
   async (get, set, content: string, messageType: string, request_id: string, url: string, cu: number, width: number, height: number) => {
     const chatState = get(chatAtom);
-    
+
     // 创建消息对象
     const receivedMessage: Message = {
       role: 'assistant',
@@ -913,7 +911,7 @@ export const addMessage = atom(
 
     // 判断是否为工作流生成的图片
     const isWorkflow = messageType === 'workflow_generate_result';
-    
+
     // 构建最新生成内容的状态信息
     const latestGeneratedImage: LatestGeneratedImage = {
       aicc_status: 'completed',
@@ -931,7 +929,7 @@ export const addMessage = atom(
 
     // 为工作流任务更新额外的状态
     let updatedWorkflowRunning = chatState.workflowRunning;
-    
+
     if (isWorkflow) {
       updatedWorkflowRunning = {
         isRunning: false,
@@ -2013,13 +2011,11 @@ interface CreateWorkflowResponse {
 // 创建工作流API函数
 export async function createWorkflowAPI(params: CreateWorkflowParams): Promise<CreateWorkflowResponse> {
   try {
-    const privyToken = await getAccessToken();
     const response = await fetch('/studio-api/workflow/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-        [PRIVY_TOKEN_HEADER]: privyToken || "",
       },
       body: JSON.stringify(params)
     });
@@ -2210,13 +2206,11 @@ interface AigcResponse {
 // 运行工作流API函数
 export async function runWorkflowAPI(params: RunWorkflowParams): Promise<AigcResponse> {
   try {
-    const privyToken = await getAccessToken();
     const response = await fetch('/studio-api/workflow/aigc', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-        [PRIVY_TOKEN_HEADER]: privyToken || "",
       },
       body: JSON.stringify(params)
     });
@@ -2713,13 +2707,11 @@ export interface AIProvidersState {
 // 新增：获取AI服务提供商API函数
 export async function fetchAIProvidersAPI(): Promise<AIProvidersResponse> {
   try {
-    const privyToken = await getAccessToken();
     const response = await fetch('/studio-api/dashboard/provider/ai', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-        [PRIVY_TOKEN_HEADER]: privyToken || "",
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
       }
     });
 
@@ -2907,13 +2899,12 @@ export const formatTypeLabel = (type: string): string => {
 // 新增：NFT铸造API函数
 export async function createTokenizationAPI(params: TokenizationParams): Promise<TokenizationResponse> {
   try {
-    const privyToken = await getAccessToken();
+
     const response = await fetch('/studio-api/aigc/tokenization', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-        [PRIVY_TOKEN_HEADER]: privyToken || "",
+        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`
       },
       body: JSON.stringify(params)
     });

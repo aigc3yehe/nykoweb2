@@ -16,18 +16,10 @@
     "@delvtech/drift-viem": "^0.3.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@flaunch/sdk": "^0.5.1",
     "@mui/icons-material": "^6.4.8",
     "@mui/material": "^6.4.8",
-    "@privy-io/react-auth": "^2.6.4",
-    "@privy-io/wagmi": "^1.0.3",
     "@tanstack/react-query": "^5.68.0",
-    "@uniswap/sdk-core": "^7.7.2",
-    "@uniswap/v4-sdk": "^1.21.2",
-    "@uniswap/widgets": "^2.59.0",
     "@vercel/analytics": "^1.5.0",
-    "@wagmi/core": "^2.16.5",
-    "alchemy-sdk": "^3.6.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "ethers": "^5.8.0",
@@ -43,8 +35,7 @@
     "recharts": "^2.15.3",
     "tailwind-merge": "^3.3.1",
     "viem": "^2.28.0",
-    "vite-plugin-node-polyfills": "^0.23.0",
-    "wagmi": "^2.14.13"
+    "vite-plugin-node-polyfills": "^0.23.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

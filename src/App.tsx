@@ -2,12 +2,9 @@ import './App.css'
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
-import Toast from './components/Toast'
 import ConfirmDialog from './components/ui/ConfirmDialog'
 import { dialogAtom } from './store/dialogStore';
 import { useAtom, useSetAtom } from 'jotai'
-import { modalAtom, closeImageDetails } from './store/modalStore'
-import ImageDetailsModal from './components/ImageDetailsModal'
 import ContentDetailModal from './components/modals/ContentDetailModal'
 import { Analytics } from '@vercel/analytics/react'
 import { initUserStateAtom } from './store/loginStore'
@@ -24,9 +21,7 @@ import StyleTrainer from './pages/StyleTrainer'
 import Pricing from './pages/Pricing'
 
 function App() {
-  const [modalState] = useAtom(modalAtom)
   const [dialog] = useAtom(dialogAtom);
-  const handleCloseImageDetails = useSetAtom(closeImageDetails)
 
   // 初始化用户状态
   const initUserState = useSetAtom(initUserStateAtom)
@@ -45,21 +40,21 @@ function App() {
           <Route path="/recipes" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
           <Route path="/recipes/:tab" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
           <Route path="/api/auth/callback/google" element={<AuthCallback />} />
-          
+
           {/* 公开详情页面 - 不需要登录 */}
           <Route path="/workflow/:id" element={<ProtectedRoute requireAuth={false}><WorkflowDetail /></ProtectedRoute>} />
           <Route path="/model/:id" element={<ProtectedRoute requireAuth={false}><ModelDetail /></ProtectedRoute>} />
-          
+
           {/* 需要登录的页面 */}
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
           <Route path="/workflow/builder" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />
           <Route path="/style/trainer" element={<ProtectedRoute><StyleTrainer /></ProtectedRoute>} />
-          
+
           {/* 其他路由... */}
         </Routes>
 
-        <Toast />
+        {/* <Toast /> */}
         {/* 新 ConfirmDialog 通用弹窗 */}
         {dialog.open && (
           <ConfirmDialog
@@ -70,19 +65,6 @@ function App() {
             onCancel={dialog.onCancel}
             confirmText={dialog.confirmText}
             cancelText={dialog.cancelText}
-          />
-        )}
-
-
-        {/* 保持现有的模态框 */}
-        {modalState.isImageDetailsOpen && modalState.selectedImage && (
-          <ImageDetailsModal
-            key={`image-detail-${modalState.selectedImage.id}`}
-            image={modalState.selectedImage}
-            imageDetail={modalState.imageDetail}
-            isLoading={modalState.isLoading}
-            error={modalState.error}
-            onClose={handleCloseImageDetails}
           />
         )}
 

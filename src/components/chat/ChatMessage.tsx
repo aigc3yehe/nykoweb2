@@ -1,7 +1,6 @@
 import React from "react";
 import checkAgreeIcon from "../../assets/check_agree.svg";
 import checkedAgreeIcon from "../../assets/checked_agree.svg";
-import { WorkflowDetail } from '../../store/workflowStore';
 import { getScaledImageUrl } from '../../utils/image';
 import modifyIcon from '../../assets/web2/modify.svg';
 import animateIcon from '../../assets/web2/animate.svg';
@@ -83,7 +82,7 @@ export interface ChatMessageProps {
   onRemoveReferenceImage?: () => void;
   workflow_extra_prompt?: string;
   onUpdateWorkflowExtraPrompt?: (prompt: string) => void;
-  currentWorkflow?: WorkflowDetail | null;
+  // currentWorkflow?: WorkflowDetail | null;
   isLastMessage?: boolean;
   onPartiallyModify?: () => void;
   onAnimate?: () => void;
@@ -390,4 +389,4 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   );
 }
 
-export default ChatMessage; 
+export default ChatMessage;

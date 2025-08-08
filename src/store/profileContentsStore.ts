@@ -1,7 +1,7 @@
 import { atom } from 'jotai'
 import { contentsApi } from '../services/api/contents'
 import { userStateAtom } from './loginStore'
-import type { ContentItem } from '../services/api/types'
+import type { ContentItem } from '../services/api'
 
 export type ContentType = 'image' | 'video'
 
@@ -104,7 +104,7 @@ const mergeGroupedContents = (existingGroups: TimeGroup[], newGroups: TimeGroup[
   existingGroups.forEach(group => {
     groupMap.set(group.groupKey, group)
   })
-  
+
   // 合并新 group
   newGroups.forEach(newGroup => {
     const oldGroup = groupMap.get(newGroup.groupKey)
@@ -150,7 +150,7 @@ export const fetchProfileContentsAtom = atom(
     const { type, reset = false } = options
     const now = Date.now()
     const isImage = type === 'image'
-    
+
     // 缓存检查（仅在重置时检查）
     if (reset) {
       const cacheValid = ((isImage && currentState.lastFetchImage && (now - currentState.lastFetchImage) < CACHE_DURATION && currentState.imageGroups.length > 0) ||
@@ -160,16 +160,16 @@ export const fetchProfileContentsAtom = atom(
         return isImage ? currentState.imageGroups : currentState.videoGroups
       }
     }
-    
+
     const currentPage = reset ? 1 : (isImage ? currentState.imageCurrentPage : currentState.videoCurrentPage)
     const pageSize = isImage ? currentState.imagePageSize : currentState.videoPageSize
-    
+
     set(profileContentsAtom, {
       ...currentState,
       isLoading: true,
       error: null
     })
-    
+
     try {
       const params: any = {
         //user: userState.user.tokens.did,
@@ -180,9 +180,9 @@ export const fetchProfileContentsAtom = atom(
       const response = await contentsApi.getContentsList(params)
       const items = response.contents || []
       const newGroups = groupContentsByTime(items)
-      
+
       const hasMore = items.length === pageSize && (currentPage * pageSize) < (response.total_count || 0)
-      
+
       if (isImage) {
         const finalGroups = reset ? newGroups : mergeGroupedContents(currentState.imageGroups, newGroups)
         set(profileContentsAtom, {
@@ -228,7 +228,7 @@ export const loadMoreProfileContentsAtom = atom(
   async (get, set, type: ContentType) => {
     const currentState = get(profileContentsAtom)
     const hasMore = type === 'image' ? currentState.imageHasMore : currentState.videoHasMore
-    
+
     if (hasMore && !currentState.isLoading) {
       console.log('ProfileContents: Loading more', type)
       return set(fetchProfileContentsAtom, { type, reset: false })
@@ -241,4 +241,4 @@ export const resetProfileContentsAtom = atom(
   (_, set) => {
     set(profileContentsAtom, initialState)
   }
-) 
+)

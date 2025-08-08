@@ -1,6 +1,4 @@
 import { atom } from "jotai";
-import { accountAtom } from "./accountStore";
-
 // 定义功能项类型
 export interface PricingFeature {
   title: string;
@@ -137,23 +135,23 @@ const initialState: PricingState = {
 export const pricingAtom = atom<PricingState>(initialState);
 
 // 从账户状态同步角色/计划
-export const syncPlanWithAccount = atom(null, (get, set) => {
-  const accountState = get(accountAtom);
-  const pricingState = get(pricingAtom);
-
-  // 根据用户角色设置当前计划
-  if (accountState.role === "premium") {
-    set(pricingAtom, {
-      ...pricingState,
-      currentPlanId: "premium",
-    });
-  } else {
-    set(pricingAtom, {
-      ...pricingState,
-      currentPlanId: "free",
-    });
-  }
-});
+// export const syncPlanWithAccount = atom(null, (get, set) => {
+//   //const accountState = get(userStateAtom);
+//   //const pricingState = get(pricingAtom);
+//
+//   // 根据用户角色设置当前计划
+//   // if (accountState.userDetails?.role === "premium") {
+//   //   set(pricingAtom, {
+//   //     ...pricingState,
+//   //     currentPlanId: "premium",
+//   //   });
+//   // } else {
+//   //   set(pricingAtom, {
+//   //     ...pricingState,
+//   //     currentPlanId: "free",
+//   //   });
+//   // }
+// });
 
 export const setOperationLoading = atom(
   null,

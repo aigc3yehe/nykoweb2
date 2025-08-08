@@ -1,5 +1,4 @@
 import { API_CONFIG } from './config'
-import { getAccessToken } from '@privy-io/react-auth'
 
 // 标准API响应格式
 export interface ApiResponse<T = any> {
@@ -25,7 +24,6 @@ export interface RequestConfig {
   headers?: Record<string, string>
   timeout?: number
   requiresAuth?: boolean
-  requiresPrivyToken?: boolean
   requiresAgentToken?: boolean
   retries?: number
 }
@@ -65,18 +63,6 @@ export class BaseApiService {
       headers[API_CONFIG.BEARER_TOKEN_HEADER] = `Bearer ${this.bearerToken}`
     }
 
-    // 添加Privy Token
-    if (config?.requiresPrivyToken) {
-      try {
-        const privyToken = await getAccessToken()
-        if (privyToken) {
-          headers[API_CONFIG.PRIVY_TOKEN_HEADER] = privyToken
-        }
-      } catch (error) {
-        console.warn('Failed to get Privy token:', error)
-      }
-    }
-
     // 添加Agent Token
     if (config?.requiresAgentToken && this.agentToken) {
       headers[API_CONFIG.AGENT_TOKEN_HEADER] = this.agentToken
@@ -92,17 +78,17 @@ export class BaseApiService {
     if (baseURL.startsWith('/')) {
       baseURL = window.location.origin + baseURL
     }
-    
+
     // 确保baseURL以/结尾
     if (!baseURL.endsWith('/')) {
       baseURL += '/'
     }
-    
+
     // 去掉endpoint开头的/，避免new URL()忽略baseURL
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint
-    
+
     const url = new URL(cleanEndpoint, baseURL)
-    
+
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -110,9 +96,9 @@ export class BaseApiService {
         }
       })
     }
-    
+
     console.log(`Building URL - baseURL: ${baseURL}, endpoint: ${cleanEndpoint}, final: ${url.toString()}`)
-    
+
     return url.toString()
   }
 
@@ -176,13 +162,13 @@ export class BaseApiService {
 
       } catch (error) {
         lastError = error as Error
-        
+
         // 如果不是最后一次尝试，等待后重试
         if (attempt < maxRetries) {
           await this.delay(API_CONFIG.RETRY.DELAY * (attempt + 1))
           continue
         }
-        
+
         break
       }
     }
@@ -270,7 +256,7 @@ export class BaseApiService {
     const headers = await this.getHeaders(config)
     // 移除Content-Type，让浏览器自动设置
     delete headers['Content-Type']
-    
+
     const url = this.buildURL(endpoint)
     return this.makeRequest<T>(
       url,
@@ -284,4 +270,4 @@ export class BaseApiService {
 }
 
 // 导出单例实例
-export const apiService = new BaseApiService() 
+export const apiService = new BaseApiService()

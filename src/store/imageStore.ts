@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { atom } from 'jotai';
-import { accountAtom } from './accountStore';
 import { SOURCE_TYPE } from '../types/api.type';
-import { getAccessToken } from '@privy-io/react-auth';
-import { PRIVY_TOKEN_HEADER } from '../utils/constants';
 
 // 定义Twitter接口
 export interface Twitter {
@@ -98,12 +95,13 @@ export const fetchImages = atom(
     order?: ImageOrderType
   } = {}) => {
     const imageState = get(imageListAtom);
-    const accountState = get(accountAtom);
+    //const accountState = get(accountAtom);
 
     // 如果重置或者还有更多数据可加载
     if (reset || imageState.hasMore) {
       if (reset && ownedOnly) {
-        const ownedImages = imageState.images.filter((image) => image.creator == accountState.did);
+        const ownedImages = imageState.images.filter(() => false);
+        // const ownedImages = imageState.images.filter((image) => image.creator == accountState.did);
         set(imageListAtom, {
           ...imageState,
           images: ownedImages,
@@ -144,9 +142,9 @@ export const fetchImages = atom(
         });
 
         // 如果是owned模式，添加user参数
-        if (ownedOnly && accountState.did) {
-          params.append('user', accountState.did);
-        }
+        //if (ownedOnly && accountState.did) {
+        //  params.append('user', accountState.did);
+        //}
 
         // 添加可选的model_id参数
         if (model_id !== undefined) {
@@ -169,13 +167,13 @@ export const fetchImages = atom(
           params.append('view', 'true');
         }
 
-        const privyToken = await getAccessToken();
+
 
         // 发送请求
         const response = await fetch(`/studio-api/aigc/gallery?${params.toString()}`, {
           headers: {
             'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-            [PRIVY_TOKEN_HEADER]: privyToken || '',
+            //[PRIVY_TOKEN_HEADER]: privyToken || '',
           }
         });
 
@@ -235,45 +233,6 @@ export const fetchImages = atom(
   }
 );
 
-
-// 按模型ID筛选
-export const filterByModelId = atom(
-  null,
-  (get, set, model_id?: number) => {
-    const state = get(imageListAtom);
-
-    set(imageListAtom, {
-      ...state,
-      model_id,
-      page: 1,
-      images: [],
-      hasMore: true
-    });
-
-    // @ts-ignore
-    get(fetchImages)({ reset: true, model_id });
-  }
-);
-
-// 按状态筛选
-export const filterByState = atom(
-  null,
-  (get, set, state?: ImageState) => {
-    const imageState = get(imageListAtom);
-
-    set(imageListAtom, {
-      ...imageState,
-      state,
-      page: 1,
-      images: [],
-      hasMore: true
-    });
-
-    // @ts-ignore
-    get(fetchImages)({ reset: true, state });
-  }
-);
-
 // 重置
 export const resetImageList = atom(
   null,
@@ -330,52 +289,3 @@ export const fetchImageDetail = async (imageId: number): Promise<ImageDetail> =>
     throw error;
   }
 };
-
-// 点赞API函数
-export const likeImageAPI = async (contentId: number, isLiked: boolean, userDid: string): Promise<{data: boolean, message: string}> => {
-  try {
-    const privyToken = await getAccessToken();
-    const response = await fetch('/studio-api/aigc/like', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-        [PRIVY_TOKEN_HEADER]: privyToken || '',
-      },
-      body: JSON.stringify({
-        user: userDid,
-        content_id: contentId,
-        is_liked: isLiked
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Like image failed: ${response.statusText}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Like image failed:', error);
-    throw error;
-  }
-};
-
-// 点赞操作atom
-export const likeImageAtom = atom(
-  null,
-  async (get, _set, contentId: number, isLiked: boolean) => {
-    const accountState = get(accountAtom);
-    
-    if (!accountState.did) {
-      throw new Error('User not authenticated');
-    }
-
-    try {
-      const response = await likeImageAPI(contentId, isLiked, accountState.did);
-      return response;
-    } catch (error) {
-      console.error('Like image failed:', error);
-      throw error;
-    }
-  }
-);

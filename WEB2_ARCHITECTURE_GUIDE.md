@@ -110,7 +110,7 @@ nikosolo/
 │   ├── hooks/                      # 自定义 Hooks
 │   │   └── useI18n.ts              # 国际化 Hook
 │   ├── providers/                  # Context Providers
-│   │   ├── PrivyAuthProvider.tsx   # Privy 认证提供者
+│   │   ├── 
 │   │   └── ...
 │   ├── locales/                    # 国际化文件
 │   │   ├── en.ts                   # 英文
