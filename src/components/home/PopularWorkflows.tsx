@@ -129,7 +129,7 @@ const PopularWorkflows: React.FC = () => {
       {/* 滚动容器 - 间距16px */}
       <div 
         ref={scrollContainerRef}
-        className="flex gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth items-start h-[18rem] md:h-[19.25rem]"
+        className="flex gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth items-start h-[18.575rem] md:h-[19.625rem]"
       >
         {workflowsState.items.map((item) => (
           <WorkflowCard
