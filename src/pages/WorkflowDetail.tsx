@@ -55,9 +55,13 @@ const WorkflowDetail: React.FC = () => {
 
   // 获取用户头像
   const getAvatarUrl = () => {
-    if (state.workflow?.user?.avatar) {
+    // 检查是否有有效的头像URL，排除占位地址
+    if (state.workflow?.user?.avatar &&
+        !state.workflow.user.avatar.includes('example.com') &&
+        !state.workflow.user.avatar.includes('placeholder')) {
       return state.workflow.user.avatar
     }
+    // 使用本地默认头像
     return avatarSvg
   }
 
@@ -180,7 +184,7 @@ const WorkflowDetail: React.FC = () => {
                     {/* 用户信息与标签 */}
                     <div className="flex items-center gap-6 h-8">
                       {/* 用户信息 */}
-                      <div className="flex items-center gap-1.5 h-8">
+                      <div className="flex items-center gap-1.5 h-8 mt-1.5">
                         <img
                           src={getAvatarUrl()}
                           alt={getDisplayName()}
@@ -362,7 +366,7 @@ const WorkflowDetail: React.FC = () => {
                   )}
                 </div>
                 {/* 用户信息 */}
-                <div className="flex items-center gap-1.5 h-6">
+                <div className="flex items-center gap-1.5 h-6 mt-1.5">
                   <img
                       src={getAvatarUrl()}
                       alt={getDisplayName()}

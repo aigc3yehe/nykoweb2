@@ -52,16 +52,21 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
 
   // 获取头像URL
   const getAvatarUrl = () => {
-    // 优先使用详细信息中的数据
-    if (localImageDetail?.users?.twitter?.profilePictureUrl) {
+    // 优先使用详细信息中的数据，排除占位地址
+    if (localImageDetail?.users?.twitter?.profilePictureUrl &&
+        !localImageDetail.users.twitter.profilePictureUrl.includes('example.com') &&
+        !localImageDetail.users.twitter.profilePictureUrl.includes('placeholder')) {
       return localImageDetail.users.twitter.profilePictureUrl;
     } else if (localImageDetail?.users?.twitter?.username) {
       return `https://unavatar.io/twitter/${localImageDetail.users.twitter.username}`;
-    } else if (image.users.twitter?.profilePictureUrl) {
+    } else if (image.users.twitter?.profilePictureUrl &&
+               !image.users.twitter.profilePictureUrl.includes('example.com') &&
+               !image.users.twitter.profilePictureUrl.includes('placeholder')) {
       return image.users.twitter.profilePictureUrl;
     } else if (image.users.twitter?.username) {
       return `https://unavatar.io/twitter/${image.users.twitter.username}`;
     } else {
+      // 使用本地默认头像
       return avatarSvg;
     }
   };
@@ -214,7 +219,7 @@ const ImageDetailsModal: React.FC<ImageDetailsModalProps> = ({
 
         <div className={styles.imageInfo}>
           <div className={styles.infoHeader}>
-            <div className={styles.authorInfo}>
+            <div className={styles.authorInfo} style={{ marginTop: '6px' }}>
               <img
                 src={getAvatarUrl()}
                 alt="authorAvatar"

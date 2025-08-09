@@ -126,7 +126,7 @@ const TrendingStyles: React.FC = () => {
       {/* 滚动容器 - 间距20px */}
       <div 
         ref={scrollContainerRef}
-        className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth"
+        className="flex gap-5 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth items-start h-[22.75rem]"
       >
         {modelsState.items.map((item) => (
           <WorkflowCard

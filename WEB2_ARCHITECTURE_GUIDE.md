@@ -76,6 +76,11 @@ nikosolo/
 │   │   ├── Recipes.tsx             # Recipes 页面
 │   │   ├── Profile.tsx             # 用户资料页
 │   │   ├── AuthCallback.tsx        # OAuth 回调页
+│   │   ├── Pricing.tsx             # 定价/会员页面
+│   │   ├── ModelDetail.tsx         # 模型详情页
+│   │   ├── WorkflowDetail.tsx      # 工作流详情页
+│   │   ├── WorkflowBuilder.tsx     # 工作流构建器
+│   │   ├── StyleTrainer.tsx        # 风格训练页
 │   │   └── ...
 │   ├── store/                      # 状态管理（Jotai）
 │   │   ├── loginStore.ts           # 用户认证状态
@@ -110,7 +115,7 @@ nikosolo/
 │   ├── hooks/                      # 自定义 Hooks
 │   │   └── useI18n.ts              # 国际化 Hook
 │   ├── providers/                  # Context Providers
-│   │   ├── PrivyAuthProvider.tsx   # Privy 认证提供者
+│   │   ├── ~~PrivyAuthProvider.tsx   # Privy 认证提供者~~ # Web3残留代码
 │   │   └── ...
 │   ├── locales/                    # 国际化文件
 │   │   ├── en.ts                   # 英文
@@ -787,6 +792,78 @@ git commit -m "refactor: 重构状态管理架构"
 - ✅ 详细的错误信息
 - ✅ 开发工具集成
 
+## Web3残留代码
+
+由于本项目从Web3项目迁移而来，仍存在大量Web3相关的残留代码需要清理：
+
+### 1. 智能合约相关
+- **目录**: `src/abi/`
+  - `abi.json` - 智能合约ABI
+  - `IERC20.json` - ERC20代币接口
+  - `IERC721_abi.json` - ERC721 NFT接口
+  - `INikoTokenLocker.json` - 代币锁定合约
+  - `VirtualsLocker.json` - Virtuals锁定合约
+
+### 2. 钱包和认证相关
+- **组件**:
+  - `src/providers/PrivyAuthProvider.tsx` - Privy钱包认证（已废弃）
+  - `src/components/LinkWallet.tsx` - 钱包连接组件
+  - `src/components/WalletAssets.tsx` - 钱包资产显示
+  - `src/components/ExportKeyModal.tsx` - 导出私钥模态框
+
+### 3. DeFi相关
+- **组件**:
+  - `src/components/UniswapWidge.tsx` - Uniswap交易组件
+  - `src/components/SwapWidgetCustom.tsx` - 自定义Swap组件
+  - `src/components/TokenMarquee.tsx` - 代币滚动显示
+  - `src/components/TokenIcon.tsx` - 代币图标组件
+
+### 4. NFT相关
+- **组件**:
+  - `src/components/NFTCard.tsx` - NFT卡片
+  - `src/components/NFTCollectionCard.tsx` - NFT集合卡片
+  - `src/components/NFTList.tsx` - NFT列表
+  - `src/components/NFTSection.tsx` - NFT板块
+- **Store**:
+  - `src/store/nftStore.ts` - NFT状态管理
+
+### 5. 代币化相关
+- **组件**:
+  - `src/components/TokenizationPanel.tsx` - 代币化面板
+  - `src/components/StatsCard.tsx` - 统计卡片（包含质押数据）
+- **Store**:
+  - `src/store/tokenStore.ts` - 代币状态管理
+  - `src/store/stakeStore.ts` - 质押状态管理
+  - `src/store/tokenMarqueeStore.ts` - 代币滚动状态
+
+### 6. 区块链基础设施
+- **Store**:
+  - `src/store/alchemyStore.ts` - Alchemy SDK集成
+  - `src/store/providerStore.ts` - Web3 Provider管理
+
+### 7. 主题相关（Topic功能）
+这些组件似乎是一个完整的功能模块，可能需要整体评估是否保留：
+- `src/components/TopicPage.tsx`
+- `src/components/TopicGallery.tsx`
+- `src/components/TopicCloud.tsx`
+- `src/components/TopicAICCSection.tsx`
+- `src/components/TopicRelatedTweets.tsx`
+- `src/components/TweetCard.tsx`
+- `src/store/topicStore.ts`
+- `src/store/topicTweetsStore.ts`
+- `src/store/topicCloudStore.ts`
+- `src/store/topicStatsStore.ts`
+
+### 8. 其他相关文件
+- `src/services/userService.ts` - 包含钱包地址相关的用户服务方法
+- `src/store/accountStore.ts` - 包含钱包连接相关的状态
+- 多个组件的CSS模块文件包含代币、NFT相关样式
+
+### 清理建议
+1. **优先清理**：智能合约ABI、钱包连接、DeFi组件
+2. **评估后清理**：Topic相关功能（如果不需要）
+3. **保留并改造**：某些UI组件可能可以改造为Web2版本使用
+
 ## 未来规划
 
 ### 短期目标（1-2个月）
@@ -794,6 +871,7 @@ git commit -m "refactor: 重构状态管理架构"
 - [ ] 添加内容生成功能
 - [ ] 优化移动端体验
 - [ ] 增加更多 AI 模型支持
+- [ ] 清理Web3残留代码
 
 ### 中期目标（3-6个月）
 - [ ] 实现实时协作功能

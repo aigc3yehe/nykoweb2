@@ -114,12 +114,16 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
 
   // 获取头像URL
   const getAvatarUrl = () => {
-    if (localImage.users.twitter?.profilePictureUrl) {
+    // 检查是否有有效的头像URL，排除占位地址
+    if (localImage.users.twitter?.profilePictureUrl &&
+        !localImage.users.twitter.profilePictureUrl.includes('example.com') &&
+        !localImage.users.twitter.profilePictureUrl.includes('placeholder')) {
       return localImage.users.twitter.profilePictureUrl;
     } else if (localImage.users.twitter?.username) {
       // 备用方案：如果有username但没有profilePictureUrl，使用第三方服务
       return `https://unavatar.io/twitter/${localImage.users.twitter.username}`;
     } else {
+      // 使用本地默认头像
       return avatarSvg;
     }
   };
@@ -556,7 +560,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onVisibilityChange, showEd
               </div>
             </div>
           )}
-          <div className={styles.creatorInfo}>
+          <div className={styles.creatorInfo} style={{ marginTop: '6px' }}>
             <img
               src={getAvatarUrl()}
               alt="Twitter Avatar"

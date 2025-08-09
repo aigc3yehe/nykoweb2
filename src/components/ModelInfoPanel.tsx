@@ -47,12 +47,16 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
 
   // 获取头像URL
   const getAvatarUrl = () => {
-    if (model.users.twitter?.profilePictureUrl) {
+    // 检查是否有有效的头像URL，排除占位地址
+    if (model.users.twitter?.profilePictureUrl &&
+        !model.users.twitter.profilePictureUrl.includes('example.com') &&
+        !model.users.twitter.profilePictureUrl.includes('placeholder')) {
       return model.users.twitter.profilePictureUrl;
     } else if (model.users.twitter?.username) {
       // 备用方案
       return `https://unavatar.io/twitter/${model.users.twitter.username}`;
     } else {
+      // 使用本地默认头像
       return avatarSvg;
     }
   };
@@ -193,7 +197,7 @@ const ModelInfoPanel: React.FC<ModelInfoPanelProps> = ({ model }) => {
     <div className={styles.infoPanel}>
       {/* 第一行: 创建者信息 */}
       <div className={styles.creatorHeader}>
-        <div className={styles.creatorInfo}>
+        <div className={styles.creatorInfo} style={{ marginTop: '6px' }}>
           <img
             src={getAvatarUrl()}
             alt="Creator Avatar"

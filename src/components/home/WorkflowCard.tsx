@@ -114,9 +114,9 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         }
       }
     } else {
-      // Popular Workflows: PC 288x306, 移动端 224x266
+      // Popular Workflows: PC 288x306, 移动端 224x286 (增加20px给文本区域)
       return {
-        card: 'w-56 md:w-72 h-[16.625rem] md:h-[19.125rem]', // 移动端: 224x266, PC端: 288x306
+        card: 'w-56 md:w-72 h-[17.875rem] md:h-[19.125rem]', // 移动端: 224x286, PC端: 288x306
         cover: 'w-56 md:w-72 h-[13.75rem] md:h-[13.75rem]', // 移动端: 224x220, PC端: 288x220
         container: 'w-56 md:w-72',
         showDescription: true, // PC端显示，移动端通过CSS隐藏
@@ -145,10 +145,13 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
 
   // 获取用户头像 - 新的用户数据结构
   const getAvatarUrl = () => {
-    // 新的API结构：item.user.avatar
-    if (item.user?.avatar) {
+    // 检查是否有有效的头像URL，排除占位地址
+    if (item.user?.avatar && 
+        !item.user.avatar.includes('example.com') && 
+        !item.user.avatar.includes('placeholder')) {
       return item.user.avatar
     }
+    // 使用本地默认头像
     return avatarSvg
   }
 
@@ -274,13 +277,13 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         </div>
       </div>
 
-      {/* Container 区域 - 修复布局 */}
+      {/* Container 区域 - 修复布局和高度 */}
       <div 
         className={cn(
           "pt-3 flex flex-col gap-0.5", // padding-top: 12px, gap: 4px
           // 根据variant决定是否有移动端样式覆盖
           !dimensions.mobileStyle && dimensions.container,
-          dimensions.mobileStyle && `[width:var(--mobile-width)] [height:var(--mobile-text-height)] lg:h-auto lg:w-16.8125`
+          dimensions.mobileStyle && `[width:var(--mobile-width)] [min-height:var(--mobile-text-height)] lg:h-auto lg:w-16.8125`
         )}
         style={
           dimensions.mobileStyle ? {
@@ -309,13 +312,13 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           </p>
         )}
 
-        {/* User 信息 - 修复字符裁切问题 */}
+        {/* User 信息 - 头像和文字水平居中对齐 */}
         {dimensions.showUser && (
-          <div className="flex items-center gap-1.5 h-4"> {/* 固定高度确保显示完整 */}
+          <div className="flex items-center gap-1.5 min-h-4 mt-1.5"> {/* min-h-4确保容器高度，mt-1.5增加6px上边距 */}
             <img
               src={getAvatarUrl()}
               alt={getDisplayName()}
-              className="w-4 h-4 rounded-full flex-shrink-0"
+              className="w-4 h-4 rounded-full flex-shrink-0 object-cover"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = avatarSvg
               }}

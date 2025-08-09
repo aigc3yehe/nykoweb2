@@ -53,12 +53,16 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
 
   // 获取头像URL
   const getAvatarUrl = () => {
-    if (localModel.users.twitter?.profilePictureUrl) {
+    // 检查是否有有效的头像URL，排除占位地址
+    if (localModel.users.twitter?.profilePictureUrl &&
+        !localModel.users.twitter.profilePictureUrl.includes('example.com') &&
+        !localModel.users.twitter.profilePictureUrl.includes('placeholder')) {
       return localModel.users.twitter.profilePictureUrl;
     } else if (localModel.users.twitter?.username) {
       // 备用方案：如果有username但没有profilePictureUrl，使用第三方服务
       return `https://unavatar.io/twitter/${localModel.users.twitter.username}`;
     } else {
+      // 使用本地默认头像
       return avatarSvg;
     }
   };
@@ -242,7 +246,7 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
         <h3 className={styles.modelName}>{localModel.name}</h3>
 
         <div className={styles.modelMeta}>
-          <div className={styles.twitterInfo}>
+          <div className={styles.twitterInfo} style={{ marginTop: '6px' }}>
             <img
               src={getAvatarUrl()}
               alt="Avatar"

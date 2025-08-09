@@ -53,9 +53,13 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
 
   // 获取用户头像
   const getAvatarUrl = () => {
-    if (content.user?.avatar) {
+    // 检查是否有有效的头像URL，排除占位地址
+    if (content.user?.avatar && 
+        !content.user.avatar.includes('example.com') && 
+        !content.user.avatar.includes('placeholder')) {
       return content.user.avatar
     }
+    // 使用本地默认头像
     return avatarSvg
   }
 
@@ -194,12 +198,12 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
         </div>
       </div>
 
-      {/* Users 区域 - 修复字符裁切问题 */}
-      <div className="mt-[0.625rem] flex items-center gap-1.5 h-4"> {/* 固定高度确保显示完整 */}
+      {/* Users 区域 - 头像和文字水平居中对齐 */}
+      <div className="mt-[0.875rem] flex items-center gap-1.5 min-h-4"> {/* min-h-4确保容器高度，原10px+6px=16px(0.875rem) */}
         <img
           src={getAvatarUrl()}
           alt={getDisplayName()}
-          className="w-4 h-4 rounded-full flex-shrink-0"
+          className="w-4 h-4 rounded-full flex-shrink-0 object-cover"
           onError={(e) => {
             (e.target as HTMLImageElement).src = avatarSvg
           }}

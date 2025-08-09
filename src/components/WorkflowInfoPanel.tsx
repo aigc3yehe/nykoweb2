@@ -45,12 +45,16 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
 
   // 获取头像URL
   const getAvatarUrl = () => {
-    if (workflow.users.twitter?.profilePictureUrl) {
+    // 检查是否有有效的头像URL，排除占位地址
+    if (workflow.users.twitter?.profilePictureUrl &&
+        !workflow.users.twitter.profilePictureUrl.includes('example.com') &&
+        !workflow.users.twitter.profilePictureUrl.includes('placeholder')) {
       return workflow.users.twitter.profilePictureUrl;
     } else if (workflow.users.twitter?.username) {
       // 备用方案
       return `https://unavatar.io/twitter/${workflow.users.twitter.username}`;
     } else {
+      // 使用本地默认头像
       return avatarSvg;
     }
   };
@@ -149,7 +153,7 @@ const WorkflowInfoPanel: React.FC<WorkflowInfoPanelProps> = ({ workflow }) => {
     <div className={styles.infoPanel}>
       {/* 第一行: 创建者信息 */}
       <div className={styles.creatorHeader}>
-        <div className={styles.creatorInfo}>
+        <div className={styles.creatorInfo} style={{ marginTop: '6px' }}>
           <img
             src={getAvatarUrl()}
             alt="Creator Avatar"

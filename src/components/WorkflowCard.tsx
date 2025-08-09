@@ -59,12 +59,16 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
 
   // 获取头像URL
   const getAvatarUrl = () => {
-    if (localWorkflow.users.twitter?.profilePictureUrl) {
+    // 检查是否有有效的头像URL，排除占位地址
+    if (localWorkflow.users.twitter?.profilePictureUrl &&
+        !localWorkflow.users.twitter.profilePictureUrl.includes('example.com') &&
+        !localWorkflow.users.twitter.profilePictureUrl.includes('placeholder')) {
       return localWorkflow.users.twitter.profilePictureUrl;
     } else if (localWorkflow.users.twitter?.username) {
       // 备用方案：如果有username但没有profilePictureUrl，使用第三方服务
       return `https://unavatar.io/twitter/${localWorkflow.users.twitter.username}`;
     } else {
+      // 使用本地默认头像
       return avatarSvg;
     }
   };
@@ -259,7 +263,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({ workflow }) => {
         <h3 className={styles.workflowName}>{localWorkflow.name}</h3>
 
         <div className={styles.workflowMeta}>
-          <div className={styles.twitterInfo}>
+          <div className={styles.twitterInfo} style={{ marginTop: '6px' }}>
             <img
               src={getAvatarUrl()}
               alt="Avatar"

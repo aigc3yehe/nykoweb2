@@ -2,12 +2,12 @@ import { useAtom } from 'jotai'
 import { languageAtom } from '../store/i18nStore'
 import { en } from '../locales/en'
 import { zh } from '../locales/zh'
+import { zhTw } from '../locales/zh-tw'
 
 const messages = {
   en,
   zh,
-  ja: en, // 暂时使用英文
-  ko: en  // 暂时使用英文
+  'zh-tw': zhTw
 }
 
 export const useI18n = () => {
