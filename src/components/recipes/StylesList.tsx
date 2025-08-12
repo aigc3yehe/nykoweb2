@@ -9,6 +9,7 @@ import {
 import type { FetchModelDto } from '../../services/api/types'
 import type { FeaturedItem } from '../../store/featuredStore'
 import { useNavigate } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { setPendingMessageAtom } from '../../store/assistantStore'
 
@@ -36,6 +37,7 @@ const StylesList: React.FC = () => {
   const [, loadMore] = useAtom(loadMoreRecipesModelsAtom)
   const isLoadingRef = useRef(false)
   const navigate = useNavigate()
+  const lang = useLang()
   const { openChat } = useChatSidebar()
   const setPendingMessage = useSetAtom(setPendingMessageAtom)
   // 初始加载数据
@@ -49,14 +51,14 @@ const StylesList: React.FC = () => {
   }, [fetchData, modelState.items.length, modelState.isLoading])
 
   const handleStyleClick = (styleId: number) => {
-    navigate(`/model/${styleId}`)
+    navigate(withLangPrefix(lang, `/model/${styleId}`))
   }
 
   const handleUseClick = (styleId: number) => {
     // 1. 设置延迟发送的消息
     setPendingMessage('I want to generate an image.')
     // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
-    navigate(`/model/${styleId}`)
+    navigate(withLangPrefix(lang, `/model/${styleId}`))
     // 3. 打开右侧聊天窗口（包含登录检查）
     openChat()
   }

@@ -11,9 +11,12 @@ import HelIcon from '../assets/web2/hel.svg'
 import OkIcon from '../assets/web2/ok.svg'
 import NoIcon from '../assets/web2/no.svg'
 import { fetchUserDetailsAtom } from '../store/loginStore'
+import Seo from '../components/Seo'
+import { useLocaleFromUrl } from '../hooks/useLocaleFromUrl'
 
 const Pricing: React.FC = React.memo(() => {
   const { t } = useI18n()
+  useLocaleFromUrl()
   const [searchParams] = useSearchParams()
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useAtom(selectedPaymentMethodAtom)
   const [showPaymentDropdown, setShowPaymentDropdown] = useAtom(showPaymentDropdownAtom)
@@ -114,6 +117,7 @@ const Pricing: React.FC = React.memo(() => {
   return (
     <div className="min-h-screen bg-background dark:bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-[1100px] flex flex-col gap-10">
+        <Seo title={t('pricing.title') + ' - MAVAE'} description={t('pricing.subtitle')} image="/og-image.png" />
         {/* 标题区域 */}
         <div className="relative w-full flex flex-col gap-2">
           {/* 主标题 */}

@@ -1,54 +1,45 @@
-# React + TypeScript + Vite
+# MAVAE Web2
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 多语言（i18n）
 
-Currently, two official plugins are available:
+项目的多语言配置已集中管理：
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 配置文件：`src/i18n/config.ts`
+  - `SUPPORTED_LANGUAGES`: `en`、`zh-CN`（简体中文）、`zh-TW`（繁体中文）
+  - `DEFAULT_LANGUAGE`: 默认语言
+- 语言状态：`src/store/i18nStore.ts`
+  - 读取/保存用户选择到 `localStorage`
+  - 根据浏览器语言在 `en`/`zh-CN`/`zh-TW` 之间自动回退
+- 语言包：
+  - 英文：`src/locales/en.ts`
+  - 简体中文：`src/locales/zh-CN.ts`
+  - 繁体中文：`src/locales/zh-TW.ts`
+  - 旧文件 `src/locales/zh.ts` 仅为兼容保留，请迁移到 `zh-CN.ts`
+- 在组件中取词：
+  - `const { t } = useI18n()`，示例：`t('pricing.title')`
 
-## Expanding the ESLint configuration
+### 增减词条
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. 在所有语言包中添加同名 key，保持层级一致：
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```ts
+// en.ts
+export const en = { pricing: { title: 'Plans & pricing', subtitle: 'Upgrade to gain access to Premium features', cta: 'Upgrade now' } }
+
+// zh-CN.ts
+export const zhCN = { pricing: { title: '套餐与定价', subtitle: '升级以获得高级功能', cta: '立即升级' } }
+
+// zh-TW.ts
+export const zhTW = { pricing: { title: '方案與定價', subtitle: '升級以獲得高級功能', cta: '立即升級' } }
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. 组件使用：`t('pricing.cta')`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+3. 若某语言缺失 key，会退回显示该 key 文本，便于在开发时发现遗漏。
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+### 新增语言（可选）
+
+1. 在 `src/i18n/config.ts` 的 `SUPPORTED_LANGUAGES` 中追加；
+2. 新建语言包文件并在 `useI18n.ts` 中引入；
+3. 在 `i18nStore.ts` 中完善浏览器语言映射；
+4. 语言选择下拉基于 `SUPPORTED_LANGUAGES` 自动渲染。

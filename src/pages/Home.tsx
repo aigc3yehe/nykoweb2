@@ -5,9 +5,14 @@ import TrendingStyles from '../components/home/TrendingStyles'
 import InspirationFeed from '../components/home/InspirationFeed'
 import { useAtom } from 'jotai'
 import { contentsAtom, loadMoreContentsAtom } from '../store/contentsStore'
+import Seo from '../components/Seo'
+import { useI18n } from '../hooks/useI18n'
+import { useLocaleFromUrl } from '../hooks/useLocaleFromUrl'
 
 const Home: React.FC = () => {
   const [contentsState] = useAtom(contentsAtom)
+  const { t } = useI18n()
+  useLocaleFromUrl()
   const [, loadMore] = useAtom(loadMoreContentsAtom)
   const isLoadingRef = useRef(false)
 
@@ -52,6 +57,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="w-full px-6 space-y-[1.875rem] pb-8"> {/* gap: 30px, 添加底部padding */}
+      <Seo title={t('nav.home') + ' - MAVAE'} description={t('common.loading')} image="/og-image.png" />
       {/* Banner 区域 */}
       <Banner />
       

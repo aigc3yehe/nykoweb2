@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { useAtom } from 'jotai'
 import { useNavigate } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { useI18n } from '../../hooks/useI18n'
 import BgLogo from '../../assets/web2/workflow_setting.svg'
 import CoverSelectIcon from '../../assets/web2/cover_select.svg'
@@ -13,6 +14,7 @@ import { uploadFileToS3 } from '../../store/imagesStore'
 const PublishSidebar: React.FC = () => {
   const { t } = useI18n()
   const navigate = useNavigate()
+  const lang = useLang()
   
   // Store 状态
   const [workflowForm] = useAtom(workflowFormAtom)
@@ -107,7 +109,7 @@ const PublishSidebar: React.FC = () => {
         
         // 延迟跳转到工作流详情页
         setTimeout(() => {
-          navigate(`/workflow/${result.workflow_id}`)
+      navigate(withLangPrefix(lang, `/workflow/${result.workflow_id}`))
         }, 1500)
       }
     } catch (error) {

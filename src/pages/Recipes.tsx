@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../hooks/useLang'
 import RecipesTab from '../components/recipes/RecipesTab'
 import RecipesActions from '../components/recipes/RecipesActions'
 import WorkflowsList from '../components/recipes/WorkflowsList'
@@ -10,6 +11,7 @@ export type RecipeType = 'workflows' | 'styles'
 const Recipes: React.FC = () => {
   //const { t } = useI18n()
   const navigate = useNavigate()
+  const lang = useLang()
   const { tab } = useParams<{ tab?: string }>()
   const [activeTab, setActiveTab] = useState<RecipeType>('workflows')
 
@@ -19,20 +21,20 @@ const Recipes: React.FC = () => {
       setActiveTab(tab)
     } else if (tab) {
       // 如果URL参数不正确，重定向到workflows
-      navigate('/recipes/workflows', { replace: true })
+      navigate(withLangPrefix(lang, '/recipes/workflows'), { replace: true })
     }
   }, [tab, navigate])
 
   // 处理tab切换
   const handleTabChange = (newTab: RecipeType) => {
     setActiveTab(newTab)
-    navigate(`/recipes/${newTab}`)
+    navigate(withLangPrefix(lang, `/recipes/${newTab}`))
   }
 
   // 如果没有tab参数，默认重定向到workflows
   useEffect(() => {
     if (!tab) {
-      navigate('/recipes/workflows', { replace: true })
+      navigate(withLangPrefix(lang, '/recipes/workflows'), { replace: true })
     }
   }, [tab, navigate])
 

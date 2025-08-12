@@ -1,12 +1,11 @@
 import { atom } from 'jotai'
-
-export type Language = 'en' | 'zh' | 'ja' | 'ko'
+import { DEFAULT_LANGUAGE, Language } from '../i18n/config'
 
 export interface I18nMessages {
   [key: string]: string | I18nMessages
 }
 
-export const languageAtom = atom<Language>('en')
+export const languageAtom = atom<Language>(DEFAULT_LANGUAGE)
 
 export const setLanguageAtom = atom(
   null,
@@ -21,9 +20,14 @@ export const initLanguageAtom = atom(
   null,
   (_, set) => {
     const savedLang = localStorage.getItem('language') as Language
-    const browserLang = navigator.language.split('-')[0] as Language
-    const supportedLangs: Language[] = ['en', 'zh', 'ja', 'ko']
-    const lang = savedLang || (supportedLangs.includes(browserLang) ? browserLang : 'en')
+    const browserLang = ((): Language => {
+      const nav = navigator.language
+      if (nav.startsWith('zh-CN') || nav === 'zh') return 'zh-CN'
+      if (nav.startsWith('zh-TW') || nav.startsWith('zh-HK')) return 'zh-HK'
+      return 'en'
+    })()
+    const supportedLangs: Language[] = ['en', 'zh-CN', 'zh-HK']
+    const lang = savedLang || (supportedLangs.includes(browserLang) ? browserLang : DEFAULT_LANGUAGE)
     set(languageAtom, lang)
   }
 )

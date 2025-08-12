@@ -1,6 +1,6 @@
 import './App.css'
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
 import ConfirmDialog from './components/ui/ConfirmDialog'
 import { dialogAtom } from './store/dialogStore';
@@ -36,22 +36,26 @@ function App() {
       <AppLayout>
         <Routes>
           {/* 公开页面 - 不需要登录 */}
-          <Route path="/" element={<ProtectedRoute requireAuth={false}><Home /></ProtectedRoute>} />
-          <Route path="/recipes" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
-          <Route path="/recipes/:tab" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
-          <Route path="/api/auth/callback/google" element={<AuthCallback />} />
+          <Route path=":lang" element={<ProtectedRoute requireAuth={false}><Home /></ProtectedRoute>} />
+          <Route path=":lang/recipes" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
+          <Route path=":lang/recipes/:tab" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
+          <Route path=":lang/api/auth/callback/google" element={<AuthCallback />} />
 
           {/* 公开详情页面 - 不需要登录 */}
-          <Route path="/workflow/:id" element={<ProtectedRoute requireAuth={false}><WorkflowDetail /></ProtectedRoute>} />
-          <Route path="/model/:id" element={<ProtectedRoute requireAuth={false}><ModelDetail /></ProtectedRoute>} />
+          <Route path=":lang/workflow/:id" element={<ProtectedRoute requireAuth={false}><WorkflowDetail /></ProtectedRoute>} />
+          <Route path=":lang/model/:id" element={<ProtectedRoute requireAuth={false}><ModelDetail /></ProtectedRoute>} />
 
           {/* 需要登录的页面 */}
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
-          <Route path="/workflow/builder" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />
-          <Route path="/style/trainer" element={<ProtectedRoute><StyleTrainer /></ProtectedRoute>} />
+          <Route path=":lang/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path=":lang/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
+          <Route path=":lang/workflow/builder" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />
+          <Route path=":lang/style/trainer" element={<ProtectedRoute><StyleTrainer /></ProtectedRoute>} />
 
-          {/* 其他路由... */}
+          {/* 根路径重定向到默认语言 */}
+          <Route path="/" element={<Navigate to="/en" replace />} />
+          {/* 未知路径：如果形如 /xx 开头，重定向到 /xx（去除后缀）；否则回 /en */}
+          <Route path=":lang/*" element={<Navigate to=".." replace />} />
+          <Route path="*" element={<Navigate to="/en" replace />} />
         </Routes>
 
         {/* <Toast /> */}

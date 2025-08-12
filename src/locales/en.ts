@@ -55,5 +55,8 @@ export const en = {
   pricing: {
     title: 'Plans & pricing',
     subtitle: 'Upgrade to gain access to Premium features'
+  },
+  aria: {
+    openChat: 'Open chat'
   }
 }

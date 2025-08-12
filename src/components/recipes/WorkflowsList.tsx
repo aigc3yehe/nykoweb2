@@ -7,6 +7,7 @@ import {
   loadMoreRecipesWorkflowsAtom
 } from '../../store/recipesWorkflowStore'
 import { useNavigate } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 import type { WorkflowDto } from '../../services/api'
 import type { FeaturedItem } from '../../store/featuredStore'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
@@ -36,6 +37,7 @@ const WorkflowsList: React.FC = () => {
   const [, loadMore] = useAtom(loadMoreRecipesWorkflowsAtom)
   const isLoadingRef = useRef(false)
   const navigate = useNavigate()
+  const lang = useLang()
   const { openChat } = useChatSidebar()
   const setPendingMessage = useSetAtom(setPendingMessageAtom)
   // 初始加载数据
@@ -61,7 +63,7 @@ const WorkflowsList: React.FC = () => {
 
   // 处理工作流点击 - 导航到详情页面
   const handleWorkflowClick = (workflowId: number) => {
-    navigate(`/workflow/${workflowId}`)
+    navigate(withLangPrefix(lang, `/workflow/${workflowId}`))
   }
 
   // 处理使用工作流
@@ -70,7 +72,7 @@ const WorkflowsList: React.FC = () => {
     // 1. 设置延迟发送的消息
     setPendingMessage('I want to use this workflow.')
     // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
-    navigate(`/workflow/${workflowId}`)
+    navigate(withLangPrefix(lang, `/workflow/${workflowId}`))
     // 3. 打开右侧聊天窗口（包含登录检查）
     openChat()
   }

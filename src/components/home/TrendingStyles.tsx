@@ -4,6 +4,7 @@ import { featuredModelsAtom, fetchFeaturedModelsAtom } from '../../store/feature
 import SectionHeader from './SectionHeader'
 import WorkflowCard from './WorkflowCard'
 import { useNavigate } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { setPendingMessageAtom } from '../../store/assistantStore'
 
@@ -14,6 +15,7 @@ const TrendingStyles: React.FC = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
   const navigate = useNavigate()
+  const lang = useLang()
   const { openChat } = useChatSidebar()
   const setPendingMessage = useSetAtom(setPendingMessageAtom)
   // 获取数据 - 移除用户认证检查，因为接口是公开的
@@ -96,18 +98,18 @@ const TrendingStyles: React.FC = () => {
 
   const handleViewAll = () => {
     // 导航到Recipes页面的Styles标签
-    navigate('/recipes/styles')
+    navigate(withLangPrefix(lang, '/recipes/styles'))
   }
 
   const handleStyleClick = (styleId: number) => {
-    navigate(`/model/${styleId}`)
+    navigate(withLangPrefix(lang, `/model/${styleId}`))
   }
 
   const handleUseStyle = (styleId: number) => {
     // 1. 设置延迟发送的消息
     setPendingMessage('I want to generate an image.')
     // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
-    navigate(`/model/${styleId}`)
+    navigate(withLangPrefix(lang, `/model/${styleId}`))
     // 3. 打开右侧聊天窗口（包含登录检查）
     openChat()
   }

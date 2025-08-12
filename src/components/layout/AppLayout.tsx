@@ -42,12 +42,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       <div className="flex flex-1 overflow-hidden relative">
         {/* 左侧边栏：移动端不显示侧边栏，PC端根据路由显示不同侧边栏 */}
-        {location.pathname === '/pricing' ? null : 
-          location.pathname === '/workflow/builder' ? (
+         {/^\/(en|zh-CN|zh-HK)\/pricing$/.test(location.pathname) ? null : 
+          /^\/(en|zh-CN|zh-HK)\/workflow\/builder$/.test(location.pathname) ? (
             <div className="hidden lg:block">
               <PublishSidebar />
             </div>
-          ) : location.pathname === '/style/trainer' ? (
+          ) : /^\/(en|zh-CN|zh-HK)\/style\/trainer$/.test(location.pathname) ? (
             <div className="hidden lg:block">
               <TrainerSidebar />
             </div>
@@ -67,14 +67,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <ChatSidebar />
 
         {/* 移动端底部栏 - WorkflowBuilder页面 */}
-        {location.pathname === '/workflow/builder' && (
+        {/^\/(en|zh-CN|zh-HK)\/workflow\/builder$/.test(location.pathname) && (
           <BottomBar
             onOpenSettings={() => setIsSettingsModalOpen(true)}
           />
         )}
 
         {/* 移动端底部栏 - StyleTrainer页面 */}
-        {location.pathname === '/style/trainer' && (
+        {/^\/(en|zh-CN|zh-HK)\/style\/trainer$/.test(location.pathname) && (
           <StyleTrainerBottomBar
             onOpenSettings={() => setIsStyleTrainerSettingsModalOpen(true)}
           />

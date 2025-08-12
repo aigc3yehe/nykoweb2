@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useAtom } from 'jotai'
 import { useNavigate } from 'react-router-dom'
+import { useLang } from '../../hooks/useLang'
 import { useI18n } from '../../hooks/useI18n'
 import UseIcon from '../../assets/web2/use_2.svg'
 import CreateEditIcon from '../../assets/web2/create_edit.svg'
@@ -17,6 +18,7 @@ interface StyleTrainerBottomBarProps {
 const StyleTrainerBottomBar: React.FC<StyleTrainerBottomBarProps> = ({ onOpenSettings }) => {
   const { t } = useI18n()
   const navigate = useNavigate()
+  useLang() // keep hook to sync language context if needed
   
   // Store 状态
   const [modelCreationState] = useAtom(modelCreationStateAtom)

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../hooks/useLang'
 import { useSetAtom } from 'jotai'
 import { loginAtom, hideLoginModalAtom } from '../store/loginStore'
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate()
+  const lang = useLang()
   const [searchParams] = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [error, setError] = useState<string>('')
@@ -45,7 +47,7 @@ const AuthCallback: React.FC = () => {
 
         // 延迟跳转，让用户看到成功消息
         setTimeout(() => {
-          navigate('/', { replace: true })
+          navigate(withLangPrefix(lang, '/'), { replace: true })
         }, 2000)
 
       } catch (error) {
@@ -59,7 +61,7 @@ const AuthCallback: React.FC = () => {
   }, [searchParams, navigate, login, hideLoginModal])
 
   const handleRetry = () => {
-    navigate('/', { replace: true })
+    navigate(withLangPrefix(lang, '/'), { replace: true })
   }
 
   return (

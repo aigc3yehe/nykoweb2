@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { useLocation, Link } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { useAtom, useSetAtom } from 'jotai'
 import { sidebarOpenAtom, closeSidebarAtom } from '../../store/sidebarStore'
 import { useI18n } from '../../hooks/useI18n'
@@ -57,6 +58,7 @@ const IconSwap: React.FC<{
 
 const Sidebar: React.FC = () => {
   const { t } = useI18n()
+  const lang = useLang()
   const location = useLocation()
   const [isOpen] = useAtom(sidebarOpenAtom)
   const closeSidebar = useSetAtom(closeSidebarAtom)
@@ -73,14 +75,14 @@ const Sidebar: React.FC = () => {
       label: t('nav.home'), // en: Home / zh: 首页
       icon: <IconSwap light={HomeIcon} dark={HomeIconDark} alt="Home" className="w-5 h-5" />,
       selectedIcon: <IconSwap light={HomeSelectedIcon} dark={HomeSelectedIconDark} alt="Home" className="w-5 h-5" />,
-      path: '/'
+       path: withLangPrefix(lang, '/')
     },
     {
       key: 'recipes',
       label: t('nav.recipes'), // en: Recipes / zh: 组合
       icon: <IconSwap light={RecipesIcon} dark={RecipesIconDark} alt="Recipes" className="w-5 h-5" />,
       selectedIcon: <IconSwap light={RecipesSelectedIcon} dark={RecipesSelectedIconDark} alt="Recipes" className="w-5 h-5" />,
-      path: '/recipes'
+       path: withLangPrefix(lang, '/recipes')
     },
   ]
 
@@ -91,21 +93,21 @@ const Sidebar: React.FC = () => {
       label: t('nav.generator'), // en: Generator / zh: 生成器
       icon: <IconSwap light={GeneratorIcon} dark={GeneratorIconDark} alt="Generator" className="w-8 h-8" />,
       selectedIcon: <IconSwap light={GeneratorIcon} dark={GeneratorIconDark} alt="Generator" className="w-8 h-8" />,
-      path: '/generator'
+       path: withLangPrefix(lang, '/generator')
     },
     {
       key: 'workflow-builder',
       label: t('nav.workflowBuilder'), // en: Workflow Builder / zh: 工作流构建器
       icon: <IconSwap light={WorkflowBuilderIcon} dark={WorkflowBuilderIconDark} alt="Workflow Builder" className="w-8 h-8" />,
       selectedIcon: <IconSwap light={WorkflowBuilderIcon} dark={WorkflowBuilderIconDark} alt="Workflow Builder" className="w-8 h-8" />,
-      path: '/workflow/builder'
+       path: withLangPrefix(lang, '/workflow/builder')
     },
     {
       key: 'style-trainer',
       label: t('nav.styleTrainer'), // en: Style Trainer / zh: 风格训练器
       icon: <IconSwap light={StyleTrainerIcon} dark={StyleTrainerIconDark} alt="Style Trainer" className="w-8 h-8" />,
       selectedIcon: <IconSwap light={StyleTrainerIcon} dark={StyleTrainerIconDark} alt="Style Trainer" className="w-8 h-8" />,
-      path: '/style/trainer'
+       path: withLangPrefix(lang, '/style/trainer')
     }
   ]
 
@@ -116,7 +118,7 @@ const Sidebar: React.FC = () => {
       label: t('nav.assets'), // en: My Assets / zh: 我的资产
       icon: <IconSwap light={MyAssetsIcon} dark={MyAssetsIconDark} alt="My Assets" className="w-4 h-4" />,
       selectedIcon: <IconSwap light={MyAssetsSelectedIcon} dark={MyAssetsSelectedIconDark} alt="My Assets" className="w-4 h-4" />,
-      path: '/profile' // 修改为导航到个人中心
+       path: withLangPrefix(lang, '/profile') // 修改为导航到个人中心
     }
   ]
 
@@ -137,9 +139,11 @@ const Sidebar: React.FC = () => {
 
   const isLocation = (pathname: string, path: string) => {
     if (path === "/") {
-      return pathname === path
+      return pathname === `/${lang}`
     }
-    return pathname.startsWith(path)
+    if (!path.startsWith('/')) return false
+    const suffix = path.replace(/^\/(en|zh-CN|zh-HK)/, '')
+    return pathname === `/${lang}${suffix}` || pathname.startsWith(`/${lang}${suffix}`)
   }
 
   return (

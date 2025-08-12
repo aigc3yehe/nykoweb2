@@ -11,6 +11,7 @@ import {
 import type { WorkflowDto } from '../../services/api'
 import type { FeaturedItem } from '../../store/featuredStore'
 import { useNavigate } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 
 interface ProfileWorkflowsListProps {
   tab: 'published' | 'liked'
@@ -41,6 +42,7 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
   const [, loadMorePublished] = useAtom(loadMorePublishedWorkflowsAtom)
   const isLoadingRef = useRef(false)
   const navigate = useNavigate()
+  const lang = useLang()
   // 初始加载数据
   useEffect(() => {
     if (tab === 'published') {
@@ -66,7 +68,7 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
   }, [tab, state.publishedHasMore, state.isLoading, loadMorePublished])
 
   const handleWorkflowClick = (workflowId: number) => {
-    navigate(`/workflow/${workflowId}`)
+    navigate(withLangPrefix(lang, `/workflow/${workflowId}`))
   }
   const handleUseWorkflow = (workflowId: number) => {
     console.log('Use workflow:', workflowId)

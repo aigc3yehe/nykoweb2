@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { RecipeType } from '../../pages/Recipes'
 import DropdownIcon from '../../assets/web2/drop_down.svg'
 import SearchIcon from '../../assets/web2/search.svg'
@@ -11,6 +12,7 @@ interface RecipesActionsProps {
 
 const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab }) => {
   const navigate = useNavigate()
+  const lang = useLang()
   const [selectedOption, setSelectedOption] = useState('All')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [searchValue, setSearchValue] = useState('')
@@ -27,10 +29,10 @@ const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab }) => {
   const handleNewClick = () => {
     if (activeTab === 'workflows') {
       // 导航到工作流构建器页面
-      navigate('/workflow/builder')
+    navigate(withLangPrefix(lang, '/workflow/builder'))
     } else if (activeTab === 'styles') {
       // 导航到风格训练器页面
-      navigate('/style/trainer')
+    navigate(withLangPrefix(lang, '/style/trainer'))
     }
   }
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { useAtom, useSetAtom } from 'jotai'
 import { featuredWorkflowsAtom, fetchFeaturedWorkflowsAtom } from '../../store/featuredStore'
 import SectionHeader from './SectionHeader'
@@ -9,6 +10,7 @@ import { useChatSidebar } from '../../hooks/useChatSidebar'
 
 const PopularWorkflows: React.FC = () => {
   const navigate = useNavigate()
+  const lang = useLang()
   const [workflowsState] = useAtom(featuredWorkflowsAtom)
   const [, fetchWorkflows] = useAtom(fetchFeaturedWorkflowsAtom)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -59,7 +61,7 @@ const PopularWorkflows: React.FC = () => {
 
   // 处理工作流点击 - 导航到详情页面
   const handleWorkflowClick = (workflowId: number) => {
-    navigate(`/workflow/${workflowId}`)
+    navigate(withLangPrefix(lang, `/workflow/${workflowId}`))
   }
 
   // 处理使用工作流
@@ -68,7 +70,7 @@ const PopularWorkflows: React.FC = () => {
     // 1. 设置延迟发送的消息
     setPendingMessage('I want to use this workflow.')
     // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
-    navigate(`/workflow/${workflowId}`)
+    navigate(withLangPrefix(lang, `/workflow/${workflowId}`))
     // 3. 打开右侧聊天窗口（包含登录检查）
     openChat()
   }
@@ -112,7 +114,7 @@ const PopularWorkflows: React.FC = () => {
 
   const handleViewAll = () => {
     // 导航到Recipes页面的Workflows标签
-    navigate('/recipes/workflows')
+    navigate(withLangPrefix(lang, '/recipes/workflows'))
   }
 
   return (

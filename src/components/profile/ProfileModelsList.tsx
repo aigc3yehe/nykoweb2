@@ -11,6 +11,7 @@ import {
 import type { FetchModelDto } from '../../services/api/types'
 import type { FeaturedItem } from '../../store/featuredStore'
 import { useNavigate } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { setPendingMessageAtom } from '../../store/assistantStore'
 
@@ -43,6 +44,7 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
   const [, loadMorePublished] = useAtom(loadMorePublishedModelsAtom)
   const isLoadingRef = useRef(false)
   const navigate = useNavigate()
+  const lang = useLang()
   const { openChat } = useChatSidebar()
   const setPendingMessage = useSetAtom(setPendingMessageAtom)
 
@@ -161,13 +163,13 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
                   item={convertModelToFeaturedItem(model)}
                   variant="profile_style"
                   onClick={() => {
-                    navigate(`/model/${model.model_id}`)
+    navigate(withLangPrefix(lang, `/model/${model.model_id}`))
                   }}
                   onUseClick={() => {
                     // 1. 设置延迟发送的消息
                     setPendingMessage('I want to generate an image.')
                     // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
-                    navigate(`/model/${model.model_id}`)
+    navigate(withLangPrefix(lang, `/model/${model.model_id}`))
                     // 3. 打开右侧聊天窗口（包含登录检查）
                     openChat()
                   }}

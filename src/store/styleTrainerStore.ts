@@ -301,6 +301,7 @@ export const createModelAtom = atom(
       
       // 如果返回的 model_id 不为空且不为0，则跳转到模型详情页面
       if (response?.model_id && response.model_id !== 0 && navigate) {
+        // 这里不处理语言前缀，由调用方传入 navigate 时自行构造语言化路径
         navigate(`/model/${response.model_id}`)
       }
       

@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { toggleSidebarAtom } from '../../store/sidebarStore'
 import { showLoginModalAtom, userStateAtom } from '../../store/loginStore'
 import { useI18n } from '../../hooks/useI18n'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 import ThemeToggle from '../ui/ThemeToggle'
 import LanguageSelector from '../ui/LanguageSelector'
 import MenuIcon from '../../assets/web2/menu.svg'
@@ -15,6 +16,7 @@ import { formatNumber } from '../../utils/format'
 
 const Header: React.FC = React.memo(() => {
   const { t } = useI18n()
+  const lang = useLang()
   const navigate = useNavigate()
   const location = useLocation()
   const toggleSidebar = useSetAtom(toggleSidebarAtom)
@@ -65,7 +67,7 @@ const Header: React.FC = React.memo(() => {
               </button>
               {/* Logo - 点击导航到首页 */}
               <button
-                onClick={() => navigate('/')}
+        onClick={() => navigate(withLangPrefix(lang, '/'))}
                 className="flex items-center"
                 aria-label="Go to home"
               >
@@ -101,7 +103,7 @@ const Header: React.FC = React.memo(() => {
 
           {/* Upgrade 按钮 - 移动端只显示图标 */}
           <button 
-            onClick={() => navigate('/pricing')}
+            onClick={() => navigate(withLangPrefix(lang, '/pricing'))}
             className="flex items-center justify-center gap-1.5 h-8 px-3 sm:px-4 py-2 bg-[#00FF48] hover:bg-[#00E041] dark:bg-[#00CC39] dark:hover:bg-[#00B833] rounded-md transition-colors"
           >
             <img
@@ -118,7 +120,7 @@ const Header: React.FC = React.memo(() => {
           {userState.isAuthenticated && userState.user ? (
             /* 用户头像 - 32*32px (2rem*2rem) 圆形 */
             <button
-              onClick={() => navigate('/profile')}
+            onClick={() => navigate(withLangPrefix(lang, '/profile'))}
               className="w-8 h-8 rounded-full bg-[#E5E7EB] hover:bg-[#D1D5DB] transition-colors overflow-hidden flex items-center justify-center"
               aria-label="User profile"
             >

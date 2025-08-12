@@ -1,5 +1,4 @@
-// Deprecated: kept temporarily for backward compats; use zh-CN instead
-export const zh = {
+export const zhCN = {
   nav: {
     discover: '发现',
     creativeTools: '创意工具',
@@ -16,7 +15,7 @@ export const zh = {
     search: '搜索...',
     credits: '积分',
     upgrade: '升级',
-    login: '登录',
+    login: '登录'
   },
   common: {
     loading: '加载中...',
@@ -46,5 +45,8 @@ export const zh = {
   pricing: {
     title: '套餐与定价',
     subtitle: '升级以获得高级功能'
+  },
+  aria: {
+    openChat: '打开聊天'
   }
 }

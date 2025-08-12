@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { useAtom } from 'jotai'
 import { useNavigate } from 'react-router-dom'
+import { useLang } from '../../hooks/useLang'
 import BgLogo from '../../assets/web2/workflow_setting.svg'
 import CoverSelectIcon from '../../assets/web2/cover_select.svg'
 import CloseIcon from '../../assets/web2/close.svg'
@@ -16,6 +17,7 @@ import {
 
 const TrainerSidebar: React.FC = () => {
   const navigate = useNavigate()
+  useLang()
   const [formData] = useAtom(styleTrainerFormAtom)
   const [, updateForm] = useAtom(updateStyleTrainerFormAtom)
   const [modelCreationState] = useAtom(modelCreationStateAtom)

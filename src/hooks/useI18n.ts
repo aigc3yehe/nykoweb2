@@ -1,13 +1,13 @@
 import { useAtom } from 'jotai'
 import { languageAtom } from '../store/i18nStore'
 import { en } from '../locales/en'
-import { zh } from '../locales/zh'
+import { zhCN } from '../locales/zh-CN'
+import { zhHK } from '../locales/zh-HK'
 
 const messages = {
   en,
-  zh,
-  ja: en, // 暂时使用英文
-  ko: en  // 暂时使用英文
+  'zh-CN': zhCN,
+  'zh-HK': zhHK
 }
 
 export const useI18n = () => {
@@ -15,7 +15,7 @@ export const useI18n = () => {
   
   const t = (key: string): string => {
     const keys = key.split('.')
-    let value: any = messages[language]
+    let value: any = (messages as any)[language]
     
     for (const k of keys) {
       value = value?.[k]

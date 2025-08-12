@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useAtom } from 'jotai'
 import { useNavigate } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { useI18n } from '../../hooks/useI18n'
 import UseIcon from '../../assets/web2/use_2.svg'
 import CreateEditIcon from '../../assets/web2/create_edit.svg'
@@ -19,6 +20,7 @@ interface BottomBarProps {
 const BottomBar: React.FC<BottomBarProps> = ({ onOpenSettings }) => {
   const { t } = useI18n()
   const navigate = useNavigate()
+  const lang = useLang()
   
   // Store 状态
   const [workflowForm] = useAtom(workflowFormAtom)
@@ -47,7 +49,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ onOpenSettings }) => {
         
         // 延迟跳转到工作流详情页
         setTimeout(() => {
-          navigate(`/workflow/${result.workflow_id}`)
+      navigate(withLangPrefix(lang, `/workflow/${result.workflow_id}`))
         }, 1500)
       }
     } catch (error) {

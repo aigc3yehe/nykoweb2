@@ -4,6 +4,7 @@ import { contentDetailAtom, closeContentDetailAtom, toggleLikeContentAtom } from
 import { openChatSidebar } from '../../store/chatSidebarStore'
 import { clearChat, addMessage, sendMessage } from '../../store/assistantStore'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useLang, withLangPrefix } from '../../hooks/useLang'
 
 // 导入图标
 import modifyIcon from '../../assets/web2/modify.svg'
@@ -23,6 +24,7 @@ const ContentDetailModal: React.FC = () => {
   const addMessageToChat = useSetAtom(addMessage)
   const sendMessageAction = useSetAtom(sendMessage)
   const navigate = useNavigate()
+  const lang = useLang()
   const location = useLocation()
 
   if (!state.isOpen) return null
@@ -50,9 +52,9 @@ const ContentDetailModal: React.FC = () => {
     const pathname = location.pathname
     
     if (content?.source === 'model' && content?.source_info?.id) {
-      return pathname === `/model/${content.source_info.id}`
+      return /\/(en|zh-CN|zh-HK)\/model\//.test(pathname) && pathname.endsWith(`/${content.source_info.id}`)
     } else if (content?.source === 'workflow' && content?.source_info?.id) {
-      return pathname === `/workflow/${content.source_info.id}`
+      return /\/(en|zh-CN|zh-HK)\/workflow\//.test(pathname) && pathname.endsWith(`/${content.source_info.id}`)
     }
     return false
   }
@@ -62,9 +64,9 @@ const ContentDetailModal: React.FC = () => {
     if (!content?.source_info?.id) return
     
     if (content.source === 'model') {
-      navigate(`/model/${content.source_info.id}`)
+      navigate(withLangPrefix(lang, `/model/${content.source_info.id}`))
     } else if (content.source === 'workflow') {
-      navigate(`/workflow/${content.source_info.id}`)
+      navigate(withLangPrefix(lang, `/workflow/${content.source_info.id}`))
     }
   }
 
@@ -150,10 +152,10 @@ const ContentDetailModal: React.FC = () => {
     console.log('Go to source:', content?.source, content?.source_info?.id)
     const source_id = content?.source_info?.id
     if (content?.source === 'model') {
-      navigate(`/model/${source_id}`)
+      navigate(withLangPrefix(lang, `/model/${source_id}`))
       closeModal()
     } else if (content?.source === 'workflow') {
-      navigate(`/workflow/${source_id}`)
+      navigate(withLangPrefix(lang, `/workflow/${source_id}`))
       closeModal()
     }
   }
