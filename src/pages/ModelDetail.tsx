@@ -3,14 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAtom, useSetAtom } from 'jotai'
 import { getScaledImageUrl } from '../utils'
 import { modelDetailAtom, fetchModelDetailAtom, clearModelDetailAtom } from '../store/modelDetailStore'
-import { userStateAtom } from '../store/loginStore'
 import { setCurrentDetailModelAtom, sendMessage } from '../store/assistantStore'
 import CloseIcon from '../assets/web2/close.svg'
 import avatarSvg from '../assets/Avatar.svg'
 import usageSvg from '../assets/web2/usage.svg'
 import use2Svg from '../assets/web2/use_2.svg'
 import shareSvg from '../assets/web2/share.svg'
-import editSvg from '../assets/web2/edit.svg'
 import likeSvg from '../assets/web2/aicc_like.svg'
 import likedSvg from '../assets/web2/aicc_liked.svg'
 import { formatNumber } from '../utils'
@@ -27,7 +25,6 @@ const ModelDetail: React.FC = () => {
   const [state] = useAtom(modelDetailAtom)
   const [, fetchModelDetail] = useAtom(fetchModelDetailAtom)
   const [, clearModelDetail] = useAtom(clearModelDetailAtom)
-  const [userState] = useAtom(userStateAtom)
   const setCurrentDetailModel = useSetAtom(setCurrentDetailModelAtom)
   const sendMessageAction = useSetAtom(sendMessage)
   const { openChat } = useChatSidebar()
@@ -35,8 +32,6 @@ const ModelDetail: React.FC = () => {
   const { t } = useI18n()
   const addToast = useSetAtom(addToastAtom)
   const modelId = id ? parseInt(id, 10) : null
-  const userDid = userState.user?.tokens?.did || userState.userDetails?.did || ''
-  const userRole = userState.userDetails?.role || ''
 
   // 获取模型详情
   useEffect(() => {
@@ -332,7 +327,7 @@ const ModelDetail: React.FC = () => {
                         </span>
                       </button>
                       {/* 分享按钮 */}
-                      <button 
+                      <button
                         onClick={handleShare}
                         className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
                       >
@@ -467,7 +462,7 @@ const ModelDetail: React.FC = () => {
                 {/* 右侧按钮组 */}
                 <div className="flex items-center gap-3.5 h-[3rem]">
                   {/* 分享按钮 */}
-                  <button 
+                  <button
                     onClick={handleShare}
                     className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
                   >

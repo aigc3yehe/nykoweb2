@@ -3,14 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAtom, useSetAtom } from 'jotai'
 import { getScaledImageUrl } from '../utils'
 import { workflowDetailAtom, fetchWorkflowDetailAtom, clearWorkflowDetailAtom } from '../store/workflowDetailStore'
-import { userStateAtom } from '../store/loginStore'
 import { setCurrentDetailWorkflowAtom, sendMessage } from '../store/assistantStore'
 import CloseIcon from '../assets/web2/close.svg'
 import avatarSvg from '../assets/Avatar.svg'
 import usageSvg from '../assets/web2/usage.svg'
 import use2Svg from '../assets/web2/use_2.svg'
 import shareSvg from '../assets/web2/share.svg'
-import editSvg from '../assets/web2/edit.svg'
 import likeSvg from '../assets/web2/aicc_like.svg'
 import likedSvg from '../assets/web2/aicc_liked.svg'
 import { formatNumber } from '../utils'
@@ -27,7 +25,6 @@ const WorkflowDetail: React.FC = () => {
   const [state] = useAtom(workflowDetailAtom)
   const [, fetchWorkflowDetail] = useAtom(fetchWorkflowDetailAtom)
   const [, clearWorkflowDetail] = useAtom(clearWorkflowDetailAtom)
-  const [userState] = useAtom(userStateAtom)
   const setCurrentDetailWorkflow = useSetAtom(setCurrentDetailWorkflowAtom)
   const sendMessageAction = useSetAtom(sendMessage)
   const { openChat } = useChatSidebar()
@@ -35,8 +32,6 @@ const WorkflowDetail: React.FC = () => {
   const { t } = useI18n()
   const addToast = useSetAtom(addToastAtom)
   const workflowId = id ? parseInt(id, 10) : null
-  const userDid = userState.user?.tokens?.did || userState.userDetails?.did || ''
-  const userRole = userState.userDetails?.role || ''
 
   // 获取工作流详情
   useEffect(() => {
@@ -324,7 +319,7 @@ const WorkflowDetail: React.FC = () => {
                         </span>
                       </button>
                       {/* 分享按钮 */}
-                      <button 
+                      <button
                         onClick={handleShare}
                         className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
                       >
@@ -485,7 +480,7 @@ const WorkflowDetail: React.FC = () => {
                 {/* 右侧按钮组 */}
                 <div className="flex items-center gap-3.5 h-[3rem]">
                   {/* 分享按钮 */}
-                  <button 
+                  <button
                     onClick={handleShare}
                     className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
                   >

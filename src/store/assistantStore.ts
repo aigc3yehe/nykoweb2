@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { atom } from 'jotai';
 import { imageUploadAtom, setImageUploadStateAtom, updateMessageUrlsAtom, showToastAtom, uploadImages } from './imagesStore.ts';
-import { fetchContentsAtom, fetchModelGalleryAtom, fetchWorkflowGalleryAtom } from './contentsStore';
+import { fetchModelGalleryAtom, fetchWorkflowGalleryAtom } from './contentsStore';
 import { FetchModelDto, WorkflowDto } from '../services/api';
 import { contentsApi } from '../services/api/contents';
 import type { FetchGenerateContentStateRequest, FetchGenerateContentStateResponse } from '../services/api';
