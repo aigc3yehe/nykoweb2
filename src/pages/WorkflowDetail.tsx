@@ -17,6 +17,9 @@ import { formatNumber } from '../utils'
 import WorkflowGallery from '../components/workflow/WorkflowGallery.tsx'
 import { useChatSidebar } from '../hooks/useChatSidebar'
 import { toggleLikeWorkflowAtom } from '../store/workflowDetailStore'
+import { useI18n } from '../hooks/useI18n'
+import { addToastAtom } from '../store/toastStore'
+import { shareCurrentPage } from '../utils/share'
 
 const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -29,6 +32,8 @@ const WorkflowDetail: React.FC = () => {
   const sendMessageAction = useSetAtom(sendMessage)
   const { openChat } = useChatSidebar()
   const toggleLikeWorkflow = useSetAtom(toggleLikeWorkflowAtom)
+  const { t } = useI18n()
+  const addToast = useSetAtom(addToastAtom)
   const workflowId = id ? parseInt(id, 10) : null
   const userDid = userState.user?.tokens?.did || userState.userDetails?.did || ''
   const userRole = userState.userDetails?.role || ''
@@ -83,6 +88,21 @@ const WorkflowDetail: React.FC = () => {
     // 2. 发送消息：I want to use this workflow.
     openChat()
     sendMessageAction('I want to use this workflow.')
+  }
+
+  const handleShare = async () => {
+    const success = await shareCurrentPage()
+    if (success) {
+      addToast({
+        message: t('common.share.copied'),
+        type: 'success'
+      })
+    } else {
+      addToast({
+        message: t('common.share.copyFailed'),
+        type: 'error'
+      })
+    }
   }
 
   // 如果没有有效的工作流ID，显示错误
@@ -304,7 +324,10 @@ const WorkflowDetail: React.FC = () => {
                         </span>
                       </button>
                       {/* 分享按钮 */}
-                      <button className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">
+                      <button 
+                        onClick={handleShare}
+                        className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+                      >
                         <img src={shareSvg} alt="Share" className="w-6 h-6" />
                       </button>
                       {/* 编辑按钮（仅作者或admin可见）- 暂时隐藏，功能未实现 */}
@@ -462,7 +485,10 @@ const WorkflowDetail: React.FC = () => {
                 {/* 右侧按钮组 */}
                 <div className="flex items-center gap-3.5 h-[3rem]">
                   {/* 分享按钮 */}
-                  <button className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">
+                  <button 
+                    onClick={handleShare}
+                    className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+                  >
                     <img src={shareSvg} alt="Share" className="w-6 h-6" />
                   </button>
                   {/* 编辑按钮（仅作者或admin可见）- 暂时隐藏，功能未实现 */}

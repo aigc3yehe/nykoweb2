@@ -17,12 +17,16 @@ export const en = {
     upgrade: 'Upgrade',
     login: 'Log in',
   },
-  common: { // 整个 common 部分缺失
+  common: {
     loading: 'Loading...',
     error: 'Error',
     retry: 'Retry',
     cancel: 'Cancel',
-    confirm: 'Confirm'
+    confirm: 'Confirm',
+    share: {
+      copied: 'Link copied to clipboard!',
+      copyFailed: 'Failed to copy link'
+    }
   },
   auth: {
     loginRequired: 'Login Required',

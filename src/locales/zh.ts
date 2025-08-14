@@ -23,7 +23,11 @@ export const zh = {
     error: '错误',
     retry: '重试',
     cancel: '取消',
-    confirm: '确认'
+    confirm: '确认',
+    share: {
+      copied: '链接已复制到剪贴板！',
+      copyFailed: '复制链接失败'
+    }
   },
   auth: {
     loginRequired: '需要登录',

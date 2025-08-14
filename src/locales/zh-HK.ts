@@ -22,7 +22,11 @@ export const zhHK = {
     error: '錯誤',
     retry: '重試',
     cancel: '取消',
-    confirm: '確認'
+    confirm: '確認',
+    share: {
+      copied: '連結已複製到剪貼簿！',
+      copyFailed: '複製連結失敗'
+    }
   },
   auth: {
     loginRequired: '需要登入',

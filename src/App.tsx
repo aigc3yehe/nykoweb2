@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
 import ConfirmDialog from './components/ui/ConfirmDialog'
+import Toast from './components/ui/Toast'
 import { dialogAtom } from './store/dialogStore';
 import { useAtom, useSetAtom } from 'jotai'
 import ContentDetailModal from './components/modals/ContentDetailModal'
@@ -60,7 +61,7 @@ function App() {
           <Route path="*" element={<Navigate to="/en" replace />} />
         </Routes>
 
-        {/* <Toast /> */}
+        <Toast />
         {/* 新 ConfirmDialog 通用弹窗 */}
         {dialog.open && (
           <ConfirmDialog
