@@ -12,7 +12,6 @@ import CuIcon from '../../assets/web2/cu.svg'
 import BackIcon from '../../assets/web2/back.svg'
 import LogoImage from '../../assets/web2/Logo.png'
 import UpgradeIcon from '../../assets/web2/upgrade.svg'
-import { formatNumber } from '../../utils/format'
 
 const Header: React.FC = React.memo(() => {
   const { t } = useI18n()
@@ -96,7 +95,7 @@ const Header: React.FC = React.memo(() => {
             <div className="h-8 rounded-[6px] gap-1.5 px-3 border border-[#E5E7EB] flex items-center mr-1">
               <img src={CuIcon} alt="CU" className="w-[0.875rem] h-4" />
               <span className="font-lexend font-normal text-sm leading-[100%] text-[#1F2937] ml-1">
-                {formatNumber(userState.userDetails?.credit || 0)}
+                {userState.userDetails?.credit || 0}
               </span>
             </div>
           )}

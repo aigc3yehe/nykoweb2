@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { atom } from 'jotai';
 import { imageUploadAtom, setImageUploadStateAtom, updateMessageUrlsAtom, showToastAtom, uploadImages } from './imagesStore.ts';
-import { fetchContentsAtom } from './contentsStore';
+import { fetchContentsAtom, fetchModelGalleryAtom, fetchWorkflowGalleryAtom } from './contentsStore';
 import { FetchModelDto, WorkflowDto } from '../services/api';
 import { contentsApi } from '../services/api/contents';
 import type { FetchGenerateContentStateRequest, FetchGenerateContentStateResponse } from '../services/api';
@@ -475,7 +475,9 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
 
           if (isWorkflow) {
             // 如果 isWorkflow 为 true，检查之前的 latestGeneratedImage 来判断是否应该继承之前的类型
+            console.log("当前是Workflow")
             const previousSource = chatState.latestGeneratedImage.source;
+            console.log("之前的值：previousSource", previousSource)
             if (previousSource === 'model') {
               // 如果之前是 model 生成的图片，这次修改也应该保持 model 类型
               actualIsWorkflow = false;
@@ -493,7 +495,7 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
             provider: actualIsWorkflow ? (isVideo ? 'kling' : 'gpt-4o') : 'sd',
             model: actualIsWorkflow ? (isVideo ? 'kling-video-v1' : 'gpt-image-1-vip') : 'sd',
             source: actualIsWorkflow ? 'workflow' : 'model',
-            source_id: actualIsWorkflow ? chatState.workflowRunningState.workflow?.id : chatState.currentDetailModel?.model_id,
+            source_id: actualIsWorkflow ? chatState.workflowRunningState.workflow?.workflow_id : chatState.currentDetailModel?.model_id,
             reference: generatedUrls[0], // 使用第一个生成的内容
             aicc_width: actualIsWorkflow ? chatState.workflowRunningState.width : chatState.selectedAspectRatio?.width,
             aicc_height: actualIsWorkflow ? chatState.workflowRunningState.height : chatState.selectedAspectRatio?.height,
@@ -668,21 +670,17 @@ export async function pollImageGenerationTask(taskId: string, content_id: number
 
           // 如果有当前模型，静默刷新内容（获取第1页新内容并与现有内容合并）
           if (chatState.currentDetailModel?.model_id) {
-            set(fetchContentsAtom, {
-              reset: false,
-              typeFilter: 'all',
-              source: 'model',
-              source_id: chatState.currentDetailModel.model_id,
+            set(fetchModelGalleryAtom, {
+              refresh: true,
+              modelId: chatState.currentDetailModel.model_id,
               disableCache: true
             });
           }
           // 如果是工作流，静默刷新内容（获取第1页新内容并与现有内容合并）
           if (actualIsWorkflow && chatState.currentDetailWorkflow?.workflow_id) {
-            set(fetchContentsAtom, {
-              reset: false,
-              typeFilter: 'all',
-              source: 'workflow',
-              source_id: chatState.currentDetailWorkflow.workflow_id,
+            set(fetchWorkflowGalleryAtom, {
+              refresh: true,
+              workflowId: chatState.currentDetailWorkflow.workflow_id,
               disableCache: true
             });
           }

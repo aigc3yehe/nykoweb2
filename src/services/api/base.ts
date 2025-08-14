@@ -97,7 +97,7 @@ export class BaseApiService {
       })
     }
 
-    console.log(`Building URL - baseURL: ${baseURL}, endpoint: ${cleanEndpoint}, final: ${url.toString()}`)
+    // console.log(`Building URL - baseURL: ${baseURL}, endpoint: ${cleanEndpoint}, final: ${url.toString()}`)
 
     return url.toString()
   }

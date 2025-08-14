@@ -39,6 +39,8 @@ function App() {
           <Route path=":lang" element={<ProtectedRoute requireAuth={false}><Home /></ProtectedRoute>} />
           <Route path=":lang/recipes" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
           <Route path=":lang/recipes/:tab" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
+          {/* 新增：无语言前缀的 OAuth 回调路径，保证第三方重定向可命中 */}
+          <Route path="api/auth/callback/google" element={<AuthCallback />} />
           <Route path=":lang/api/auth/callback/google" element={<AuthCallback />} />
 
           {/* 公开详情页面 - 不需要登录 */}

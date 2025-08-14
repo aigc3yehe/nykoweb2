@@ -66,7 +66,7 @@ export const hideLoginModalAtom = atom(
 // 初始化用户状态（从localStorage恢复）
 export const initUserStateAtom = atom(
   null,
-  (_, set) => {
+  (get, set) => {
     const user = authService.getCurrentUser()
     if (user && authService.isAuthenticated()) {
       // 重新设置Bearer Token - 修复重新打开应用时token丢失的问题
@@ -76,10 +76,12 @@ export const initUserStateAtom = atom(
         set(setAgentTokenAtom, user.tokens.access_token)
       }
 
+      const currentUserState = get(userStateAtom)
+
       set(userStateAtom, {
         isAuthenticated: true,
         user,
-        userDetails: null,
+        userDetails: currentUserState.userDetails,
         isLoading: false,
         error: null
       })

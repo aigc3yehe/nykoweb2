@@ -365,6 +365,7 @@ export const fetchModelGalleryAtom = atom(
   null,
   async (get, set, options: {
     reset?: boolean
+    refresh?: boolean
     modelId: number
     order?: ContentOrderType
     desc?: 'desc' | 'asc'
@@ -374,6 +375,7 @@ export const fetchModelGalleryAtom = atom(
 
     const {
       reset = false,
+      refresh = false,
       modelId,
       order = currentState.order,
       desc = currentState.desc,
@@ -395,6 +397,7 @@ export const fetchModelGalleryAtom = atom(
 
     console.log('ModelGallery: Cache check -', {
       shouldReset,
+      refresh,
       cacheValid,
       hasExistingData: currentState.items.length > 0,
       willUseCache: cacheValid && currentState.items.length > 0,
@@ -406,10 +409,11 @@ export const fetchModelGalleryAtom = atom(
       return currentState.items
     }
 
-    const newPage = shouldReset ? 1 : currentState.page
+    // 如果是刷新模式，获取第一页但保留现有内容
+    const newPage = shouldReset ? 1 : (refresh ? 1 : currentState.page)
     const existingItems = shouldReset ? [] : currentState.items
 
-    console.log('ModelGallery: Fetching page', newPage, shouldReset ? '(reset)' : '(load more)', { modelId })
+    console.log('ModelGallery: Fetching page', newPage, shouldReset ? '(reset)' : (refresh ? '(refresh)' : '(load more)'), { modelId })
 
     // 设置加载状态
     set(modelGalleryAtom, {
@@ -441,10 +445,29 @@ export const fetchModelGalleryAtom = atom(
 
       const newItems = response.contents || []
       const totalCount = response.total_count || 0
-      const allItems = shouldReset ? newItems : [...existingItems, ...newItems]
+      
+      // 如果是刷新模式，需要去重并正确排序
+      let allItems: ContentItem[]
+      if (refresh && !shouldReset) {
+        // 刷新模式：合并现有内容和新内容，去重，按created_at排序
+        const existingIds = new Set(existingItems.map(item => item.content_id))
+        const uniqueNewItems = newItems.filter(item => !existingIds.has(item.content_id))
+        allItems = [...uniqueNewItems, ...existingItems]
+        
+        // 按created_at降序排序（最新的在前面）
+        allItems.sort((a, b) => {
+          const aTime = a.created_at ? new Date(a.created_at).getTime() : 0
+          const bTime = b.created_at ? new Date(b.created_at).getTime() : 0
+          return bTime - aTime
+        })
+      } else {
+        // 重置或加载更多模式：正常处理
+        allItems = shouldReset ? newItems : [...existingItems, ...newItems]
+      }
+      
       const hasMore = allItems.length < totalCount
 
-      console.log('ModelGallery: Loaded', newItems.length, 'items, total:', allItems.length, '/', totalCount, 'hasMore:', hasMore, 'modelId:', modelId)
+      console.log('ModelGallery: Loaded', newItems.length, 'items, total:', allItems.length, '/', totalCount, 'hasMore:', hasMore, 'modelId:', modelId, 'refresh:', refresh)
 
       set(modelGalleryAtom, {
         ...currentState,
@@ -481,6 +504,7 @@ export const fetchWorkflowGalleryAtom = atom(
   null,
   async (get, set, options: {
     reset?: boolean
+    refresh?: boolean
     workflowId: number
     order?: ContentOrderType
     desc?: 'desc' | 'asc'
@@ -490,6 +514,7 @@ export const fetchWorkflowGalleryAtom = atom(
 
     const {
       reset = false,
+      refresh = false,
       workflowId,
       order = currentState.order,
       desc = currentState.desc,
@@ -511,6 +536,7 @@ export const fetchWorkflowGalleryAtom = atom(
 
     console.log('WorkflowGallery: Cache check -', {
       shouldReset,
+      refresh,
       cacheValid,
       hasExistingData: currentState.items.length > 0,
       willUseCache: cacheValid && currentState.items.length > 0,
@@ -522,10 +548,11 @@ export const fetchWorkflowGalleryAtom = atom(
       return currentState.items
     }
 
-    const newPage = shouldReset ? 1 : currentState.page
+    // 如果是刷新模式，获取第一页但保留现有内容
+    const newPage = shouldReset ? 1 : (refresh ? 1 : currentState.page)
     const existingItems = shouldReset ? [] : currentState.items
 
-    console.log('WorkflowGallery: Fetching page', newPage, shouldReset ? '(reset)' : '(load more)', { workflowId })
+    console.log('WorkflowGallery: Fetching page', newPage, shouldReset ? '(reset)' : (refresh ? '(refresh)' : '(load more)'), { workflowId })
 
     // 设置加载状态
     set(workflowGalleryAtom, {
@@ -557,10 +584,29 @@ export const fetchWorkflowGalleryAtom = atom(
 
       const newItems = response.contents || []
       const totalCount = response.total_count || 0
-      const allItems = shouldReset ? newItems : [...existingItems, ...newItems]
+      
+      // 如果是刷新模式，需要去重并正确排序
+      let allItems: ContentItem[]
+      if (refresh && !shouldReset) {
+        // 刷新模式：合并现有内容和新内容，去重，按created_at排序
+        const existingIds = new Set(existingItems.map(item => item.content_id))
+        const uniqueNewItems = newItems.filter(item => !existingIds.has(item.content_id))
+        allItems = [...uniqueNewItems, ...existingItems]
+        
+        // 按created_at降序排序（最新的在前面）
+        allItems.sort((a, b) => {
+          const aTime = a.created_at ? new Date(a.created_at).getTime() : 0
+          const bTime = b.created_at ? new Date(b.created_at).getTime() : 0
+          return bTime - aTime
+        })
+      } else {
+        // 重置或加载更多模式：正常处理
+        allItems = shouldReset ? newItems : [...existingItems, ...newItems]
+      }
+      
       const hasMore = allItems.length < totalCount
 
-      console.log('WorkflowGallery: Loaded', newItems.length, 'items, total:', allItems.length, '/', totalCount, 'hasMore:', hasMore, 'workflowId:', workflowId)
+      console.log('WorkflowGallery: Loaded', newItems.length, 'items, total:', allItems.length, '/', totalCount, 'hasMore:', hasMore, 'workflowId:', workflowId, 'refresh:', refresh)
 
       set(workflowGalleryAtom, {
         ...currentState,

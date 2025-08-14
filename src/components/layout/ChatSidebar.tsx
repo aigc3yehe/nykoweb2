@@ -218,6 +218,20 @@ const ChatSidebar: React.FC = () => {
                 onPartiallyModify={handlePartiallyModify}
               />
             ))}
+            
+            {/* AI回复loading状态 */}
+            {chatState.isLoading && (
+              <div className="flex items-start mt-4">
+                <div className="flex-1 min-w-0">
+                  <div className="ai-typing">
+                    <div className="ai-typing-dot ai-typing-dot-1 bg-design-main-blue dark:bg-design-dark-main-blue"></div>
+                    <div className="ai-typing-dot ai-typing-dot-2 bg-design-light-green dark:bg-design-dark-light-green"></div>
+                    <div className="ai-typing-dot ai-typing-dot-3 bg-design-medium-gray dark:bg-design-dark-medium-gray"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div ref={messagesEndRef} />
             {/* 留白div，高度与输入框一致 */}
             <div style={{ height: inputHeight, minHeight: 0, pointerEvents: 'none' }} aria-hidden />

@@ -166,3 +166,17 @@ html {
 .no-spinner {
   -moz-appearance: textfield; /* Firefox */
 }
+
+/* AI typing indicator */
+@keyframes ai-dot-bounce {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-0.25rem); }
+}
+
+@layer utilities {
+	.ai-typing { @apply flex items-center gap-2; }
+	.ai-typing-dot { @apply w-2.5 h-2.5 rounded-full; }
+	.ai-typing-dot-1 { animation: ai-dot-bounce 0.9s ease-in-out infinite; animation-delay: 0s; }
+	.ai-typing-dot-2 { animation: ai-dot-bounce 0.9s ease-in-out infinite; animation-delay: 0.15s; }
+	.ai-typing-dot-3 { animation: ai-dot-bounce 0.9s ease-in-out infinite; animation-delay: 0.3s; }
+}

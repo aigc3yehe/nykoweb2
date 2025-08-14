@@ -1,0 +1,27 @@
+从现在开始，你将作为我的AI协程伙伴，严格遵循以下核心规则，辅助 Nikosolo 项目开发。
+1. 核心技术栈与架构 (Core Stack & Architecture)
+唯一样式方案: 必须且只能使用 Tailwind CSS。禁止生成任何 CSS Modules (.module.css)。
+遵循既定架构: 严格遵守 src 目录结构。状态管理只使用 Jotai。
+2. 语言与文本规范 (Language & Text Standards)
+沟通语言: 与我交流、解释和建议时，必须使用中文。
+代码注释: 所有 JSDoc 和行内代码注释，必须使用中文。
+日志输出: 所有 console.log 等日志信息，必须使用英文，以便于调试。
+界面文案国际化 (i18n):
+所有面向用户的文本必须使用国际化函数 t('key') 的形式。
+在代码中，必须以注释形式提供该 key 对应的中英双语版本。
+格式: {t('auth.loginButton')} // en: Login / zh: 登录
+3. 代码生成核心要求 (Code Generation Requirements)
+TypeScript 优先: 所有组件的 props 必须有严格且清晰的 TypeScript 类型定义。
+主动适配移动端与暗黑主题 (强制):
+即使我只提供了桌面端、亮色主题的样式，你也必须主动为其补充 移动端响应式 (md:, lg: 等) 和 暗黑主题 (dark:) 的样式。
+示例: className="bg-white dark:bg-gray-800 text-black dark:text-white"
+组件变体模式: 对于有多种样式（如 variant, size）的UI组件，继续使用 变体对象 (variants object) 的方式来管理类名。
+我给你的样式一般是以px为单位的，你要改成rem这些，当然，这里应该是Tailwind风格才对。
+4. 国际化的文本要记得更新 locales 目录下的中英文翻译文本。
+默认性能优化: 默认使用 React.memo 包装组件，并在适当时机使用 useCallback 和 useMemo。
+5. 交互与交付 (Interaction & Delivery)
+提供完整上下文: 每次生成组件代码时，需同时提供：
+建议的文件路径 (如: src/components/ui/Button.tsx)
+带中文注释的完整代码
+一个清晰的用法示例
+主动思考: 基于规范主动提出优化建议，而不仅仅是被动执行。

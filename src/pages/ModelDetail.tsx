@@ -186,7 +186,8 @@ const ModelDetail: React.FC = () => {
                       alt={state.model.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/path/to/fallback-image.png'
+                        (e.target as HTMLImageElement).style.backgroundColor = '#E8E8E8'
+                        ;(e.target as HTMLImageElement).src = ''
                       }}
                     />
                   ) : (
@@ -314,12 +315,12 @@ const ModelDetail: React.FC = () => {
                       <button className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">
                         <img src={shareSvg} alt="Share" className="w-6 h-6" />
                       </button>
-                      {/* 编辑按钮（仅作者或admin可见） */}
-                      {(state.model.user?.did === userDid || userRole === 'admin') && (
+                      {/* 编辑按钮（仅作者或admin可见）- 暂时隐藏，功能未实现 */}
+                      {/* {(state.model.user?.did === userDid || userRole === 'admin') && (
                         <button className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">
                           <img src={editSvg} alt="Edit" className="w-6 h-6" />
                         </button>
-                      )}
+                      )} */}
                     </div>
                   </div>
                 </div>
@@ -366,7 +367,8 @@ const ModelDetail: React.FC = () => {
                       alt={state.model.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/path/to/fallback-image.png'
+                        (e.target as HTMLImageElement).style.backgroundColor = '#E8E8E8'
+                        ;(e.target as HTMLImageElement).src = ''
                       }}
                     />
                   ) : (
@@ -445,12 +447,12 @@ const ModelDetail: React.FC = () => {
                   <button className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">
                     <img src={shareSvg} alt="Share" className="w-6 h-6" />
                   </button>
-                  {/* 编辑按钮（仅作者或admin可见） */}
-                  {(state.model.user?.did === userDid || userRole === 'admin') && (
+                  {/* 编辑按钮（仅作者或admin可见）- 暂时隐藏，功能未实现 */}
+                  {/* {(state.model.user?.did === userDid || userRole === 'admin') && (
                     <button className="w-[3rem] h-[3rem] flex items-center justify-center rounded-[6px] bg-design-bg-light-blue dark:bg-design-dark-bg-light-blue">
                       <img src={editSvg} alt="Edit" className="w-6 h-6" />
                     </button>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>

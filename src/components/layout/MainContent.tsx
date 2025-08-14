@@ -19,9 +19,9 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
         return 'bg-white dark:bg-gray-900'
       case '/workflow/builder':
       case '/style/trainer':
-        return 'bg-main-bg dark:bg-gray-900'
+        return 'bg-white dark:bg-gray-900'
       default:
-        return 'bg-main-bg dark:bg-gray-900'
+        return 'bg-white dark:bg-gray-900'
     }
   }
 
