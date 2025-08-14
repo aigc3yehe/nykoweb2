@@ -1,7 +1,7 @@
 import { atom } from 'jotai'
 import { workflowsApi } from '../services/api/workflows'
 import type { WorkflowDto } from '../services/api/types'
-import { userStateAtom } from './loginStore'
+import { userStateAtom, showLoginModalAtom } from './loginStore'
 
 // 工作流详情状态
 export interface WorkflowDetailState {
@@ -74,6 +74,13 @@ export const clearWorkflowDetailAtom = atom(
 export const toggleLikeWorkflowAtom = atom(
   null,
   async (get, set, workflowId: number) => {
+    // 登录校验：未登录则弹出登录框并中断
+    const userState = get(userStateAtom)
+    if (!userState.isAuthenticated) {
+      set(showLoginModalAtom)
+      return
+    }
+
     const state = get(workflowDetailAtom)
     if (!state.workflow) return
 

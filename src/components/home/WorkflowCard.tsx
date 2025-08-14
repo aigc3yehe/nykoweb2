@@ -114,9 +114,10 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         }
       }
     } else {
-      // Popular Workflows: PC 288x306, 移动端 224x266
+      // Popular Workflows: 修复高度问题 - 增加高度确保内容完整显示
+      // 移动端: 224x280 (增加14px), PC端: 288x320 (增加14px)
       return {
-        card: 'w-56 md:w-72 h-[16.625rem] md:h-[19.125rem]', // 移动端: 224x266, PC端: 288x306
+        card: 'w-56 md:w-72 h-[17.5rem] md:h-[20rem]', // 移动端: 224x280, PC端: 288x320
         cover: 'w-56 md:w-72 h-[13.75rem] md:h-[13.75rem]', // 移动端: 224x220, PC端: 288x220
         container: 'w-56 md:w-72',
         showDescription: true, // PC端显示，移动端通过CSS隐藏
@@ -170,7 +171,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
   return (
     <div 
       className={cn(
-        "rounded-xl cursor-pointer flex-shrink-0 group",
+        "rounded-xl cursor-pointer flex-shrink-0 group flex flex-col", // 添加flex flex-col布局
         // 根据variant决定是否有移动端样式覆盖
         !dimensions.mobileStyle && dimensions.card,
         dimensions.mobileStyle && "[width:var(--mobile-width)] [height:var(--mobile-height)] lg:w-16.8125",
@@ -279,7 +280,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
       {/* Container 区域 - 修复布局 */}
       <div 
         className={cn(
-          "pt-3 flex flex-col gap-0.5", // padding-top: 12px, gap: 4px
+          "pt-3 flex flex-col gap-0.5 flex-1", // padding-top: 12px, gap: 4px, 添加flex-1确保占满剩余空间
           // 根据variant决定是否有移动端样式覆盖
           !dimensions.mobileStyle && dimensions.container,
           dimensions.mobileStyle && `[width:var(--mobile-width)] [height:var(--mobile-text-height)] lg:h-auto lg:w-16.8125`
@@ -298,7 +299,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         {/* Description - 根据variant和屏幕尺寸决定是否显示，并处理可选性 */}
         {dimensions.showDescription && item.description && (
           <p 
-            className="font-lexend text-xs leading-[140%] text-design-medium-gray dark:text-design-dark-medium-gray overflow-hidden hidden md:block"
+            className="font-lexend text-xs leading-[140%] text-design-medium-gray dark:text-design-dark-medium-gray overflow-hidden hidden md:block flex-1"
             style={{
               display: '-webkit-box',
               WebkitLineClamp: 2,
@@ -311,9 +312,9 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           </p>
         )}
 
-        {/* User 信息 - 修复字符裁切问题 */}
+        {/* User 信息 - 修复字符裁切问题，确保显示在底部 */}
         {dimensions.showUser && (
-          <div className="flex items-center gap-1.5 h-4"> {/* 固定高度确保显示完整 */}
+          <div className="flex items-center gap-1.5 h-4 mt-auto"> {/* 固定高度确保显示完整，添加mt-auto推到底部 */}
             <img
               src={getAvatarUrl()}
               alt={getDisplayName()}

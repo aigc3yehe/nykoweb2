@@ -1,7 +1,7 @@
 import { atom } from 'jotai'
 import { contentsApi } from '../services/api/contents'
 import type { Content } from '../services/api/types'
-import { userStateAtom } from './loginStore'
+import { userStateAtom, showLoginModalAtom } from './loginStore'
 
 // 内容详情状态
 export interface ContentDetailState {
@@ -100,6 +100,13 @@ export const closeContentDetailAtom = atom(
 export const toggleLikeContentAtom = atom(
   null,
   async (get, set, contentId: number) => {
+    // 登录校验：未登录则弹出登录框并中断
+    const userState = get(userStateAtom)
+    if (!userState.isAuthenticated) {
+      set(showLoginModalAtom)
+      return
+    }
+
     const currentState = get(contentDetailAtom)
     if (!currentState.content) return
 

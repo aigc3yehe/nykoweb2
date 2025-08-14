@@ -80,7 +80,7 @@ const PopularWorkflows: React.FC = () => {
     return (
       <div className="w-full">
         <SectionHeader title="Popular Workflows" />
-        <div className="h-[16.625rem] md:h-[19.125rem] flex items-center justify-center">
+        <div className="h-[17.5rem] md:h-[20rem] flex items-center justify-center">
           <span className="text-gray-500">Loading...</span>
         </div>
       </div>
@@ -92,7 +92,7 @@ const PopularWorkflows: React.FC = () => {
     return (
       <div className="w-full">
         <SectionHeader title="Popular Workflows" />
-        <div className="h-[16.625rem] md:h-[19.125rem] flex items-center justify-center">
+        <div className="h-[17.5rem] md:h-[20rem] flex items-center justify-center">
           <div className="text-center">
             <p className="text-red-500 mb-2">Failed to load workflows</p>
             <button 
@@ -131,7 +131,7 @@ const PopularWorkflows: React.FC = () => {
       {/* 滚动容器 - 间距16px */}
       <div 
         ref={scrollContainerRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+        className="flex gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth"
       >
         {workflowsState.items.map((item) => (
           <WorkflowCard

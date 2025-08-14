@@ -42,8 +42,8 @@ const LoginModal: React.FC = () => {
   }
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+    <div
+      className="fixed inset-0 z-1000 flex items-center justify-center bg-black bg-opacity-50"
       onClick={handleOverlayClick}
     >
       {/* 登录弹窗容器 - 宽度22.5rem，圆角0.625rem，白色背景 */}
@@ -51,9 +51,9 @@ const LoginModal: React.FC = () => {
         {/* 标题栏 - 高度3.125rem */}
         <div className="relative w-[22.5rem] h-[3.125rem] flex items-center justify-center">
           {/* 背景图 */}
-          <img 
-            src={LoginTitleBg} 
-            alt="" 
+          <img
+            src={LoginTitleBg}
+            alt=""
             className="absolute inset-0 w-full h-full object-cover"
           />
           {/* 标题 */}
@@ -71,15 +71,15 @@ const LoginModal: React.FC = () => {
         {/* Logo区域 - 宽22.5rem，高6.4375rem */}
         <div className="relative w-[22.5rem] h-[6.4375rem] flex items-center justify-center">
           {/* 背景图 */}
-          <img 
-            src={LoginLogoBg} 
-            alt="" 
+          <img
+            src={LoginLogoBg}
+            alt=""
             className="absolute inset-0 w-full h-full object-cover"
           />
           {/* Logo - 6.25rem*2.6875rem */}
-          <img 
-            src={Logo} 
-            alt="Logo" 
+          <img
+            src={Logo}
+            alt="Logo"
             className="relative z-10 w-[6.25rem] h-[2.6875rem] object-contain"
             onError={(e) => {
               // 如果logo加载失败，显示文本占位符
@@ -98,7 +98,7 @@ const LoginModal: React.FC = () => {
         {/* 内容区域 - 宽22.5rem，gap 1.25rem，padding 1.25rem */}
         <div className="w-[22.5rem] flex flex-col gap-5 p-5">
           {/* Google登录按钮 - 宽20rem，高3rem */}
-          <button 
+          <button
             onClick={handleGoogleLogin}
             className="w-[20rem] h-[3rem] flex items-center justify-center gap-[0.625rem] px-[0.875rem] py-[0.875rem] rounded-[0.625rem] border border-[#E5E7EB] hover:bg-gray-50 transition-colors"
           >
@@ -124,4 +124,4 @@ const LoginModal: React.FC = () => {
   )
 }
 
-export default LoginModal 
+export default LoginModal

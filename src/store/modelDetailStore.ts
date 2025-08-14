@@ -1,7 +1,7 @@
 import { atom } from 'jotai'
 import { modelsApi } from '../services/api/models'
 import type { FetchModelDto } from '../services/api/types'
-import { userStateAtom } from './loginStore'
+import { userStateAtom, showLoginModalAtom } from './loginStore'
 
 // 模型详情状态
 export interface ModelDetailState {
@@ -84,6 +84,13 @@ export const clearModelDetailAtom = atom(
 export const toggleLikeModelAtom = atom(
   null,
   async (get, set, modelId: number) => {
+    // 登录校验：未登录则弹出登录框并中断
+    const userState = get(userStateAtom)
+    if (!userState.isAuthenticated) {
+      set(showLoginModalAtom)
+      return
+    }
+
     const state = get(modelDetailAtom)
     if (!state.model) return
 
