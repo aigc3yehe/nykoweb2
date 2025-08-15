@@ -31,7 +31,11 @@ const convertWorkflowToFeaturedItem = (workflow: WorkflowDto): FeaturedItem => (
   }
 })
 
-const WorkflowsList: React.FC = () => {
+interface WorkflowsListProps {
+  sortOption?: string
+}
+
+const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => {
   const [workflowState] = useAtom(recipesWorkflowsAtom)
   const [, fetchData] = useAtom(fetchRecipesWorkflowsAtom)
   const [, loadMore] = useAtom(loadMoreRecipesWorkflowsAtom)
@@ -40,15 +44,41 @@ const WorkflowsList: React.FC = () => {
   const lang = useLang()
   const { openChat } = useChatSidebar()
   const setPendingMessage = useSetAtom(setPendingMessageAtom)
+  // 将排序选项转换为API参数
+  const getSortParams = (option: string) => {
+    switch (option) {
+      case 'All':
+        return { order: 'created_at' as const, desc: 'desc' as const } // 默认排序
+      case 'Popular':
+        return { order: 'usage' as const, desc: 'desc' as const }
+      case 'Recent':
+        return { order: 'created_at' as const, desc: 'desc' as const }
+      default:
+        return { order: 'created_at' as const, desc: 'desc' as const }
+    }
+  }
+
   // 初始加载数据
   useEffect(() => {
     if (workflowState.items.length === 0 && !workflowState.isLoading) {
       console.log('WorkflowsList: Starting initial load')
-      fetchData({ reset: true }).catch(error => {
+      const sortParams = getSortParams(sortOption)
+      fetchData({ reset: true, ...sortParams }).catch(error => {
         console.error('WorkflowsList: Initial load failed:', error)
       })
     }
-  }, [fetchData, workflowState.items.length, workflowState.isLoading])
+  }, [fetchData, workflowState.items.length, workflowState.isLoading, sortOption])
+
+  // 处理排序变化
+  useEffect(() => {
+    if (workflowState.items.length > 0) {
+      console.log('WorkflowsList: Sorting changed to', sortOption)
+      const sortParams = getSortParams(sortOption)
+      fetchData({ reset: true, ...sortParams }).catch(error => {
+        console.error('WorkflowsList: Sort change failed:', error)
+      })
+    }
+  }, [sortOption, fetchData, workflowState.items.length])
 
   // 处理加载更多
   const handleLoadMore = useCallback(() => {

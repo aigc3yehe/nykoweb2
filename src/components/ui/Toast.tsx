@@ -9,13 +9,13 @@ const Toast: React.FC = () => {
 
   // 处理消息的显示和隐藏动画
   useEffect(() => {
-    const newVisibleMessages = new Set<string>()
+    // 获取当前所有消息的ID
+    const currentMessageIds = new Set(messages.map(msg => msg.id))
     
+    // 添加新消息到可见状态
     messages.forEach(message => {
-      newVisibleMessages.add(message.id)
-      
-      // 如果消息刚添加，设置显示状态
       if (!visibleMessages.has(message.id)) {
+        // 新消息，延迟显示以触发动画
         setTimeout(() => {
           setVisibleMessages(prev => new Set([...prev, message.id]))
         }, 10)
@@ -23,16 +23,17 @@ const Toast: React.FC = () => {
     })
     
     // 移除不再存在的消息
-    setVisibleMessages(prev => {
-      const updated = new Set<string>()
-      messages.forEach(message => {
-        if (prev.has(message.id)) {
-          updated.add(message.id)
-        }
+    const removedMessages = Array.from(visibleMessages).filter(id => !currentMessageIds.has(id))
+    if (removedMessages.length > 0) {
+      removedMessages.forEach(id => {
+        setVisibleMessages(prev => {
+          const updated = new Set(prev)
+          updated.delete(id)
+          return updated
+        })
       })
-      return updated
-    })
-  }, [messages, visibleMessages])
+    }
+  }, [messages]) // 只依赖messages，不依赖visibleMessages
 
   const getToastStyles = (type: 'success' | 'error' | 'info') => {
     switch (type) {

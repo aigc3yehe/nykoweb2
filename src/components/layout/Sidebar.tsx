@@ -34,6 +34,7 @@ interface NavItem {
   icon: React.ReactNode
   selectedIcon: React.ReactNode
   path: string
+  matchPaths: string[] // 匹配路径列表
   badge?: string
 }
 
@@ -75,14 +76,16 @@ const Sidebar: React.FC = () => {
       label: t('nav.home'), // en: Home / zh: 首页
       icon: <IconSwap light={HomeIcon} dark={HomeIconDark} alt="Home" className="w-5 h-5" />,
       selectedIcon: <IconSwap light={HomeSelectedIcon} dark={HomeSelectedIconDark} alt="Home" className="w-5 h-5" />,
-       path: withLangPrefix(lang, '/')
+      path: withLangPrefix(lang, '/'),
+      matchPaths: [`/${lang}`, `/${lang}/`]
     },
     {
       key: 'recipes',
       label: t('nav.recipes'), // en: Recipes / zh: 组合
       icon: <IconSwap light={RecipesIcon} dark={RecipesIconDark} alt="Recipes" className="w-5 h-5" />,
       selectedIcon: <IconSwap light={RecipesSelectedIcon} dark={RecipesSelectedIconDark} alt="Recipes" className="w-5 h-5" />,
-       path: withLangPrefix(lang, '/recipes')
+      path: withLangPrefix(lang, '/recipes'),
+      matchPaths: [`/${lang}/recipes`, `/${lang}/recipes/workflows`, `/${lang}/recipes/styles`]
     },
   ]
 
@@ -93,21 +96,24 @@ const Sidebar: React.FC = () => {
       label: t('nav.generator'), // en: Generator / zh: 生成器
       icon: <IconSwap light={GeneratorIcon} dark={GeneratorIconDark} alt="Generator" className="w-8 h-8" />,
       selectedIcon: <IconSwap light={GeneratorIcon} dark={GeneratorIconDark} alt="Generator" className="w-8 h-8" />,
-       path: withLangPrefix(lang, '/generator')
+      path: withLangPrefix(lang, '/generator'),
+      matchPaths: [`/${lang}/generator`]
     },
     {
       key: 'workflow-builder',
       label: t('nav.workflowBuilder'), // en: Workflow Builder / zh: 工作流构建器
       icon: <IconSwap light={WorkflowBuilderIcon} dark={WorkflowBuilderIconDark} alt="Workflow Builder" className="w-8 h-8" />,
       selectedIcon: <IconSwap light={WorkflowBuilderIcon} dark={WorkflowBuilderIconDark} alt="Workflow Builder" className="w-8 h-8" />,
-       path: withLangPrefix(lang, '/workflow/builder')
+      path: withLangPrefix(lang, '/workflow/builder'),
+      matchPaths: [`/${lang}/workflow/builder`]
     },
     {
       key: 'style-trainer',
       label: t('nav.styleTrainer'), // en: Style Trainer / zh: 风格训练器
       icon: <IconSwap light={StyleTrainerIcon} dark={StyleTrainerIconDark} alt="Style Trainer" className="w-8 h-8" />,
       selectedIcon: <IconSwap light={StyleTrainerIcon} dark={StyleTrainerIconDark} alt="Style Trainer" className="w-8 h-8" />,
-       path: withLangPrefix(lang, '/style/trainer')
+      path: withLangPrefix(lang, '/style/trainer'),
+      matchPaths: [`/${lang}/style/trainer`]
     }
   ]
 
@@ -118,7 +124,8 @@ const Sidebar: React.FC = () => {
       label: t('nav.assets'), // en: My Assets / zh: 我的资产
       icon: <IconSwap light={MyAssetsIcon} dark={MyAssetsIconDark} alt="My Assets" className="w-4 h-4" />,
       selectedIcon: <IconSwap light={MyAssetsSelectedIcon} dark={MyAssetsSelectedIconDark} alt="My Assets" className="w-4 h-4" />,
-       path: withLangPrefix(lang, '/profile') // 修改为导航到个人中心
+      path: withLangPrefix(lang, '/profile'), // 修改为导航到个人中心
+      matchPaths: [`/${lang}/profile`]
     }
   ]
 
@@ -137,13 +144,8 @@ const Sidebar: React.FC = () => {
     }
   ]
 
-  const isLocation = (pathname: string, path: string) => {
-    if (path === "/") {
-      return pathname === `/${lang}`
-    }
-    if (!path.startsWith('/')) return false
-    const suffix = path.replace(/^\/(en|zh-CN|zh-HK)/, '')
-    return pathname === `/${lang}${suffix}` || pathname.startsWith(`/${lang}${suffix}`)
+  const isLocation = (pathname: string, matchPaths: string[]) => {
+    return matchPaths.includes(pathname)
   }
 
   return (
@@ -199,7 +201,7 @@ const Sidebar: React.FC = () => {
                           ? "gap-2 h-14 rounded-xl p-3 border border-design-line-light-gray dark:border-design-dark-line-light-gray text-design-main-text dark:text-design-dark-main-text font-normal hover:bg-gray-50 dark:hover:bg-gray-800"
                           : "gap-1 h-11 rounded-xl p-3",
                         // 第一组和第三组的选中效果
-                        sectionIndex !== 1 && isLocation(location.pathname, item.path)
+                        sectionIndex !== 1 && isLocation(location.pathname, item.matchPaths)
                           ? "bg-design-bg-light-blue font-bold text-design-main-blue"
                           : sectionIndex !== 1
                           ? "text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 font-normal"
@@ -209,7 +211,7 @@ const Sidebar: React.FC = () => {
                       )}
                     >
                       <div className="flex-shrink-0">
-                        {sectionIndex !== 1 && isLocation(location.pathname, item.path) ? item.selectedIcon : item.icon}
+                        {sectionIndex !== 1 && isLocation(location.pathname, item.matchPaths) ? item.selectedIcon : item.icon}
                       </div>
                       <span className="flex-1">{item.label}</span>
                       {item.badge && (

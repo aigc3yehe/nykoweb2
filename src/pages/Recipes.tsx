@@ -14,6 +14,7 @@ const Recipes: React.FC = () => {
   const lang = useLang()
   const { tab } = useParams<{ tab?: string }>()
   const [activeTab, setActiveTab] = useState<RecipeType>('workflows')
+  const [sortOption, setSortOption] = useState('All')
 
   // 从URL参数初始化activeTab
   useEffect(() => {
@@ -31,6 +32,11 @@ const Recipes: React.FC = () => {
     navigate(withLangPrefix(lang, `/recipes/${newTab}`))
   }
 
+  // 处理排序变化
+  const handleSortChange = (newSortOption: string) => {
+    setSortOption(newSortOption)
+  }
+
   // 如果没有tab参数，默认重定向到workflows
   useEffect(() => {
     if (!tab) {
@@ -45,12 +51,12 @@ const Recipes: React.FC = () => {
         <RecipesTab activeTab={activeTab} onTabChange={handleTabChange} />
 
         {/* 快捷操作组件 */}
-        <RecipesActions activeTab={activeTab} />
+        <RecipesActions activeTab={activeTab} onSortChange={handleSortChange} />
 
         {/* 内容区域 */}
         <div className="min-h-96">
-          {activeTab === 'workflows' && <WorkflowsList />}
-          {activeTab === 'styles' && <StylesList />}
+          {activeTab === 'workflows' && <WorkflowsList sortOption={sortOption} />}
+          {activeTab === 'styles' && <StylesList sortOption={sortOption} />}
         </div>
       </div>
     </div>

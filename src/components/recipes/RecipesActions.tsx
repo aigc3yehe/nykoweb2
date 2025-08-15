@@ -3,26 +3,30 @@ import { useNavigate } from 'react-router-dom'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { RecipeType } from '../../pages/Recipes'
 import DropdownIcon from '../../assets/web2/drop_down.svg'
-import SearchIcon from '../../assets/web2/search.svg'
 import AddIcon from '../../assets/web2/add.svg'
 
 interface RecipesActionsProps {
   activeTab: RecipeType
+  onSortChange?: (sortOption: string) => void
 }
 
-const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab }) => {
+const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab, onSortChange }) => {
   const navigate = useNavigate()
   const lang = useLang()
   const [selectedOption, setSelectedOption] = useState('All')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [searchValue, setSearchValue] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const options = ['All', 'Featured', 'Popular', 'Recent']
+  const options = ['All', 'Popular', 'Recent']
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option)
     setIsDropdownOpen(false)
+    
+    // 调用父组件的排序回调
+    if (onSortChange) {
+      onSortChange(option)
+    }
   }
 
   // 处理新建按钮点击事件
@@ -88,20 +92,8 @@ const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab }) => {
         )}
       </div>
 
-      {/* PC端spacer - 占满剩余空间把搜索框挤到右边 */}
+      {/* PC端spacer - 占满剩余空间把新建按钮挤到右边 */}
       <div className="hidden md:block md:flex-1"></div>
-
-      {/* 搜索框 - 移动端动态计算剩余宽度 */}
-      <div className="w-[calc(100%-169px)] md:w-[218px] h-9 flex items-center gap-1.5 px-3.5 py-2.5 border border-gray-200 rounded-md bg-white">
-        <img src={SearchIcon} alt="Search" className="w-4 h-4" />
-        <input
-          type="text"
-          placeholder="Search"
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          className="flex-1 h-3.5 font-lexend font-normal text-sm leading-none text-[#9CA3AF] placeholder-[#9CA3AF] bg-transparent border-none outline-none"
-        />
-      </div>
 
       {/* 新建按钮 - 移动端44*36px */}
       <button 

@@ -31,7 +31,11 @@ const convertModelToFeaturedItem = (model: FetchModelDto): FeaturedItem => ({
   }
 })
 
-const StylesList: React.FC = () => {
+interface StylesListProps {
+  sortOption?: string
+}
+
+const StylesList: React.FC<StylesListProps> = ({ sortOption = 'All' }) => {
   const [modelState] = useAtom(recipesModelsAtom)
   const [, fetchData] = useAtom(fetchRecipesModelsAtom)
   const [, loadMore] = useAtom(loadMoreRecipesModelsAtom)
@@ -40,15 +44,42 @@ const StylesList: React.FC = () => {
   const lang = useLang()
   const { openChat } = useChatSidebar()
   const setPendingMessage = useSetAtom(setPendingMessageAtom)
+
+  // 将排序选项转换为API参数
+  const getSortParams = (option: string) => {
+    switch (option) {
+      case 'All':
+        return { order: 'created_at' as const, desc: 'desc' as const } // 默认排序
+      case 'Popular':
+        return { order: 'usage' as const, desc: 'desc' as const }
+      case 'Recent':
+        return { order: 'created_at' as const, desc: 'desc' as const }
+      default:
+        return { order: 'created_at' as const, desc: 'desc' as const }
+    }
+  }
+
   // 初始加载数据
   useEffect(() => {
     if (modelState.items.length === 0 && !modelState.isLoading) {
       console.log('StylesList: Starting initial load')
-      fetchData({ reset: true }).catch(error => {
+      const sortParams = getSortParams(sortOption)
+      fetchData({ reset: true, ...sortParams }).catch(error => {
         console.error('StylesList: Initial load failed:', error)
       })
     }
-  }, [fetchData, modelState.items.length, modelState.isLoading])
+  }, [fetchData, modelState.items.length, modelState.isLoading, sortOption])
+
+  // 处理排序变化
+  useEffect(() => {
+    if (modelState.items.length > 0) {
+      console.log('StylesList: Sorting changed to', sortOption)
+      const sortParams = getSortParams(sortOption)
+      fetchData({ reset: true, ...sortParams }).catch(error => {
+        console.error('StylesList: Sort change failed:', error)
+      })
+    }
+  }, [sortOption, fetchData, modelState.items.length])
 
   const handleStyleClick = (styleId: number) => {
     navigate(withLangPrefix(lang, `/model/${styleId}`))
