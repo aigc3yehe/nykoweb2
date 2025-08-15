@@ -138,12 +138,12 @@ const Sidebar: React.FC = () => {
   ]
 
   const isLocation = (pathname: string, path: string) => {
-    if (path === "/") {
-      return pathname === `/${lang}`
-    }
-    if (!path.startsWith('/')) return false
-    const suffix = path.replace(/^\/(en|zh-CN|zh-HK)/, '')
-    return pathname === `/${lang}${suffix}` || pathname.startsWith(`/${lang}${suffix}`)
+    // 标准化路径，移除尾部斜杠
+    const normalizedPathname = pathname.replace(/\/$/, '') || '/'
+    const normalizedPath = path.replace(/\/$/, '') || '/'
+    
+    // 精确匹配
+    return normalizedPathname === normalizedPath
   }
 
   return (
