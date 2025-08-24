@@ -16,12 +16,12 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
   const getBackgroundStyle = () => {
     switch (location.pathname) {
       case '/pricing':
-        return 'bg-white dark:bg-gray-900'
+        return 'bg-primary dark:bg-primary-dark'
       case '/workflow/builder':
       case '/style/trainer':
-        return 'bg-white dark:bg-gray-900'
+        return 'bg-primary dark:bg-primary-dark'
       default:
-        return 'bg-white dark:bg-gray-900'
+        return 'bg-primary dark:bg-primary-dark'
     }
   }
 

@@ -2,103 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 基础CSS变量 - 保留原有的shadcn/ui变量 */
 @layer base {
   :root {
-    /* 原有语义化颜色 */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --primary: 221.2 83.2% 53.3%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-
+    --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
-
-    /* 设计稿颜色变量 - 亮色主题 */
-    --design-main-text: 31 41 55; /* #1F2937 */
-    --design-medium-gray: 107 114 128; /* #6B7280 */
-    --design-dark-gray: 75 85 99; /* #4B5563 */
-    --design-lightest-gray: 156 163 175; /* #9CA3AF */
-    --design-main-blue: 9 0 255; /* #0900FF */
-    --design-light-green: 0 255 72; /* #00FF48 */
-    --design-line-light-gray: 229 231 235; /* #E5E7EB */
-    --design-bg-light-blue: 238 242 255; /* #EEF2FF */
-    --design-bg-light-gray: 243 244 246; /* #F3F4F6 */
-
-    /* 设计稿宽度 */
-    --design-width: 1440px;
-    /* 基础字体大小 */
-    --base-font-size: 16px;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
   }
 
   .dark {
-    /* 原有语义化颜色 - 暗色主题 */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --primary: 217.2 91.2% 59.8%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
-
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
-
-    /* 设计稿颜色变量 - 暗色主题 */
-    --design-main-text: 249 250 251; /* #F9FAFB */
-    --design-medium-gray: 156 163 175; /* #9CA3AF */
-    --design-dark-gray: 209 213 219; /* #D1D5DB */
-    --design-lightest-gray: 107 114 128; /* #6B7280 */
-    --design-main-blue: 59 130 246; /* #3B82F6 */
-    --design-light-green: 16 185 129; /* #10B981 */
-    --design-line-light-gray: 55 65 81; /* #374151 */
-    --design-bg-light-blue: 30 41 59; /* #1E293B */
-    --design-bg-light-gray: 17 24 39; /* #111827 */
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
+/* 保留原有的全局样式 */
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    /* 根据主题切换背景 */
-    background: radial-gradient(circle at 35.69% 103.83%, #181E31 0%, #090B12 100%);
-    min-height: 100vh;
-  }
-  
-  /* 暗色主题下的背景 */
-  .dark body {
-    background: radial-gradient(circle at 35.69% 103.83%, #0F172A 0%, #020617 100%);
   }
 }
 
 /* 在宽度小于等于1920px时，font-size随视窗宽度等比例变化 */
-/* 计算方式仍然基于设计稿宽度：100vw / 1440 * 16px = 1.11vw */
+/* 计算方式基于设计稿宽度：100vw / 1512 * 16px = 1.06vw */
 html {
-  font-size: 1.11vw;
+  font-size: 1.06vw;
 }
 
 /* 移除container的固定宽度设置，允许内容继续占满屏幕 */
@@ -109,11 +84,10 @@ html {
   flex-direction: column !important; /* 确保垂直方向布局 */
 }
 
-/* 当宽度超过1920px时，固定font-size不再增长，但依然占满宽度 */
-@media screen and (min-width: 1440px) {
+/* 当宽度超过1512px时，固定font-size不再增长，但依然占满宽度 */
+@media screen and (min-width: 1512px) {
   html {
-    font-size: 16px; /* 相当于1920px宽度下的1.11vw，即1920 * 1.11% = 21.33px */
-    /*font-size: 21.33px; *//* 相当于1920px宽度下的1.11vw，即1920 * 1.11% = 21.33px */
+    font-size: 16px; /* 相当于1512px宽度下的1.06vw，即1512 * 1.06% = 16px */
   }
 }
 

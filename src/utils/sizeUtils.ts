@@ -4,7 +4,7 @@
  */
 
 // 设计稿基准宽度(px)
-const DESIGN_WIDTH = 1440;
+const DESIGN_WIDTH = 1512;
 
 // 基准字体大小(px)
 const BASE_FONT_SIZE = 16;

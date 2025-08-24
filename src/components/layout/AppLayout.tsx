@@ -36,64 +36,61 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   }, [])
 
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground">
-      {/* 顶部标题栏 */}
-      <Header />
+    <div className="h-screen flex bg-primary dark:bg-primary-dark text-text-main dark:text-text-main-dark">
+      {/* PC端：左侧边栏独占左侧 */}
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
 
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* 左侧边栏：移动端不显示侧边栏，PC端根据路由显示不同侧边栏 */}
-         {/^\/(en|zh-CN|zh-HK)\/pricing$/.test(location.pathname) ? null : 
-          /^\/(en|zh-CN|zh-HK)\/workflow\/builder$/.test(location.pathname) ? (
-            <div className="hidden lg:block">
-              <PublishSidebar />
-            </div>
-          ) : /^\/(en|zh-CN|zh-HK)\/style\/trainer$/.test(location.pathname) ? (
-            <div className="hidden lg:block">
-              <TrainerSidebar />
-            </div>
-          ) : (
-            <Sidebar />
-          )}
+      {/* 右侧内容区域：Header + 主内容 */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* 顶部标题栏 */}
+        <Header />
 
         {/* 主内容区 */}
         <MainContent>
           {children}
         </MainContent>
-
-        {/* 聊天按钮 */}
-        <ChatButton />
-
-        {/* 聊天侧边栏 */}
-        <ChatSidebar />
-
-        {/* 移动端底部栏 - WorkflowBuilder页面 */}
-        {/^\/(en|zh-CN|zh-HK)\/workflow\/builder$/.test(location.pathname) && (
-          <BottomBar
-            onOpenSettings={() => setIsSettingsModalOpen(true)}
-          />
-        )}
-
-        {/* 移动端底部栏 - StyleTrainer页面 */}
-        {/^\/(en|zh-CN|zh-HK)\/style\/trainer$/.test(location.pathname) && (
-          <StyleTrainerBottomBar
-            onOpenSettings={() => setIsStyleTrainerSettingsModalOpen(true)}
-          />
-        )}
-
-        {/* 移动端模态框 */}
-        <PublishModal
-          isOpen={isPublishModalOpen}
-          onClose={() => setIsPublishModalOpen(false)}
-        />
-        <SettingsModal
-          isOpen={isSettingsModalOpen}
-          onClose={() => setIsSettingsModalOpen(false)}
-        />
-        <StyleTrainerSettingsModal
-          isOpen={isStyleTrainerSettingsModalOpen}
-          onClose={() => setIsStyleTrainerSettingsModalOpen(false)}
-        />
       </div>
+
+      {/* 移动端：侧边栏覆盖显示 */}
+      <div className="md:hidden">
+        <Sidebar />
+      </div>
+
+      {/* 聊天按钮 */}
+      <ChatButton />
+
+      {/* 聊天侧边栏 */}
+      <ChatSidebar />
+
+      {/* 移动端底部栏 - WorkflowBuilder页面 */}
+      {/^\/(en|zh-CN|zh-HK)\/workflow\/builder$/.test(location.pathname) && (
+        <BottomBar
+          onOpenSettings={() => setIsSettingsModalOpen(true)}
+        />
+      )}
+
+      {/* 移动端底部栏 - StyleTrainer页面 */}
+      {/^\/(en|zh-CN|zh-HK)\/style\/trainer$/.test(location.pathname) && (
+        <StyleTrainerBottomBar
+          onOpenSettings={() => setIsStyleTrainerSettingsModalOpen(true)}
+        />
+      )}
+
+      {/* 移动端模态框 */}
+      <PublishModal
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
+      />
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
+      <StyleTrainerSettingsModal
+        isOpen={isStyleTrainerSettingsModalOpen}
+        onClose={() => setIsStyleTrainerSettingsModalOpen(false)}
+      />
     </div>
   )
 }

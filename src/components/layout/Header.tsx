@@ -23,7 +23,7 @@ const Header: React.FC = React.memo(() => {
   const [userState] = useAtom(userStateAtom)
 
   return (
-    <header className="h-14 border-b border-border bg-background dark:bg-background">
+    <header className="h-14 border-b border-line-subtle dark:border-line-subtle-dark bg-secondary dark:bg-secondary-dark">
       <div className="flex h-full items-center justify-between px-4 md:px-6">
         {/* Logo和菜单按钮 */}
         <div className="flex items-center gap-3">

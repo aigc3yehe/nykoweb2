@@ -20,6 +20,7 @@ import ModelDetail from './pages/ModelDetail'
 import WorkflowBuilder from './pages/WorkflowBuilder'
 import StyleTrainer from './pages/StyleTrainer'
 import Pricing from './pages/Pricing'
+import ThemeDemoPage from './pages/ThemeDemo'
 
 function App() {
   const [dialog] = useAtom(dialogAtom);
@@ -40,6 +41,7 @@ function App() {
           <Route path=":lang" element={<ProtectedRoute requireAuth={false}><Home /></ProtectedRoute>} />
           <Route path=":lang/recipes" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
           <Route path=":lang/recipes/:tab" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
+          <Route path=":lang/theme-demo" element={<ProtectedRoute requireAuth={false}><ThemeDemoPage /></ProtectedRoute>} />
           {/* 新增：无语言前缀的 OAuth 回调路径，保证第三方重定向可命中 */}
           <Route path="api/auth/callback/google" element={<AuthCallback />} />
           <Route path=":lang/api/auth/callback/google" element={<AuthCallback />} />
