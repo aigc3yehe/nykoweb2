@@ -87,7 +87,7 @@ const InspirationFeed: React.FC = () => {
   const { columns, columnCount } = getColumnsLayout()
 
   return (
-    <div className="w-full">
+    <div className="w-full px-6">
       <InspirationSectionHeader
         title="Inspiration Feed"
         selectedFilter={selectedFilter}

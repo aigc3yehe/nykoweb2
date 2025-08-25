@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react'
 import BannerCard from './BannerCard'
 import { cn } from '../../utils/cn'
-import Banner1Image from '../../assets/web2/banner_1.png'
-import Banner2Image from '../../assets/web2/banner_2.png'
+import LifeIcon from '../../assets/mavae/life.svg'
+import LifeIconDark from '../../assets/mavae/dark/life.svg'
+import WorkflowsIcon from '../../assets/mavae/Workflows.svg'
+import WorkflowsIconDark from '../../assets/mavae/dark/Workflows.svg'
 
 const Banner: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -17,7 +19,8 @@ const Banner: React.FC = () => {
       title: "Bring your ideas to life",
       description: "Generate Creations through conversational canvas",
       buttonText: "Generate",
-      backgroundImage: Banner1Image,
+      icon: LifeIcon,
+      iconDark: LifeIconDark,
       onClick: () => console.log('Generate clicked')
     },
     {
@@ -25,7 +28,8 @@ const Banner: React.FC = () => {
       title: "Build Custom Workflows",
       description: "Efficient tasks with custom AI workflows",
       buttonText: "Create",
-      backgroundImage: Banner2Image,
+      icon: WorkflowsIcon,
+      iconDark: WorkflowsIconDark,
       onClick: () => console.log('Create clicked')
     }
   ]
@@ -93,18 +97,18 @@ const Banner: React.FC = () => {
   return (
     <div className="w-full">
       {/* 桌面端 - 并排显示 */}
-      <div className="hidden md:flex gap-[1.5rem] h-[12.4375rem]"> {/* gap: 24px, height: 199px */}
+      <div className="hidden md:flex w-full h-[14.25rem] px-8 pb-8 gap-6"> {/* width: 1352px, height: 228px, padding: 32px, gap: 24px */}
         {banners.map((banner) => (
           <BannerCard key={banner.id} {...banner} />
         ))}
       </div>
 
       {/* 移动端 - 轮播显示 */}
-      <div className="md:hidden flex flex-col gap-[0.875rem] h-[13.0625rem]"> {/* height: 209px, gap: 14px */}
+      <div className="md:hidden flex flex-col gap-4 h-[8.25rem] pt-4 px-4 pb-6"> {/* width: 390px, height: 132px, padding: 16px 16px 24px 16px */}
         {/* 轮播容器 */}
         <div
           ref={containerRef}
-          className="relative overflow-hidden h-[11.9375rem]" // height: 191px
+          className="relative overflow-hidden h-[5.75rem]" // height: 92px
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -126,24 +130,26 @@ const Banner: React.FC = () => {
               </div>
             ))}
           </div>
+
+          {/* 分页指示器 - 叠加在轮播容器上方 */}
+          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-0.5">
+            {banners.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={cn(
+                  "h-0.5 transition-all duration-300", // height: 2px
+                  index === currentIndex
+                    ? "w-[1.375rem] bg-link-default dark:bg-link-default-dark" // width: 22px
+                    : "w-[1.375rem] bg-line-subtle dark:bg-line-subtle-dark" // width: 22px
+                )}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* 分页指示器 */}
-        <div className="flex justify-center gap-[0.625rem]"> {/* gap: 10px */}
-          {banners.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={cn(
-                "h-1 transition-all duration-300",
-                index === currentIndex
-                  ? "w-10 bg-design-main-blue dark:bg-design-dark-main-blue"
-                  : "w-10 bg-design-line-light-gray dark:bg-design-dark-line-light-gray"
-              )}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
+
       </div>
     </div>
   )

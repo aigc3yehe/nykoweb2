@@ -118,7 +118,7 @@ const PopularWorkflows: React.FC = () => {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full px-6">
       <SectionHeader
         title="Popular Workflows"
         onPrevious={() => scrollTo('left')}

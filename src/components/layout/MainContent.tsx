@@ -48,8 +48,8 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
       style={location.pathname === '/workflow/builder' || location.pathname === '/style/trainer' ? dotBg : undefined}
       id="main-content" // 添加id便于查找
     >
-      {/* 内容容器 - 最大宽度1184px，居中显示 */}
-      <div className="w-full max-w-[74rem] mx-auto h-full">
+      {/* 内容容器 - 最大宽度1352px，居中显示 */}
+      <div className="w-full max-w-[84.5rem] mx-auto h-full">
         {children}
       </div>
     </main>

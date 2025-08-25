@@ -56,7 +56,7 @@ const Home: React.FC = () => {
   }, [handleScroll])
 
   return (
-    <div className="w-full px-6 space-y-[1.875rem] pb-8"> {/* gap: 30px, 添加底部padding */}
+    <div className="w-full space-y-[1.875rem] pb-8"> {/* gap: 30px, 添加底部padding，移除px-6因为Banner有自己的padding */}
       <Seo title={t('nav.home') + ' - MAVAE'} description={t('common.loading')} image="/og-image.png" />
       {/* Banner 区域 */}
       <Banner />

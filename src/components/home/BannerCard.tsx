@@ -5,7 +5,8 @@ interface BannerCardProps {
   title: string
   description: string
   buttonText: string
-  backgroundImage: string
+  icon: string
+  iconDark?: string
   onClick?: () => void
   isMobile?: boolean
 }
@@ -14,61 +15,108 @@ const BannerCard: React.FC<BannerCardProps> = ({
   title,
   description,
   buttonText,
-  backgroundImage,
+  icon,
+  iconDark,
   onClick,
   isMobile = false
 }) => {
   return (
     <div 
       className={cn(
-        "relative rounded-xl overflow-hidden",
+        "relative rounded-xl overflow-hidden border border-line-subtle dark:border-line-subtle-dark bg-secondary dark:bg-secondary-dark hover:border-line-strong dark:hover:border-line-strong-dark transition-colors",
         // 桌面端样式
-        !isMobile && "w-[34.75rem] h-[12.4375rem] p-10", // width: 556px, height: 199px, padding: 40px
+        !isMobile && "w-[39.5rem] h-[12.25rem] p-8", // width: 632px, height: 196px, padding: 32px
         // 移动端样式
-        isMobile && "w-full h-[11.9375rem] p-6" // height: 191px, padding: 24px
+        isMobile && "w-full h-[5.75rem] pt-4 pr-3 pb-6 pl-3" // width: 358px, height: 92px, padding: 16px 12px 16px 12px
       )}
     >
-      {/* 背景图片 */}
-      <img
-        src={backgroundImage}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover"
-        aria-hidden="true"
-      />
+      {/* 桌面端内容布局 */}
+      {!isMobile && (
+        <div className="w-full h-full flex justify-between items-center">
+          {/* 左侧文本信息 */}
+          <div className="w-[28rem] h-[8.25rem] flex flex-col gap-8"> {/* width: 448px, height: 132px, gap: 32px */}
+            {/* 文本区域 */}
+            <div className="w-[28rem] h-16 flex flex-col gap-1"> {/* width: 448px, height: 64px, gap: 4px */}
+              {/* 标题 */}
+              <h2 className="font-switzer font-bold text-2xl leading-10 text-text-main dark:text-text-main-dark">
+                {title}
+              </h2>
+              
+              {/* 描述 */}
+              <p className="font-switzer font-medium text-sm leading-5 text-text-secondary dark:text-text-secondary-dark">
+                {description}
+              </p>
+            </div>
+            
+            {/* 按钮 */}
+            <button
+              onClick={onClick}
+              className="w-30 h-9 px-4 rounded-full bg-text-main dark:bg-text-main-dark hover:bg-text-secondary dark:hover:bg-text-secondary-dark transition-colors"
+            >
+              <span className="font-switzer font-medium text-sm leading-5 text-text-inverse dark:text-text-inverse-dark text-center">
+                {buttonText}
+              </span>
+            </button>
+          </div>
+          
+          {/* 右侧SVG图标 */}
+          <div className="w-30 h-30 flex items-center justify-center"> {/* 120px * 120px */}
+            <img
+              src={icon}
+              alt=""
+              className="w-30 h-30 block dark:hidden"
+              aria-hidden="true"
+            />
+            {iconDark && (
+              <img
+                src={iconDark}
+                alt=""
+                className="w-30 h-30 hidden dark:block"
+                aria-hidden="true"
+              />
+            )}
+          </div>
+        </div>
+      )}
       
-      {/* 内容区域 */}
-      <div className={cn(
-        "relative z-10 flex flex-col gap-[0.625rem]", // gap: 10px
-        !isMobile && "w-[29.75rem] h-[7.4375rem]", // desktop: width: 476px, height: 119px
-        isMobile && "w-full h-full"
-      )}>
-        {/* 标题 */}
-        <h2 className={cn(
-          "font-lexend font-semibold leading-[120%] text-white",
-          !isMobile && "text-[2rem]", // desktop: 32px
-          isMobile && "text-2xl" // mobile: 24px
-        )}>
-          {title}
-        </h2>
-        
-        {/* 描述 padding bottom 8px*/}
-        <p className="font-lexend font-normal text-sm leading-[120%] text-white/80 pb-2">
-          {description}
-        </p>
-        
-        {/* 按钮 */}
-        <button
+      {/* 移动端内容布局 */}
+      {isMobile && (
+        <div 
+          className="w-full h-full flex justify-between items-center gap-4 cursor-pointer" 
           onClick={onClick}
-          className={cn(
-            "w-fit h-9 px-6 py-1.5 rounded-md border border-white bg-transparent hover:bg-white/10 transition-colors",
-            isMobile && "mt-auto" // 移动端按钮贴底
-          )}
-        >
-          <span className="font-lexend font-medium text-base leading-6 text-white">
-            {buttonText}
-          </span>
-        </button>
-      </div>
+        > {/* gap: 16px */}
+          {/* 左侧文本信息 */}
+          <div className="w-[16.375rem] h-[3.75rem] flex flex-col gap-1"> {/* width: 262px, height: 60px, gap: 4px */}
+            {/* 标题 */}
+            <h2 className="font-switzer font-bold text-lg leading-6 text-text-main dark:text-text-main-dark">
+              {title}
+            </h2>
+            
+            {/* 描述 */}
+            <p className="font-switzer font-medium text-xs leading-4 text-text-secondary dark:text-text-secondary-dark">
+              {description}
+            </p>
+          </div>
+          
+          {/* 右侧SVG图标 */}
+          <div className="w-14 h-14 flex items-center justify-center"> {/* 56px * 56px */}
+            <img
+              src={icon}
+              alt=""
+              className="w-14 h-14 block dark:hidden"
+              aria-hidden="true"
+            />
+            {iconDark && (
+              <img
+                src={iconDark}
+                alt=""
+                className="w-14 h-14 hidden dark:block"
+                aria-hidden="true"
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

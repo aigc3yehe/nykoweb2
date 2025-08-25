@@ -115,7 +115,7 @@ const TrendingStyles: React.FC = () => {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full px-6">
       <SectionHeader
         title="Trending Styles"
         onPrevious={() => scrollTo('left')}
