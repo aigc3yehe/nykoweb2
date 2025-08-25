@@ -4,86 +4,105 @@ import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { useAtom, useSetAtom } from 'jotai'
 import { sidebarOpenAtom, closeSidebarAtom } from '../../store/sidebarStore'
 import { getCurrentTheme, toggleTheme } from '../../utils/theme'
+import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 
 import { cn } from '../../utils/cn'
 
 // 导入新的MAVAE图标
 import LogoIcon from '../../assets/mavae/logo.svg'
 import LogoIconDark from '../../assets/mavae/dark/logo.svg'
+
+// 导航图标 - 正常状态
 import SparksIcon from '../../assets/mavae/Sparks.svg'
 import RecipesIcon from '../../assets/mavae/Recipes.svg'
 import MyAssetsIcon from '../../assets/mavae/MyAssets.svg'
 import WorkflowBuilderIcon from '../../assets/mavae/WorkflowBuilder.svg'
 import StyleTrainerIcon from '../../assets/mavae/StyleTrainer.svg'
+
+// 导航图标 - 暗色主题
+import SparksIconDark from '../../assets/mavae/dark/Sparks.svg'
+import RecipesIconDark from '../../assets/mavae/dark/Recipes.svg'
+import MyAssetsIconDark from '../../assets/mavae/dark/MyAssets.svg'
+import WorkflowBuilderIconDark from '../../assets/mavae/dark/WorkflowBuilder.svg'
+import StyleTrainerIconDark from '../../assets/mavae/dark/StyleTrainer.svg'
+
+// 导航图标 - 选中状态
+import SparksIconSelected from '../../assets/mavae/selected/Sparks.svg'
+import RecipesIconSelected from '../../assets/mavae/selected/Recipes.svg'
+import MyAssetsIconSelected from '../../assets/mavae/selected/MyAssets.svg'
+import WorkflowBuilderIconSelected from '../../assets/mavae/selected/WorkflowBuilder.svg'
+import StyleTrainerIconSelected from '../../assets/mavae/selected/StyleTrainer.svg'
+
+// 导航图标 - 暗色选中状态
+import SparksIconDarkSelected from '../../assets/mavae/dark/selected/Sparks.svg'
+import RecipesIconDarkSelected from '../../assets/mavae/dark/selected/Recipes.svg'
+import MyAssetsIconDarkSelected from '../../assets/mavae/dark/selected/MyAssets.svg'
+import WorkflowBuilderIconDarkSelected from '../../assets/mavae/dark/selected/WorkflowBuilder.svg'
+import StyleTrainerIconDarkSelected from '../../assets/mavae/dark/selected/StyleTrainer.svg'
+
+// 其他图标
 import XIcon from '../../assets/mavae/X.svg'
+import XIconDark from '../../assets/mavae/dark/X.svg'
 import DiscordIcon from '../../assets/mavae/discord.svg'
+import DiscordIconDark from '../../assets/mavae/dark/discord.svg'
 import WeixinIcon from '../../assets/mavae/weixin.svg'
+import WeixinIconDark from '../../assets/mavae/dark/weixin.svg'
 import CloseIcon from '../../assets/mavae/close.svg'
+import CloseIconDark from '../../assets/mavae/dark/close.svg'
 import GlobeIcon from '../../assets/mavae/globe.svg'
+import GlobeIconDark from '../../assets/mavae/dark/globe.svg'
 import ThemeIcon from '../../assets/mavae/them.svg'
+import ThemeIconDark from '../../assets/mavae/dark/them.svg'
 
 interface NavItem {
   key: string
   label: string
-  icon: string
+  lightIcon: string
+  darkIcon: string
+  lightSelectedIcon: string
+  darkSelectedIcon: string
   path: string
   matchPaths: string[] // 匹配路径列表
 }
 
 const IconComponent: React.FC<{
-  src: string
+  lightIcon: string
+  darkIcon: string
+  lightSelectedIcon: string
+  darkSelectedIcon: string
   alt: string
   className?: string
   isSelected?: boolean
-}> = ({ src, alt, className, isSelected }) => {
+}> = ({ lightIcon, darkIcon, lightSelectedIcon, darkSelectedIcon, alt, className, isSelected }) => {
   return (
-    <div className={cn("flex-shrink-0", className)}>
-      <svg 
-        className={cn(
-          "w-5 h-5",
-          // 图标颜色跟随文字颜色
-          isSelected 
-            ? "text-link-default dark:text-link-default-dark" 
-            : "text-text-secondary dark:text-text-secondary-dark"
-        )}
-        style={{
-          filter: isSelected 
-            ? "brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(230deg) brightness(104%) contrast(97%)" // #4458FF
-            : "brightness(0) saturate(100%) invert(44%) sepia(8%) saturate(1018%) hue-rotate(201deg) brightness(94%) contrast(87%)" // #686E7D
-        }}
-      >
-        <image href={src} width="1.25rem" height="1.25rem" />
-      </svg>
-    </div>
+    <ThemeAdaptiveIcon
+      lightIcon={lightIcon}
+      darkIcon={darkIcon}
+      lightSelectedIcon={lightSelectedIcon}
+      darkSelectedIcon={darkSelectedIcon}
+      alt={alt}
+      size="md"
+      className={className}
+      isSelected={isSelected}
+    />
   )
 }
 
 // 底部社交图标组件
 const SocialIconComponent: React.FC<{
-  src: string
+  lightIcon: string
+  darkIcon: string
   alt: string
   href?: string
-}> = ({ src, alt, href }) => {
+}> = ({ lightIcon, darkIcon, alt, href }) => {
   const IconElement = (
     <div className="w-9 h-9 flex items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors rounded-lg">
-      {/* Light theme icon */}
-      <svg 
-        className="w-5 h-5 block dark:hidden"
-        style={{
-          filter: "brightness(0) saturate(100%) invert(7%) sepia(5%) saturate(1038%) hue-rotate(202deg) brightness(94%) contrast(95%)" // #121314
-        }}
-      >
-        <image href={src} width="1.25rem" height="1.25rem" />
-      </svg>
-      {/* Dark theme icon */}
-      <svg 
-        className="w-5 h-5 hidden dark:block"
-        style={{
-          filter: "brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(103%) contrast(103%)" // #FFFFFF
-        }}
-      >
-        <image href={src} width="1.25rem" height="1.25rem" />
-      </svg>
+      <ThemeAdaptiveIcon 
+        lightIcon={lightIcon}
+        darkIcon={darkIcon}
+        alt={alt} 
+        size="md"
+      />
     </div>
   )
 
@@ -108,24 +127,12 @@ const MobileCloseButton: React.FC<{
       className="w-9 h-9 flex items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors rounded-lg"
       aria-label="Close menu"
     >
-      {/* Light theme icon */}
-      <svg 
-        className="w-6 h-6 block dark:hidden"
-        style={{
-          filter: "brightness(0) saturate(100%) invert(7%) sepia(5%) saturate(1038%) hue-rotate(202deg) brightness(94%) contrast(95%)" // #121314
-        }}
-      >
-        <image href={CloseIcon} width="1.5rem" height="1.5rem" />
-      </svg>
-      {/* Dark theme icon */}
-      <svg 
-        className="w-6 h-6 hidden dark:block"
-        style={{
-          filter: "brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(103%) contrast(103%)" // #FFFFFF
-        }}
-      >
-        <image href={CloseIcon} width="1.5rem" height="1.5rem" />
-      </svg>
+      <ThemeAdaptiveIcon 
+        lightIcon={CloseIcon}
+        darkIcon={CloseIconDark}
+        alt="Close" 
+        size="lg"
+      />
     </button>
   )
 }
@@ -167,10 +174,11 @@ const MobileThemeToggle: React.FC = () => {
   return (
     <div className="w-full h-12 flex items-center justify-between px-4">
       <div className="flex items-center gap-2">
-        <IconComponent 
-          src={ThemeIcon} 
+        <ThemeAdaptiveIcon 
+          lightIcon={ThemeIcon}
+          darkIcon={ThemeIconDark}
           alt="Theme" 
-          isSelected={false}
+          size="md"
         />
         <span className="font-switzer font-medium text-base leading-6 text-text-main dark:text-text-main-dark">
           Theme
@@ -224,21 +232,30 @@ const Sidebar: React.FC = () => {
     {
       key: 'home',
       label: 'Home',
-      icon: SparksIcon,
+      lightIcon: SparksIcon,
+      darkIcon: SparksIconDark,
+      lightSelectedIcon: SparksIconSelected,
+      darkSelectedIcon: SparksIconDarkSelected,
       path: withLangPrefix(lang, '/'),
       matchPaths: [`/${lang}`, `/${lang}/`]
     },
     {
       key: 'recipes',
       label: 'Agent Cases',
-      icon: RecipesIcon,
+      lightIcon: RecipesIcon,
+      darkIcon: RecipesIconDark,
+      lightSelectedIcon: RecipesIconSelected,
+      darkSelectedIcon: RecipesIconDarkSelected,
       path: withLangPrefix(lang, '/recipes'),
       matchPaths: [`/${lang}/recipes`, `/${lang}/recipes/workflows`, `/${lang}/recipes/styles`]
     },
     {
       key: 'assets',
       label: 'My creations',
-      icon: MyAssetsIcon,
+      lightIcon: MyAssetsIcon,
+      darkIcon: MyAssetsIconDark,
+      lightSelectedIcon: MyAssetsIconSelected,
+      darkSelectedIcon: MyAssetsIconDarkSelected,
       path: withLangPrefix(lang, '/profile'),
       matchPaths: [`/${lang}/profile`]
     }
@@ -248,14 +265,20 @@ const Sidebar: React.FC = () => {
     {
       key: 'workflow-builder',
       label: 'Builder',
-      icon: WorkflowBuilderIcon,
+      lightIcon: WorkflowBuilderIcon,
+      darkIcon: WorkflowBuilderIconDark,
+      lightSelectedIcon: WorkflowBuilderIconSelected,
+      darkSelectedIcon: WorkflowBuilderIconDarkSelected,
       path: withLangPrefix(lang, '/workflow/builder'),
       matchPaths: [`/${lang}/workflow/builder`]
     },
     {
       key: 'style-trainer',
       label: 'Style Trainer',
-      icon: StyleTrainerIcon,
+      lightIcon: StyleTrainerIcon,
+      darkIcon: StyleTrainerIconDark,
+      lightSelectedIcon: StyleTrainerIconSelected,
+      darkSelectedIcon: StyleTrainerIconDarkSelected,
       path: withLangPrefix(lang, '/style/trainer'),
       matchPaths: [`/${lang}/style/trainer`]
     }
@@ -330,12 +353,15 @@ const Sidebar: React.FC = () => {
                       "hover:bg-tertiary dark:hover:bg-tertiary-dark"
                     )}
                   >
-                    <IconComponent 
-                      src={item.icon} 
-                      alt={item.label} 
-                      isSelected={isSelected}
-                    />
-                    <span className="flex-1">{item.label}</span>
+                                         <IconComponent 
+                       lightIcon={item.lightIcon}
+                       darkIcon={item.darkIcon}
+                       lightSelectedIcon={item.lightSelectedIcon}
+                       darkSelectedIcon={item.darkSelectedIcon}
+                       alt={item.label} 
+                       isSelected={isSelected}
+                     />
+                     <span className="flex-1">{item.label}</span>
                     {/* 选中状态的右侧线条 */}
                     {isSelected && (
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-link-default dark:bg-link-default-dark rounded-full" />
@@ -369,12 +395,15 @@ const Sidebar: React.FC = () => {
                       "hover:bg-tertiary dark:hover:bg-tertiary-dark"
                     )}
                   >
-                    <IconComponent 
-                      src={item.icon} 
-                      alt={item.label} 
-                      isSelected={isSelected}
-                    />
-                    <span className="flex-1">{item.label}</span>
+                                         <IconComponent 
+                       lightIcon={item.lightIcon}
+                       darkIcon={item.darkIcon}
+                       lightSelectedIcon={item.lightSelectedIcon}
+                       darkSelectedIcon={item.darkSelectedIcon}
+                       alt={item.label} 
+                       isSelected={isSelected}
+                     />
+                     <span className="flex-1">{item.label}</span>
                     {/* 选中状态的右侧线条 */}
                     {isSelected && (
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-link-default dark:bg-link-default-dark rounded-full" />
@@ -392,17 +421,18 @@ const Sidebar: React.FC = () => {
                <div className="w-full h-0 border-t border-line-subtle dark:border-line-subtle-dark" />
              </div>
 
-             {/* 语言按钮 */}
-             <div className="w-full h-12 flex items-center gap-2 px-4">
-               <IconComponent 
-                 src={GlobeIcon} 
-                 alt="Language" 
-                 isSelected={false}
-               />
-               <span className="font-switzer font-medium text-base leading-6 text-text-main dark:text-text-main-dark">
-                 English
-               </span>
-             </div>
+                           {/* 语言按钮 */}
+              <div className="w-full h-12 flex items-center gap-2 px-4">
+                <ThemeAdaptiveIcon 
+                  lightIcon={GlobeIcon}
+                  darkIcon={GlobeIconDark}
+                  alt="Language" 
+                  size="md"
+                />
+                <span className="font-switzer font-medium text-base leading-6 text-text-main dark:text-text-main-dark">
+                  English
+                </span>
+              </div>
 
              {/* 主题切换按钮 */}
              <MobileThemeToggle />
@@ -411,23 +441,26 @@ const Sidebar: React.FC = () => {
 
         {/* 下半部分：底部官方链接 */}
         <div className="w-full md:w-40 h-19 pt-3 gap-3 border-t border-line-subtle dark:border-line-subtle-dark flex flex-col">
-          {/* 社交图标行 */}
-          <div className="w-full md:w-40 h-9 gap-2 flex items-center justify-center">
-            <SocialIconComponent 
-              src={XIcon} 
-              alt="X (Twitter)" 
-              href="https://x.com/mavae"
-            />
-            <SocialIconComponent 
-              src={DiscordIcon} 
-              alt="Discord" 
-              href="https://discord.gg/mavae"
-            />
-            <SocialIconComponent 
-              src={WeixinIcon} 
-              alt="WeChat" 
-            />
-          </div>
+                     {/* 社交图标行 */}
+           <div className="w-full md:w-40 h-9 gap-2 flex items-center justify-center">
+             <SocialIconComponent 
+               lightIcon={XIcon}
+               darkIcon={XIconDark}
+               alt="X (Twitter)" 
+               href="https://x.com/mavae"
+             />
+             <SocialIconComponent 
+               lightIcon={DiscordIcon}
+               darkIcon={DiscordIconDark}
+               alt="Discord" 
+               href="https://discord.gg/mavae"
+             />
+             <SocialIconComponent 
+               lightIcon={WeixinIcon}
+               darkIcon={WeixinIconDark}
+               alt="WeChat" 
+             />
+           </div>
           
           {/* 版权文本行 */}
           <div className="w-full md:w-40 h-9 flex items-center justify-center">
