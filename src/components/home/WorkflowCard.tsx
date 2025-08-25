@@ -7,6 +7,13 @@ import UseIcon from '../../assets/web2/use.svg'
 import UseCountIcon from '../../assets/web2/use_2.svg'
 import LikeIcon from '../../assets/web2/like.svg'
 import avatarSvg from '../../assets/Avatar.svg'
+import PictureIcon from '../../assets/mavae/Picture_white.svg'
+import VideoIconNew from '../../assets/mavae/video_white.svg'
+import UseIconNew from '../../assets/mavae/use_white.svg'
+import BookmarkNormalIcon from '../../assets/mavae/Bookmark_normal.svg'
+import BookmarkYellowIcon from '../../assets/mavae/Bookmark_yellow.svg'
+import BookmarkNormalIconDark from '../../assets/mavae/dark/Bookmark_normal.svg'
+import BookmarkYellowIconDark from '../../assets/mavae/dark/Bookmark_yellow.svg'
 
 interface MobileStyle {
   width: string
@@ -114,13 +121,12 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         }
       }
     } else {
-      // Popular Workflows: 修复高度问题 - 增加高度确保内容完整显示
-      // 移动端: 224x280 (增加14px), PC端: 288x320 (增加14px)
+      // Popular Workflows: 新的设计 - PC端: width: 230px, height: 437px; 移动端: width: 240px
       return {
-        card: 'w-56 md:w-72 h-[17.5rem] md:h-[20rem]', // 移动端: 224x280, PC端: 288x320
-        cover: 'w-56 md:w-72 h-[13.75rem] md:h-[13.75rem]', // 移动端: 224x220, PC端: 288x220
-        container: 'w-56 md:w-72',
-        showDescription: true, // PC端显示，移动端通过CSS隐藏
+        card: 'w-[15rem] md:w-[14.375rem] h-[27.3125rem] min-w-[15rem] md:min-w-[14.375rem] max-w-[15rem] pb-2 gap-2', // 移动端: 240px, PC端: 230px
+        cover: 'w-[15rem] md:w-[14.375rem] h-[21.5625rem]', // 移动端: 240px, PC端: 230px, height: 345px
+        container: 'w-[15rem] md:w-[14.375rem]',
+        showDescription: true,
         showUser: true
       }
     }
@@ -131,7 +137,11 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
   const getCoverWidthInPixels = () => {
     switch (variant) {
       case 'workflow':
-        return 288 // From md:w-72
+        // 根据屏幕尺寸返回不同宽度
+        if (typeof window !== 'undefined' && window.innerWidth < 768) {
+          return 240 // 移动端: 240px
+        }
+        return 230 // PC端: 230px
       case 'style':
         return 224 // From w-56
       case 'recipes_workflow':
@@ -140,7 +150,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
       case 'profile_style':
         return 269 // From w-16.8125
       default:
-        return 288 // Default fallback
+        return 230 // Default fallback
     }
   }
 
@@ -171,7 +181,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
   return (
     <div 
       className={cn(
-        "rounded-xl cursor-pointer flex-shrink-0 group flex flex-col", // 添加flex flex-col布局
+        "rounded-xl cursor-pointer flex-shrink-0 group flex flex-col bg-secondary dark:bg-secondary-dark hover:shadow-[0px_8px_16px_0px_rgba(18,18,26,0.1)] transition-shadow", // 移除默认阴影，只保留hover阴影
         // 根据variant决定是否有移动端样式覆盖
         !dimensions.mobileStyle && dimensions.card,
         dimensions.mobileStyle && "[width:var(--mobile-width)] [height:var(--mobile-height)] lg:w-16.8125",
@@ -192,19 +202,19 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Cover 区域 */}
-      <div 
-        className={cn(
-          "relative rounded-xl overflow-hidden bg-[#E8E8E8] dark:bg-gray-700",
-          // 根据variant决定是否有移动端样式覆盖
-          !dimensions.mobileStyle && dimensions.cover,
-          dimensions.mobileStyle && "[width:var(--mobile-width)] [height:var(--mobile-cover-height)] lg:w-16.8125",
-          variant === 'recipes_workflow' && dimensions.mobileStyle && "lg:h-[13.75rem]",
-          variant === 'profile_workflow' && dimensions.mobileStyle && "lg:h-[13.75rem]",
-          variant === 'recipes_style' && dimensions.mobileStyle && "lg:h-[23.125rem]",
-          variant === 'profile_style' && dimensions.mobileStyle && "lg:h-[23.125rem]"
-        )}
-      >
+             {/* Cover 区域 */}
+       <div 
+         className={cn(
+           "relative rounded-t-xl overflow-hidden bg-[#E8E8E8] dark:bg-gray-700", // 改为rounded-t-xl，只保留顶部圆角
+           // 根据variant决定是否有移动端样式覆盖
+           !dimensions.mobileStyle && dimensions.cover,
+           dimensions.mobileStyle && "[width:var(--mobile-width)] [height:var(--mobile-cover-height)] lg:w-16.8125",
+           variant === 'recipes_workflow' && dimensions.mobileStyle && "lg:h-[13.75rem]",
+           variant === 'profile_workflow' && dimensions.mobileStyle && "lg:h-[13.75rem]",
+           variant === 'recipes_style' && dimensions.mobileStyle && "lg:h-[23.125rem]",
+           variant === 'profile_style' && dimensions.mobileStyle && "lg:h-[23.125rem]"
+         )}
+       >
         {item.cover && !imageError ? (
           isVideo ? (
             <video
@@ -228,59 +238,47 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           </div>
         )}
 
-        {/* Video 标签 */}
-        {isVideo && (
-          <div className="absolute top-3 right-3 flex items-center gap-1 px-[0.625rem] py-1.5 bg-black/60 rounded-full">
-            <img src={VideoIcon} alt="Video" className="w-4 h-4" />
-            <span className="font-lexend text-xs text-white">Video</span>
-          </div>
-        )}
+                 {/* Mask阴影区域 */}
+         <div className="absolute bottom-0 left-0 right-0 h-[3.25rem] bg-gradient-to-t from-black/72 to-transparent"></div>
 
-        {/* Hover 遮罩 */}
-        <div className={cn(
-          "absolute inset-0 bg-gradient-to-b from-transparent to-black/40 transition-opacity duration-200",
-          isHovered ? "opacity-100" : "opacity-0"
-        )} />
+         {/* 类型标签 - 左下角 */}
+         <div className="absolute bottom-2 left-2 flex items-center p-0.5 bg-black/20 rounded">
+           {isVideo ? (
+             <>
+               <img src={VideoIconNew} alt="Video" className="w-4 h-4 min-w-4 min-h-4 " />
+             </>
+           ) : (
+             <>
+               <img src={PictureIcon} alt="Picture" className="w-4 h-4 min-w-4 min-h-4 " />
+             </>
+           )}
+         </div>
 
-        {/* Hover 信息 */}
-        <div className={cn(
-          "absolute bottom-4 left-0 right-0 px-[0.875rem] flex items-center justify-between transition-opacity duration-200 z-10",
-          isHovered ? "opacity-100" : "opacity-0"
-        )}>
-          {/* Use 按钮 */}
-          <button
-            onClick={handleUseClick}
-            className="flex items-center gap-1 h-[1.875rem] px-3 bg-white rounded-md hover:bg-gray-50 transition-colors"
-          >
-            <img src={UseIcon} alt="Use" className="w-4 h-4" />
-            <span className="font-lexend text-sm text-design-main-text">Use</span>
-          </button>
+         {/* 使用量和收藏数 - 右下角 */}
+         <div className="absolute bottom-2 right-2 flex items-center gap-2">
+           {/* 使用量 */}
+           <div className="flex items-center gap-0.5 h-5">
+             <img src={UseIconNew} alt="Uses" className="w-3 h-3 " />
+             <span className="pb-px font-switzer font-medium text-xs leading-4 text-white text-center">
+               {item.usage || 0}
+             </span>
+           </div>
 
-          {/* 使用次数和点赞数 */}
-          <div className="flex items-center gap-[0.875rem]"> {/* gap: 14px */}
-            {/* 使用次数 */}
-            <div className="flex items-center gap-1">
-              <img src={UseCountIcon} alt="Uses" className="w-4 h-4" />
-              <span className="font-lexend text-xs text-design-bg-light-gray">
-                {item.usage || 0}
-              </span>
-            </div>
-
-            {/* 点赞数 */}
-            <div className="flex items-center gap-1">
-              <img src={LikeIcon} alt="Likes" className="w-4 h-4" />
-              <span className="font-lexend text-xs text-design-bg-light-gray">
-                {item.like_count || 0}
-              </span>
-            </div>
-          </div>
-        </div>
+           {/* 收藏数 */}
+           <div className="flex items-center gap-0.5 h-5">
+             {/* 这里需要根据用户是否收藏来显示不同图标，暂时使用默认图标 */}
+             <img src={BookmarkNormalIcon} alt="Bookmark" className="w-3 h-3 " />
+             <span className="pb-px font-switzer font-medium text-xs leading-4 text-white text-center">
+               {item.like_count || 0}
+             </span>
+           </div>
+         </div>
       </div>
 
       {/* Container 区域 - 修复布局 */}
       <div 
         className={cn(
-          "pt-3 flex flex-col gap-0.5 flex-1", // padding-top: 12px, gap: 4px, 添加flex-1确保占满剩余空间
+          "flex flex-col flex-1", // 添加flex-1确保占满剩余空间
           // 根据variant决定是否有移动端样式覆盖
           !dimensions.mobileStyle && dimensions.container,
           dimensions.mobileStyle && `[width:var(--mobile-width)] [height:var(--mobile-text-height)] lg:h-auto lg:w-16.8125`
@@ -291,42 +289,86 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           } as React.CSSProperties : undefined
         }
       >
-        {/* Name */}
-        <h3 className="font-lexend font-semibold text-sm md:text-base leading-snug text-design-main-text dark:text-design-dark-main-text truncate">
-          {item.name}
-        </h3>
+        {/* 作品信息 - 根据variant显示不同样式 */}
+        {variant === 'workflow' ? (
+          <div className="px-2 flex flex-col gap-1 flex-1">
+            {/* 第一行 - 标题 */}
+            <h3 className="font-switzer font-bold text-sm leading-5 text-text-main dark:text-text-main-dark truncate">
+              {item.name}
+            </h3>
 
-        {/* Description - 根据variant和屏幕尺寸决定是否显示，并处理可选性 */}
-        {dimensions.showDescription && item.description && (
-          <p 
-            className="font-lexend text-xs leading-[140%] text-design-medium-gray dark:text-design-dark-medium-gray overflow-hidden hidden md:block flex-1"
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              lineHeight: '1.4',
-              maxHeight: 'calc(2 * 1.4 * 0.75rem)', // 2行 * line-height * font-size
-            }}
-          >
-            {item.description}
-          </p>
+            {/* 第二行 - 描述 */}
+            {item.description && (
+              <p 
+                className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark overflow-hidden flex-1"
+                style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  lineHeight: '1rem',
+                  maxHeight: '2rem', // 2行 * line-height
+                }}
+              >
+                {item.description}
+              </p>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Name */}
+            <h3 className="font-lexend font-semibold text-sm md:text-base leading-snug text-design-main-text dark:text-design-dark-main-text truncate">
+              {item.name}
+            </h3>
+
+            {/* Description - 根据variant和屏幕尺寸决定是否显示，并处理可选性 */}
+            {dimensions.showDescription && item.description && (
+              <p 
+                className="font-lexend text-xs leading-[140%] text-design-medium-gray dark:text-design-dark-medium-gray overflow-hidden hidden md:block flex-1"
+                style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  lineHeight: '1.4',
+                  maxHeight: 'calc(2 * 1.4 * 0.75rem)', // 2行 * line-height * font-size
+                }}
+              >
+                {item.description}
+              </p>
+            )}
+          </>
         )}
 
-        {/* User 信息 - 修复字符裁切问题，确保显示在底部 */}
-        {dimensions.showUser && (
-          <div className="flex items-center gap-1.5 h-4 mt-auto"> {/* 固定高度确保显示完整，添加mt-auto推到底部 */}
-            <img
-              src={getAvatarUrl()}
-              alt={getDisplayName()}
-              className="w-4 h-4 rounded-full flex-shrink-0"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = avatarSvg
-              }}
-            />
-            <span className="font-lexend text-xs leading-4 text-design-dark-gray dark:text-design-dark-dark-gray truncate">
-              {getDisplayName()}
-            </span>
-          </div>
+                 {/* User 信息 - 根据variant显示不同样式 */}
+         {dimensions.showUser && (
+           variant === 'workflow' ? (
+             <div className="w-[15rem] md:w-[14.375rem] h-4 px-2 flex items-center gap-1">
+               <img
+                 src={getAvatarUrl()}
+                 alt={getDisplayName()}
+                 className="w-4 h-4 rounded-full flex-shrink-0"
+                 onError={(e) => {
+                   (e.target as HTMLImageElement).src = avatarSvg
+                 }}
+               />
+               <span className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark truncate">
+                 {getDisplayName()}
+               </span>
+             </div>
+           ) : (
+            <div className="flex items-center gap-1.5 h-4 mt-auto">
+              <img
+                src={getAvatarUrl()}
+                alt={getDisplayName()}
+                className="w-4 h-4 rounded-full flex-shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = avatarSvg
+                }}
+              />
+              <span className="font-lexend text-xs leading-4 text-design-dark-gray dark:text-design-dark-dark-gray truncate">
+                {getDisplayName()}
+              </span>
+            </div>
+          )
         )}
       </div>
     </div>

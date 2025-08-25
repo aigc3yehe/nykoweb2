@@ -78,7 +78,7 @@ const PopularWorkflows: React.FC = () => {
   // 加载状态
   if (workflowsState.isLoading && workflowsState.items.length === 0) {
     return (
-      <div className="w-full">
+      <div className="w-full h-[33.3125rem] px-8 pb-10 gap-4">
         <SectionHeader title="Popular Workflows" />
         <div className="h-[17.5rem] md:h-[20rem] flex items-center justify-center">
           <span className="text-gray-500">Loading...</span>
@@ -90,7 +90,7 @@ const PopularWorkflows: React.FC = () => {
   // 错误状态
   if (workflowsState.error && workflowsState.items.length === 0) {
     return (
-      <div className="w-full">
+      <div className="w-full h-[33.3125rem] px-8 pb-10 gap-4">
         <SectionHeader title="Popular Workflows" />
         <div className="h-[17.5rem] md:h-[20rem] flex items-center justify-center">
           <div className="text-center">
@@ -118,7 +118,7 @@ const PopularWorkflows: React.FC = () => {
   }
 
   return (
-    <div className="w-full px-6">
+    <div className="w-full h-[33.3125rem] px-8 pb-10 gap-4"> {/* width: 1352px, height: 533px, padding: 32px 32px 40px 32px, gap: 16px */}
       <SectionHeader
         title="Popular Workflows"
         onPrevious={() => scrollTo('left')}
@@ -128,10 +128,10 @@ const PopularWorkflows: React.FC = () => {
         canGoNext={canScrollRight}
       />
       
-      {/* 滚动容器 - 间距16px */}
+      {/* 滚动容器 - 间距24px，添加padding防止阴影被截断 */}
       <div 
         ref={scrollContainerRef}
-        className="flex gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth"
+        className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth px-4 py-2 -mx-4 -my-2"
       >
         {workflowsState.items.map((item) => (
           <WorkflowCard
