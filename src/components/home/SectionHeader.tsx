@@ -29,7 +29,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   canGoNext = true
 }) => {
   return (
-    <div className="flex items-center justify-between h-10 mb-4"> {/* height: 40px */}
+    <div className="flex items-center justify-between h-6 md:h-10 mb-4"> {/* height: 40px */}
       {/* 移动端 - 只有标题和右箭头 */}
       <div className="md:hidden flex items-center">
         <h2 className="font-switzer font-bold text-lg leading-6 text-text-main dark:text-text-main-dark">

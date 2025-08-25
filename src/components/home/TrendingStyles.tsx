@@ -62,7 +62,7 @@ const TrendingStyles: React.FC = () => {
   // 加载状态
   if (modelsState.isLoading && modelsState.items.length === 0) {
     return (
-      <div className="w-full">
+      <div className="w-full h-[31rem] md:h-[33.3125rem] px-8 pb-10 gap-4">
         <SectionHeader title="Trending Styles" />
         <div className="h-[22.25rem] flex items-center justify-center">
           <span className="text-gray-500">Loading...</span>
@@ -74,7 +74,7 @@ const TrendingStyles: React.FC = () => {
   // 错误状态
   if (modelsState.error && modelsState.items.length === 0) {
     return (
-      <div className="w-full">
+      <div className="w-full h-[31rem] md:h-[33.3125rem] px-8 pb-10 gap-4">
         <SectionHeader title="Trending Styles" />
         <div className="h-[22.25rem] flex items-center justify-center">
           <div className="text-center">
@@ -115,7 +115,7 @@ const TrendingStyles: React.FC = () => {
   }
 
   return (
-    <div className="w-full px-6">
+    <div className="w-full h-[31rem] md:h-[33.3125rem] px-4 md:px-8 pb-10 gap-4"> {/* 移动端: height: 496px, PC端: height: 533px, padding: 32px 32px 40px 32px, gap: 16px */}
       <SectionHeader
         title="Trending Styles"
         onPrevious={() => scrollTo('left')}
@@ -125,10 +125,10 @@ const TrendingStyles: React.FC = () => {
         canGoNext={canScrollRight}
       />
       
-      {/* 滚动容器 - 间距20px */}
+      {/* 滚动容器 - 间距24px，添加padding防止阴影被截断 */}
       <div 
         ref={scrollContainerRef}
-        className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth"
+        className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth px-4 py-2 -mx-4 -my-2"
       >
         {modelsState.items.map((item) => (
           <WorkflowCard

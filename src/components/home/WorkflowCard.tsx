@@ -49,17 +49,17 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
   // 判断是否为视频
   const isVideo = item.cover?.includes('.mp4') || item.cover?.includes('.webm')
 
-  // 根据variant和屏幕尺寸确定尺寸
-  const getCardDimensions = (): CardDimensions => {
-    if (variant === 'style') {
-      // Trending Styles: PC和移动端都是 224x356
-      return {
-        card: 'w-56 h-[22.5rem]', // 224x356
-        cover: 'w-56 h-[19.25rem]', // 224x308
-        container: 'w-56',
-        showDescription: false,
-        showUser: true
-      }
+     // 根据variant和屏幕尺寸确定尺寸
+   const getCardDimensions = (): CardDimensions => {
+     if (variant === 'style') {
+       // Trending Styles: PC端和workflow一样显示描述，移动端高度416px且不显示描述
+       return {
+         card: 'w-[15rem] md:w-[14.375rem] h-[26rem] md:h-[27.3125rem] min-w-[15rem] md:min-w-[14.375rem] max-w-[15rem] pb-2 gap-2', // 移动端: 240x416px, PC端: 230x437px
+         cover: 'w-[15rem] md:w-[14.375rem] h-[22.5rem] md:h-[21.5625rem]', // 移动端: 240x360px, PC端: 230x345px
+         container: 'w-[15rem] md:w-[14.375rem]',
+         showDescription: true, // PC端显示描述
+         showUser: true
+       }
     } else if (variant === 'recipes_workflow') {
       // Recipes Workflows页面: 移动端动态计算，PC端固定269x306
       return {
@@ -120,15 +120,15 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           coverHeight: 'calc(((100vw - 60px) / 2) * (228/165))' // cover宽高比 165:228
         }
       }
-    } else {
-      // Popular Workflows: 新的设计 - PC端: width: 230px, height: 437px; 移动端: width: 240px
-      return {
-        card: 'w-[15rem] md:w-[14.375rem] h-[27.3125rem] min-w-[15rem] md:min-w-[14.375rem] max-w-[15rem] pb-2 gap-2', // 移动端: 240px, PC端: 230px
-        cover: 'w-[15rem] md:w-[14.375rem] h-[21.5625rem]', // 移动端: 240px, PC端: 230px, height: 345px
-        container: 'w-[15rem] md:w-[14.375rem]',
-        showDescription: true,
-        showUser: true
-      }
+         } else {
+       // Popular Workflows: 新的设计 - PC端: width: 230px, height: 437px; 移动端: width: 240px, height: 452px
+       return {
+         card: 'w-[15rem] md:w-[14.375rem] h-[28.25rem] md:h-[27.3125rem] min-w-[15rem] md:min-w-[14.375rem] max-w-[15rem] pb-2 gap-2', // 移动端: 240x452px, PC端: 230x437px
+         cover: 'w-[15rem] md:w-[14.375rem] h-[22.5rem] md:h-[21.5625rem]', // 移动端: 240x360px, PC端: 230x345px
+         container: 'w-[15rem] md:w-[14.375rem]',
+         showDescription: true,
+         showUser: true
+       }
     }
   }
 
@@ -137,13 +137,12 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
   const getCoverWidthInPixels = () => {
     switch (variant) {
       case 'workflow':
+      case 'style':
         // 根据屏幕尺寸返回不同宽度
         if (typeof window !== 'undefined' && window.innerWidth < 768) {
           return 240 // 移动端: 240px
         }
         return 230 // PC端: 230px
-      case 'style':
-        return 224 // From w-56
       case 'recipes_workflow':
       case 'profile_workflow':
       case 'recipes_style':
@@ -289,31 +288,31 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           } as React.CSSProperties : undefined
         }
       >
-        {/* 作品信息 - 根据variant显示不同样式 */}
-        {variant === 'workflow' ? (
-          <div className="px-2 flex flex-col gap-1 flex-1">
-            {/* 第一行 - 标题 */}
-            <h3 className="font-switzer font-bold text-sm leading-5 text-text-main dark:text-text-main-dark truncate">
-              {item.name}
-            </h3>
+                 {/* 作品信息 - 根据variant显示不同样式 */}
+         {variant === 'workflow' || variant === 'style' ? (
+           <div className="px-2 flex flex-col gap-1 flex-1">
+             {/* 第一行 - 标题 */}
+             <h3 className="font-switzer font-bold text-sm leading-5 text-text-main dark:text-text-main-dark truncate">
+               {item.name}
+             </h3>
 
-            {/* 第二行 - 描述 */}
-            {item.description && (
-              <p 
-                className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark overflow-hidden flex-1"
-                style={{
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  lineHeight: '1rem',
-                  maxHeight: '2rem', // 2行 * line-height
-                }}
-              >
-                {item.description}
-              </p>
-            )}
-          </div>
-        ) : (
+             {/* 第二行 - 描述 - workflow显示，style只在PC端显示 */}
+             {item.description && (variant === 'workflow' || (variant === 'style' && typeof window !== 'undefined' && window.innerWidth >= 768)) && (
+               <p 
+                 className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark overflow-hidden flex-1"
+                 style={{
+                   display: '-webkit-box',
+                   WebkitLineClamp: 2,
+                   WebkitBoxOrient: 'vertical',
+                   lineHeight: '1rem',
+                   maxHeight: '2rem', // 2行 * line-height
+                 }}
+               >
+                 {item.description}
+               </p>
+             )}
+           </div>
+         ) : (
           <>
             {/* Name */}
             <h3 className="font-lexend font-semibold text-sm md:text-base leading-snug text-design-main-text dark:text-design-dark-main-text truncate">
@@ -340,7 +339,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
 
                  {/* User 信息 - 根据variant显示不同样式 */}
          {dimensions.showUser && (
-           variant === 'workflow' ? (
+           variant === 'workflow' || variant === 'style' ? (
              <div className="w-[15rem] md:w-[14.375rem] h-4 px-2 flex items-center gap-1">
                <img
                  src={getAvatarUrl()}

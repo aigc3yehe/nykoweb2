@@ -80,7 +80,7 @@ const Header: React.FC = React.memo(() => {
   }
 
      return (
-     <header className="h-14 md:h-24 border-b border-line-subtle dark:border-line-subtle-dark bg-secondary dark:bg-secondary-dark md:bg-primary md:dark:bg-primary-dark">
+     <header className="h-14 md:h-24 bg-secondary dark:bg-secondary-dark md:bg-primary md:dark:bg-primary-dark">
        <div className="flex h-full items-center justify-between px-2.5 pr-4 md:px-8 md:py-6">
                  {/* 左侧：移动端菜单+Logo / PC端页面标题 */}
          <div className="flex items-center">

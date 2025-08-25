@@ -118,7 +118,7 @@ const PopularWorkflows: React.FC = () => {
   }
 
   return (
-    <div className="w-full h-[33.3125rem] px-8 pb-10 gap-4"> {/* width: 1352px, height: 533px, padding: 32px 32px 40px 32px, gap: 16px */}
+    <div className="w-full h-[33.3125rem] px-4 md:px-8 pb-10 gap-4"> {/* width: 1352px, height: 533px, padding: 32px 32px 40px 32px, gap: 16px */}
       <SectionHeader
         title="Popular Workflows"
         onPrevious={() => scrollTo('left')}
