@@ -167,8 +167,8 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
             </span>
           </div>
 
-          {/* 工作流网格 - 复用recipes页面的样式 */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* 工作流网格 - 移动端1列，PC端5列，gap 24px */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {group.workflows.map((workflow, index) => (
               <div key={`${workflow.workflow_id}-${index}`} className="flex justify-center">
                 <WorkflowCard

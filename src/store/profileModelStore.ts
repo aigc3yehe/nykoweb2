@@ -156,7 +156,7 @@ export const fetchPublishedModelsAtom = atom(
     
     try {
       const params = {
-        user: userState.user.tokens.did,
+        //user: userState.user.tokens.did,
         page: currentPage,
         page_size: currentState.pageSize,
         order: 'created_at' as const,
