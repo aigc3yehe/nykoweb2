@@ -177,7 +177,7 @@ export const fetchPublishedWorkflowsAtom = atom(
     try {
       // 调用API获取用户的工作流
       const params = {
-        // user: userState.user.tokens.did, // 添加用户did参数
+        user: userState.user.tokens.did, // 添加用户did参数
         page: currentPage,
         page_size: currentState.pageSize,
         order: 'created_at' as const,
