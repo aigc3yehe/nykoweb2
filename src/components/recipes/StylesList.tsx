@@ -165,10 +165,10 @@ const StylesList: React.FC<StylesListProps> = ({ sortOption = 'All' }) => {
 
   return (
     <div className="space-y-6">
-      {/* 风格网格列表 - 移动端2列，PC端4列，每个卡片269px宽度，gap 20px */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* 风格网格列表 - 移动端1列，PC端5列，gap 24px */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {modelState.items.map((model, index) => (
-          <div key={`${model.model_id}-${index}`} className="flex justify-center">
+          <div key={`${model.model_id}-${index}`} className="flex justify-center lg:justify-start">
             <WorkflowCard
               item={convertModelToFeaturedItem(model)}
               variant="recipes_style"

@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { RecipeType } from '../../pages/Recipes'
-import DropdownIcon from '../../assets/web2/drop_down.svg'
-import AddIcon from '../../assets/web2/add.svg'
+import { cn } from '../../utils/cn'
+import CreditBtnIcon from '../../assets/mavae/credit_btn.svg'
 
 interface RecipesActionsProps {
   activeTab: RecipeType
@@ -14,14 +14,11 @@ const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab, onSortChange
   const navigate = useNavigate()
   const lang = useLang()
   const [selectedOption, setSelectedOption] = useState('All')
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const options = ['All', 'Popular', 'Recent']
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option)
-    setIsDropdownOpen(false)
     
     // 调用父组件的排序回调
     if (onSortChange) {
@@ -40,69 +37,45 @@ const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab, onSortChange
     }
   }
 
-  // 处理点击外部关闭下拉菜单
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false)
-      }
-    }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
 
   return (
-    <div className="h-9 flex items-center gap-3">
-      {/* 左侧选项按钮 */}
-      <div className="relative" ref={dropdownRef}>
-        <button
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="min-w-[101px] h-9 flex items-center justify-between gap-1 px-3.5 py-2.5 rounded-md border border-gray-200 bg-white"
-        >
-          <span className="font-lexend font-normal text-sm leading-none text-[#4B5563]">
-            {selectedOption}
-          </span>
-          <img src={DropdownIcon} alt="Dropdown" className="w-4 h-4" />
-        </button>
-
-        {/* 下拉菜单 */}
-        {isDropdownOpen && (
-          <div className="absolute top-full left-0 mt-1 min-w-[101px] bg-white border border-[#3741514D] rounded-md shadow-lg z-10">
-            <div className="p-2 flex flex-col gap-1.5">
-              {options.map(option => (
-                <button
-                  key={option}
-                  onClick={() => handleOptionSelect(option)}
-                  className={`
-                    h-7.5 px-2.5 py-2 rounded-md text-sm font-lexend font-normal leading-none capitalize
-                    ${selectedOption === option 
-                      ? 'bg-[#EEF2FF] text-[#0900FF]' 
-                      : 'text-[#4B5563] hover:bg-gray-50'
-                    }
-                  `}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+    <div className="w-full h-auto md:h-9 flex items-center justify-between pt-3 pb-6 md:pt-0 md:pb-0"> {/* 移动端: height: auto, padding: 12px 16px 24px 16px, PC端: height: 36px */}
+      {/* 左侧分段选择器 */}
+      <div className="w-full md:w-auto h-9 py-px rounded-full bg-quaternary dark:bg-quaternary-dark border border-line-subtle dark:border-line-subtle-dark"> {/* 移动端: 宽度占满, PC端: 自适应宽度 */}
+        {options.map((option) => (
+          <button
+            key={option}
+            onClick={() => handleOptionSelect(option)}
+                         className={cn(
+               "h-8 px-4 rounded-full transition-all duration-200", // height: 32px, padding: 16px
+               "md:min-w-[6.875rem]", // PC端: min-width: 110px
+               "w-1/3 md:w-auto md:flex-none", // 移动端: 平分1/3宽度, PC端: 自适应
+              selectedOption === option
+                ? "bg-btn-selected dark:bg-btn-selected-dark shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.1)]" // 选中状态
+                : "hover:bg-quaternary dark:hover:bg-quaternary-dark" // 未选中状态
+            )}
+          >
+            <span className={cn(
+              "font-switzer font-medium text-sm leading-[1.375rem] text-center", // font-size: 14px, line-height: 22px
+              selectedOption === option
+                ? "text-text-main dark:text-text-main-dark" // 选中状态字体颜色
+                : "text-text-secondary dark:text-text-secondary-dark" // 未选中状态字体颜色
+            )}>
+              {option}
+            </span>
+          </button>
+        ))}
       </div>
 
-      {/* PC端spacer - 占满剩余空间把新建按钮挤到右边 */}
-      <div className="hidden md:block md:flex-1"></div>
-
-      {/* 新建按钮 - 移动端44*36px */}
+      {/* PC端新建按钮 - 移动端隐藏 */}
       <button 
         onClick={handleNewClick}
-        className="w-11 h-9 md:w-auto md:h-9 flex items-center justify-center gap-1.5 md:px-3.5 py-2.5 bg-[#0900FF] rounded-md hover:bg-[#0800E6] transition-colors"
+        className="hidden md:flex h-9 px-4 items-center gap-1 rounded-full bg-[#84CC161A] hover:bg-[#84CC1626] transition-colors" // height: 36px, padding: 16px, gap: 4px, radius: 666px, background: #84CC161A
       >
-        <img src={AddIcon} alt="Add" className="w-4 h-4" />
-        <span className="hidden md:inline font-lexend font-normal text-sm leading-none text-white">
-          New {activeTab === 'workflows' ? 'Workflow' : 'Style'}
+        <img src={CreditBtnIcon} alt="Builder" className="w-4 h-4" /> {/* 16x16 */}
+        <span className="h-6 font-switzer font-medium text-sm leading-6 text-[#65A30D]"> {/* height: 24px, font-size: 14px, line-height: 24px, color: #65A30D */}
+          Builder
         </span>
       </button>
     </div>

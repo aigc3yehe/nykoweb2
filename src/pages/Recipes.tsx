@@ -45,19 +45,22 @@ const Recipes: React.FC = () => {
   }, [tab, navigate])
 
   return (
-    <div className="p-5 md:p-6">
-      <div className="flex flex-col gap-5">
-        {/* Tab 导航 */}
-        <RecipesTab activeTab={activeTab} onTabChange={handleTabChange} />
+    <div className="w-full px-4 md:px-8 pb-10 flex flex-col md:gap-6"> {/* width: 1352px (full), padding: 32px 32px 40px 32px, gap: 24px */}
+      {/* 移动端标题 */}
+      <h1 className="md:hidden h-16 py-4 font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark"> {/* height: 64px, padding: 16px, font-size: 24px, line-height: 32px */}
+        Recipes
+      </h1>
+      
+      {/* Tab 导航 */}
+      <RecipesTab activeTab={activeTab} onTabChange={handleTabChange} />
 
-        {/* 快捷操作组件 */}
-        <RecipesActions activeTab={activeTab} onSortChange={handleSortChange} />
+      {/* 快捷操作组件 */}
+      <RecipesActions activeTab={activeTab} onSortChange={handleSortChange} />
 
-        {/* 内容区域 */}
-        <div className="min-h-96">
-          {activeTab === 'workflows' && <WorkflowsList sortOption={sortOption} />}
-          {activeTab === 'styles' && <StylesList sortOption={sortOption} />}
-        </div>
+      {/* 内容区域 */}
+      <div className="min-h-96">
+        {activeTab === 'workflows' && <WorkflowsList sortOption={sortOption} />}
+        {activeTab === 'styles' && <StylesList sortOption={sortOption} />}
       </div>
     </div>
   )

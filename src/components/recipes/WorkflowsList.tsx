@@ -167,10 +167,10 @@ const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => 
 
   return (
     <div className="space-y-6">
-      {/* 工作流网格列表 - 移动端2列，PC端4列，每个卡片269px宽度，gap 20px */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* 工作流网格列表 - 移动端1列，PC端5列，gap 24px */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {workflowState.items.map((workflow, index) => (
-          <div key={`${workflow.workflow_id}-${index}`} className="flex justify-center">
+          <div key={`${workflow.workflow_id}-${index}`} className="flex justify-center lg:justify-start">
             <WorkflowCard
               item={convertWorkflowToFeaturedItem(workflow)}
               variant="recipes_workflow"

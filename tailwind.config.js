@@ -224,6 +224,13 @@ export default {
       backgroundImage: {
         'premium-gradient': 'linear-gradient(180deg, rgba(9, 0, 255, 0) 68.81%, rgba(9, 0, 255, 0.1) 100%)',
         'premium-plus-gradient': 'linear-gradient(180deg, rgba(0, 255, 72, 0) 68.81%, rgba(0, 255, 72, 0.1) 100%)',
+      },
+      // 玻璃效果
+      backdropBlur: {
+        'glass': 'blur(8px)',
+      },
+      boxShadow: {
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
       }
     },
   },

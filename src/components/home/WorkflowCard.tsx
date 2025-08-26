@@ -61,11 +61,11 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
          showUser: true
        }
          } else if (variant === 'recipes_workflow' || variant === 'recipes_style') {
-       // Recipes Workflows/Styles页面: 统一样式，与workflow相似
+       // Recipes Workflows/Styles页面: 移动端宽度占满，PC端固定尺寸
        return {
-         card: 'w-[14.9rem] h-[28.1rem] min-w-[14.9rem] max-w-[14.9rem] pb-2 gap-2', // width: 238.4px, height: 449.6px, gap: 8px
-         cover: 'w-[14.9rem] h-[22.35rem]', // width: 238.4px, height: 357.6px
-         container: 'w-[14.9rem]',
+         card: 'w-full md:w-[14.9rem] h-[39.3125rem] md:h-[28.1rem] min-w-full md:min-w-[14.9rem] max-w-full md:max-w-[14.9rem] pb-2 gap-2', // 移动端: 宽度占满, 高度629px, PC端: 238.4x449.6px
+         cover: 'w-full md:w-[14.9rem] h-[33.5625rem] md:h-[22.35rem]', // 移动端: 宽度占满, 高度537px, PC端: 238.4x357.6px
+         container: 'w-full md:w-[14.9rem]',
          showDescription: true,
          showUser: true
        }
@@ -124,7 +124,11 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
          return 230 // PC端: 230px
        case 'recipes_workflow':
        case 'recipes_style':
-         return 238 // From w-[14.9rem] (238.4px)
+         // 根据屏幕尺寸返回不同宽度
+         if (typeof window !== 'undefined' && window.innerWidth < 768) {
+           return window.innerWidth - 32 // 移动端: 屏幕宽度减去左右padding (16px * 2)
+         }
+         return 238 // PC端: From w-[14.9rem] (238.4px)
        case 'profile_workflow':
        case 'profile_style':
          return 269 // From w-16.8125
