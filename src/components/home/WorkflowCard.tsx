@@ -60,51 +60,30 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
          showDescription: true, // PC端显示描述
          showUser: true
        }
-    } else if (variant === 'recipes_workflow') {
-      // Recipes Workflows页面: 移动端动态计算，PC端固定269x306
-      return {
-        card: 'w-16.8125 h-[19.125rem]', // PC端: 269x306
-        cover: 'w-16.8125 h-[13.75rem]', // PC端: 269x220
-        container: 'w-16.8125',
-        showDescription: true,
-        showUser: true,
-        mobileStyle: {
-          // 移动端：宽度=(100vw-60px)/2，cover高度=宽度*(154/165)，文本区域2.875rem
-          width: 'calc((100vw - 60px) / 2)',
-          height: 'calc(((100vw - 60px) / 2) * (154/165) + 2.875rem)',
-          coverHeight: 'calc(((100vw - 60px) / 2) * (154/165))' // cover宽高比 165:154
-        }
-      }
-    } else if (variant === 'profile_workflow') {
-      // Recipes Workflows页面: 移动端动态计算，PC端固定269x252
-      return {
-        card: 'w-16.8125 h-[15.625rem]', // PC端: 269x252
-        cover: 'w-16.8125 h-[13.75rem]', // PC端: 269x220
-        container: 'w-16.8125',
-        showDescription: false,
-        showUser: false,
-        mobileStyle: {
-          // 移动端：宽度=(100vw-60px)/2，cover高度=宽度*(154/165)，文本区域1.875rem
-          width: 'calc((100vw - 60px) / 2)',
-          height: 'calc(((100vw - 60px) / 2) * (154/165) + 1.875rem)',
-          coverHeight: 'calc(((100vw - 60px) / 2) * (154/165))' // cover宽高比 165:154
-        }
-      }
-    } else if (variant === 'recipes_style') {
-      // Recipes Styles页面: 移动端动态计算，PC端固定269x418
-      return {
-        card: 'w-16.8125 h-[26.125rem]', // PC端: 269x418
-        cover: 'w-16.8125 h-[23.125rem]', // PC端: 269x370
-        container: 'w-16.8125',
-        showDescription: false,
-        showUser: true,
-        mobileStyle: {
-          // 移动端：宽度=(100vw-60px)/2，cover高度=宽度*(228/165)，文本区域2.875rem
-          width: 'calc((100vw - 60px) / 2)',
-          height: 'calc(((100vw - 60px) / 2) * (228/165) + 2.875rem)',
-          coverHeight: 'calc(((100vw - 60px) / 2) * (228/165))' // cover宽高比 165:228
-        }
-      }
+         } else if (variant === 'recipes_workflow' || variant === 'recipes_style') {
+       // Recipes Workflows/Styles页面: 统一样式，与workflow相似
+       return {
+         card: 'w-[14.9rem] h-[28.1rem] min-w-[14.9rem] max-w-[14.9rem] pb-2 gap-2', // width: 238.4px, height: 449.6px, gap: 8px
+         cover: 'w-[14.9rem] h-[22.35rem]', // width: 238.4px, height: 357.6px
+         container: 'w-[14.9rem]',
+         showDescription: true,
+         showUser: true
+       }
+     } else if (variant === 'profile_workflow') {
+       // Profile Workflows页面: 移动端动态计算，PC端固定269x252
+       return {
+         card: 'w-16.8125 h-[15.625rem]', // PC端: 269x252
+         cover: 'w-16.8125 h-[13.75rem]', // PC端: 269x220
+         container: 'w-16.8125',
+         showDescription: false,
+         showUser: false,
+         mobileStyle: {
+           // 移动端：宽度=(100vw-60px)/2，cover高度=宽度*(154/165)，文本区域1.875rem
+           width: 'calc((100vw - 60px) / 2)',
+           height: 'calc(((100vw - 60px) / 2) * (154/165) + 1.875rem)',
+           coverHeight: 'calc(((100vw - 60px) / 2) * (154/165))' // cover宽高比 165:154
+         }
+       }
     } else if (variant === 'profile_style') {
       // Profile Styles页面: 移动端动态计算，PC端固定269x402
       return {
@@ -134,24 +113,25 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
 
   const dimensions = getCardDimensions()
 
-  const getCoverWidthInPixels = () => {
-    switch (variant) {
-      case 'workflow':
-      case 'style':
-        // 根据屏幕尺寸返回不同宽度
-        if (typeof window !== 'undefined' && window.innerWidth < 768) {
-          return 240 // 移动端: 240px
-        }
-        return 230 // PC端: 230px
-      case 'recipes_workflow':
-      case 'profile_workflow':
-      case 'recipes_style':
-      case 'profile_style':
-        return 269 // From w-16.8125
-      default:
-        return 230 // Default fallback
-    }
-  }
+     const getCoverWidthInPixels = () => {
+     switch (variant) {
+       case 'workflow':
+       case 'style':
+         // 根据屏幕尺寸返回不同宽度
+         if (typeof window !== 'undefined' && window.innerWidth < 768) {
+           return 240 // 移动端: 240px
+         }
+         return 230 // PC端: 230px
+       case 'recipes_workflow':
+       case 'recipes_style':
+         return 238 // From w-[14.9rem] (238.4px)
+       case 'profile_workflow':
+       case 'profile_style':
+         return 269 // From w-16.8125
+       default:
+         return 230 // Default fallback
+     }
+   }
 
   // 获取用户头像 - 新的用户数据结构
   const getAvatarUrl = () => {
@@ -289,15 +269,15 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         }
       >
                  {/* 作品信息 - 根据variant显示不同样式 */}
-         {variant === 'workflow' || variant === 'style' ? (
+         {variant === 'workflow' || variant === 'style' || variant === 'recipes_workflow' || variant === 'recipes_style' ? (
            <div className="px-2 flex flex-col gap-1 flex-1">
              {/* 第一行 - 标题 */}
              <h3 className="font-switzer font-bold text-sm leading-5 text-text-main dark:text-text-main-dark truncate">
                {item.name}
              </h3>
 
-             {/* 第二行 - 描述 - workflow显示，style只在PC端显示 */}
-             {item.description && (variant === 'workflow' || (variant === 'style' && typeof window !== 'undefined' && window.innerWidth >= 768)) && (
+             {/* 第二行 - 描述 - workflow和recipes显示，style只在PC端显示 */}
+             {item.description && (variant === 'workflow' || variant === 'recipes_workflow' || variant === 'recipes_style' || (variant === 'style' && typeof window !== 'undefined' && window.innerWidth >= 768)) && (
                <p 
                  className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark overflow-hidden flex-1"
                  style={{
@@ -339,8 +319,11 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
 
                  {/* User 信息 - 根据variant显示不同样式 */}
          {dimensions.showUser && (
-           variant === 'workflow' || variant === 'style' ? (
-             <div className="w-[15rem] md:w-[14.375rem] h-4 px-2 flex items-center gap-1">
+           variant === 'workflow' || variant === 'style' || variant === 'recipes_workflow' || variant === 'recipes_style' ? (
+             <div className={cn(
+               "h-4 px-2 flex items-center gap-1",
+               variant === 'workflow' || variant === 'style' ? "w-[15rem] md:w-[14.375rem]" : "w-[14.9rem]"
+             )}>
                <img
                  src={getAvatarUrl()}
                  alt={getDisplayName()}

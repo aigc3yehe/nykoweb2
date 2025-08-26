@@ -66,7 +66,7 @@ const InspirationFeed: React.FC = () => {
       const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights))
 
       // 计算图片高度（使用rem单位）
-      const cardWidthRem = isMobile ? ((window.innerWidth - 48) / 16) : 17.1875 // 移动端适配宽度，PC端275px
+      const cardWidthRem = isMobile ? ((window.innerWidth - 48) / 16) : 18.375 // 移动端适配宽度，PC端294px
       const imageHeightRem = content.width && content.height
         ? (cardWidthRem * content.height) / content.width
         : 12.5 // 默认200px = 12.5rem
@@ -87,7 +87,7 @@ const InspirationFeed: React.FC = () => {
   const { columns, columnCount } = getColumnsLayout()
 
   return (
-    <div className="w-full px-6">
+    <div className="w-full px-4 md:px-8">
       <InspirationSectionHeader
         title="Inspiration Feed"
         selectedFilter={selectedFilter}
@@ -117,9 +117,9 @@ const InspirationFeed: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className={`grid gap-3 ${columnCount === 1 ? 'grid-cols-1' : 'grid-cols-4'}`}>
+          <div className={`grid gap-6 ${columnCount === 1 ? 'grid-cols-1' : 'grid-cols-4'}`}>
             {columns.map((columnItems, columnIndex) => (
-              <div key={columnIndex} className="flex flex-col gap-3">
+              <div key={columnIndex} className="flex flex-col gap-6">
                 {columnItems.map((content: ContentItem & { calculatedHeight?: number }) => (
                   <InspirationImageCard
                     key={content.content_id}
