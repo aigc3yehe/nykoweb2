@@ -1,5 +1,9 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
+import PictureIcon from '../../assets/mavae/Picture.svg'
+import PictureIconDark from '../../assets/mavae/dark/Picture.svg'
+import LiveIcon from '../../assets/mavae/live.svg'
+import LiveIconDark from '../../assets/mavae/dark/live.svg'
 
 type ProfileTab = 'published' | 'liked'
 type ContentTypeFilter = 'workflows' | 'models' | 'images' | 'videos'
@@ -26,13 +30,13 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ activeTab, onFilterChan
   return (
     <div className="w-full h-auto md:h-9 flex items-center justify-between pt-3 pb-6 md:pt-0 md:pb-0"> {/* 移动端: height: auto, padding: 12px 16px 24px 16px, PC端: height: 36px */}
       {/* 左侧分段选择器 */}
-      <div className="w-full md:w-auto h-9 p-0.5 rounded-full bg-quaternary dark:bg-quaternary-dark border border-line-subtle dark:border-line-subtle-dark"> {/* 移动端: 宽度占满, PC端: 自适应宽度 */}
+      <div className="w-full md:w-auto h-9 p-0.5 rounded-full bg-quaternary dark:bg-quaternary-dark border border-line-subtle dark:border-line-subtle-dark flex"> {/* 移动端: 宽度占满, PC端: 自适应宽度 */}
         {options.map((option) => (
           <button
             key={option}
             onClick={() => handleOptionSelect(option)}
             className={cn(
-              "h-8 px-4 rounded-full transition-all duration-200", // height: 32px, padding: 16px
+              "h-8 px-4 rounded-full transition-all duration-200 flex items-center gap-1", // height: 32px, padding: 16px, gap: 4px
               "md:min-w-[6.875rem]", // PC端: min-width: 110px
               "w-1/4 md:w-auto md:flex-none", // 移动端: 平分1/4宽度, PC端: 自适应
               selectedOption === option
@@ -40,6 +44,21 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ activeTab, onFilterChan
                 : "hover:bg-quaternary dark:hover:bg-quaternary-dark" // 未选中状态
             )}
           >
+            {/* 图标 - 仅对 images 和 videos 显示 */}
+            {(option === 'images' || option === 'videos') && (
+              <img 
+                src={option === 'images' ? PictureIcon : LiveIcon} 
+                alt={option}
+                className="w-4 h-4 flex-shrink-0 dark:hidden" // 16x16px, 浅色模式显示
+              />
+            )}
+            {(option === 'images' || option === 'videos') && (
+              <img 
+                src={option === 'images' ? PictureIconDark : LiveIconDark} 
+                alt={option}
+                className="w-4 h-4 flex-shrink-0 hidden dark:block" // 16x16px, 深色模式显示
+              />
+            )}
             <span className={cn(
               "font-switzer font-medium text-sm leading-[1.375rem] text-center", // font-size: 14px, line-height: 22px
               selectedOption === option

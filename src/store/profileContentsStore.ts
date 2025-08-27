@@ -172,7 +172,7 @@ export const fetchProfileContentsAtom = atom(
 
     try {
       const params: any = {
-        //user: userState.user.tokens.did,
+        user: userState.user.tokens.did,
         page: currentPage,
         page_size: pageSize,
         type

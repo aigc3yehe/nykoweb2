@@ -26,6 +26,9 @@ import LikedIcon from '../../assets/web2/liked.svg'
 import avatarSvg from '../../assets/mavae/avatar.svg'
 import PictureIcon from '../../assets/mavae/Picture_white.svg'
 import VideoIconNew from '../../assets/mavae/video_white.svg'
+import NanananaIcon from '../../assets/mavae/nananana.svg'
+import NanananaIconDark from '../../assets/mavae/dark/nananana.svg'
+import WorkflowBuilderIcon from '../../assets/mavae/WorkflowBuilder_white.svg'
 
 interface ProfileContentsListProps {
   type: 'image' | 'video'
@@ -128,15 +131,36 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
 
   if (groups.length === 0 && !state.isLoading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <div className="text-center">
-          <p className="text-gray-500 mb-2">
+      <div className="flex flex-col items-center justify-center py-10 gap-6"> {/* padding-top: 40px, padding-bottom: 40px, gap: 24px */}
+        {/* 图标 */}
+        <img 
+          src={NanananaIcon} 
+          alt="Empty" 
+          className="w-[7.5rem] h-[7.5rem] dark:hidden" // 120x120px, 浅色模式显示
+        />
+        <img 
+          src={NanananaIconDark} 
+          alt="Empty" 
+          className="w-[7.5rem] h-[7.5rem] hidden dark:block" // 120x120px, 深色模式显示
+        />
+        
+        {/* 文本提示 */}
+        <div className="flex flex-col items-center gap-1"> {/* 两行文本间距4px */}
+          <p className="font-switzer font-medium text-2xl leading-8 text-text-main dark:text-text-main-dark text-center"> {/* font-size: 24px, line-height: 32px */}
             No {type === 'image' ? 'images' : 'videos'} found
           </p>
-          <p className="text-gray-400 text-sm">
+          <p className="font-switzer font-medium text-sm leading-5 text-[#9CA1AF] text-center"> {/* font-size: 14px, line-height: 20px */}
             {type === 'image' ? 'Create or upload images to see them here' : 'Create or upload videos to see them here'}
           </p>
         </div>
+
+        {/* 创建按钮 */}
+        <button className="w-40 h-9 min-w-40 px-4 flex items-center justify-center gap-1 rounded-full bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors"> {/* width: 160px, height: 36px, gap: 4px */}
+          <img src={WorkflowBuilderIcon} alt="Create" className="w-5 h-5" /> {/* 20x20px */}
+          <span className="font-switzer font-medium text-sm leading-5 text-white"> {/* font-size: 14px, line-height: 20px */}
+            Create
+          </span>
+        </button>
       </div>
     )
   }
