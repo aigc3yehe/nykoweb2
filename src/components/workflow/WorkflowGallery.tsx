@@ -72,7 +72,7 @@ const WorkflowGallery: React.FC<WorkflowGalleryProps> = ({ workflowId }) => {
     const columnItems: ContentItem[][] = new Array(columns).fill(null).map(() => [])
     contentsState.items.forEach((content) => {
       const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights))
-      const cardWidthRem = isMobile ? ((window.innerWidth - 48) / 16) : 17.1875
+      const cardWidthRem = isMobile ? ((window.innerWidth - 48) / 16) : 18.375 // 移动端适配宽度，PC端294px
       const imageHeightRem = content.width && content.height
         ? (cardWidthRem * content.height) / content.width
         : 12.5
@@ -116,9 +116,9 @@ const WorkflowGallery: React.FC<WorkflowGalleryProps> = ({ workflowId }) => {
         </div>
       ) : (
         <>
-          <div className={`grid gap-3 ${columnCount === 1 ? 'grid-cols-1' : 'grid-cols-4'}`}>
+          <div className={`grid gap-6 ${columnCount === 1 ? 'grid-cols-1' : 'grid-cols-4'}`}>
             {columns.map((columnItems, columnIndex) => (
-              <div key={columnIndex} className="flex flex-col gap-3">
+              <div key={columnIndex} className="flex flex-col gap-6">
                 {columnItems.map((content: ContentItem & { calculatedHeight?: number }) => (
                   <InspirationImageCard
                     key={content.content_id}

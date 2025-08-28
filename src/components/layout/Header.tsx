@@ -9,6 +9,8 @@ import { getCurrentTheme, toggleTheme } from '../../utils/theme'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 import MenuIcon from '../../assets/web2/menu.svg'
 import BackIcon from '../../assets/web2/back.svg'
+import LeftIcon from '../../assets/mavae/left.svg'
+import LeftIconDark from '../../assets/mavae/dark/left.svg'
 import CreditIcon from '../../assets/mavae/credit_btn.svg'
 import RadixIcon from '../../assets/mavae/Radix.svg'
 import RadixIconDark from '../../assets/mavae/dark/Radix.svg'
@@ -72,6 +74,13 @@ const Header: React.FC = React.memo(() => {
     return 'Sparks' // Home页面
   }
 
+  // 判断是否显示返回组件
+  const shouldShowReturnComponent = () => {
+    const path = location.pathname
+    return (path.includes('/workflow/') && path.split('/').length > 2) || // 工作流详情页面
+           (path.includes('/model/') && path.split('/').length > 2) // model详情页面
+  }
+
   // 获取会员等级图标
   const getMembershipIcon = () => {
     // TODO: 从用户信息中获取实际会员等级
@@ -84,7 +93,25 @@ const Header: React.FC = React.memo(() => {
        <div className="flex h-full items-center justify-between px-2.5 pr-4 md:px-8 md:py-6">
                  {/* 左侧：移动端菜单+Logo / PC端页面标题 */}
          <div className="flex items-center">
-           {location.pathname.includes('/workflow/builder') || location.pathname.includes('/style/trainer') ? (
+           {shouldShowReturnComponent() ? (
+             <>
+               <button
+                 onClick={() => navigate(-1)}
+                 className="flex items-center gap-2 h-8"
+                 aria-label="Return"
+               >
+                 <ThemeAdaptiveIcon
+                   lightIcon={LeftIcon}
+                   darkIcon={LeftIconDark}
+                   alt="Return"
+                   size="lg"
+                 />
+                 <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark select-none">
+                   Return
+                 </span>
+               </button>
+             </>
+           ) : location.pathname.includes('/workflow/builder') || location.pathname.includes('/style/trainer') ? (
              <>
                <button
                  onClick={() => navigate(-1)}

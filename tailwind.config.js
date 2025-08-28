@@ -216,6 +216,7 @@ export default {
       fontFamily: {
         'lexend': ['Lexend', 'sans-serif'],
         'switzer': ['Switzer', 'sans-serif'],
+        'roboto': ['Roboto', 'sans-serif'],
       },
       lineHeight: {
         '140': '1.4', // 140% line height

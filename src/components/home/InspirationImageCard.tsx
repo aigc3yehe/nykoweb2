@@ -110,7 +110,7 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
 
   return (
     <div 
-      className="w-full md:w-[18.375rem] md:min-w-[290px] md:max-w-[294px] cursor-pointer rounded-xl bg-secondary dark:bg-secondary-dark pb-2 gap-2 hover:shadow-[0px_8px_16px_0px_rgba(18,18,26,0.1)] transition-shadow" // 移动端全宽，PC端294px，padding-bottom: 8px, gap: 8px, border-radius: 12px, background: #FFFFFF, hover效果
+      className="w-full md:w-[18.375rem] cursor-pointer rounded-xl bg-secondary dark:bg-secondary-dark pb-2 gap-2 hover:shadow-[0px_8px_16px_0px_rgba(18,18,26,0.1)] transition-shadow" // 移动端全宽，PC端294px，padding-bottom: 8px, gap: 8px, border-radius: 12px, background: #FFFFFF, hover效果
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

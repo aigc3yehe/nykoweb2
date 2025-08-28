@@ -36,7 +36,7 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ activeTab, onFilterChan
             key={option}
             onClick={() => handleOptionSelect(option)}
             className={cn(
-              "h-8 px-4 rounded-full transition-all duration-200 flex items-center gap-1", // height: 32px, padding: 16px, gap: 4px
+              "h-8 px-4 rounded-full transition-all duration-200 flex items-center justify-center gap-1", // height: 32px, padding: 16px, gap: 4px, 内容居中
               "md:min-w-[6.875rem]", // PC端: min-width: 110px
               "w-1/4 md:w-auto md:flex-none", // 移动端: 平分1/4宽度, PC端: 自适应
               selectedOption === option
