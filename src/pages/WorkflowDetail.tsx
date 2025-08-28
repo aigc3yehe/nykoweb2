@@ -96,7 +96,7 @@ const WorkflowDetail: React.FC = () => {
 
                 {/* 工作流详情内容 */}
         {state.workflow && !state.isLoading && (
-          <div className="max-w-7xl mx-auto">
+          <div className="mx-auto">
             {/* PC端 - 左右布局 */}
             <div className="hidden md:block">
               <div className="flex h-[37.5rem] rounded-xl bg-secondary dark:bg-secondary-dark">

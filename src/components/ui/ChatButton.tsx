@@ -3,9 +3,11 @@ import { useAtom } from 'jotai'
 import { useLocation } from 'react-router-dom'
 import { chatSidebarAtom } from '../../store/chatSidebarStore'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
-import ChatBtnIcon from '../../assets/web2/chatbtn.svg'
+import ChatIcon from '../../assets/mavae/chat.svg'
+import ChatIconDark from '../../assets/mavae/dark/chat.svg'
 import { useI18n } from '../../hooks/useI18n'
 import { useLang } from '../../hooks/useLang'
+import ThemeAdaptiveIcon from './ThemeAdaptiveIcon'
 
 const ChatButton: React.FC = () => {
   const [chatSidebar] = useAtom(chatSidebarAtom)
@@ -29,18 +31,25 @@ const ChatButton: React.FC = () => {
     return /\/(en|zh-CN|zh-HK)\/workflow\//.test(path) || /\/(en|zh-CN|zh-HK)\/model\//.test(path)
   })()
 
-  // 当侧边栏打开时或在特定页面时，不显示聊天按钮
-  if (chatSidebar.isOpen || shouldHideChatButton) {
+  // 只在详情页显示，当侧边栏打开时或在特定页面时，不显示聊天按钮
+  if (!isDetailPage || chatSidebar.isOpen || shouldHideChatButton) {
     return null
   }
 
   return (
     <button
       onClick={openChat}
-      className={`fixed ${isDetailPage ? 'bottom-24' : 'bottom-7.5'} right-6 z-40 w-[3.375rem] h-[3.375rem] flex items-center justify-center`}
+      className={`fixed bottom-6 right-6 z-40 w-16 h-16 flex items-center justify-center rounded-full bg-link-default dark:bg-link-default-dark hover:w-18 hover:h-18 active:w-12 active:h-12 transition-all duration-200 hover:shadow-[0px_8px_16px_0px_rgba(18,18,26,0.1)] hover:shadow-[0px_4px_8px_0px_rgba(18,18,26,0.2)] active:shadow-[0px_8px_16px_0px_rgba(18,18,26,0.1)] active:shadow-[0px_4px_8px_0px_rgba(18,18,26,0.2)]`}
       aria-label={t('aria.openChat')}
     >
-      <img src={ChatBtnIcon} alt="Chat" className="w-[3.375rem] h-[3.375rem]" />
+      <div className="w-8 h-8 hover:w-9 hover:h-9 active:w-6 active:h-6 transition-all duration-200">
+        <ThemeAdaptiveIcon
+          lightIcon={ChatIcon}
+          darkIcon={ChatIconDark}
+          alt="Chat"
+          size="xl"
+        />
+      </div>
     </button>
   )
 }
