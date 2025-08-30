@@ -2,9 +2,13 @@ import React from "react";
 import checkAgreeIcon from "../../assets/check_agree.svg";
 import checkedAgreeIcon from "../../assets/checked_agree.svg";
 import { getScaledImageUrl } from '../../utils/image';
-import modifyIcon from '../../assets/web2/modify.svg';
-import animateIcon from '../../assets/web2/animate.svg';
-import generatingIcon from '../../assets/web2/generating.svg';
+import ModifyIcon from '../../assets/mavae/modify.svg';
+import ModifyIconDark from '../../assets/mavae/dark/modify.svg';
+import AnimateIcon from '../../assets/mavae/animate.svg';
+import AnimateIconDark from '../../assets/mavae/dark/animate.svg';
+import LoadingIcon from '../../assets/mavae/Loading.svg';
+import LoadingIconDark from '../../assets/mavae/dark/Loading.svg';
+import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon';
 
 interface ImageUploadState {
   totalCount: number;
@@ -123,13 +127,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   // 添加图片生成中组件
   const renderGeneratingImageComponent = () => {
     return (
-      <div className="mt-3 h-8 flex items-center gap-1 px-3 rounded-md bg-design-bg-light-blue font-lexend font-normal text-[12px] leading-[100%] text-[#4B5563] select-none">
-        <img
-          src={generatingIcon}
-          alt="Generating"
-          className="w-4 h-4 mr-1 animate-spin"
-        />
-        Generating image, please wait...
+      <div className="max-w-[20rem] pt-3 pr-4 pb-3 pl-4 gap-1 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] bg-chat-bg dark:bg-chat-bg-dark font-switzer font-normal text-[0.875rem] leading-[1.25rem] text-text-main dark:text-text-main-dark">
+        <div className="flex items-center gap-1">
+          <ThemeAdaptiveIcon
+            lightIcon={LoadingIcon}
+            darkIcon={LoadingIconDark}
+            alt="Generating"
+            size="sm"
+            className="animate-spin"
+          />
+          <span>Generating image, please wait...</span>
+        </div>
       </div>
     );
   };
@@ -137,13 +145,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   // 添加图片修改中组件
   const renderModifyImageComponent = () => {
     return (
-      <div className="h-8 flex items-center gap-1 px-3 rounded-md bg-design-bg-light-blue font-lexend font-normal text-[12px] leading-[100%] text-[#4B5563] select-none">
-        <img
-          src={generatingIcon}
-          alt="Modify"
-          className="w-4 h-4 mr-1 animate-spin"
-        />
-        Modifying image, please wait...(ETA 200 sec)
+      <div className="max-w-[20rem] pt-3 pr-4 pb-3 pl-4 gap-1 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] bg-chat-bg dark:bg-chat-bg-dark font-switzer font-normal text-[0.875rem] leading-[1.25rem] text-text-main dark:text-text-main-dark">
+        <div className="flex items-center gap-1">
+          <ThemeAdaptiveIcon
+            lightIcon={LoadingIcon}
+            darkIcon={LoadingIconDark}
+            alt="Modify"
+            size="sm"
+            className="animate-spin"
+          />
+          <span>Modifying image, please wait...(ETA 200 sec)</span>
+        </div>
       </div>
     );
   };
@@ -216,60 +228,41 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     }
 
     return (
-      <div className="w-full flex flex-col gap-3 mt-2">
-        <div className="flex justify-center items-center w-full">
-          {/* 只显示第一张图片 */}
-          {images.length > 0 && (
-            <div
-              className="overflow-hidden rounded-[10px] relative mx-auto"
-              style={{
-                width: `${displayWidth}rem`,
-                height: `${displayHeight}rem`,
-              }}
-            >
-              <img
-                src={getScaledImageUrl(images[0], 276)}
-                alt="Generated Image"
-                className="w-full h-full object-cover transition-transform duration-200 cursor-pointer hover:scale-105"
-              />
-            </div>
-          )}
-        </div>
-        {/* 新增：扩展选项 - 只在最后一条消息时显示 */}
-        {isLastMessage && (
-          <div className="w-full flex flex-row gap-2">
-            {/* Modify 按钮 */}
-            <button
-              className="h-8 flex items-center gap-1 px-3 rounded-md bg-design-bg-light-blue font-lexend font-normal text-[12px] leading-[100%] text-[#4B5563] transition-all duration-200 hover:bg-blue-100"
-              onClick={onPartiallyModify}
-            >
-              <img src={modifyIcon} alt="Modify" className="w-4 h-4 mr-1" />
-              Modify
-            </button>
-            {/* Animate 按钮 */}
-            <button
-              className="h-8 flex items-center gap-1 px-3 rounded-md bg-design-bg-light-blue font-lexend font-normal text-[12px] leading-[100%] text-[#4B5563] transition-all duration-200 hover:bg-blue-100"
-              onClick={onAnimate}
-            >
-              <img src={animateIcon} alt="Animate" className="w-4 h-4 mr-1" />
-              Animate
-            </button>
+      <>
+        {/* 只显示第一张图片 */}
+        {images.length > 0 && (
+          <div
+            className="overflow-hidden rounded-[10px] relative mx-auto"
+            style={{
+              width: `${displayWidth}rem`,
+              height: `${displayHeight}rem`,
+            }}
+          >
+            <img
+              src={getScaledImageUrl(images[0], 276)}
+              alt="Generated Image"
+              className="w-full h-full object-cover transition-transform duration-200 cursor-pointer hover:scale-105"
+            />
           </div>
         )}
-      </div>
+      </>
     );
   };
 
   // 视频生成中组件
   const renderGeneratingVideoComponent = () => {
     return (
-      <div className="mt-3 h-8 flex items-center gap-1 px-3 rounded-md bg-design-bg-light-blue font-lexend font-normal text-[12px] leading-[100%] text-[#4B5563] select-none">
-        <img
-          src={generatingIcon}
-          alt="Generating Video"
-          className="w-4 h-4 mr-1 animate-spin"
-        />
-        Generating video, please wait...(ETA 600 sec)
+      <div className="max-w-[20rem] pt-3 pr-4 pb-3 pl-4 gap-1 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] bg-chat-bg dark:bg-chat-bg-dark font-switzer font-normal text-[0.875rem] leading-[1.25rem] text-text-main dark:text-text-main-dark">
+        <div className="flex items-center gap-1">
+          <ThemeAdaptiveIcon
+            lightIcon={LoadingIcon}
+            darkIcon={LoadingIconDark}
+            alt="Generating Video"
+            size="sm"
+            className="animate-spin"
+          />
+          <span>Generating video, please wait...(ETA 600 sec)</span>
+        </div>
       </div>
     );
   };
@@ -277,13 +270,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   // 图片动画中组件
   const renderAnimatingImageComponent = () => {
     return (
-      <div className="mt-3 h-8 flex items-center gap-1 px-3 rounded-md bg-design-bg-light-blue font-lexend font-normal text-[12px] leading-[100%] text-[#4B5563] select-none">
-        <img
-          src={generatingIcon}
-          alt="Animating"
-          className="w-4 h-4 mr-1 animate-spin"
-        />
-        Animating image, please wait...(ETA 600 sec)
+      <div className="max-w-[20rem] pt-3 pr-4 pb-3 pl-4 gap-1 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] bg-chat-bg dark:bg-chat-bg-dark font-switzer font-normal text-[0.875rem] leading-[1.25rem] text-text-main dark:text-text-main-dark">
+        <div className="flex items-center gap-1">
+          <ThemeAdaptiveIcon
+            lightIcon={LoadingIcon}
+            darkIcon={LoadingIconDark}
+            alt="Animating"
+            size="sm"
+            className="animate-spin"
+          />
+          <span>Animating image, please wait...(ETA 600 sec)</span>
+        </div>
       </div>
     );
   };
@@ -291,26 +288,24 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   // 视频生成结果组件
   const renderVideoResultComponent = () => {
     return (
-      <div className="w-full flex flex-col gap-12 mt-2">
-        <div className="flex justify-center items-center w-full">
-          {videos.length > 0 && (
-            <div
-              className="overflow-hidden rounded-[10px] relative mx-auto"
-              style={{ width: '17.25rem', height: '17.25rem' }}
+      <>
+        {videos.length > 0 && (
+          <div
+            className="overflow-hidden rounded-[10px] relative mx-auto"
+            style={{ width: '17.25rem', height: '17.25rem' }}
+          >
+            <video
+              src={videos[0]}
+              controls
+              className="w-full h-full object-cover rounded-[10px]"
+              style={{ background: '#000' }}
             >
-              <video
-                src={videos[0]}
-                controls
-                className="w-full h-full object-cover rounded-[10px]"
-                style={{ background: '#000' }}
-              >
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          )}
-        </div>
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        )}
         {/* 可选扩展按钮等可后续补充 */}
-      </div>
+      </>
     );
   };
 
@@ -335,19 +330,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   const renderUserUploadedImageComponent = () => {
     if (!images || images.length === 0) return null;
     return (
-      <div className="w-full flex flex-col gap-12 mt-2">
-        <div className="flex justify-end items-center w-full">
-          <div
-            className="overflow-hidden rounded-[10px] relative flex-shrink-0"
-            style={{ width: '17.25rem', height: '17.25rem' }}
-          >
-            <img
-              src={images[0]}
-              alt="User Uploaded"
-              className="w-full h-full object-cover rounded-[10px]"
-            />
-          </div>
-        </div>
+      <div
+        className="overflow-hidden rounded-[10px] relative flex-shrink-0"
+        style={{ width: '17.25rem', height: '17.25rem' }}
+      >
+        <img
+          src={images[0]}
+          alt="User Uploaded"
+          className="w-full h-full object-cover rounded-[10px]"
+        />
       </div>
     );
   };
@@ -356,35 +347,92 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
   return (
     <div className={`flex flex-col ${role === 'user' ? 'items-end' : 'items-start'} mb-4`}>
-      {showContent && type !== "minting_success" && (
-        <div className={`${
-          role === 'user' 
-            ? 'p-4 rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl bg-design-bg-light-blue text-design-dark-gray max-w-xs' 
-            : 'text-design-dark-gray max-w-sm'
-        } font-lexend font-normal text-sm leading-140`}>
-          {type === "tokenization_agreement" ? (
-            <div>{processContent(content)}</div>
-          ) : (
-            <div>{content}</div>
-          )}
-        </div>
-      )}
+             {/* 用户消息 - 包括文本和图片 */}
+       {role === 'user' && showContent && type !== "minting_success" && (
+         <div className="max-w-[20rem] pt-3 pr-4 pb-3 pl-4 gap-[0.625rem] rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-bl-[1.5rem] bg-chat-bg dark:bg-chat-bg-dark font-switzer font-normal text-[0.875rem] leading-[1.25rem] text-text-main dark:text-text-main-dark">
+           {type === "tokenization_agreement" ? (
+             <div>{processContent(content)}</div>
+           ) : (
+             <div>{content}</div>
+           )}
+         </div>
+       )}
 
-      {/* 助手消息的组件渲染 - 添加间距 */}
-      {role === "assistant" && (
-        <div className="flex flex-col gap-3 max-w-sm">
-          {type === "generate_result" && renderGenerateResultComponent()}
-          {type === "workflow_generate_result" && renderGenerateResultComponent()}
+       {/* 用户上传的图片 */}
+       {role === "user" && type === "uploaded_image" && (
+         <div className="max-w-[20rem] pt-3 pr-4 pb-3 pl-4 gap-[0.625rem] rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-bl-[1.5rem] bg-chat-bg dark:bg-chat-bg-dark">
+           {renderUserUploadedImageComponent()}
+         </div>
+       )}
+
+       {/* 助手消息 - 根据是否有图片/视频决定是否使用聊天气泡 */}
+       {role === "assistant" && (
+         <>
+                       {/* 有图片或视频的消息 - 使用聊天气泡包装 */}
+            {(type === "generate_result" || type === "workflow_generate_result" || type === "video_generate_result") && (
+              <>
+                <div className="max-w-[20rem] pt-3 pr-4 pb-3 pl-4 gap-1 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] bg-chat-bg dark:bg-chat-bg-dark font-switzer font-normal text-[0.875rem] leading-[1.25rem] text-text-main dark:text-text-main-dark">
+                  <div className="mb-1">{content}</div>
+                  {type === "generate_result" && renderGenerateResultComponent()}
+                  {type === "workflow_generate_result" && renderGenerateResultComponent()}
+                  {type === "video_generate_result" && renderVideoResultComponent()}
+                </div>
+                {/* 扩展选项按钮 - 只在最后一条消息时显示，放在气泡外面 */}
+                {isLastMessage && (
+                  <div className="flex flex-row gap-2 mt-2">
+                    {/* Modify 按钮 */}
+                    <button
+                      className="h-8 flex items-center gap-1 px-3 py-2 rounded-[1.5rem] bg-quaternary dark:bg-quaternary-dark font-lexend font-normal text-xs leading-[100%] text-link-default dark:text-link-default-dark transition-all duration-200 hover:bg-quaternary/80 dark:hover:bg-quaternary-dark/80"
+                      onClick={onPartiallyModify}
+                    >
+                      <ThemeAdaptiveIcon
+                        lightIcon={ModifyIcon}
+                        darkIcon={ModifyIconDark}
+                        alt="Modify"
+                        size="sm"
+                      />
+                      <span className="text-center align-middle">Modify</span>
+                    </button>
+                    {/* Animate 按钮 */}
+                    <button
+                      className="h-8 flex items-center gap-1 px-3 py-2 rounded-[1.5rem] bg-quaternary dark:bg-quaternary-dark font-lexend font-normal text-xs leading-[100%] text-link-default dark:text-link-default-dark transition-all duration-200 hover:bg-quaternary/80 dark:hover:bg-quaternary-dark/80"
+                      onClick={onAnimate}
+                    >
+                      <ThemeAdaptiveIcon
+                        lightIcon={AnimateIcon}
+                        darkIcon={AnimateIconDark}
+                        alt="Animate"
+                        size="sm"
+                      />
+                      <span className="text-center align-middle">Animate</span>
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+           {/* 纯文本消息 - 使用聊天气泡 */}
+           {type === "text" && (
+             <div className="max-w-[20rem] pt-3 pr-4 pb-3 pl-4 gap-1 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] bg-chat-bg dark:bg-chat-bg-dark font-switzer font-normal text-[0.875rem] leading-[1.25rem] text-text-main dark:text-text-main-dark">
+               <div>{content}</div>
+             </div>
+           )}
+
+          {/* 其他类型的消息 - 不使用聊天气泡包装 */}
+          {type !== "text" && type !== "generate_result" && type !== "workflow_generate_result" && type !== "video_generate_result" && type !== "generating_image" && type !== "modify_image" && type !== "generating_video" && type !== "animating_image" && (
+            <div className="flex flex-col gap-3 max-w-sm">
+              {type === "tokenization_agreement" && renderTokenizationAgreementComponent()}
+              {(type === 'generation_timeout' || type === 'tokenization_timeout') && renderTimeoutRetryComponent()}
+            </div>
+          )}
+
+          {/* 生成中的消息 - 使用聊天气泡包装 */}
           {type === "generating_image" && renderGeneratingImageComponent()}
           {type === "modify_image" && renderModifyImageComponent()}
-          {type === "tokenization_agreement" && renderTokenizationAgreementComponent()}
           {type === "generating_video" && renderGeneratingVideoComponent()}
           {type === "animating_image" && renderAnimatingImageComponent()}
-          {type === "video_generate_result" && renderVideoResultComponent()}
-          {(type === 'generation_timeout' || type === 'tokenization_timeout') && renderTimeoutRetryComponent()}
-        </div>
+        </>
       )}
-      {role === "user" && type === "uploaded_image" && renderUserUploadedImageComponent()}
     </div>
   );
 }

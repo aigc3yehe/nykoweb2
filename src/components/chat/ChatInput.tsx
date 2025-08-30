@@ -1,15 +1,25 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { chatAtom, sendMessage, runWorkflowFromChatInput, setLoraWeight } from '../../store/assistantStore'
-import SendIcon from '../../assets/web2/send.svg'
-import SendNormalIcon from '../../assets/web2/send_normal.svg'
-import UploadImgIcon from '../../assets/web2/upload_img.svg'
-import AiccTypeIcon from '../../assets/web2/aicc_type.svg'
-import ImageCloseIcon from '../../assets/web2/image_close.svg'
+import DisableEnterIcon from '../../assets/mavae/disable_enter.svg'
+import DisableEnterIconDark from '../../assets/mavae/dark/disable_enter.svg'
+import InputEnterIcon from '../../assets/mavae/input_enter.svg'
+import InputEnterIconDark from '../../assets/mavae/dark/input_enter.svg'
+import UploadImgIcon from '../../assets/mavae/input_image_add.svg'
+import UploadImgIconDark from '../../assets/mavae/dark/input_image_add.svg'
+import AiccTypeIcon from '../../assets/mavae/input_workflow_type.svg'
+import AiccTypeIconDark from '../../assets/mavae/dark/input_workflow_type.svg'
+import ImageCloseIcon from '../../assets/mavae/input_image_close.svg'
+import ImageCloseIconDark from '../../assets/mavae/dark/input_image_close.svg'
 import { getScaledImageUrl } from '../../utils'
 import { uploadWorkflowReferenceImage, removeWorkflowReferenceImage } from '../../store/assistantStore';
-import imageIcon from '../../assets/web2/image_ratios.svg';
-import downIcon from '../../assets/web2/down_ratios.svg';
+import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
+import imageIcon from '../../assets/mavae/input_size_img.svg';
+import imageIconDark from '../../assets/mavae/dark/input_size_img.svg';
+import downIcon from '../../assets/mavae/input_size_down.svg';
+import downIconDark from '../../assets/mavae/dark/input_size_down.svg';
+import upIcon from '../../assets/mavae/input_size_up.svg';
+import upIconDark from '../../assets/mavae/dark/input_size_up.svg';
 import type { AspectRatio } from '../../store/assistantStore';
 import { workflowAspectRatios, aspectRatios, setWorkflowAspectRatio, setAspectRatio } from '../../store/assistantStore';
 
@@ -119,18 +129,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
   const isDisabled = chatState.isLoading || chatState.isGenerating
 
   return (
-    <div ref={containerRef} className="absolute bottom-5 left-5 right-5 md:bottom-6 md:left-6 md:right-6 z-10">
-      <div className="w-full bg-white border border-design-line-light-gray rounded-2xl shadow-sm">
-        <div className="px-4 py-3.5">
+    <div ref={containerRef} className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 z-10">
+      <div className="w-full bg-pop-ups dark:bg-pop-ups-dark border-2 border-line-subtle dark:border-line-subtle-dark rounded-[1.25rem] shadow-sm focus-within:border-link-default dark:focus-within:border-link-default-dark transition-colors duration-200">
+        <div className="p-3">
           {/* 上半部分 */}
-          <div className="flex flex-col gap-3.5">
+          <div className="flex flex-col gap-3">
             {/* 第一行 - 显示当前工作流或模型 */}
             <div className="flex gap-1.5">
               {/* 工作流详情显示 */}
               {chatState.currentDetailWorkflow && chatState.task_type === "use_workflow" && (
-                <div className="flex items-center gap-2.5 h-[4.125rem] px-2 py-2 pr-3.5 pl-2 bg-design-bg-light-blue rounded-[0.625rem]">
+                <div className="flex items-center gap-1 h-14 p-1 rounded bg-tertiary dark:bg-tertiary-dark">
                   {/* 工作流封面 */}
-                  <div className="w-[3.125rem] h-[3.125rem] rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                  <div className="w-8 h-12 rounded overflow-hidden bg-gray-200 flex-shrink-0">
                     {chatState.currentDetailWorkflow.cover ? (
                       <img
                         src={getScaledImageUrl(chatState.currentDetailWorkflow.cover, 50)}
@@ -147,7 +157,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
                   </div>
                   {/* 工作流名称 */}
                   <div className="flex items-center">
-                    <span className="font-lexend font-normal text-xs leading-none text-design-main-text">
+                    <span className="font-switzer font-normal text-xs leading-5 text-text-main dark:text-text-main-dark">
                       {chatState.currentDetailWorkflow.name}
                     </span>
                   </div>
@@ -156,9 +166,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
 
               {/* 模型详情显示 */}
               {chatState.currentDetailModel && chatState.task_type === "generation" && (
-                <div className="flex items-center gap-2.5 h-[4.25rem] px-2 py-2 pr-3.5 pl-2 bg-design-bg-light-blue rounded-[0.625rem]">
+                <div className="flex items-center gap-1 h-14 p-1 rounded bg-tertiary dark:bg-tertiary-dark">
                   {/* 模型封面 */}
-                  <div className="w-[3.125rem] h-[3.125rem] rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                  <div className="w-8 h-12 rounded overflow-hidden bg-gray-200 flex-shrink-0">
                     {chatState.currentDetailModel.cover ? (
                       <img
                         src={getScaledImageUrl(chatState.currentDetailModel.cover, 50)}
@@ -174,9 +184,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
                     )}
                   </div>
                   {/* 模型信息 */}
-                  <div className="flex flex-col justify-center gap-1 h-[3.25rem]">
+                  <div className="flex flex-col justify-center gap-1 h-12">
                     {/* 模型名称 */}
-                    <span className="font-lexend font-normal text-xs leading-none text-design-main-text">
+                    <span className="font-switzer font-normal text-xs leading-5 text-text-main dark:text-text-main-dark">
                       {chatState.currentDetailModel.name}
                     </span>
                     {/* Strength 标签 */}
@@ -223,20 +233,25 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
                     <button
                       onClick={() => uploadWorkflowReferenceImageAction()}
                       disabled={chatState.workflowReferenceImage.isUploading}
-                      className="w-[4.125rem] h-[4.125rem] bg-design-bg-light-blue rounded-[0.625rem] flex items-center justify-center hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-14 h-14 bg-tertiary dark:bg-tertiary-dark rounded flex items-center justify-center hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {chatState.workflowReferenceImage.isUploading ? (
                         <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <img src={UploadImgIcon} alt="Upload" className="w-6 h-6" />
+                        <ThemeAdaptiveIcon
+                          lightIcon={UploadImgIcon}
+                          darkIcon={UploadImgIconDark}
+                          alt="Upload"
+                          size="lg"
+                        />
                       )}
                     </button>
                   )}
 
                   {/* 如果已上传图片，显示图片预览和文件名 */}
                   {chatState.workflowReferenceImage.uploadedUrl && (
-                    <div className="relative group h-[4.125rem] aspect-square rounded-[0.625rem] p-2 bg-design-bg-light-blue">
-                      <div className="w-full h-full rounded-[0.625rem] overflow-hidden">
+                    <div className="relative group w-14 h-14 rounded p-1 bg-tertiary dark:bg-tertiary-dark">
+                      <div className="w-full h-full rounded overflow-hidden">
                         <img
                           src={chatState.workflowReferenceImage.uploadedUrl}
                           alt={chatState.workflowReferenceImage.fileName}
@@ -249,7 +264,12 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
                         className="absolute top-0 right-0 w-5 h-5 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200"
                         style={{ transform: 'translate(50%, -50%)' }}
                       >
-                        <img src={ImageCloseIcon} alt="Remove" className="w-5 h-5" />
+                        <ThemeAdaptiveIcon
+                          lightIcon={ImageCloseIcon}
+                          darkIcon={ImageCloseIconDark}
+                          alt="Remove"
+                          size="sm"
+                        />
                       </button>
                     </div>
                   )}
@@ -267,30 +287,40 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
                 disabled={isDisabled}
                 placeholder="What do you want to create?"
                 rows={1}
-                className="w-full min-h-5 h-5 max-h-[7.5rem] overflow-hidden resize-none border-none outline-none bg-transparent font-lexend font-normal text-sm leading-none p-0 text-design-dark-gray placeholder:text-design-lightest-gray disabled:opacity-50"
+                className="w-full min-h-5 h-5 max-h-[7.5rem] overflow-hidden resize-none border-none outline-none bg-transparent font-switzer font-medium text-xs leading-5 p-0 text-text-main dark:text-text-main-dark placeholder:text-text-tips dark:placeholder:text-text-tips-dark disabled:opacity-50"
                 style={{ lineHeight: '1.25rem' }}
               />
             </div>
           </div>
 
           {/* 下半部分 */}
-          <div className="flex items-center justify-between h-8 mt-1">
+          <div className="flex items-center justify-between h-8 mt-3">
             {/* 左侧选项组 */}
             <div className="flex items-center h-full gap-3">
               {/* 类型标签 */}
               {chatState.currentDetailModel && chatState.task_type === "generation" && (
-                <div className="flex items-center gap-1 h-8 px-3.5 bg-white border border-design-main-blue rounded-full">
-                  <img src={AiccTypeIcon} alt="Type" className="w-4 h-4" />
-                  <span className="font-lexend font-normal text-sm leading-none text-center text-design-main-blue">
+                <div className="flex items-center gap-1 h-8 pt-2 pb-2 pl-3.5 pr-3.5 bg-tertiary dark:bg-tertiary-dark rounded-full">
+                  <ThemeAdaptiveIcon
+                    lightIcon={AiccTypeIcon}
+                    darkIcon={AiccTypeIconDark}
+                    alt="Type"
+                    size="sm"
+                  />
+                  <span className="font-lexend font-normal text-sm leading-[100%] text-center align-middle text-link-default dark:text-link-default-dark">
                     Style
                   </span>
                 </div>
               )}
 
               {chatState.currentDetailWorkflow && chatState.task_type === "use_workflow" && (
-                <div className="flex items-center gap-1 h-8 px-3.5 bg-white border border-design-main-blue rounded-full">
-                  <img src={AiccTypeIcon} alt="Type" className="w-4 h-4" />
-                  <span className="font-lexend font-normal text-sm leading-none text-center text-design-main-blue">
+                <div className="flex items-center gap-1 h-8 pt-2 pb-2 pl-3.5 pr-3.5 bg-tertiary dark:bg-tertiary-dark rounded-full">
+                  <ThemeAdaptiveIcon
+                    lightIcon={AiccTypeIcon}
+                    darkIcon={AiccTypeIconDark}
+                    alt="Type"
+                    size="sm"
+                  />
+                  <span className="font-lexend font-normal text-sm leading-[100%] text-center align-middle text-link-default dark:text-link-default-dark">
                     Workflow
                   </span>
                 </div>
@@ -319,13 +349,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
             <button
               onClick={handleSend}
               disabled={!canSend || isDisabled}
-              className="flex-shrink-0 w-8 h-8 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+              className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+                canSend 
+                  ? 'bg-link-default dark:bg-link-default-dark' 
+                  : 'bg-tertiary dark:bg-tertiary-dark'
+              } disabled:cursor-not-allowed`}
               aria-label="Send message"
             >
-              <img
-                src={canSend ? SendIcon : SendNormalIcon}
+              <ThemeAdaptiveIcon
+                lightIcon={canSend ? InputEnterIcon : DisableEnterIcon}
+                darkIcon={canSend ? InputEnterIconDark : DisableEnterIconDark}
                 alt="Send"
-                className="w-8 h-8"
+                size="sm"
               />
             </button>
           </div>
@@ -345,23 +380,32 @@ const AspectRatioDropdown: React.FC<{
   return (
     <div className="relative inline-block">
       <button
-        className="flex items-center justify-center h-8 gap-1 px-3.5 rounded-full border border-[#E5E7EB] bg-white transition min-w-[4.5rem]"
+        className="flex items-center justify-center h-8 pt-2 pb-2 pl-3.5 pr-3.5 gap-1 rounded-full border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark hover:bg-tertiary dark:hover:bg-tertiary-dark transition min-w-[4.5rem]"
         onClick={() => setOpen(!open)}
         type="button"
-        style={{ borderWidth: 1, borderStyle: 'solid' }}
       >
-        <img src={imageIcon} className="w-4 h-4" alt="ratio"/>
-        <span className="pb-0.5 font-lexend font-normal text-sm leading-[100%] text-[#4B5563] text-center align-middle">
+        <ThemeAdaptiveIcon
+          lightIcon={imageIcon}
+          darkIcon={imageIconDark}
+          alt="ratio"
+          size="sm"
+        />
+        <span className="pb-0.5 font-lexend font-normal text-sm leading-[100%] text-text-secondary dark:text-text-secondary-dark text-center align-middle">
           {selected?.label || options[0].label}
         </span>
-        <img src={downIcon} className="w-4 h-4" alt="down"/>
+        <ThemeAdaptiveIcon
+          lightIcon={open ? upIcon : downIcon}
+          darkIcon={open ? upIconDark : downIconDark}
+          alt={open ? "up" : "down"}
+          size="sm"
+        />
       </button>
       {open && (
-        <div className="absolute left-0 bottom-full mb-2 px-2 py-0.5 w-24 bg-white border border-[#E5E7EB] rounded shadow-lg z-20">
+        <div className="absolute left-0 bottom-full mb-2 w-50 min-w-[12.5rem] pt-2 pb-2 rounded-lg bg-switch-bg dark:bg-switch-bg-dark shadow-lg z-20" style={{ boxShadow: '0px 8px 16px 0px #12121A1A, 0px 4px 8px 0px #12121A33' }}>
           {options.map((ratio) => (
             <div
               key={ratio.value}
-              className={`my-1.5 px-4 py-2 text-sm font-lexend font-normal leading-[100%] text-[#4B5563] text-center align-middle cursor-pointer hover:bg-blue-50 rounded ${selected?.value === ratio.value ? 'bg-blue-100 text-blue-600 font-bold' : ''}`}
+              className="w-50 h-10 pt-3 pb-3 pl-4 pr-4 gap-2 font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark text-center align-middle cursor-pointer hover:bg-switch-hover dark:hover:bg-switch-hover-dark transition-colors"
               onClick={() => { onSelect(ratio); setOpen(false); }}
             >
               {ratio.label}

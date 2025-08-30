@@ -6,9 +6,12 @@ import { userStateAtom, showLoginModalAtom } from '../../store/loginStore'
 import { showDialogAtom } from '../../store/dialogStore';
 import { useI18n } from '../../hooks/useI18n'
 import ChatInput from '../chat/ChatInput'
-import ClearIcon from '../../assets/web2/clear.svg'
-import CloseChatIcon from '../../assets/web2/close_chat.svg'
+import ClearIcon from '../../assets/mavae/clear.svg'
+import ClearIconDark from '../../assets/mavae/dark/clear.svg'
+import CloseIcon from '../../assets/mavae/close.svg'
+import CloseIconDark from '../../assets/mavae/dark/close.svg'
 import ChatMessage from '../chat/ChatMessage'
+import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 
 const ChatSidebar: React.FC = () => {
   const [sidebarState] = useAtom(chatSidebarAtom)
@@ -147,12 +150,12 @@ const ChatSidebar: React.FC = () => {
   }
 
   return (
-    <div className="fixed right-0 top-14 bottom-0 w-full md:w-[34.5rem] bg-white border-l border-design-bg-light-gray z-30 flex flex-col">
+    <div className="fixed right-0 top-14 md:top-24 md:right-8 md:bottom-4 w-full md:w-[24.375rem] md:rounded-[1.25rem] bg-pop-ups dark:bg-pop-ups-dark z-30 flex flex-col bottom-0">
       {/* 标题栏 */}
-      <div className="flex items-center justify-between h-12 px-6 border-b border-design-line-light-gray">
+      <div className="flex items-center justify-between h-[3.375rem] px-4 md:px-4 border-b border-line-subtle dark:border-line-subtle-dark bg-pop-ups dark:bg-pop-ups-dark rounded-t-[1.25rem]">
         {/* 左侧标题和状态 */}
         <div className="flex items-center gap-1.5">
-          <h3 className="font-lexend font-medium text-base leading-none text-design-main-text">
+          <h3 className="font-lexend font-medium text-base leading-none text-text-main dark:text-text-main-dark">
             Chat with Mavae
           </h3>
           <div 
@@ -166,31 +169,41 @@ const ChatSidebar: React.FC = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={handleClear}
-            className="flex items-center justify-center w-6 h-6 hover:bg-gray-100 rounded transition-colors"
+            className="flex items-center justify-center w-6 h-6 hover:bg-tertiary dark:hover:bg-tertiary-dark rounded transition-colors"
             aria-label="Clear chat"
           >
-            <img src={ClearIcon} alt="Clear" className="w-6 h-6" />
+            <ThemeAdaptiveIcon
+              lightIcon={ClearIcon}
+              darkIcon={ClearIconDark}
+              alt="Clear"
+              size="sm"
+            />
           </button>
           <button
             onClick={handleClose}
-            className="flex items-center justify-center w-6 h-6 hover:bg-gray-100 rounded transition-colors"
+            className="flex items-center justify-center w-6 h-6 hover:bg-tertiary dark:hover:bg-tertiary-dark rounded transition-colors"
             aria-label="Close chat"
           >
-            <img src={CloseChatIcon} alt="Close" className="w-6 h-6" />
+            <ThemeAdaptiveIcon
+              lightIcon={CloseIcon}
+              darkIcon={CloseIconDark}
+              alt="Close"
+              size="sm"
+            />
           </button>
         </div>
       </div>
 
       {/* 消息列表区域 */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 scrollbar-hide pb-24">
         {!userState.isAuthenticated ? (
           // 未登录状态 - 显示登录提示
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="max-w-sm mx-auto">
-              <h3 className="text-lg font-medium text-design-main-text dark:text-white mb-4">
+              <h3 className="text-lg font-medium text-text-main dark:text-text-main-dark mb-4">
                 {t('auth.loginRequired')} {/* en: Login Required / zh: 需要登录 */}
               </h3>
-              <p className="text-design-secondary-text dark:text-gray-300 mb-6">
+              <p className="text-text-secondary dark:text-text-secondary-dark mb-6">
                 {t('auth.chatLoginMessage')} {/* en: Please log in to start chatting with Mavae / zh: 请登录后开始与 Mavae 聊天 */}
               </p>
               <button
@@ -198,7 +211,7 @@ const ChatSidebar: React.FC = () => {
                   showLoginModal()
                   closeSidebar() // 关闭侧边栏，让用户专注于登录
                 }}
-                className="px-6 py-3 bg-design-main text-white rounded-lg hover:bg-design-main-hover transition-colors font-medium"
+                className="px-6 py-3 bg-link-default dark:bg-link-default-dark text-text-inverse dark:text-text-inverse-dark rounded-lg hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors font-medium"
               >
                 {t('auth.loginNow')} {/* en: Login Now / zh: 立即登录 */}
               </button>
