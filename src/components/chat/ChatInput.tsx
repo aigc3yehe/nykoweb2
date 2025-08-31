@@ -184,7 +184,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
                     )}
                   </div>
                   {/* 模型信息 */}
-                  <div className="flex flex-col justify-center gap-1 h-12">
+                  <div className="flex flex-col justify-center gap-1 h-14">
                     {/* 模型名称 */}
                     <span className="font-switzer font-normal text-xs leading-5 text-text-main dark:text-text-main-dark">
                       {chatState.currentDetailModel.name}
@@ -196,7 +196,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
                     {/* 强度滑块 - 新设计 */}
                     <div
                         ref={sliderRef}
-                        className="relative w-24 h-5 bg-gray-200 rounded-xl cursor-pointer flex items-center justify-center overflow-hidden"
+                        className="relative w-24 h-5.5 bg-gray-200 rounded-xl cursor-pointer flex items-center justify-center overflow-hidden"
                         onClick={handleSliderInteraction}
                         onMouseDown={(e) => {
                           e.preventDefault()
@@ -405,7 +405,7 @@ const AspectRatioDropdown: React.FC<{
           {options.map((ratio) => (
             <div
               key={ratio.value}
-              className="w-50 h-10 pt-3 pb-3 pl-4 pr-4 gap-2 font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark text-center align-middle cursor-pointer hover:bg-switch-hover dark:hover:bg-switch-hover-dark transition-colors"
+              className="w-50 h-10 pt-3 pb-3 pl-4 pr-4 gap-2 font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark text-left align-middle cursor-pointer hover:bg-switch-hover dark:hover:bg-switch-hover-dark transition-colors"
               onClick={() => { onSelect(ratio); setOpen(false); }}
             >
               {ratio.label}

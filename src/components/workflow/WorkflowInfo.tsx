@@ -22,6 +22,14 @@ import PictureIcon from '../../assets/mavae/Picture.svg'
 import PictureIconDark from '../../assets/mavae/dark/Picture.svg'
 import GptIcon from '../../assets/mavae/gpt.svg'
 import GptIconDark from '../../assets/mavae/dark/gpt.svg'
+import GeminiIcon from '../../assets/mavae/gemini.svg'
+import GeminiIconDark from '../../assets/mavae/dark/gemini.svg'
+import Gemini2Icon from '../../assets/mavae/gemini2.svg'
+import Gemini2IconDark from '../../assets/mavae/dark/gemini2.svg'
+import KlingIcon from '../../assets/mavae/klingai.svg'
+import KlingIconDark from '../../assets/mavae/dark/klingai.svg'
+import MidjourneyIcon from '../../assets/mavae/midjourney.svg'
+import MidjourneyIconDark from '../../assets/mavae/dark/midjourney.svg'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { toggleLikeWorkflowAtom } from '../../store/workflowDetailStore'
 import { useI18n } from '../../hooks/useI18n'
@@ -52,24 +60,42 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
     return avatarSvg
   }
 
+  // 根据提供商名称获取对应的图标
+  const getProviderIcon = (provider: string) => {
+    const providerLower = provider.toLowerCase()
+    if (providerLower.includes('gpt')) {
+      return { light: GptIcon, dark: GptIconDark }
+    } else if (providerLower.includes('kling')) {
+      return { light: KlingIcon, dark: KlingIconDark }
+    } else if (providerLower.includes('veo')) {
+      return { light: Gemini2Icon, dark: Gemini2IconDark }
+    } else {
+      return { light: GptIcon, dark: GptIconDark }
+    }
+  }
+
   // 获取类型对应的图标
-  const getTypeIcon = (type: string) => {
+  const getTypeIcon = (type: string, provider?: string) => {
     switch (type.toLowerCase().trim()) {
       case 'image':
         return { light: PictureIcon, dark: PictureIconDark }
       default:
+        // 如果有提供商信息，使用提供商图标
+        if (provider) {
+          return getProviderIcon(provider)
+        }
         return { light: GptIcon, dark: GptIconDark }
     }
   }
 
   // 渲染类型标签
-  const renderTypeTags = (types: string[], typeName: string) => {
+  const renderTypeTags = (types: string[], typeName: string, provider?: string) => {
     if (!types || types.length === 0) return null
 
     return (
       <div className="flex items-center gap-2">
         {types.map((type, index) => {
-          const typeIcon = getTypeIcon(type)
+          const typeIcon = getTypeIcon(type, provider)
           return (
             <React.Fragment key={index}>
               <div className="flex items-center gap-0.5 h-5 px-1.5 py-0.5 rounded-lg border border-line-subtle dark:border-line-subtle-dark">
@@ -99,7 +125,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
   }
 
   // 渲染Builder步骤
-  const renderBuilderStep = (step: number, title: string, types: string[]) => {
+  const renderBuilderStep = (step: number, title: string, types: string[], provider?: string) => {
     return (
       <div className="flex items-start gap-3">
         {/* 步骤圆圈和连接线 */}
@@ -138,7 +164,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
             <span className="font-switzer font-medium text-xs leading-4 text-text-secondary dark:text-text-secondary-dark">
               {title}
             </span>
-            {renderTypeTags(types, title)}
+            {renderTypeTags(types, title, provider)}
           </div>
         </div>
       </div>
@@ -321,7 +347,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
             {renderBuilderStep(1, 'Input', workflow.input_type ? workflow.input_type.split(',').map((t: string) => t.trim()) : [])}
 
             {/* 第二行：Model */}
-            {renderBuilderStep(2, 'Model', workflow.model ? [workflow.model] : [])}
+            {renderBuilderStep(2, 'Model', workflow.model ? [workflow.model] : [], workflow.provider)}
 
             {/* 第三行：Output */}
             {renderBuilderStep(3, 'Output', workflow.output_type ? workflow.output_type.split(',').map((t: string) => t.trim()) : [])}

@@ -4,6 +4,9 @@ import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { RecipeType } from '../../pages/Recipes'
 import { cn } from '../../utils/cn'
 import CreditBtnIcon from '../../assets/mavae/credit_btn.svg'
+import StyleCreateIcon from '../../assets/mavae/style_create.svg'
+import StyleCreateIconDark from '../../assets/mavae/dark/style_create.svg'
+import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 
 interface RecipesActionsProps {
   activeTab: RecipeType
@@ -71,12 +74,34 @@ const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab, onSortChange
       {/* PC端新建按钮 - 移动端隐藏 */}
       <button 
         onClick={handleNewClick}
-        className="hidden md:flex h-9 px-4 items-center gap-1 rounded-full bg-[#84CC161A] hover:bg-[#84CC1626] transition-colors" // height: 36px, padding: 16px, gap: 4px, radius: 666px, background: #84CC161A
+        className={cn(
+          "hidden md:flex h-9 px-4 items-center gap-1 rounded-full transition-colors",
+          activeTab === 'workflows' 
+            ? "bg-[#84CC161A] hover:bg-[#84CC1626]" 
+            : "bg-[#0DA3A31A] hover:bg-[#0DA3A326]"
+        )}
       >
-        <img src={CreditBtnIcon} alt="Builder" className="w-4 h-4" /> {/* 16x16 */}
-        <span className="h-6 font-switzer font-medium text-sm leading-6 text-[#65A30D]"> {/* height: 24px, font-size: 14px, line-height: 24px, color: #65A30D */}
-          Builder
-        </span>
+        {activeTab === 'workflows' ? (
+          <>
+            <img src={CreditBtnIcon} alt="Builder" className="w-4 h-4" />
+            <span className="h-6 font-switzer font-medium text-sm leading-6 text-[#65A30D]">
+              Builder
+            </span>
+          </>
+        ) : (
+          <>
+            <ThemeAdaptiveIcon
+              lightIcon={StyleCreateIcon}
+              darkIcon={StyleCreateIconDark}
+              alt="New Style"
+              size="sm"
+              className="w-4 h-4"
+            />
+            <span className="h-6 font-switzer font-medium text-sm leading-6 text-[#0DA3A3]">
+              New Style
+            </span>
+          </>
+        )}
       </button>
     </div>
   )

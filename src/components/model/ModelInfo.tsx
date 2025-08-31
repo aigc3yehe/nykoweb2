@@ -218,20 +218,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
     }
   }
 
-  const handleCopyPrompt = async () => {
-    try {
-      await navigator.clipboard.writeText(model.prompt || '')
-      addToast({
-        message: 'Prompt copied to clipboard',
-        type: 'success'
-      })
-    } catch (error) {
-      addToast({
-        message: 'Failed to copy prompt',
-        type: 'error'
-      })
-    }
-  }
+
 
   return (
     <div className={`flex flex-col justify-between md:h-[37.5rem] w-full p-6 md:p-6 pt-4 pr-4 pb-6 pl-4 md:pt-6 md:pr-6 md:pb-6 md:pl-6 gap-4 md:gap-4 ${className}`}>
@@ -300,42 +287,28 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
           </span>
         </div>
 
-        {/* 第三行：Prompt块 */}
+        {/* 第三行：Description块 */}
         <div className="flex flex-col gap-2">
-          {/* Prompt第一行：标题和复制按钮 */}
-          <div className="flex items-center justify-between h-5">
+          {/* Description第一行：标题 */}
+          <div className="flex items-center h-5">
             <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-              Prompt
+              Description
             </span>
-            <button
-              onClick={handleCopyPrompt}
-              className="flex items-center gap-1"
-            >
-              <ThemeAdaptiveIcon
-                lightIcon={CopyIcon}
-                darkIcon={CopyIconDark}
-                alt="Copy"
-                size="sm"
-              />
-              <span className="font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark">
-                Copy
-              </span>
-            </button>
           </div>
 
-          {/* Prompt第二行：内容 */}
+          {/* Description第二行：内容 */}
           <div className="flex flex-col gap-1">
             <div className="rounded-xl p-3 bg-gray-50 dark:bg-gray-800">
               <p
                 className={`font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark ${isPromptExpanded ? '' : 'line-clamp-2'
                   }`}
               >
-                {model.prompt || 'No prompt available'}
+                {model.description || 'No description available'}
               </p>
             </div>
 
-            {/* Prompt第三行：展开/收起按钮 */}
-            {model.prompt && model.prompt.length > 100 && (
+            {/* Description第三行：展开/收起按钮 */}
+            {model.description && model.description.length > 100 && (
               <button
                 onClick={() => setIsPromptExpanded(!isPromptExpanded)}
                 className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start"
@@ -353,13 +326,13 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
           </span>
           <div className="flex flex-col">
             {/* 第一行：Input */}
-            {renderBuilderStep(1, 'Input', model.input_type ? model.input_type.split(',').map((t: string) => t.trim()) : [])}
+            {renderBuilderStep(1, 'Input', ['Text'])}
             
             {/* 第二行：Model */}
-            {renderBuilderStep(2, 'Model', model.model ? [model.model] : [])}
+            {renderBuilderStep(2, 'Model', ['StableDiffusionXL'])}
             
             {/* 第三行：Output */}
-            {renderBuilderStep(3, 'Output', model.output_type ? model.output_type.split(',').map((t: string) => t.trim()) : [])}
+            {renderBuilderStep(3, 'Output', ['Image'])}
           </div>
         </div>
       </div>

@@ -5,6 +5,14 @@ import UploadIcon from '../assets/mavae/upload.svg'
 import UploadIconDark from '../assets/mavae/dark/upload.svg'
 import GptIcon from '../assets/mavae/gpt.svg'
 import GptIconDark from '../assets/mavae/dark/gpt.svg'
+import GeminiIcon from '../assets/mavae/gemini.svg'
+import GeminiIconDark from '../assets/mavae/dark/gemini.svg'
+import Gemini2Icon from '../assets/mavae/gemini2.svg'
+import Gemini2IconDark from '../assets/mavae/dark/gemini2.svg'
+import KlingIcon from '../assets/mavae/klingai.svg'
+import KlingIconDark from '../assets/mavae/dark/klingai.svg'
+import MidjourneyIcon from '../assets/mavae/midjourney.svg'
+import MidjourneyIconDark from '../assets/mavae/dark/midjourney.svg'
 import OutputLiveIcon from '../assets/mavae/output_live.svg'
 import OutputLiveIconDark from '../assets/mavae/dark/output_live.svg'
 import CloseIcon from '../assets/web2/close.svg'
@@ -36,7 +44,7 @@ import { useLang, withLangPrefix } from '../hooks/useLang'
 const WorkflowBuilder: React.FC = () => {
   const navigate = useNavigate()
   const lang = useLang()
-  
+
   // Store状态
   const [availableModels] = useAtom(availableModelsAtom)
   const [isLoadingProviders] = useAtom(isLoadingProvidersAtom)
@@ -74,6 +82,20 @@ const WorkflowBuilder: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const refImageInputRef = useRef<HTMLInputElement>(null)
+
+  // 根据提供商名称获取对应的图标
+  const getProviderIcon = (provider: string) => {
+    const providerLower = provider.toLowerCase()
+    if (providerLower.includes('gpt')) {
+      return { light: GptIcon, dark: GptIconDark }
+    } else if (providerLower.includes('kling')) {
+      return { light: KlingIcon, dark: KlingIconDark }
+    } else if (providerLower.includes('veo')) {
+      return { light: Gemini2Icon, dark: Gemini2IconDark }
+    } else {
+      return { light: GptIcon, dark: GptIconDark }
+    }
+  }
 
   // 组件挂载时获取AI提供商数据
   useEffect(() => {
@@ -144,16 +166,16 @@ const WorkflowBuilder: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-    // Reference Image 相关函数
+  // Reference Image 相关函数
   const handleRefImageUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       console.error('Please select an image file')
       return
     }
-    
+
     setRefImage(file)
     setRefImageUrl(URL.createObjectURL(file))
-    
+
     try {
       setIsUploadingRefImage(true)
       const uploadedUrl = await uploadFileToS3(file)
@@ -208,21 +230,21 @@ const WorkflowBuilder: React.FC = () => {
       console.error('User not authenticated or missing user ID')
       return
     }
-    
+
     const userId = userState.userDetails.did
-    
+
     try {
       const result = await createWorkflow(userId)
       if (result && result.workflow_id) {
         // 创建成功，显示成功提示
         setSuccessMessage('Workflow created successfully!')
-        
+
         // 重置本地状态
         setCover(null)
         setCoverUrl(null)
         setRefImage(null)
         setRefImageUrl(null)
-        
+
         // 延迟跳转到工作流详情页
         setTimeout(() => {
           navigate(withLangPrefix(lang, `/workflow/${result.workflow_id}`))
@@ -281,14 +303,14 @@ const WorkflowBuilder: React.FC = () => {
               <span className="text-green-600 dark:text-green-400 text-sm font-lexend">{successMessage}</span>
             </div>
           )}
-          
+
           {/* 错误提示 */}
           {createWorkflowError && (
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg z-50">
               <span className="text-red-600 dark:text-red-400 text-sm font-lexend">{createWorkflowError}</span>
             </div>
           )}
-          
+
           {/* Display 组件 */}
           <div className="w-[22.5rem] max-w-[22.5rem] flex flex-col gap-6 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-secondary dark:bg-secondary-dark p-6">
             {/* 标题组件 */}
@@ -420,8 +442,8 @@ const WorkflowBuilder: React.FC = () => {
                     key={type}
                     onClick={() => setSelectedInputType(type)}
                     className={`w-[6.167rem] h-10 rounded-full border font-switzer text-sm leading-5 text-center align-middle transition-colors ${selectedInputType === type
-                        ? 'border-text-main dark:border-text-main-dark font-semibold text-text-main dark:text-text-main-dark'
-                        : 'border-line-subtle dark:border-line-subtle-dark font-normal text-text-secondary dark:text-text-secondary-dark'
+                      ? 'border-text-main dark:border-text-main-dark font-semibold text-text-main dark:text-text-main-dark'
+                      : 'border-line-subtle dark:border-line-subtle-dark font-normal text-text-secondary dark:text-text-secondary-dark'
                       }`}
                   >
                     {type}
@@ -444,20 +466,20 @@ const WorkflowBuilder: React.FC = () => {
                     key={`${model.provider}-${model.name}`}
                     onClick={() => selectModel(model.name)}
                     className={`w-[19.5rem] h-10 pr-2 pl-2 flex items-center gap-1 rounded-full border transition-colors ${selectedModel === model.name
-                        ? 'border-text-main dark:border-text-main-dark'
-                        : 'border-line-subtle dark:border-line-subtle-dark'
+                      ? 'border-text-main dark:border-text-main-dark'
+                      : 'border-line-subtle dark:border-line-subtle-dark'
                       }`}
                   >
                     <div className="h-5 flex items-center gap-1">
                       <ThemeAdaptiveIcon
-                        lightIcon={GptIcon}
-                        darkIcon={GptIconDark}
+                        lightIcon={getProviderIcon(model.provider).light}
+                        darkIcon={getProviderIcon(model.provider).dark}
                         alt={model.name}
                         size="sm"
                       />
                       <span className={`font-switzer text-sm leading-5 ${selectedModel === model.name
-                          ? 'font-semibold text-text-main dark:text-text-main-dark'
-                          : 'font-normal text-text-secondary dark:text-text-secondary-dark'
+                        ? 'font-semibold text-text-main dark:text-text-main-dark'
+                        : 'font-normal text-text-secondary dark:text-text-secondary-dark'
                         }`}>
                         {model.name}
                       </span>
@@ -579,14 +601,14 @@ const WorkflowBuilder: React.FC = () => {
               </div>
             </div>
 
-                       {/* Builder 按钮 */}
-           <button
-             onClick={handleBuilder}
-             disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
-             className="w-[19.5rem] h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-           >
-             {isCreatingWorkflow ? 'Creating...' : 'Builder'}
-           </button>
+            {/* Builder 按钮 */}
+            <button
+              onClick={handleBuilder}
+              disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
+              className="w-[19.5rem] h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {isCreatingWorkflow ? 'Creating...' : 'Builder'}
+            </button>
           </div>
         </div>
 
@@ -598,14 +620,14 @@ const WorkflowBuilder: React.FC = () => {
               <span className="text-green-600 dark:text-green-400 text-sm font-lexend">{successMessage}</span>
             </div>
           )}
-          
+
           {/* 错误提示 */}
           {createWorkflowError && (
             <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <span className="text-red-600 dark:text-red-400 text-sm font-lexend">{createWorkflowError}</span>
             </div>
           )}
-          
+
           {/* Display 组件 - 移动端 */}
           <div className="w-full flex flex-col gap-6">
             {/* 标题组件 */}
@@ -737,8 +759,8 @@ const WorkflowBuilder: React.FC = () => {
                     key={type}
                     onClick={() => setSelectedInputType(type)}
                     className={`flex-1 h-10 rounded-full border font-switzer text-sm leading-5 text-center align-middle transition-colors ${selectedInputType === type
-                        ? 'border-text-main dark:border-text-main-dark font-semibold text-text-main dark:text-text-main-dark'
-                        : 'border-line-subtle dark:border-line-subtle-dark font-normal text-text-secondary dark:text-text-secondary-dark'
+                      ? 'border-text-main dark:border-text-main-dark font-semibold text-text-main dark:text-text-main-dark'
+                      : 'border-line-subtle dark:border-line-subtle-dark font-normal text-text-secondary dark:text-text-secondary-dark'
                       }`}
                   >
                     {type}
@@ -761,20 +783,20 @@ const WorkflowBuilder: React.FC = () => {
                     key={`${model.provider}-${model.name}`}
                     onClick={() => selectModel(model.name)}
                     className={`w-full h-10 pr-2 pl-2 flex items-center gap-1 rounded-full border transition-colors ${selectedModel === model.name
-                        ? 'border-text-main dark:border-text-main-dark'
-                        : 'border-line-subtle dark:border-line-subtle-dark'
+                      ? 'border-text-main dark:border-text-main-dark'
+                      : 'border-line-subtle dark:border-line-subtle-dark'
                       }`}
                   >
                     <div className="h-5 flex items-center gap-1">
                       <ThemeAdaptiveIcon
-                        lightIcon={GptIcon}
-                        darkIcon={GptIconDark}
+                        lightIcon={getProviderIcon(model.provider).light}
+                        darkIcon={getProviderIcon(model.provider).dark}
                         alt={model.name}
                         size="sm"
                       />
                       <span className={`font-switzer text-sm leading-5 ${selectedModel === model.name
-                          ? 'font-semibold text-text-main dark:text-text-main-dark'
-                          : 'font-normal text-text-secondary dark:text-text-secondary-dark'
+                        ? 'font-semibold text-text-main dark:text-text-main-dark'
+                        : 'font-normal text-text-secondary dark:text-text-secondary-dark'
                         }`}>
                         {model.name}
                       </span>
@@ -896,14 +918,14 @@ const WorkflowBuilder: React.FC = () => {
               </div>
             </div>
 
-                         {/* Builder 按钮 */}
-             <button
-               onClick={handleBuilder}
-               disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
-               className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-             >
-               {isCreatingWorkflow ? 'Creating...' : 'Builder'}
-             </button>
+            {/* Builder 按钮 */}
+            <button
+              onClick={handleBuilder}
+              disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
+              className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {isCreatingWorkflow ? 'Creating...' : 'Builder'}
+            </button>
           </div>
         </div>
       </div>

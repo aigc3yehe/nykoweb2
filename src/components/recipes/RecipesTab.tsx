@@ -3,6 +3,9 @@ import { RecipeType } from '../../pages/Recipes'
 import { useNavigate } from 'react-router-dom'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
 import CreditBtnIcon from '../../assets/mavae/credit_btn.svg'
+import StyleCreateIcon from '../../assets/mavae/style_create.svg'
+import StyleCreateIconDark from '../../assets/mavae/dark/style_create.svg'
+import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 
 interface RecipesTabProps {
   activeTab: RecipeType
@@ -62,12 +65,35 @@ const RecipesTab: React.FC<RecipesTabProps> = ({ activeTab, onTabChange }) => {
       {/* 移动端新建按钮 - PC端隐藏 */}
       <button 
         onClick={handleNewClick}
-        className="md:hidden h-8 px-3 flex items-center gap-1 rounded-full bg-[#84CC161A] hover:bg-[#84CC1626] transition-colors" // height: 32px, padding: 12px, gap: 4px, radius: 666px, background: #84CC161A
+        className={`
+          md:hidden h-8 px-3 flex items-center gap-1 rounded-full transition-colors
+          ${activeTab === 'workflows' 
+            ? 'bg-[#84CC161A] hover:bg-[#84CC1626]' 
+            : 'bg-[#0DA3A31A] hover:bg-[#0DA3A326]'
+          }
+        `}
       >
-        <img src={CreditBtnIcon} alt="Builder" className="w-4 h-4" /> {/* 16x16 */}
-        <span className="font-switzer font-medium text-sm leading-6 text-[#65A30D]"> {/* font-size: 14px, line-height: 24px, color: #65A30D */}
-          Builder
-        </span>
+        {activeTab === 'workflows' ? (
+          <>
+            <img src={CreditBtnIcon} alt="Builder" className="w-4 h-4" />
+            <span className="font-switzer font-medium text-sm leading-6 text-[#65A30D]">
+              Builder
+            </span>
+          </>
+        ) : (
+          <>
+            <ThemeAdaptiveIcon
+              lightIcon={StyleCreateIcon}
+              darkIcon={StyleCreateIconDark}
+              alt="New Style"
+              size="sm"
+              className="w-4 h-4"
+            />
+            <span className="font-switzer font-medium text-sm leading-6 text-[#0DA3A3]">
+              New Style
+            </span>
+          </>
+        )}
       </button>
     </div>
   )
