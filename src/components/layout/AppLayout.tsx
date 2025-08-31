@@ -64,13 +64,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {/* 聊天侧边栏 */}
       <ChatSidebar />
 
-      {/* 移动端底部栏 - WorkflowBuilder页面 */}
-      {/^\/(en|zh-CN|zh-HK)\/workflow\/builder$/.test(location.pathname) && (
-        <BottomBar
-          onOpenSettings={() => setIsSettingsModalOpen(true)}
-        />
-      )}
-
       {/* 移动端底部栏 - StyleTrainer页面 */}
       {/^\/(en|zh-CN|zh-HK)\/style\/trainer$/.test(location.pathname) && (
         <StyleTrainerBottomBar
