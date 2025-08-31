@@ -2,9 +2,12 @@ import React, { useState, useRef } from 'react'
 import { useAtom } from 'jotai'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
+import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 import BgLogo from '../../assets/web2/workflow_setting.svg'
 import CoverSelectIcon from '../../assets/web2/cover_select.svg'
 import CloseIcon from '../../assets/web2/close.svg'
+import StyleImageDeleteIcon from '../../assets/mavae/style_image_delete.svg'
+import StyleImageDeleteIconDark from '../../assets/mavae/dark/style_image_delete.svg'
 import PublishIcon from '../../assets/web2/publish.svg'
 import { uploadFileToS3 } from '../../store/imagesStore'
 import {
@@ -132,13 +135,19 @@ const TrainerSidebar: React.FC = () => {
                 alt="cover"
                 className="w-full rounded-[0.625rem] object-cover"
               />
-              <button
-                type="button"
-                className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
-                onClick={handleRemoveCover}
-              >
-                <img src={CloseIcon} alt="Remove" className="w-5 h-5" />
-              </button>
+                                <button
+                    type="button"
+                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
+                    onClick={handleRemoveCover}
+                  >
+                    <ThemeAdaptiveIcon
+                      lightIcon={StyleImageDeleteIcon}
+                      darkIcon={StyleImageDeleteIconDark}
+                      alt="Remove"
+                      size="sm"
+                      className="w-5 h-5"
+                    />
+                  </button>
             </div>
           ) : (
             <button
@@ -190,11 +199,11 @@ const TrainerSidebar: React.FC = () => {
           onClick={handleCreateModel}
           disabled={!status.canCreate}
         >
-          {modelCreationState.isCreating ? (
+          {modelCreationState.isCreating || modelCreationState.isTraining ? (
             <>
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               <span className="font-lexend font-normal text-lg leading-[100%] text-white" style={{ fontSize: '1.125rem' }}>
-                创建中...
+                {modelCreationState.isCreating ? '创建中...' : '训练中...'}
               </span>
             </>
           ) : (

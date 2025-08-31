@@ -8,6 +8,8 @@ import GptIconDark from '../assets/mavae/dark/gpt.svg'
 import OutputLiveIcon from '../assets/mavae/output_live.svg'
 import OutputLiveIconDark from '../assets/mavae/dark/output_live.svg'
 import CloseIcon from '../assets/web2/close.svg'
+import StyleImageDeleteIcon from '../assets/mavae/style_image_delete.svg'
+import StyleImageDeleteIconDark from '../assets/mavae/dark/style_image_delete.svg'
 import ThemeAdaptiveIcon from '../components/ui/ThemeAdaptiveIcon'
 import {
   availableModelsAtom,
@@ -346,10 +348,16 @@ const WorkflowBuilder: React.FC = () => {
                   />
                   <button
                     type="button"
-                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
+                    className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
                     onClick={handleRemoveCover}
                   >
-                    <img src={CloseIcon} alt="Remove" className="w-5 h-5" />
+                    <ThemeAdaptiveIcon
+                      lightIcon={StyleImageDeleteIcon}
+                      darkIcon={StyleImageDeleteIconDark}
+                      alt="Remove"
+                      size="sm"
+                      className="w-5 h-5"
+                    />
                   </button>
                 </div>
               ) : (
@@ -491,10 +499,16 @@ const WorkflowBuilder: React.FC = () => {
                   />
                   <button
                     type="button"
-                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
+                    className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
                     onClick={handleRemoveRefImage}
                   >
-                    <img src={CloseIcon} alt="Remove" className="w-5 h-5" />
+                    <ThemeAdaptiveIcon
+                      lightIcon={StyleImageDeleteIcon}
+                      darkIcon={StyleImageDeleteIconDark}
+                      alt="Remove"
+                      size="sm"
+                      className="w-5 h-5"
+                    />
                   </button>
                 </div>
               ) : (
@@ -651,10 +665,16 @@ const WorkflowBuilder: React.FC = () => {
                   />
                   <button
                     type="button"
-                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
+                    className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
                     onClick={handleRemoveCover}
                   >
-                    <img src={CloseIcon} alt="Remove" className="w-5 h-5" />
+                    <ThemeAdaptiveIcon
+                      lightIcon={StyleImageDeleteIcon}
+                      darkIcon={StyleImageDeleteIconDark}
+                      alt="Remove"
+                      size="sm"
+                      className="w-5 h-5"
+                    />
                   </button>
                 </div>
               ) : (
@@ -796,10 +816,16 @@ const WorkflowBuilder: React.FC = () => {
                   />
                   <button
                     type="button"
-                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
+                    className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
                     onClick={handleRemoveRefImage}
                   >
-                    <img src={CloseIcon} alt="Remove" className="w-5 h-5" />
+                    <ThemeAdaptiveIcon
+                      lightIcon={StyleImageDeleteIcon}
+                      darkIcon={StyleImageDeleteIconDark}
+                      alt="Remove"
+                      size="sm"
+                      className="w-5 h-5"
+                    />
                   </button>
                 </div>
               ) : (

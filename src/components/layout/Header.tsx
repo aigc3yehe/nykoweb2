@@ -136,36 +136,6 @@ const Header: React.FC = React.memo(() => {
                    </span>
                  </>
                )
-             } else if (pathWithoutLang.includes('/workflow/builder')) {
-               return (
-                 <>
-                   {/* 移动端：菜单按钮 + Logo */}
-                   <div className="flex md:hidden items-center w-29 h-9 gap-1">
-                     <button
-                       onClick={() => toggleSidebar()}
-                       className="w-12 h-12 flex items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors rounded-lg"
-                       aria-label="Toggle menu"
-                     >
-                       <ThemeAdaptiveIcon
-                         lightIcon={RadixIcon}
-                         darkIcon={RadixIconDark}
-                         alt="Menu"
-                         size="lg"
-                       />
-                     </button>
-                     <ThemeAdaptiveIcon
-                       lightIcon={LogoMobileIcon}
-                       darkIcon={LogoMobileIconDark}
-                       alt="Logo"
-                       className="w-19 h-8.5"
-                     />
-                   </div>
-                   {/* PC端：显示 "Builder" 标题 */}
-                   <span className="hidden md:block font-lexend font-normal text-xl leading-[100%] text-text-main dark:text-text-main-dark select-none">
-                     Builder
-                   </span>
-                 </>
-               )
              } else {
                return (
                  <>

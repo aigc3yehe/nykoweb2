@@ -2,7 +2,13 @@ import { atom } from 'jotai'
 import { modelsApi } from '../services/api/models'
 import { uploadFileToS3 } from './imagesStore'
 import { userStateAtom } from './loginStore'
-import type { CreateModelRequest, CreateModelResponse } from '../services/api/types'
+import type { 
+  CreateModelRequest, 
+  CreateModelResponse, 
+  TrainModelRequest, 
+  TrainModelResponse,
+  FetchTrainStateResponse 
+} from '../services/api/types'
 
 // 模型创建表单数据接口
 export interface StyleTrainerFormData {
@@ -28,6 +34,10 @@ export interface ModelCreationState {
   isCreating: boolean
   error: string | null
   success: boolean
+  modelId?: number
+  trainTaskId?: string
+  isTraining: boolean
+  trainingStatus?: string
 }
 
 // 通知状态接口
@@ -58,7 +68,8 @@ const initialImageUploadState: ImageUploadState = {
 const initialModelCreationState: ModelCreationState = {
   isCreating: false,
   error: null,
-  success: false
+  success: false,
+  isTraining: false
 }
 
 const initialToastState: ToastNotification = {
@@ -232,7 +243,7 @@ export const removeAllImagesAtom = atom(
   }
 )
 
-// 创建模型的异步action
+// 创建并训练模型的异步action
 export const createModelAtom = atom(
   null,
   async (get, set, navigate?: (path: string) => void): Promise<CreateModelResponse | null> => {
@@ -244,7 +255,8 @@ export const createModelAtom = atom(
       set(modelCreationStateAtom, {
         isCreating: false,
         error: errorMessage,
-        success: false
+        success: false,
+        isTraining: false
       })
       set(showToastAtom, {
         message: errorMessage,
@@ -256,7 +268,8 @@ export const createModelAtom = atom(
     set(modelCreationStateAtom, {
       isCreating: true,
       error: null,
-      success: false
+      success: false,
+      isTraining: false
     })
     
     try {
@@ -270,28 +283,49 @@ export const createModelAtom = atom(
         throw new Error('At least one reference image is required')
       }
       
-      const request: CreateModelRequest = {
+      // 第一步：创建模型
+      const createRequest: CreateModelRequest = {
         name: form.name.trim(),
         user: userState.user.tokens.did,
         description: form.description.trim() || undefined,
         cover: form.cover || undefined,
         urls: form.referenceImages,
-        //tags: [], // 默认标签
-        //params: {
-        //  type: 'style_training'
-        //}
       }
       
-      const response = await modelsApi.createModel(request)
+      const createResponse = await modelsApi.createModel(createRequest)
+      
+      if (!createResponse?.model_id || createResponse.model_id === 0) {
+        throw new Error('Failed to create model - no model ID returned')
+      }
+      
+      // 第二步：开始训练模型
+      set(modelCreationStateAtom, {
+        isCreating: false,
+        error: null,
+        success: true,
+        isTraining: true,
+        modelId: createResponse.model_id
+      })
+      
+      const trainRequest: TrainModelRequest = {
+        user: userState.user.tokens.did,
+        model_id: createResponse.model_id,
+        version: 1 // 默认版本
+      }
+      
+      const trainResponse = await modelsApi.trainModel(trainRequest)
       
       set(modelCreationStateAtom, {
         isCreating: false,
         error: null,
-        success: true
+        success: true,
+        isTraining: false,
+        modelId: createResponse.model_id,
+        trainTaskId: trainResponse.model_train_id?.toString()
       })
       
       set(showToastAtom, {
-        message: 'Model created successfully!',
+        message: 'Style training started successfully!',
         severity: 'success'
       })
       
@@ -300,21 +334,22 @@ export const createModelAtom = atom(
       set(imageUploadStateAtom, initialImageUploadState)
       
       // 如果返回的 model_id 不为空且不为0，则跳转到模型详情页面
-      if (response?.model_id && response.model_id !== 0 && navigate) {
+      if (createResponse?.model_id && createResponse.model_id !== 0 && navigate) {
         // 这里不处理语言前缀，由调用方传入 navigate 时自行构造语言化路径
-        navigate(`/model/${response.model_id}`)
+        navigate(`/model/${createResponse.model_id}`)
       }
       
-      return response
+      return createResponse
     } catch (error) {
-      console.error('Failed to create model:', error)
+      console.error('Failed to create or train model:', error)
       
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create model'
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create or train model'
       
       set(modelCreationStateAtom, {
         isCreating: false,
         error: errorMessage,
-        success: false
+        success: false,
+        isTraining: false
       })
       
       set(showToastAtom, {
@@ -323,6 +358,34 @@ export const createModelAtom = atom(
       })
       
       return null
+    }
+  }
+)
+
+// 获取训练状态的异步action
+export const getTrainStateAtom = atom(
+  null,
+  async (get, set, taskId: string): Promise<FetchTrainStateResponse | null> => {
+    try {
+      const response = await modelsApi.getTrainState(taskId)
+      return response
+    } catch (error) {
+      console.error('Failed to get train state:', error)
+      return null
+    }
+  }
+)
+
+// 刷新所有模型训练状态的异步action
+export const refreshTrainModelsStateAtom = atom(
+  null,
+  async (get, set): Promise<boolean> => {
+    try {
+      const response = await modelsApi.refreshTrainModelsState()
+      return true
+    } catch (error) {
+      console.error('Failed to refresh train models state:', error)
+      return false
     }
   }
 )
@@ -360,10 +423,14 @@ export const styleTrainerStatusAtom = atom((get) => {
   return {
     isUploading: imageUploadState.isUploading,
     isCreating: modelCreationState.isCreating,
-    isBusy: imageUploadState.isUploading || modelCreationState.isCreating,
-    canCreate: formValidation.isFormValid && !imageUploadState.isUploading && !modelCreationState.isCreating,
+    isTraining: modelCreationState.isTraining,
+    isBusy: imageUploadState.isUploading || modelCreationState.isCreating || modelCreationState.isTraining,
+    canCreate: formValidation.isFormValid && !imageUploadState.isUploading && !modelCreationState.isCreating && !modelCreationState.isTraining,
     uploadProgress: imageUploadState.progress,
     uploadedCount: imageUploadState.uploadedUrls.length,
-    hasErrors: !!imageUploadState.error || !!modelCreationState.error
+    hasErrors: !!imageUploadState.error || !!modelCreationState.error,
+    modelId: modelCreationState.modelId,
+    trainTaskId: modelCreationState.trainTaskId,
+    trainingStatus: modelCreationState.trainingStatus
   }
 })
