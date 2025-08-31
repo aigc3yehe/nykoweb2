@@ -226,6 +226,8 @@ export default {
       backgroundImage: {
         'premium-gradient': 'linear-gradient(180deg, rgba(9, 0, 255, 0) 68.81%, rgba(9, 0, 255, 0.1) 100%)',
         'premium-plus-gradient': 'linear-gradient(180deg, rgba(0, 255, 72, 0) 68.81%, rgba(0, 255, 72, 0.1) 100%)',
+        'plus-gradient': 'linear-gradient(0deg, var(--bg-Pop-ups, #FFFFFF), var(--bg-Pop-ups, #FFFFFF)), linear-gradient(180deg, rgba(200, 205, 227, 0) 64.93%, rgba(75, 87, 142, 0.2) 100%)',
+        'pro-gradient': 'linear-gradient(0deg, var(--bg-Pop-ups, #FFFFFF), var(--bg-Pop-ups, #FFFFFF)), linear-gradient(180deg, rgba(255, 237, 182, 0) 64.93%, rgba(255, 237, 182, 0.2) 100%)',
       },
       // 玻璃效果
       backdropBlur: {

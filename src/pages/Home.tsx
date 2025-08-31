@@ -31,9 +31,9 @@ const Home: React.FC = () => {
 
     // 当滚动到距离底部200px时触发加载
     const shouldLoad = distanceFromBottom <= 200 &&
-        contentsState.hasMore &&
-        !contentsState.isLoading &&
-        !isLoadingRef.current
+      contentsState.hasMore &&
+      !contentsState.isLoading &&
+      !isLoadingRef.current
 
     if (shouldLoad) {
       console.log('Home: Auto loading more content...')

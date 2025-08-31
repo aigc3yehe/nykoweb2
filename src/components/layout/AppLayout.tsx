@@ -7,10 +7,6 @@ import Sidebar from './Sidebar'
 import MainContent from './MainContent'
 import ChatButton from '../ui/ChatButton'
 import ChatSidebar from './ChatSidebar'
-import PublishSidebar from './PublishSidebar'
-import TrainerSidebar from './TrainerSidebar.tsx'
-import BottomBar from './BottomBar'
-import StyleTrainerBottomBar from './StyleTrainerBottomBar'
 import PublishModal from '../modals/PublishModal'
 import SettingsModal from '../modals/SettingsModal'
 import StyleTrainerSettingsModal from '../modals/StyleTrainerSettingsModal'
@@ -24,7 +20,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const initTheme = useSetAtom(initThemeAtom)
   const initLanguage = useSetAtom(initLanguageAtom)
   const location = useLocation()
-  
+
   // 移动端模态框状态
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)

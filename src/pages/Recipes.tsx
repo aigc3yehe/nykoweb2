@@ -50,7 +50,7 @@ const Recipes: React.FC = () => {
       <h1 className="md:hidden h-16 py-4 font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark"> {/* height: 64px, padding: 16px, font-size: 24px, line-height: 32px */}
         Recipes
       </h1>
-      
+
       {/* Tab 导航 */}
       <RecipesTab activeTab={activeTab} onTabChange={handleTabChange} />
 

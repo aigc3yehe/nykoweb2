@@ -5,14 +5,24 @@ import { selectedPaymentMethodAtom, showPaymentDropdownAtom, pricingAtom } from 
 import { useI18n } from '../hooks/useI18n'
 import { paymentService } from '../services/paymentService'
 import { showToastAtom } from '../store/imagesStore'
-import DownIcon from '../assets/web2/pricing_down.svg'
+import DownIcon from '../assets/mavae/pay_down.svg'
+import DownIconDark from '../assets/mavae/dark/pay_down.svg'
 import StripeIcon from '../assets/web2/stripe.svg'
 import HelIcon from '../assets/web2/hel.svg'
-import OkIcon from '../assets/web2/ok.svg'
-import NoIcon from '../assets/web2/no.svg'
+import OkIcon from '../assets/mavae/ok.svg'
+import OkIconDark from '../assets/mavae/dark/ok.svg'
+import NoIcon from '../assets/mavae/no.svg'
+import NoIconDark from '../assets/mavae/dark/no.svg'
+import FreeVipIcon from '../assets/mavae/vip/free.svg'
+import FreeVipIconDark from '../assets/mavae/dark/vip/free.svg'
+import PlusVipIcon from '../assets/mavae/vip/plus.svg'
+import PlusVipIconDark from '../assets/mavae/dark/vip/plus.svg'
+import ProVipIcon from '../assets/mavae/vip/pro.svg'
+import ProVipIconDark from '../assets/mavae/dark/vip/pro.svg'
 import { fetchUserDetailsAtom } from '../store/loginStore'
 import Seo from '../components/Seo'
 import { useLocaleFromUrl } from '../hooks/useLocaleFromUrl'
+import ThemeAdaptiveIcon from '../components/ui/ThemeAdaptiveIcon'
 
 const Pricing: React.FC = React.memo(() => {
   const { t } = useI18n()
@@ -23,6 +33,7 @@ const Pricing: React.FC = React.memo(() => {
   const [pricingState] = useAtom(pricingAtom)
   const showToast = useSetAtom(showToastAtom)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const fetchUserDetails = useSetAtom(fetchUserDetailsAtom)
 
   // 支付方式选项
@@ -30,6 +41,18 @@ const Pricing: React.FC = React.memo(() => {
     { id: 'stripe' as const, name: 'Stripe', icon: StripeIcon },
     { id: 'hel' as const, name: 'Hel', icon: HelIcon }
   ]
+
+  // 检测移动端
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // 处理URL参数
   useEffect(() => {
@@ -100,155 +123,188 @@ const Pricing: React.FC = React.memo(() => {
     setShowPaymentDropdown(false)
   }
 
+  // 获取 VIP 图标
+  const getVipIcon = (planId: string) => {
+    switch (planId) {
+      case 'free':
+        return { light: FreeVipIcon, dark: FreeVipIconDark }
+      case 'premium':
+        return { light: PlusVipIcon, dark: PlusVipIconDark }
+      case 'premium_plus':
+        return { light: ProVipIcon, dark: ProVipIconDark }
+      default:
+        return { light: FreeVipIcon, dark: FreeVipIconDark }
+    }
+  }
+
   // 获取套餐样式类
   const getPlanStyle = (planId: string) => {
     switch (planId) {
       case 'free':
-        return 'w-full md:w-[21.25rem] h-[33.125rem] border border-design-line-light-gray bg-white dark:bg-gray-800'
+        return 'md:w-[22.5rem] h-[33.0625rem] md:max-w-[22.5rem] border border-line-subtle dark:border-line-subtle-dark bg-pop-ups dark:bg-pop-ups-dark backdrop-blur-[20px]'
       case 'premium':
-        return 'w-full md:w-[21.25rem] h-[33.125rem] border border-design-main-blue bg-premium-gradient'
+        return 'md:w-[22.5rem] h-[33.0625rem] md:max-w-[22.5rem] border border-line-strong dark:border-line-strong-dark bg-pop-ups dark:bg-pop-ups-dark backdrop-blur-[20px]'
       case 'premium_plus':
-        return 'w-full md:w-[21.25rem] h-[33.125rem] border border-[#00D13B] bg-premium-plus-gradient'
+        return 'md:w-[22.5rem] h-[33.0625rem] md:max-w-[22.5rem] border border-line-strong dark:border-line-strong-dark bg-pop-ups dark:bg-pop-ups-dark backdrop-blur-[20px]'
       default:
-        return 'w-full md:w-[21.25rem] h-[33.125rem] border border-design-line-light-gray bg-white dark:bg-gray-800'
+        return 'md:w-[22.5rem] h-[33.0625rem] md:max-w-[22.5rem] border border-line-subtle dark:border-line-subtle-dark bg-pop-ups dark:bg-pop-ups-dark backdrop-blur-[20px]'
     }
   }
 
+
+
   return (
-    <div className="min-h-screen bg-background dark:bg-background flex items-center justify-center p-4">
-      <div className="w-full flex flex-col gap-10">
-        <Seo title={t('pricing.title') + ' - MAVAE'} description={t('pricing.subtitle')} image="/og-image.png" />
-        {/* 标题区域 */}
-        <div className="relative w-full flex flex-col gap-2">
-          {/* 主标题 */}
-          <h1 className="font-lexend font-bold text-4xl leading-[100%] text-center text-[#1F2937] dark:text-white capitalize">
-            {t('pricing.title')} {/* en: Plans & pricing / zh: 套餐与定价 */}
-          </h1>
-          
-          {/* 副标题 */}
-          <p className="font-lexend font-normal text-base leading-[100%] text-center text-[#6B7280] dark:text-gray-400 capitalize">
-            {t('pricing.subtitle')} {/* en: Upgrade to gain access to Premium features / zh: 升级以获得高级功能 */}
-          </p>
-          
-          {/* 支付方式选择器 - 移动端显示在副标题下面，PC端绝对定位到右下角 */}
-          <div className="flex justify-center md:absolute md:bottom-0 md:right-0 md:justify-start">
-            <div className="relative">
-              <button
-                onClick={() => setShowPaymentDropdown(!showPaymentDropdown)}
-                className="w-[113px] h-8 flex items-center justify-center gap-1.5 px-3.5 py-2 border border-[#E5E7EB] dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                <img 
-                  src={paymentMethods.find(m => m.id === selectedPaymentMethod)?.icon} 
-                  alt={selectedPaymentMethod} 
-                  className="w-4 h-4" 
-                />
-                <span className="font-lexend font-normal text-sm leading-[100%] text-[#4B5563] dark:text-gray-300">
-                  {paymentMethods.find(m => m.id === selectedPaymentMethod)?.name}
-                </span>
-                <img src={DownIcon} alt="Down" className="w-4 h-4" />
-              </button>
-              
-              {/* 下拉菜单 */}
-              {showPaymentDropdown && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 md:left-auto md:right-0 md:transform-none mt-1.5 w-[110px] bg-white dark:bg-gray-800 border border-[#3741514D] dark:border-gray-600 rounded-md p-2 shadow-lg z-10">
-                  {paymentMethods.map((method) => (
-                    <button
-                      key={method.id}
-                      onClick={() => handlePaymentMethodSelect(method.id)}
-                      className={`w-full h-8 flex items-center gap-1.5 px-4 py-2 rounded-md transition-colors ${
-                        selectedPaymentMethod === method.id
-                          ? 'bg-[#EEF2FF] dark:bg-blue-900/30'
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+    <div className="w-full flex flex-col md:gap-10 bg-secondary dark:bg-secondary-dark md:bg-transparent md:p-8">
+      <Seo title={t('pricing.title') + ' - MAVAE'} description={t('pricing.subtitle')} image="/og-image.png" />
+      {/* 标题区域 */}
+      <div className="relative w-full flex flex-col gap-4 p-4 md:gap-2 md:p-0">
+        {/* 主标题 */}
+        <h1 className="font-switzer font-bold text-[2.25rem] leading-[100%] text-left md:text-center text-text-main dark:text-text-main-dark capitalize">
+          {t('pricing.title')} {/* en: Plans & pricing / zh: 套餐与定价 */}
+        </h1>
+
+        {/* 副标题 */}
+        <p className="font-switzer font-normal text-base leading-[100%] text-left md:text-center text-text-secondary dark:text-text-secondary-dark capitalize">
+          {t('pricing.subtitle')} {/* en: Upgrade to gain access to Premium features / zh: 升级以获得高级功能 */}
+        </p>
+
+        {/* 支付方式选择器 - 移动端显示在副标题下面，PC端绝对定位到右下角 */}
+        <div className="flex justify-start md:absolute md:bottom-0 md:right-0 md:justify-start">
+          <div className="relative">
+            <button
+              onClick={() => setShowPaymentDropdown(!showPaymentDropdown)}
+              className="min-w-[7.0625rem] h-10 flex items-center justify-center gap-1.5 pt-2 pr-3.5 pb-2 pl-3.5 rounded-md bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            >
+              <img
+                src={paymentMethods.find(m => m.id === selectedPaymentMethod)?.icon}
+                alt={selectedPaymentMethod}
+                className="w-4 h-4"
+              />
+              <span className="font-lexend font-normal text-sm leading-[100%] text-link-default dark:text-link-default-dark">
+                {paymentMethods.find(m => m.id === selectedPaymentMethod)?.name}
+              </span>
+              <ThemeAdaptiveIcon
+                lightIcon={DownIcon}
+                darkIcon={DownIconDark}
+                alt="Down"
+                className="w-4 h-4"
+              />
+            </button>
+
+            {/* 下拉菜单 */}
+            {showPaymentDropdown && (
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 md:left-auto md:right-0 md:transform-none mt-1.5 w-[110px] bg-white dark:bg-gray-800 border border-[#3741514D] dark:border-gray-600 rounded-md p-2 shadow-lg z-10">
+                {paymentMethods.map((method) => (
+                  <button
+                    key={method.id}
+                    onClick={() => handlePaymentMethodSelect(method.id)}
+                    className={`w-full h-8 flex items-center gap-1.5 px-4 py-2 rounded-md transition-colors ${selectedPaymentMethod === method.id
+                      ? 'bg-[#EEF2FF] dark:bg-blue-900/30'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                       }`}
-                    >
-                      <img src={method.icon} alt={method.name} className="w-4 h-4" />
-                      <span className="font-lexend font-normal text-sm leading-[100%] text-[#4B5563] dark:text-gray-300">
-                        {method.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                  >
+                    <img src={method.icon} alt={method.name} className="w-4 h-4" />
+                    <span className="font-lexend font-normal text-sm leading-[100%] text-link-default dark:text-link-default-dark">
+                      {method.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* 套餐列表 */}
-        <div className="w-full flex flex-col md:flex-row gap-6 justify-center">
-          {pricingState.plans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`${getPlanStyle(plan.id)} rounded-lg p-7.5 flex flex-col transition-all hover:shadow-lg`}
-            >
-              {/* 套餐名称 */}
-              <h3 className="font-lexend font-bold text-2xl text-[#1F2937] dark:text-white mb-2">
-                {plan.name}
-              </h3>
-              
+      {/* 套餐列表 */}
+      <div className="w-full flex flex-col md:flex-row gap-8 md:gap-6 justify-center px-4 md:px-0">
+        {/* 移动端倒序显示：Pro, Plus, Free；PC端正常顺序：Free, Plus, Pro */}
+        {(isMobile ? [...pricingState.plans].reverse() : pricingState.plans).map((plan) => (
+          <div
+            key={plan.id}
+            className={`${getPlanStyle(plan.id)} w-full md:w-auto rounded-xl p-[1.875rem] flex flex-col transition-all hover:shadow-lg gap-6`}
+          >
+            {/* 套餐名称 - 使用 VIP 图标 */}
+            <div className="flex flex-col gap-2.5">
+              <ThemeAdaptiveIcon
+                lightIcon={getVipIcon(plan.id).light}
+                darkIcon={getVipIcon(plan.id).dark}
+                alt={plan.name}
+                className="w-[4.5rem] h-8"
+              />
               {/* 套餐价格 */}
-              <div className="flex items-end gap-1 mb-2">
-                <div className="font-lexend font-medium text-[2.25rem] leading-[100%] text-[#1F2937] dark:text-white capitalize">
+              <div className="flex items-end gap-1">
+                <div className="font-switzer font-black text-[2.5rem] leading-[100%] text-text-main dark:text-text-main-dark capitalize">
                   {plan.price}
                 </div>
-                <div className="font-lexend font-normal text-xs leading-[100%] text-[#6B7280] dark:text-gray-400 capitalize mb-1">
+                <div className="font-switzer font-normal text-xs leading-[100%] text-text-secondary dark:text-text-secondary-dark capitalize mb-1">
                   /Month
                 </div>
               </div>
-              
               {/* 套餐描述 */}
-              <p className="font-lexend font-normal text-base text-[#6B7280] dark:text-gray-400 mb-6">
+              <p className="font-switzer font-normal text-sm leading-[100%] text-text-secondary dark:text-text-secondary-dark capitalize">
                 {plan.description}
               </p>
-              
-              {/* 按钮 - 移到features上面 */}
+            </div>
+
+            {/* 功能列表和按钮区域 */}
+            <div className="flex flex-col gap-4">
+              {/* 功能列表 */}
+              <div className="flex flex-col gap-4">
+                {plan.features.map((feature, featureIndex) => (
+                  <React.Fragment key={featureIndex}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center mt-0.5">
+                        <ThemeAdaptiveIcon
+                          lightIcon={feature.supported ? OkIcon : NoIcon}
+                          darkIcon={feature.supported ? OkIconDark : NoIconDark}
+                          alt={feature.supported ? "Supported" : "Not supported"}
+                          className="w-5 h-5"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <div className="font-switzer font-normal text-sm leading-[100%] text-text-secondary dark:text-text-secondary-dark capitalize">
+                          {feature.title}
+                        </div>
+                        {feature.subtitle && (
+                          <div className="font-switzer font-normal text-sm leading-[100%] text-text-tips dark:text-text-tips-dark capitalize">
+                            {feature.subtitle}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* 分割线 - 除了最后一个feature */}
+                    {featureIndex < plan.features.length - 1 && (
+                      <div className="w-[18.75rem] h-0 border border-line-subtle dark:border-line-subtle-dark"></div>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              {/* 按钮 */}
               {plan.buttonText && (
-                <button 
+                <button
                   onClick={() => handleSubscribe(plan.id)}
                   disabled={isProcessing || plan.id === 'free'}
-                  className={`w-full h-12 rounded-md font-lexend font-medium text-sm transition-colors mb-6 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    plan.id === 'premium' ? 'bg-design-main-blue hover:bg-[#0800E6] text-white' :
-                    plan.id === 'premium_plus' ? 'bg-design-light-green hover:bg-[#00E041] text-black' :
-                    'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-[#1F2937] dark:text-white'
-                  }`}
+                  className={`w-full h-12 px-4 gap-1 rounded-full font-switzer font-medium text-base leading-6 text-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${plan.id === 'premium'
+                    ? 'bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark text-white'
+                    : plan.id === 'premium_plus'
+                      ? 'bg-[#FFEDB6] hover:bg-[#FFE5A3] text-black'
+                      : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-text-main dark:text-text-main-dark'
+                    }`}
                 >
                   {isProcessing ? 'Processing...' : plan.buttonText}
                 </button>
               )}
-              
-              {/* 功能列表 */}
-              <div className="space-y-3 mb-8 flex-1">
-                {plan.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center mt-0.5">
-                      <img 
-                        src={feature.supported ? OkIcon : NoIcon} 
-                        alt={feature.supported ? "Supported" : "Not supported"} 
-                        className="w-5 h-5" 
-                      />
-                    </div>
-                    <div>
-                      <div className="font-lexend font-medium text-sm text-[#1F2937] dark:text-white">
-                        {feature.title}
-                      </div>
-                      {feature.subtitle && (
-                        <div className="font-lexend font-normal text-xs text-[#6B7280] dark:text-gray-400">
-                          {feature.subtitle}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {/* 提示信息 */}
-              {plan.tips && (
-                <p className="font-lexend font-normal text-xs text-[#6B7280] dark:text-gray-400 mt-3 text-center">
-                  {plan.tips}
-                </p>
-              )}
             </div>
-          ))}
-        </div>
+
+            {/* 提示信息 - 在最底部 */}
+            {plan.tips && (
+              <p className="font-switzer font-normal text-xs leading-[100%] text-text-tips dark:text-text-tips-dark text-center mt-auto">
+                {plan.tips}
+              </p>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   )
