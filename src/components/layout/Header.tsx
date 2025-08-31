@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toggleSidebarAtom } from '../../store/sidebarStore'
@@ -35,6 +35,7 @@ const Header: React.FC = React.memo(() => {
   const showLoginModal = useSetAtom(showLoginModalAtom)
   const [userState] = useAtom(userStateAtom)
   const [theme, setTheme] = useState<'light' | 'dark'>(getCurrentTheme())
+  const userMenuRef = useRef<HTMLDivElement>(null)
 
   // 监听主题变化
   useEffect(() => {
@@ -59,9 +60,15 @@ const Header: React.FC = React.memo(() => {
     }
   }, [])
 
+
+
   const handleToggleTheme = () => {
     const newTheme = toggleTheme()
     setTheme(newTheme)
+  }
+
+  const handleUserClick = () => {
+    navigate(withLangPrefix(lang, '/account'))
   }
 
   // 获取当前页面标题
@@ -71,6 +78,7 @@ const Header: React.FC = React.memo(() => {
     if (path.includes('/style/trainer')) return 'Style Trainer'
     if (path.includes('/recipes')) return 'Agent Cases'
     if (path.includes('/profile')) return 'My creations'
+    if (path.includes('/account')) return 'Account'
     return 'Sparks' // Home页面
   }
 
@@ -119,21 +127,6 @@ const Header: React.FC = React.memo(() => {
                        Return
                      </span>
                    </button>
-                 </>
-               )
-             } else if (pathWithoutLang.includes('/style/trainer')) {
-               return (
-                 <>
-                   <button
-                     onClick={() => navigate(-1)}
-                     className="flex items-center justify-center w-6 h-6 mr-2"
-                     aria-label="Back"
-                   >
-                     <img src={BackIcon} alt="Back" className="w-6 h-6" />
-                   </button>
-                   <span className="font-lexend font-normal text-xl leading-[100%] text-text-main dark:text-text-main-dark select-none">
-                     {getPageTitle()}
-                   </span>
                  </>
                )
              } else {
@@ -198,12 +191,12 @@ const Header: React.FC = React.memo(() => {
           {/* 登录按钮或用户头像 */}
           {userState.isAuthenticated && userState.user ? (
             /* 用户头像 - 移动端36*36px / PC端48*48px 圆形 + 会员等级标识 */
-            <div className="relative">
-              <button
-                onClick={() => navigate(withLangPrefix(lang, '/profile'))}
-                className="w-9 h-9 md:w-12 md:h-12 rounded-full bg-[#E5E7EB] hover:bg-[#D1D5DB] transition-colors overflow-hidden flex items-center justify-center"
-                aria-label="User profile"
-              >
+            <div className="relative" ref={userMenuRef}>
+                             <button
+                 onClick={handleUserClick}
+                 className="w-9 h-9 md:w-12 md:h-12 rounded-full bg-[#E5E7EB] hover:bg-[#D1D5DB] transition-colors overflow-hidden flex items-center justify-center"
+                 aria-label="User account"
+               >
                 {userState.user.picture ? (
                   <img
                     src={userState.user.picture}
@@ -225,6 +218,8 @@ const Header: React.FC = React.memo(() => {
                   className="w-full h-full"
                 />
               </div>
+
+              
             </div>
           ) : (
             /* 登录按钮 */

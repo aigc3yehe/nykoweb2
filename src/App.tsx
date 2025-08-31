@@ -15,6 +15,7 @@ import Home from './pages/Home'
 import Recipes from './pages/Recipes'
 import AuthCallback from './pages/AuthCallback'
 import Profile from './pages/Profile'
+import Account from './pages/Account'
 import WorkflowDetail from './pages/WorkflowDetail'
 import ModelDetail from './pages/ModelDetail'
 import WorkflowBuilder from './pages/WorkflowBuilder'
@@ -52,6 +53,7 @@ function App() {
 
           {/* 需要登录的页面 */}
           <Route path=":lang/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path=":lang/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path=":lang/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
           <Route path=":lang/workflow/builder" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />
           <Route path=":lang/style/trainer" element={<ProtectedRoute><StyleTrainer /></ProtectedRoute>} />

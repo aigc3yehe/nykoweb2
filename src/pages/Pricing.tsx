@@ -116,7 +116,7 @@ const Pricing: React.FC = React.memo(() => {
 
   return (
     <div className="min-h-screen bg-background dark:bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-[1100px] flex flex-col gap-10">
+      <div className="w-full flex flex-col gap-10">
         <Seo title={t('pricing.title') + ' - MAVAE'} description={t('pricing.subtitle')} image="/og-image.png" />
         {/* 标题区域 */}
         <div className="relative w-full flex flex-col gap-2">
