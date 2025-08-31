@@ -77,8 +77,12 @@ const Header: React.FC = React.memo(() => {
   // 判断是否显示返回组件
   const shouldShowReturnComponent = () => {
     const path = location.pathname
-    return (path.includes('/workflow/') && path.split('/').length > 2) || // 工作流详情页面
-      (path.includes('/model/') && path.split('/').length > 2) // model详情页面
+    // 移除语言前缀后再判断
+    const pathWithoutLang = path.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, '')
+    if (pathWithoutLang.includes('/workflow/builder')) return false
+    if (pathWithoutLang.includes('/style/trainer')) return false
+    return (pathWithoutLang.includes('/workflow/') && pathWithoutLang.split('/').length > 2) || // 工作流详情页面
+      (pathWithoutLang.includes('/model/') && pathWithoutLang.split('/').length > 2) // model详情页面
   }
 
   // 获取会员等级图标
@@ -93,66 +97,107 @@ const Header: React.FC = React.memo(() => {
       <div className="flex h-full items-center justify-between px-2.5 pr-4 md:px-8 md:py-6">
         {/* 左侧：移动端菜单+Logo / PC端页面标题 */}
         <div className="flex items-center">
-          {shouldShowReturnComponent() ? (
-            <>
-              <button
-                onClick={() => navigate(-1)}
-                className="flex items-center gap-2 h-8"
-                aria-label="Return"
-              >
-                <ThemeAdaptiveIcon
-                  lightIcon={LeftIcon}
-                  darkIcon={LeftIconDark}
-                  alt="Return"
-                  size="lg"
-                />
-                <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark select-none">
-                  Return
-                </span>
-              </button>
-            </>
-                     ) : location.pathname.includes('/style/trainer') ? (
-             <>
-               <button
-                 onClick={() => navigate(-1)}
-                 className="flex items-center justify-center w-6 h-6 mr-2"
-                 aria-label="Back"
-               >
-                 <img src={BackIcon} alt="Back" className="w-6 h-6" />
-               </button>
-               <span className="font-lexend font-normal text-xl leading-[100%] text-text-main dark:text-text-main-dark select-none">
-                 {getPageTitle()}
-               </span>
-             </>
-          ) : (
-            <>
-              {/* 移动端：菜单按钮 + Logo */}
-              <div className="flex md:hidden items-center w-29 h-9 gap-1">
-                <button
-                  onClick={() => toggleSidebar()}
-                  className="w-12 h-12 flex items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors rounded-lg"
-                  aria-label="Toggle menu"
-                >
-                  <ThemeAdaptiveIcon
-                    lightIcon={RadixIcon}
-                    darkIcon={RadixIconDark}
-                    alt="Menu"
-                    size="lg"
-                  />
-                </button>
-                <ThemeAdaptiveIcon
-                  lightIcon={LogoMobileIcon}
-                  darkIcon={LogoMobileIconDark}
-                  alt="Logo"
-                  className="w-19 h-8.5"
-                />
-              </div>
-              {/* PC端页面标题 */}
-              <span className="hidden md:block font-lexend font-normal text-xl leading-[100%] text-text-main dark:text-text-main-dark select-none">
-                {getPageTitle()}
-              </span>
-            </>
-          )}
+                     {(() => {
+             // 移除语言前缀后再判断
+             const pathWithoutLang = location.pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, '')
+             
+             if (shouldShowReturnComponent()) {
+               return (
+                 <>
+                   <button
+                     onClick={() => navigate(-1)}
+                     className="flex items-center gap-2 h-8"
+                     aria-label="Return"
+                   >
+                     <ThemeAdaptiveIcon
+                       lightIcon={LeftIcon}
+                       darkIcon={LeftIconDark}
+                       alt="Return"
+                       size="lg"
+                     />
+                     <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark select-none">
+                       Return
+                     </span>
+                   </button>
+                 </>
+               )
+             } else if (pathWithoutLang.includes('/style/trainer')) {
+               return (
+                 <>
+                   <button
+                     onClick={() => navigate(-1)}
+                     className="flex items-center justify-center w-6 h-6 mr-2"
+                     aria-label="Back"
+                   >
+                     <img src={BackIcon} alt="Back" className="w-6 h-6" />
+                   </button>
+                   <span className="font-lexend font-normal text-xl leading-[100%] text-text-main dark:text-text-main-dark select-none">
+                     {getPageTitle()}
+                   </span>
+                 </>
+               )
+             } else if (pathWithoutLang.includes('/workflow/builder')) {
+               return (
+                 <>
+                   {/* 移动端：菜单按钮 + Logo */}
+                   <div className="flex md:hidden items-center w-29 h-9 gap-1">
+                     <button
+                       onClick={() => toggleSidebar()}
+                       className="w-12 h-12 flex items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors rounded-lg"
+                       aria-label="Toggle menu"
+                     >
+                       <ThemeAdaptiveIcon
+                         lightIcon={RadixIcon}
+                         darkIcon={RadixIconDark}
+                         alt="Menu"
+                         size="lg"
+                       />
+                     </button>
+                     <ThemeAdaptiveIcon
+                       lightIcon={LogoMobileIcon}
+                       darkIcon={LogoMobileIconDark}
+                       alt="Logo"
+                       className="w-19 h-8.5"
+                     />
+                   </div>
+                   {/* PC端：显示 "Builder" 标题 */}
+                   <span className="hidden md:block font-lexend font-normal text-xl leading-[100%] text-text-main dark:text-text-main-dark select-none">
+                     Builder
+                   </span>
+                 </>
+               )
+             } else {
+               return (
+                 <>
+                   {/* 移动端：菜单按钮 + Logo */}
+                   <div className="flex md:hidden items-center w-29 h-9 gap-1">
+                     <button
+                       onClick={() => toggleSidebar()}
+                       className="w-12 h-12 flex items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors rounded-lg"
+                       aria-label="Toggle menu"
+                     >
+                       <ThemeAdaptiveIcon
+                         lightIcon={RadixIcon}
+                         darkIcon={RadixIconDark}
+                         alt="Menu"
+                         size="lg"
+                       />
+                     </button>
+                     <ThemeAdaptiveIcon
+                       lightIcon={LogoMobileIcon}
+                       darkIcon={LogoMobileIconDark}
+                       alt="Logo"
+                       className="w-19 h-8.5"
+                     />
+                   </div>
+                   {/* PC端页面标题 */}
+                   <span className="hidden md:block font-lexend font-normal text-xl leading-[100%] text-text-main dark:text-text-main-dark select-none">
+                     {getPageTitle()}
+                   </span>
+                 </>
+               )
+                           }
+            })()}
         </div>
 
         {/* 右侧按钮组 */}
