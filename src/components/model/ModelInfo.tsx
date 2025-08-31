@@ -6,6 +6,8 @@ import AvatarIcon from '../../assets/mavae/avatar.svg'
 import AvatarIconDark from '../../assets/mavae/dark/avatar.svg'
 import CreateIcon from '../../assets/mavae/create.svg'
 import CreateIconDark from '../../assets/mavae/dark/create.svg'
+import TrainingIcon from '../../assets/mavae/Training.svg'
+import TrainingIconDark from '../../assets/mavae/dark/Training.svg'
 import ShareIcon from '../../assets/mavae/share.svg'
 import ShareIconDark from '../../assets/mavae/dark/share.svg'
 import LikeOutlineIcon from '../../assets/mavae/Like_outline.svg'
@@ -168,8 +170,60 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
     const latestTrain = model.model_tran[model.model_tran.length - 1]
     if (latestTrain.train_state === 2) return 'Ready'
     if (latestTrain.train_state === 1) return 'Training'
+    if (latestTrain.train_state === 0) return 'Queuing'
     if (latestTrain.train_state === -1) return 'Failed'
     return 'Training'
+  }
+
+  // 获取按钮显示文本
+  const getButtonText = () => {
+    if (!model?.model_tran || model.model_tran.length === 0) {
+      return 'Create With this Agent Case'
+    }
+    const latestTrain = model.model_tran[model.model_tran.length - 1]
+    if (latestTrain.train_state === 2) return 'Create With this Agent Case'
+    if (latestTrain.train_state === 1) return 'Training'
+    if (latestTrain.train_state === 0) return 'Queuing'
+    if (latestTrain.train_state === -1) return 'Training Failed'
+    return 'Training'
+  }
+
+  // 获取按钮样式
+  const getButtonStyles = () => {
+    if (!model?.model_tran || model.model_tran.length === 0) {
+      return {
+        background: 'bg-text-disable dark:bg-text-disable-dark',
+        textColor: 'text-white',
+        cursor: 'cursor-not-allowed'
+      }
+    }
+    const latestTrain = model.model_tran[model.model_tran.length - 1]
+    if (latestTrain.train_state === 2) {
+      return {
+        background: 'bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark',
+        textColor: 'text-white',
+        cursor: 'cursor-pointer'
+      }
+    }
+    if (latestTrain.train_state === 1 || latestTrain.train_state === 0) {
+      return {
+        background: 'bg-[#0DA3A3]',
+        textColor: 'text-white',
+        cursor: 'cursor-not-allowed'
+      }
+    }
+    if (latestTrain.train_state === -1) {
+      return {
+        background: 'bg-[#CA35421F]',
+        textColor: 'text-[#CA3542]',
+        cursor: 'cursor-not-allowed'
+      }
+    }
+    return {
+      background: 'bg-text-disable dark:bg-text-disable-dark',
+      textColor: 'text-white',
+      cursor: 'cursor-not-allowed'
+    }
   }
 
   // 是否ready
@@ -343,20 +397,16 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
         <button
           onClick={isReady ? handleUseNow : undefined}
           disabled={!isReady}
-          className={`flex items-center justify-center gap-1 h-10 px-4 rounded-full transition-colors flex-1 md:flex-none ${
-            isReady 
-              ? 'bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark' 
-              : 'bg-text-disable dark:bg-text-disable-dark cursor-not-allowed'
-          }`}
+          className={`flex items-center justify-center gap-1 h-10 px-4 rounded-full transition-colors flex-1 md:flex-none min-w-[12.5rem] ${getButtonStyles().background} ${getButtonStyles().cursor}`}
         >
           <ThemeAdaptiveIcon
-            lightIcon={CreateIcon}
-            darkIcon={CreateIconDark}
+            lightIcon={isReady ? CreateIcon : TrainingIcon}
+            darkIcon={isReady ? CreateIconDark : TrainingIconDark}
             alt="Use"
             size="lg"
           />
-          <span className="font-switzer font-medium text-sm leading-5 text-white">
-            Create With this Agent Case
+          <span className={`font-switzer font-medium text-sm leading-5 ${getButtonStyles().textColor}`}>
+            {getButtonText()}
           </span>
         </button>
 
