@@ -40,7 +40,7 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
   const getImageHeight = () => {
     if (imageHeightRem) return imageHeightRem
     if (content.calculatedHeight) return content.calculatedHeight
-    
+
     // 根据屏幕宽度动态计算卡片宽度
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
     const cardWidthRem = isMobile ? ((window.innerWidth - 48) / 16) : 18.375 // 移动端适配宽度，PC端294px
@@ -71,19 +71,19 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
   // 处理点赞
   const handleLikeClick = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    
+
     if (isLiking || !userState.isAuthenticated) return
 
     setIsLiking(true)
     try {
       const newIsLiked = !localContent.is_liked
       await likeContent(localContent.content_id, newIsLiked)
-      
+
       setLocalContent(prev => ({
         ...prev,
         is_liked: newIsLiked,
-        like_count: newIsLiked 
-          ? (prev.like_count || 0) + 1 
+        like_count: newIsLiked
+          ? (prev.like_count || 0) + 1
           : Math.max((prev.like_count || 0) - 1, 0)
       }))
     } catch (error) {
@@ -109,14 +109,14 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
   }
 
   return (
-    <div 
+    <div
       className="w-full md:w-[18.375rem] cursor-pointer rounded-xl bg-secondary dark:bg-secondary-dark pb-2 gap-2 hover:shadow-[0px_8px_16px_0px_rgba(18,18,26,0.1)] transition-shadow" // 移动端全宽，PC端294px，padding-bottom: 8px, gap: 8px, border-radius: 12px, background: #FFFFFF, hover效果
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Cover 区域 */}
-      <div 
+      <div
         className="relative w-full rounded-t-xl overflow-hidden bg-[#E8E8E8] dark:bg-gray-700" // 改为rounded-t-xl，只保留顶部圆角
         style={{ height: `${heightRem}rem` }}
       >
@@ -169,10 +169,10 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
             className="flex items-center gap-0.5 h-5 transition-opacity"
             style={{ opacity: isLiking ? 0.6 : 1 }}
           >
-            <img 
-              src={localContent.is_liked ? LikedIcon : LikeIcon} 
-              alt="Like" 
-              className="w-3 h-3" 
+            <img
+              src={localContent.is_liked ? LikedIcon : LikeIcon}
+              alt="Like"
+              className="w-3 h-3"
             />
             <span className={cn(
               "pb-px font-switzer font-medium text-xs leading-4 text-center",
