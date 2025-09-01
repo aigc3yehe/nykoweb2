@@ -5,17 +5,16 @@ import UploadIcon from '../assets/mavae/upload.svg'
 import UploadIconDark from '../assets/mavae/dark/upload.svg'
 import GptIcon from '../assets/mavae/gpt.svg'
 import GptIconDark from '../assets/mavae/dark/gpt.svg'
-import GeminiIcon from '../assets/mavae/gemini.svg'
-import GeminiIconDark from '../assets/mavae/dark/gemini.svg'
+//import GeminiIcon from '../assets/mavae/gemini.svg'
+//import GeminiIconDark from '../assets/mavae/dark/gemini.svg'
 import Gemini2Icon from '../assets/mavae/gemini2.svg'
 import Gemini2IconDark from '../assets/mavae/dark/gemini2.svg'
 import KlingIcon from '../assets/mavae/klingai.svg'
 import KlingIconDark from '../assets/mavae/dark/klingai.svg'
-import MidjourneyIcon from '../assets/mavae/midjourney.svg'
-import MidjourneyIconDark from '../assets/mavae/dark/midjourney.svg'
+//import MidjourneyIcon from '../assets/mavae/midjourney.svg'
+//import MidjourneyIconDark from '../assets/mavae/dark/midjourney.svg'
 import OutputLiveIcon from '../assets/mavae/output_live.svg'
 import OutputLiveIconDark from '../assets/mavae/dark/output_live.svg'
-import CloseIcon from '../assets/web2/close.svg'
 import StyleImageDeleteIcon from '../assets/mavae/style_image_delete.svg'
 import StyleImageDeleteIconDark from '../assets/mavae/dark/style_image_delete.svg'
 import ThemeAdaptiveIcon from '../components/ui/ThemeAdaptiveIcon'
@@ -27,12 +26,10 @@ import {
   availableInputTypesAtom,
   availableOutputTypesAtom,
   selectedInputTypeAtom,
-  selectedOutputTypeAtom,
   workflowFormAtom,
   fetchAiProvidersAtom,
   selectModelAtom,
   updateWorkflowFormAtom,
-  currentModelAtom,
   createWorkflowAtom,
   isCreatingWorkflowAtom,
   createWorkflowErrorAtom
@@ -53,9 +50,7 @@ const WorkflowBuilder: React.FC = () => {
   const [availableInputTypes] = useAtom(availableInputTypesAtom)
   const [availableOutputTypes] = useAtom(availableOutputTypesAtom)
   const [selectedInputType, setSelectedInputType] = useAtom(selectedInputTypeAtom)
-  const [selectedOutputType, setSelectedOutputType] = useAtom(selectedOutputTypeAtom)
   const [workflowForm] = useAtom(workflowFormAtom)
-  const [currentModel] = useAtom(currentModelAtom)
   const [userState] = useAtom(userStateAtom)
 
   // Store actions
@@ -71,13 +66,13 @@ const WorkflowBuilder: React.FC = () => {
   const [coverUrl, setCoverUrl] = useState<string | null>(null)
   const [refImage, setRefImage] = useState<File | null>(null)
   const [refImageUrl, setRefImageUrl] = useState<string | null>(null)
-  const [nameFocus, setNameFocus] = useState(false)
-  const [descFocus, setDescFocus] = useState(false)
-  const [promptFocus, setPromptFocus] = useState(false)
+  const [, setNameFocus] = useState(false)
+  const [, setDescFocus] = useState(false)
+  const [, setPromptFocus] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [isUploadingRefImage, setIsUploadingRefImage] = useState(false)
-  const [isDragOver, setIsDragOver] = useState(false)
-  const [isDragOverRefImage, setIsDragOverRefImage] = useState(false)
+  const [, setIsDragOver] = useState(false)
+  const [, setIsDragOverRefImage] = useState(false)
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -117,10 +112,10 @@ const WorkflowBuilder: React.FC = () => {
       console.error('Please select an image file')
       return
     }
-    
+
     setCover(file)
     setCoverUrl(URL.createObjectURL(file))
-    
+
     // 上传封面图片到S3
     try {
       setIsUploading(true)
@@ -152,7 +147,7 @@ const WorkflowBuilder: React.FC = () => {
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragOver(false)
-    
+
     const files = e.dataTransfer.files
     if (files && files[0]) {
       await handleFileUpload(files[0])
@@ -275,7 +270,7 @@ const WorkflowBuilder: React.FC = () => {
       <div className="flex items-center justify-center h-full w-full p-8">
         <div className="text-center">
           <span className="font-switzer text-sm text-red-500">Error: {providersError}</span>
-          <button 
+          <button
             onClick={() => fetchAiProviders()}
             className="mt-4 px-4 py-2 bg-link-default dark:bg-link-default-dark text-white rounded-lg hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors"
           >

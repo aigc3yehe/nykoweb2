@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { userStateAtom, logoutAtom } from '../store/loginStore'
 import { useLang, withLangPrefix } from '../hooks/useLang'
 import FreeIcon from '../assets/mavae/free.svg'
-import PlusIcon from '../assets/mavae/plus.svg'
-import ProIcon from '../assets/mavae/pro.svg'
+//import PlusIcon from '../assets/mavae/plus.svg'
+//import ProIcon from '../assets/mavae/pro.svg'
 
 const Account: React.FC = () => {
     const navigate = useNavigate()

@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAtom, useSetAtom } from 'jotai'
 import avatarSvg from '../../assets/Avatar.svg'
 import AvatarIcon from '../../assets/mavae/avatar.svg'
@@ -14,8 +13,6 @@ import LikeOutlineIcon from '../../assets/mavae/Like_outline.svg'
 import LikeOutlineIconDark from '../../assets/mavae/dark/Like_outline.svg'
 import LikedIcon from '../../assets/mavae/Liked.svg'
 import LikedIconDark from '../../assets/mavae/dark/Liked.svg'
-import CopyIcon from '../../assets/mavae/copy.svg'
-import CopyIconDark from '../../assets/mavae/dark/copy.svg'
 import AddIcon from '../../assets/mavae/add.svg'
 import AddIconDark from '../../assets/mavae/dark/add.svg'
 import FinishIcon from '../../assets/mavae/finish.svg'
@@ -31,7 +28,6 @@ import { addToastAtom } from '../../store/toastStore'
 import { shareCurrentPage } from '../../utils/share'
 import { sendMessage } from '../../store/assistantStore'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
-import { formatNumber } from '../../utils'
 
 interface ModelInfoProps {
   className?: string
@@ -40,7 +36,6 @@ interface ModelInfoProps {
 const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
   const [state] = useAtom(modelDetailAtom)
   const model = state.model
-  const navigate = useNavigate()
   const { openChat } = useChatSidebar()
   const toggleLikeModel = useSetAtom(toggleLikeModelAtom)
   const { t } = useI18n()
@@ -72,7 +67,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
   }
 
   // 渲染类型标签
-  const renderTypeTags = (types: string[], typeName: string) => {
+  const renderTypeTags = (types: string[]) => {
     if (!types || types.length === 0) return null
 
     return (
@@ -147,7 +142,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
             <span className="font-switzer font-medium text-xs leading-4 text-text-secondary dark:text-text-secondary-dark">
               {title}
             </span>
-            {renderTypeTags(types, title)}
+            {renderTypeTags(types)}
           </div>
         </div>
       </div>
@@ -230,26 +225,6 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
   const isReady = getTrainStatusText() === 'Ready'
 
   // 获取训练状态颜色
-  const getTrainStatusClasses = () => {
-    if (!model?.model_tran || model.model_tran.length === 0) {
-      return 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-    }
-    const latestTrain = model.model_tran[model.model_tran.length - 1]
-    if (latestTrain.train_state === 2) {
-      return 'bg-[#DBFFE5] dark:bg-green-900 text-[#319F43] dark:text-green-400'
-    }
-    if (latestTrain.train_state === 1) {
-      return 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
-    }
-    if (latestTrain.train_state === 0) {
-      return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400'
-    }
-    if (latestTrain.train_state === -1) {
-      return 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400'
-    }
-    return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400'
-  }
-
   const handleUseNow = () => {
     // 1. 打开右侧聊天窗口（包含登录检查）
     // 2. 发送消息：I want to generate an image.
@@ -297,8 +272,8 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
               size="lg"
             />
             <span className={`font-switzer font-medium text-sm leading-5 ${model?.is_liked
-                ? 'text-[#F6465D]'
-                : 'text-text-secondary dark:text-text-secondary-dark'
+              ? 'text-[#F6465D]'
+              : 'text-text-secondary dark:text-text-secondary-dark'
               }`}>
               {typeof model?.like_count === 'number' ? model.like_count : 0}
             </span>
@@ -381,10 +356,10 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
           <div className="flex flex-col">
             {/* 第一行：Input */}
             {renderBuilderStep(1, 'Input', ['Text'])}
-            
+
             {/* 第二行：Model */}
             {renderBuilderStep(2, 'Model', ['StableDiffusionXL'])}
-            
+
             {/* 第三行：Output */}
             {renderBuilderStep(3, 'Output', ['Image'])}
           </div>
@@ -438,8 +413,8 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
             size="lg"
           />
           <span className={`font-switzer font-medium text-sm leading-5 ${model?.is_liked
-              ? 'text-[#F6465D]'
-              : 'text-text-secondary dark:text-text-secondary-dark'
+            ? 'text-[#F6465D]'
+            : 'text-text-secondary dark:text-text-secondary-dark'
             }`}>
             {typeof model?.like_count === 'number' ? model.like_count : 0}
           </span>

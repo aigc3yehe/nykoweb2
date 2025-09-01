@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { cn } from '../../utils/cn'
+import { cn } from '../../utils'
 import PictureIcon from '../../assets/mavae/Picture.svg'
 import PictureIconDark from '../../assets/mavae/dark/Picture.svg'
 import LiveIcon from '../../assets/mavae/live.svg'
@@ -13,14 +13,14 @@ interface ProfileActionsProps {
   onFilterChange?: (filterOption: ContentTypeFilter) => void
 }
 
-const ProfileActions: React.FC<ProfileActionsProps> = ({ activeTab, onFilterChange }) => {
+const ProfileActions: React.FC<ProfileActionsProps> = ({onFilterChange }) => {
   const [selectedOption, setSelectedOption] = useState<ContentTypeFilter>('workflows')
 
   const options: ContentTypeFilter[] = ['workflows', 'models', 'images', 'videos']
 
   const handleOptionSelect = (option: ContentTypeFilter) => {
     setSelectedOption(option)
-    
+
     // 调用父组件的过滤回调
     if (onFilterChange) {
       onFilterChange(option)
@@ -46,15 +46,15 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ activeTab, onFilterChan
           >
             {/* 图标 - 仅对 images 和 videos 显示 */}
             {(option === 'images' || option === 'videos') && (
-              <img 
-                src={option === 'images' ? PictureIcon : LiveIcon} 
+              <img
+                src={option === 'images' ? PictureIcon : LiveIcon}
                 alt={option}
                 className="w-4 h-4 flex-shrink-0 dark:hidden" // 16x16px, 浅色模式显示
               />
             )}
             {(option === 'images' || option === 'videos') && (
-              <img 
-                src={option === 'images' ? PictureIconDark : LiveIconDark} 
+              <img
+                src={option === 'images' ? PictureIconDark : LiveIconDark}
                 alt={option}
                 className="w-4 h-4 flex-shrink-0 hidden dark:block" // 16x16px, 深色模式显示
               />

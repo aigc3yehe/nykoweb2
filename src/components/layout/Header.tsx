@@ -3,12 +3,10 @@ import { useAtom, useSetAtom } from 'jotai'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toggleSidebarAtom } from '../../store/sidebarStore'
 import { showLoginModalAtom, userStateAtom } from '../../store/loginStore'
-import { useI18n } from '../../hooks/useI18n'
+//import { useI18n } from '../../hooks/useI18n'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { getCurrentTheme, toggleTheme } from '../../utils/theme'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
-import MenuIcon from '../../assets/web2/menu.svg'
-import BackIcon from '../../assets/web2/back.svg'
 import LeftIcon from '../../assets/mavae/left.svg'
 import LeftIconDark from '../../assets/mavae/dark/left.svg'
 import CreditIcon from '../../assets/mavae/credit_btn.svg'
@@ -23,11 +21,11 @@ import SunIconDark from '../../assets/mavae/dark/sun.svg'
 import MoonIcon from '../../assets/mavae/moom.svg'
 import MoonIconDark from '../../assets/mavae/dark/moom.svg'
 import FreeIcon from '../../assets/mavae/free.svg'
-import PlusIcon from '../../assets/mavae/plus.svg'
-import ProIcon from '../../assets/mavae/pro.svg'
+//import PlusIcon from '../../assets/mavae/plus.svg'
+//import ProIcon from '../../assets/mavae/pro.svg'
 
 const Header: React.FC = React.memo(() => {
-  const { t } = useI18n()
+  //const { t } = useI18n()
   const lang = useLang()
   const navigate = useNavigate()
   const location = useLocation()
@@ -105,62 +103,61 @@ const Header: React.FC = React.memo(() => {
       <div className="flex h-full items-center justify-between px-2.5 pr-4 md:px-8 md:py-6">
         {/* 左侧：移动端菜单+Logo / PC端页面标题 */}
         <div className="flex items-center">
-                     {(() => {
-             // 移除语言前缀后再判断
-             const pathWithoutLang = location.pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, '')
-             
-             if (shouldShowReturnComponent()) {
-               return (
-                 <>
-                   <button
-                     onClick={() => navigate(-1)}
-                     className="flex items-center gap-2 h-8"
-                     aria-label="Return"
-                   >
-                     <ThemeAdaptiveIcon
-                       lightIcon={LeftIcon}
-                       darkIcon={LeftIconDark}
-                       alt="Return"
-                       size="lg"
-                     />
-                     <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark select-none">
-                       Return
-                     </span>
-                   </button>
-                 </>
-               )
-             } else {
-               return (
-                 <>
-                   {/* 移动端：菜单按钮 + Logo */}
-                   <div className="flex md:hidden items-center w-29 h-9 gap-1">
-                     <button
-                       onClick={() => toggleSidebar()}
-                       className="w-12 h-12 flex items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors rounded-lg"
-                       aria-label="Toggle menu"
-                     >
-                       <ThemeAdaptiveIcon
-                         lightIcon={RadixIcon}
-                         darkIcon={RadixIconDark}
-                         alt="Menu"
-                         size="lg"
-                       />
-                     </button>
-                     <ThemeAdaptiveIcon
-                       lightIcon={LogoMobileIcon}
-                       darkIcon={LogoMobileIconDark}
-                       alt="Logo"
-                       className="w-19 h-8.5"
-                     />
-                   </div>
-                   {/* PC端页面标题 */}
-                   <span className="hidden md:block font-lexend font-normal text-xl leading-[100%] text-text-main dark:text-text-main-dark select-none">
-                     {getPageTitle()}
-                   </span>
-                 </>
-               )
-                           }
-            })()}
+          {(() => {
+            // 移除语言前缀后再判断
+            location.pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, '');
+            if (shouldShowReturnComponent()) {
+              return (
+                <>
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-2 h-8"
+                    aria-label="Return"
+                  >
+                    <ThemeAdaptiveIcon
+                      lightIcon={LeftIcon}
+                      darkIcon={LeftIconDark}
+                      alt="Return"
+                      size="lg"
+                    />
+                    <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark select-none">
+                      Return
+                    </span>
+                  </button>
+                </>
+              )
+            } else {
+              return (
+                <>
+                  {/* 移动端：菜单按钮 + Logo */}
+                  <div className="flex md:hidden items-center w-29 h-9 gap-1">
+                    <button
+                      onClick={() => toggleSidebar()}
+                      className="w-12 h-12 flex items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors rounded-lg"
+                      aria-label="Toggle menu"
+                    >
+                      <ThemeAdaptiveIcon
+                        lightIcon={RadixIcon}
+                        darkIcon={RadixIconDark}
+                        alt="Menu"
+                        size="lg"
+                      />
+                    </button>
+                    <ThemeAdaptiveIcon
+                      lightIcon={LogoMobileIcon}
+                      darkIcon={LogoMobileIconDark}
+                      alt="Logo"
+                      className="w-19 h-8.5"
+                    />
+                  </div>
+                  {/* PC端页面标题 */}
+                  <span className="hidden md:block font-lexend font-normal text-xl leading-[100%] text-text-main dark:text-text-main-dark select-none">
+                    {getPageTitle()}
+                  </span>
+                </>
+              )
+            }
+          })()}
         </div>
 
         {/* 右侧按钮组 */}
@@ -192,11 +189,11 @@ const Header: React.FC = React.memo(() => {
           {userState.isAuthenticated && userState.user ? (
             /* 用户头像 - 移动端36*36px / PC端48*48px 圆形 + 会员等级标识 */
             <div className="relative" ref={userMenuRef}>
-                             <button
-                 onClick={handleUserClick}
-                 className="w-9 h-9 md:w-12 md:h-12 rounded-full bg-[#E5E7EB] hover:bg-[#D1D5DB] transition-colors overflow-hidden flex items-center justify-center"
-                 aria-label="User account"
-               >
+              <button
+                onClick={handleUserClick}
+                className="w-9 h-9 md:w-12 md:h-12 rounded-full bg-[#E5E7EB] hover:bg-[#D1D5DB] transition-colors overflow-hidden flex items-center justify-center"
+                aria-label="User account"
+              >
                 {userState.user.picture ? (
                   <img
                     src={userState.user.picture}
@@ -219,7 +216,7 @@ const Header: React.FC = React.memo(() => {
                 />
               </div>
 
-              
+
             </div>
           ) : (
             /* 登录按钮 */

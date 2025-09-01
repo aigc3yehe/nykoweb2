@@ -10,7 +10,7 @@ import ChatSidebar from './ChatSidebar'
 import PublishModal from '../modals/PublishModal'
 import SettingsModal from '../modals/SettingsModal'
 import StyleTrainerSettingsModal from '../modals/StyleTrainerSettingsModal'
-import { useLocation } from 'react-router-dom'
+//import { useLocation } from 'react-router-dom'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -19,7 +19,7 @@ interface AppLayoutProps {
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const initTheme = useSetAtom(initThemeAtom)
   const initLanguage = useSetAtom(initLanguageAtom)
-  const location = useLocation()
+  //const location = useLocation()
 
   // 移动端模态框状态
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false)

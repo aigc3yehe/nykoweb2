@@ -6,7 +6,6 @@ import { useI18n } from '../../hooks/useI18n'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 import BgLogo from '../../assets/web2/workflow_setting.svg'
 import CoverSelectIcon from '../../assets/web2/cover_select.svg'
-import CloseIcon from '../../assets/web2/close.svg'
 import StyleImageDeleteIcon from '../../assets/mavae/style_image_delete.svg'
 import StyleImageDeleteIconDark from '../../assets/mavae/dark/style_image_delete.svg'
 import PublishIcon from '../../assets/web2/publish.svg'
@@ -18,7 +17,7 @@ const PublishSidebar: React.FC = () => {
   const { t } = useI18n()
   const navigate = useNavigate()
   const lang = useLang()
-  
+
   // Store 状态
   const [workflowForm] = useAtom(workflowFormAtom)
   const [, updateWorkflowForm] = useAtom(updateWorkflowFormAtom)
@@ -26,7 +25,7 @@ const PublishSidebar: React.FC = () => {
   const [isCreatingWorkflow] = useAtom(isCreatingWorkflowAtom)
   const [createWorkflowError] = useAtom(createWorkflowErrorAtom)
   const [userState] = useAtom(userStateAtom)
-  
+
   // 本地状态
   const [cover, setCover] = useState<File | null>(null)
   const [coverUrl, setCoverUrl] = useState<string | null>(null)
@@ -42,10 +41,10 @@ const PublishSidebar: React.FC = () => {
       console.error('Please select an image file')
       return
     }
-    
+
     setCover(file)
     setCoverUrl(URL.createObjectURL(file))
-    
+
     // 上传封面图片到S3
     try {
       setIsUploading(true)
@@ -77,39 +76,39 @@ const PublishSidebar: React.FC = () => {
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragOver(false)
-    
+
     const files = e.dataTransfer.files
     if (files && files[0]) {
       await handleFileUpload(files[0])
     }
   }
-  
+
   const handleRemoveCover = () => {
     setCover(null)
     setCoverUrl(null)
     updateWorkflowForm({ cover: '' })
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
-  
+
   const handlePublish = async () => {
     // 检查用户是否已登录
     if (!userState.isAuthenticated || !userState.userDetails?.did) {
       console.error('User not authenticated or missing user ID')
       return
     }
-    
+
     const userId = userState.userDetails.did
-    
+
     try {
       const result = await createWorkflow(userId)
       if (result && result.workflow_id) {
         // 创建成功，显示成功提示
         setSuccessMessage('Workflow created successfully!')
-        
+
         // 重置本地状态
         setCover(null)
         setCoverUrl(null)
-        
+
         // 延迟跳转到工作流详情页
         setTimeout(() => {
       navigate(withLangPrefix(lang, `/workflow/${result.workflow_id}`))
@@ -212,14 +211,14 @@ const PublishSidebar: React.FC = () => {
             <span className="text-green-600 dark:text-green-400 text-sm font-lexend">{successMessage}</span>
           </div>
         )}
-        
+
         {/* 错误提示 */}
         {createWorkflowError && (
           <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <span className="text-red-600 dark:text-red-400 text-sm font-lexend">{createWorkflowError}</span>
           </div>
         )}
-        
+
         <button
           onClick={handlePublish}
           disabled={isCreatingWorkflow || isUploading || !workflowForm.name.trim() || !userState.isAuthenticated}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAtom, useSetAtom } from 'jotai'
+//import { useNavigate } from 'react-router-dom'
+import { useSetAtom } from 'jotai'
 import avatarSvg from '../../assets/Avatar.svg'
 import AvatarIcon from '../../assets/mavae/avatar.svg'
 import AvatarIconDark from '../../assets/mavae/dark/avatar.svg'
@@ -22,14 +22,14 @@ import PictureIcon from '../../assets/mavae/Picture.svg'
 import PictureIconDark from '../../assets/mavae/dark/Picture.svg'
 import GptIcon from '../../assets/mavae/gpt.svg'
 import GptIconDark from '../../assets/mavae/dark/gpt.svg'
-import GeminiIcon from '../../assets/mavae/gemini.svg'
-import GeminiIconDark from '../../assets/mavae/dark/gemini.svg'
+//import GeminiIcon from '../../assets/mavae/gemini.svg'
+//import GeminiIconDark from '../../assets/mavae/dark/gemini.svg'
 import Gemini2Icon from '../../assets/mavae/gemini2.svg'
 import Gemini2IconDark from '../../assets/mavae/dark/gemini2.svg'
 import KlingIcon from '../../assets/mavae/klingai.svg'
 import KlingIconDark from '../../assets/mavae/dark/klingai.svg'
-import MidjourneyIcon from '../../assets/mavae/midjourney.svg'
-import MidjourneyIconDark from '../../assets/mavae/dark/midjourney.svg'
+//import MidjourneyIcon from '../../assets/mavae/midjourney.svg'
+//import MidjourneyIconDark from '../../assets/mavae/dark/midjourney.svg'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { toggleLikeWorkflowAtom } from '../../store/workflowDetailStore'
 import { useI18n } from '../../hooks/useI18n'
@@ -44,7 +44,7 @@ interface WorkflowInfoProps {
 }
 
 const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' }) => {
-  const navigate = useNavigate()
+  //const navigate = useNavigate()
   const { openChat } = useChatSidebar()
   const toggleLikeWorkflow = useSetAtom(toggleLikeWorkflowAtom)
   const { t } = useI18n()
@@ -89,7 +89,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
   }
 
   // 渲染类型标签
-  const renderTypeTags = (types: string[], typeName: string, provider?: string) => {
+  const renderTypeTags = (types: string[], _typeName: string, provider?: string) => {
     if (!types || types.length === 0) return null
 
     return (
@@ -199,14 +199,6 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
         type: 'error'
       })
     }
-  }
-
-  const handleAnalyze = () => {
-    // 分析功能实现
-    addToast({
-      message: 'Analyze feature coming soon',
-      type: 'info'
-    })
   }
 
   const handleCopyPrompt = async () => {

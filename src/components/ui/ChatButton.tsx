@@ -1,7 +1,7 @@
-import React from 'react'
-import { useAtom } from 'jotai'
+import React, { useEffect } from 'react'
+import { useAtom, useSetAtom } from 'jotai'
 import { useLocation } from 'react-router-dom'
-import { chatSidebarAtom } from '../../store/chatSidebarStore'
+import { chatSidebarAtom, closeChatSidebar } from '../../store/chatSidebarStore'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
 import ChatIcon from '../../assets/mavae/chat.svg'
 import ChatIconDark from '../../assets/mavae/dark/chat.svg'
@@ -12,6 +12,7 @@ import ThemeAdaptiveIcon from './ThemeAdaptiveIcon'
 const ChatButton: React.FC = () => {
   const [chatSidebar] = useAtom(chatSidebarAtom)
   const { openChat } = useChatSidebar()
+  const closeSidebar = useSetAtom(closeChatSidebar)
   const location = useLocation()
   const { t } = useI18n()
   useLang() // ensure language context ties to URL
@@ -30,6 +31,13 @@ const ChatButton: React.FC = () => {
     const path = location.pathname
     return /\/(en|zh-CN|zh-HK)\/workflow\//.test(path) || /\/(en|zh-CN|zh-HK)\/model\//.test(path)
   })()
+
+  // 当用户离开详情页面时，自动关闭聊天侧边栏
+  useEffect(() => {
+    if (chatSidebar.isOpen && !isDetailPage) {
+      closeSidebar()
+    }
+  }, [location.pathname, chatSidebar.isOpen, isDetailPage, closeSidebar])
 
   // 只在详情页显示，当侧边栏打开时或在特定页面时，不显示聊天按钮
   if (!isDetailPage || chatSidebar.isOpen || shouldHideChatButton) {

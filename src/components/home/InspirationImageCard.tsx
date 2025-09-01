@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
-import { cn } from '../../utils/cn'
+import { cn } from '../../utils'
 import { ContentItem, likeContentAtom } from '../../store/contentsStore'
 import { useAtom, useSetAtom } from 'jotai'
 import { userStateAtom } from '../../store/loginStore'
 import { openContentDetailAtom } from '../../store/contentDetailStore'
 import { getScaledImageUrl } from '../../utils'
-import VideoIcon from '../../assets/web2/video.svg'
 import LikeIcon from '../../assets/web2/like.svg'
 import LikedIcon from '../../assets/web2/liked.svg'
 import avatarSvg from '../../assets/mavae/avatar.svg'
@@ -26,7 +25,7 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
   onClick
 }) => {
   const [imageError, setImageError] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
+  const [, setIsHovered] = useState(false)
   const [isLiking, setIsLiking] = useState(false)
   const [localContent, setLocalContent] = useState(content)
   const [, likeContent] = useAtom(likeContentAtom)
@@ -202,4 +201,4 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
   )
 }
 
-export default InspirationImageCard 
+export default InspirationImageCard

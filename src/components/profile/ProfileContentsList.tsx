@@ -133,17 +133,17 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     return (
       <div className="flex flex-col items-center justify-center py-10 gap-6"> {/* padding-top: 40px, padding-bottom: 40px, gap: 24px */}
         {/* 图标 */}
-        <img 
-          src={NanananaIcon} 
-          alt="Empty" 
+        <img
+          src={NanananaIcon}
+          alt="Empty"
           className="w-[7.5rem] h-[7.5rem] dark:hidden" // 120x120px, 浅色模式显示
         />
-        <img 
-          src={NanananaIconDark} 
-          alt="Empty" 
+        <img
+          src={NanananaIconDark}
+          alt="Empty"
           className="w-[7.5rem] h-[7.5rem] hidden dark:block" // 120x120px, 深色模式显示
         />
-        
+
         {/* 文本提示 */}
         <div className="flex flex-col items-center gap-1"> {/* 两行文本间距4px */}
           <p className="font-switzer font-medium text-2xl leading-8 text-text-main dark:text-text-main-dark text-center"> {/* font-size: 24px, line-height: 32px */}
@@ -168,7 +168,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
   // 内容卡片组件 - 参考 InspirationImageCard 实现
   const ContentCard: React.FC<{ item: ContentItem }> = ({ item }) => {
     const [imageError, setImageError] = useState(false)
-    const [isHovered, setIsHovered] = useState(false)
+    const [, setIsHovered] = useState(false)
     const [isLiking, setIsLiking] = useState(false)
     const [localContent, setLocalContent] = useState(item)
     const [, likeContent] = useAtom(likeContentAtom)
@@ -210,19 +210,19 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     // 处理点赞
     const handleLikeClick = async (e: React.MouseEvent) => {
       e.stopPropagation()
-      
+
       if (isLiking || !userState.isAuthenticated) return
 
       setIsLiking(true)
       try {
         const newIsLiked = !localContent.is_liked
         await likeContent(localContent.content_id, newIsLiked)
-        
+
         setLocalContent(prev => ({
           ...prev,
           is_liked: newIsLiked,
-          like_count: newIsLiked 
-            ? (prev.like_count || 0) + 1 
+          like_count: newIsLiked
+            ? (prev.like_count || 0) + 1
             : Math.max((prev.like_count || 0) - 1, 0)
         }))
       } catch (error) {
@@ -244,14 +244,14 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     }
 
     return (
-      <div 
+      <div
         className="w-full md:w-[18.375rem] cursor-pointer rounded-xl bg-secondary dark:bg-secondary-dark pb-2 gap-2 hover:shadow-[0px_8px_16px_0px_rgba(18,18,26,0.1)] transition-shadow" // 移动端全宽，PC端294px，padding-bottom: 8px, gap: 8px, border-radius: 12px, background: #FFFFFF, hover效果
         onClick={handleCardClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Cover 区域 */}
-        <div 
+        <div
           className="relative w-full rounded-t-xl overflow-hidden bg-[#E8E8E8] dark:bg-gray-700" // 改为rounded-t-xl，只保留顶部圆角
           style={{ height: `${heightRem}rem` }}
         >
@@ -304,10 +304,10 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
               className="flex items-center gap-0.5 h-5 transition-opacity"
               style={{ opacity: isLiking ? 0.6 : 1 }}
             >
-              <img 
-                src={localContent.is_liked ? LikedIcon : LikeIcon} 
-                alt="Like" 
-                className="w-3 h-3" 
+              <img
+                src={localContent.is_liked ? LikedIcon : LikeIcon}
+                alt="Like"
+                className="w-3 h-3"
               />
               <span className={cn(
                 "pb-px font-switzer font-medium text-xs leading-4 text-center",
@@ -390,4 +390,4 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
   )
 }
 
-export default ProfileContentsList 
+export default ProfileContentsList

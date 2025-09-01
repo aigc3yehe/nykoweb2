@@ -1,19 +1,15 @@
 import React, { useState } from 'react'
-import { cn } from '../../utils/cn'
+import { cn } from '../../utils'
 import { FeaturedItem } from '../../store/featuredStore'
 import { getScaledImageUrl } from '../../utils'
-import VideoIcon from '../../assets/web2/video.svg'
-import UseIcon from '../../assets/web2/use.svg'
-import UseCountIcon from '../../assets/web2/use_2.svg'
-import LikeIcon from '../../assets/web2/like.svg'
 import avatarSvg from '../../assets/Avatar.svg'
 import PictureIcon from '../../assets/mavae/Picture_white.svg'
 import VideoIconNew from '../../assets/mavae/video_white.svg'
 import UseIconNew from '../../assets/mavae/use_white.svg'
 import BookmarkNormalIcon from '../../assets/mavae/Bookmark_normal.svg'
-import BookmarkYellowIcon from '../../assets/mavae/Bookmark_yellow.svg'
-import BookmarkNormalIconDark from '../../assets/mavae/dark/Bookmark_normal.svg'
-import BookmarkYellowIconDark from '../../assets/mavae/dark/Bookmark_yellow.svg'
+//import BookmarkYellowIcon from '../../assets/mavae/Bookmark_yellow.svg'
+//import BookmarkNormalIconDark from '../../assets/mavae/dark/Bookmark_normal.svg'
+//import BookmarkYellowIconDark from '../../assets/mavae/dark/Bookmark_yellow.svg'
 
 interface MobileStyle {
   width: string
@@ -37,88 +33,92 @@ interface WorkflowCardProps {
   variant?: 'workflow' | 'style' | 'recipes_workflow' | 'recipes_style' | 'profile_workflow' | 'profile_style'
 }
 
-const WorkflowCard: React.FC<WorkflowCardProps> = ({ 
-  item, 
-  onClick, 
+const WorkflowCard: React.FC<WorkflowCardProps> = ({
+  item,
+  onClick,
   onUseClick,
   variant = 'workflow'
 }) => {
   const [imageError, setImageError] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
+  const [, setIsHovered] = useState(false)
+
+  if (onUseClick === undefined) {
+    console.log('onUseClick is undefined')
+  }
 
   // 判断是否为视频
   const isVideo = item.cover?.includes('.mp4') || item.cover?.includes('.webm')
 
-     // 根据variant和屏幕尺寸确定尺寸
-   const getCardDimensions = (): CardDimensions => {
-     if (variant === 'style') {
-       // Trending Styles: PC端和workflow一样显示描述，移动端高度416px且不显示描述
-       return {
-         card: 'w-[15rem] md:w-[14.375rem] h-[26rem] md:h-[27.3125rem] min-w-[15rem] md:min-w-[14.375rem] max-w-[15rem] pb-2 gap-2', // 移动端: 240x416px, PC端: 230x437px
-         cover: 'w-[15rem] md:w-[14.375rem] h-[22.5rem] md:h-[21.5625rem]', // 移动端: 240x360px, PC端: 230x345px
-         container: 'w-[15rem] md:w-[14.375rem]',
-         showDescription: true, // PC端显示描述
-         showUser: true
-       }
-         } else if (variant === 'recipes_workflow' || variant === 'recipes_style') {
-       // Recipes Workflows/Styles页面: 移动端宽度占满，PC端固定尺寸
-       return {
-         card: 'w-full md:w-[14.9rem] h-[39.3125rem] md:h-[28.1rem] min-w-full md:min-w-[14.9rem] max-w-full md:max-w-[14.9rem] pb-2 gap-2', // 移动端: 宽度占满, 高度629px, PC端: 238.4x449.6px
-         cover: 'w-full md:w-[14.9rem] h-[33.5625rem] md:h-[22.35rem]', // 移动端: 宽度占满, 高度537px, PC端: 238.4x357.6px
-         container: 'w-full md:w-[14.9rem]',
-         showDescription: true,
-         showUser: true
-       }
-     } else if (variant === 'profile_workflow' || variant === 'profile_style') {
-       // Profile Workflows/Styles页面: 与recipes相同的布局样式
-       return {
-         card: 'w-full md:w-[14.9rem] h-[39.3125rem] md:h-[28.1rem] min-w-full md:min-w-[14.9rem] max-w-full md:max-w-[14.9rem] pb-2 gap-2', // 移动端: 宽度占满, 高度629px, PC端: 238.4x449.6px
-         cover: 'w-full md:w-[14.9rem] h-[33.5625rem] md:h-[22.35rem]', // 移动端: 宽度占满, 高度537px, PC端: 238.4x357.6px
-         container: 'w-full md:w-[14.9rem]',
-         showDescription: true,
-         showUser: true
-       }
-         } else {
-       // Popular Workflows: 新的设计 - PC端: width: 230px, height: 437px; 移动端: width: 240px, height: 452px
-       return {
-         card: 'w-[15rem] md:w-[14.375rem] h-[28.25rem] md:h-[27.3125rem] min-w-[15rem] md:min-w-[14.375rem] max-w-[15rem] pb-2 gap-2', // 移动端: 240x452px, PC端: 230x437px
-         cover: 'w-[15rem] md:w-[14.375rem] h-[22.5rem] md:h-[21.5625rem]', // 移动端: 240x360px, PC端: 230x345px
-         container: 'w-[15rem] md:w-[14.375rem]',
-         showDescription: true,
-         showUser: true
-       }
+  // 根据variant和屏幕尺寸确定尺寸
+  const getCardDimensions = (): CardDimensions => {
+    if (variant === 'style') {
+      // Trending Styles: PC端和workflow一样显示描述，移动端高度416px且不显示描述
+      return {
+        card: 'w-[15rem] md:w-[14.375rem] h-[26rem] md:h-[27.3125rem] min-w-[15rem] md:min-w-[14.375rem] max-w-[15rem] pb-2 gap-2', // 移动端: 240x416px, PC端: 230x437px
+        cover: 'w-[15rem] md:w-[14.375rem] h-[22.5rem] md:h-[21.5625rem]', // 移动端: 240x360px, PC端: 230x345px
+        container: 'w-[15rem] md:w-[14.375rem]',
+        showDescription: true, // PC端显示描述
+        showUser: true
+      }
+    } else if (variant === 'recipes_workflow' || variant === 'recipes_style') {
+      // Recipes Workflows/Styles页面: 移动端宽度占满，PC端固定尺寸
+      return {
+        card: 'w-full md:w-[14.9rem] h-[39.3125rem] md:h-[28.1rem] min-w-full md:min-w-[14.9rem] max-w-full md:max-w-[14.9rem] pb-2 gap-2', // 移动端: 宽度占满, 高度629px, PC端: 238.4x449.6px
+        cover: 'w-full md:w-[14.9rem] h-[33.5625rem] md:h-[22.35rem]', // 移动端: 宽度占满, 高度537px, PC端: 238.4x357.6px
+        container: 'w-full md:w-[14.9rem]',
+        showDescription: true,
+        showUser: true
+      }
+    } else if (variant === 'profile_workflow' || variant === 'profile_style') {
+      // Profile Workflows/Styles页面: 与recipes相同的布局样式
+      return {
+        card: 'w-full md:w-[14.9rem] h-[39.3125rem] md:h-[28.1rem] min-w-full md:min-w-[14.9rem] max-w-full md:max-w-[14.9rem] pb-2 gap-2', // 移动端: 宽度占满, 高度629px, PC端: 238.4x449.6px
+        cover: 'w-full md:w-[14.9rem] h-[33.5625rem] md:h-[22.35rem]', // 移动端: 宽度占满, 高度537px, PC端: 238.4x357.6px
+        container: 'w-full md:w-[14.9rem]',
+        showDescription: true,
+        showUser: true
+      }
+    } else {
+      // Popular Workflows: 新的设计 - PC端: width: 230px, height: 437px; 移动端: width: 240px, height: 452px
+      return {
+        card: 'w-[15rem] md:w-[14.375rem] h-[28.25rem] md:h-[27.3125rem] min-w-[15rem] md:min-w-[14.375rem] max-w-[15rem] pb-2 gap-2', // 移动端: 240x452px, PC端: 230x437px
+        cover: 'w-[15rem] md:w-[14.375rem] h-[22.5rem] md:h-[21.5625rem]', // 移动端: 240x360px, PC端: 230x345px
+        container: 'w-[15rem] md:w-[14.375rem]',
+        showDescription: true,
+        showUser: true
+      }
     }
   }
 
   const dimensions = getCardDimensions()
 
-     const getCoverWidthInPixels = () => {
-     switch (variant) {
-       case 'workflow':
-       case 'style':
-         // 根据屏幕尺寸返回不同宽度
-         if (typeof window !== 'undefined' && window.innerWidth < 768) {
-           return 240 // 移动端: 240px
-         }
-         return 230 // PC端: 230px
-       case 'recipes_workflow':
-       case 'recipes_style':
-         // 根据屏幕尺寸返回不同宽度
-         if (typeof window !== 'undefined' && window.innerWidth < 768) {
-           return window.innerWidth - 32 // 移动端: 屏幕宽度减去左右padding (16px * 2)
-         }
-         return 238 // PC端: From w-[14.9rem] (238.4px)
-       case 'profile_workflow':
-       case 'profile_style':
-         // 根据屏幕尺寸返回不同宽度，与recipes相同的逻辑
-         if (typeof window !== 'undefined' && window.innerWidth < 768) {
-           return window.innerWidth - 32 // 移动端: 屏幕宽度减去左右padding (16px * 2)
-         }
-         return 238 // PC端: From w-[14.9rem] (238.4px)
-       default:
-         return 230 // Default fallback
-     }
-   }
+  const getCoverWidthInPixels = () => {
+    switch (variant) {
+      case 'workflow':
+      case 'style':
+        // 根据屏幕尺寸返回不同宽度
+        if (typeof window !== 'undefined' && window.innerWidth < 768) {
+          return 240 // 移动端: 240px
+        }
+        return 230 // PC端: 230px
+      case 'recipes_workflow':
+      case 'recipes_style':
+        // 根据屏幕尺寸返回不同宽度
+        if (typeof window !== 'undefined' && window.innerWidth < 768) {
+          return window.innerWidth - 32 // 移动端: 屏幕宽度减去左右padding (16px * 2)
+        }
+        return 238 // PC端: From w-[14.9rem] (238.4px)
+      case 'profile_workflow':
+      case 'profile_style':
+        // 根据屏幕尺寸返回不同宽度，与recipes相同的逻辑
+        if (typeof window !== 'undefined' && window.innerWidth < 768) {
+          return window.innerWidth - 32 // 移动端: 屏幕宽度减去左右padding (16px * 2)
+        }
+        return 238 // PC端: From w-[14.9rem] (238.4px)
+      default:
+        return 230 // Default fallback
+    }
+  }
 
   // 获取用户头像 - 新的用户数据结构
   const getAvatarUrl = () => {
@@ -138,14 +138,8 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
     return "Anonymous"
   }
 
-  // 处理Use按钮点击
-  const handleUseClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onUseClick?.()
-  }
-
   return (
-    <div 
+    <div
       className={cn(
         "rounded-xl cursor-pointer flex-shrink-0 group flex flex-col bg-secondary dark:bg-secondary-dark hover:shadow-[0px_8px_16px_0px_rgba(18,18,26,0.1)] transition-shadow", // 移除默认阴影，只保留hover阴影
         // 根据variant决定是否有移动端样式覆盖
@@ -168,19 +162,19 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-             {/* Cover 区域 */}
-       <div 
-         className={cn(
-           "relative rounded-t-xl overflow-hidden bg-[#E8E8E8] dark:bg-gray-700", // 改为rounded-t-xl，只保留顶部圆角
-           // 根据variant决定是否有移动端样式覆盖
-           !dimensions.mobileStyle && dimensions.cover,
-           dimensions.mobileStyle && "[width:var(--mobile-width)] [height:var(--mobile-cover-height)] lg:w-16.8125",
-           variant === 'recipes_workflow' && dimensions.mobileStyle && "lg:h-[13.75rem]",
-           variant === 'profile_workflow' && dimensions.mobileStyle && "lg:h-[13.75rem]",
-           variant === 'recipes_style' && dimensions.mobileStyle && "lg:h-[23.125rem]",
-           variant === 'profile_style' && dimensions.mobileStyle && "lg:h-[23.125rem]"
-         )}
-       >
+      {/* Cover 区域 */}
+      <div
+        className={cn(
+          "relative rounded-t-xl overflow-hidden bg-[#E8E8E8] dark:bg-gray-700", // 改为rounded-t-xl，只保留顶部圆角
+          // 根据variant决定是否有移动端样式覆盖
+          !dimensions.mobileStyle && dimensions.cover,
+          dimensions.mobileStyle && "[width:var(--mobile-width)] [height:var(--mobile-cover-height)] lg:w-16.8125",
+          variant === 'recipes_workflow' && dimensions.mobileStyle && "lg:h-[13.75rem]",
+          variant === 'profile_workflow' && dimensions.mobileStyle && "lg:h-[13.75rem]",
+          variant === 'recipes_style' && dimensions.mobileStyle && "lg:h-[23.125rem]",
+          variant === 'profile_style' && dimensions.mobileStyle && "lg:h-[23.125rem]"
+        )}
+      >
         {item.cover && !imageError ? (
           isVideo ? (
             <video
@@ -204,45 +198,45 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           </div>
         )}
 
-                 {/* Mask阴影区域 */}
-         <div className="absolute bottom-0 left-0 right-0 h-[3.25rem] bg-gradient-to-t from-black/72 to-transparent"></div>
+        {/* Mask阴影区域 */}
+        <div className="absolute bottom-0 left-0 right-0 h-[3.25rem] bg-gradient-to-t from-black/72 to-transparent"></div>
 
-         {/* 类型标签 - 左下角 */}
-         <div className="absolute bottom-2 left-2 flex items-center p-0.5 bg-black/20 rounded">
-           {isVideo ? (
-             <>
-               <img src={VideoIconNew} alt="Video" className="w-4 h-4 min-w-4 min-h-4 " />
-             </>
-           ) : (
-             <>
-               <img src={PictureIcon} alt="Picture" className="w-4 h-4 min-w-4 min-h-4 " />
-             </>
-           )}
-         </div>
+        {/* 类型标签 - 左下角 */}
+        <div className="absolute bottom-2 left-2 flex items-center p-0.5 bg-black/20 rounded">
+          {isVideo ? (
+            <>
+              <img src={VideoIconNew} alt="Video" className="w-4 h-4 min-w-4 min-h-4 " />
+            </>
+          ) : (
+            <>
+              <img src={PictureIcon} alt="Picture" className="w-4 h-4 min-w-4 min-h-4 " />
+            </>
+          )}
+        </div>
 
-         {/* 使用量和收藏数 - 右下角 */}
-         <div className="absolute bottom-2 right-2 flex items-center gap-2">
-           {/* 使用量 */}
-           <div className="flex items-center gap-0.5 h-5">
-             <img src={UseIconNew} alt="Uses" className="w-3 h-3 " />
-             <span className="pb-px font-switzer font-medium text-xs leading-4 text-white text-center">
-               {item.usage || 0}
-             </span>
-           </div>
+        {/* 使用量和收藏数 - 右下角 */}
+        <div className="absolute bottom-2 right-2 flex items-center gap-2">
+          {/* 使用量 */}
+          <div className="flex items-center gap-0.5 h-5">
+            <img src={UseIconNew} alt="Uses" className="w-3 h-3 " />
+            <span className="pb-px font-switzer font-medium text-xs leading-4 text-white text-center">
+              {item.usage || 0}
+            </span>
+          </div>
 
-           {/* 收藏数 */}
-           <div className="flex items-center gap-0.5 h-5">
-             {/* 这里需要根据用户是否收藏来显示不同图标，暂时使用默认图标 */}
-             <img src={BookmarkNormalIcon} alt="Bookmark" className="w-3 h-3 " />
-             <span className="pb-px font-switzer font-medium text-xs leading-4 text-white text-center">
-               {item.like_count || 0}
-             </span>
-           </div>
-         </div>
+          {/* 收藏数 */}
+          <div className="flex items-center gap-0.5 h-5">
+            {/* 这里需要根据用户是否收藏来显示不同图标，暂时使用默认图标 */}
+            <img src={BookmarkNormalIcon} alt="Bookmark" className="w-3 h-3 " />
+            <span className="pb-px font-switzer font-medium text-xs leading-4 text-white text-center">
+              {item.like_count || 0}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Container 区域 - 修复布局 */}
-      <div 
+      <div
         className={cn(
           "flex flex-col flex-1", // 添加flex-1确保占满剩余空间
           // 根据variant决定是否有移动端样式覆盖
@@ -255,31 +249,31 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           } as React.CSSProperties : undefined
         }
       >
-                 {/* 作品信息 - 根据variant显示不同样式 */}
-         {variant === 'workflow' || variant === 'style' || variant === 'recipes_workflow' || variant === 'recipes_style' || variant === 'profile_workflow' || variant === 'profile_style' ? (
-           <div className="px-2 flex flex-col gap-1 flex-1">
-             {/* 第一行 - 标题 */}
-             <h3 className="font-switzer font-bold text-sm leading-5 text-text-main dark:text-text-main-dark truncate">
-               {item.name}
-             </h3>
+        {/* 作品信息 - 根据variant显示不同样式 */}
+        {variant === 'workflow' || variant === 'style' || variant === 'recipes_workflow' || variant === 'recipes_style' || variant === 'profile_workflow' || variant === 'profile_style' ? (
+          <div className="px-2 flex flex-col gap-1 flex-1">
+            {/* 第一行 - 标题 */}
+            <h3 className="font-switzer font-bold text-sm leading-5 text-text-main dark:text-text-main-dark truncate">
+              {item.name}
+            </h3>
 
-             {/* 第二行 - 描述 - workflow、recipes和profile显示，style只在PC端显示 */}
-             {item.description && (variant === 'workflow' || variant === 'recipes_workflow' || variant === 'recipes_style' || variant === 'profile_workflow' || variant === 'profile_style' || (variant === 'style' && typeof window !== 'undefined' && window.innerWidth >= 768)) && (
-               <p 
-                 className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark overflow-hidden flex-1"
-                 style={{
-                   display: '-webkit-box',
-                   WebkitLineClamp: 2,
-                   WebkitBoxOrient: 'vertical',
-                   lineHeight: '1rem',
-                   maxHeight: '2rem', // 2行 * line-height
-                 }}
-               >
-                 {item.description}
-               </p>
-             )}
-           </div>
-         ) : (
+            {/* 第二行 - 描述 - workflow、recipes和profile显示，style只在PC端显示 */}
+            {item.description && (variant === 'workflow' || variant === 'recipes_workflow' || variant === 'recipes_style' || variant === 'profile_workflow' || variant === 'profile_style' || (variant === 'style' && typeof window !== 'undefined' && window.innerWidth >= 768)) && (
+              <p
+                className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark overflow-hidden flex-1"
+                style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  lineHeight: '1rem',
+                  maxHeight: '2rem', // 2行 * line-height
+                }}
+              >
+                {item.description}
+              </p>
+            )}
+          </div>
+        ) : (
           <>
             {/* Name */}
             <h3 className="font-lexend font-semibold text-sm md:text-base leading-snug text-design-main-text dark:text-design-dark-main-text truncate">
@@ -288,7 +282,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
 
             {/* Description - 根据variant和屏幕尺寸决定是否显示，并处理可选性 */}
             {dimensions.showDescription && item.description && (
-              <p 
+              <p
                 className="font-lexend text-xs leading-[140%] text-design-medium-gray dark:text-design-dark-medium-gray overflow-hidden hidden md:block flex-1"
                 style={{
                   display: '-webkit-box',
@@ -304,26 +298,26 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
           </>
         )}
 
-                 {/* User 信息 - 根据variant显示不同样式 */}
-         {dimensions.showUser && (
-           variant === 'workflow' || variant === 'style' || variant === 'recipes_workflow' || variant === 'recipes_style' || variant === 'profile_workflow' || variant === 'profile_style' ? (
-             <div className={cn(
-               "h-4 px-2 flex items-center gap-1",
-               variant === 'workflow' || variant === 'style' ? "w-[15rem] md:w-[14.375rem]" : "w-full md:w-[14.9rem]"
-             )}>
-               <img
-                 src={getAvatarUrl()}
-                 alt={getDisplayName()}
-                 className="w-4 h-4 rounded-full flex-shrink-0"
-                 onError={(e) => {
-                   (e.target as HTMLImageElement).src = avatarSvg
-                 }}
-               />
-               <span className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark truncate">
-                 {getDisplayName()}
-               </span>
-             </div>
-           ) : (
+        {/* User 信息 - 根据variant显示不同样式 */}
+        {dimensions.showUser && (
+          variant === 'workflow' || variant === 'style' || variant === 'recipes_workflow' || variant === 'recipes_style' || variant === 'profile_workflow' || variant === 'profile_style' ? (
+            <div className={cn(
+              "h-4 px-2 flex items-center gap-1",
+              variant === 'workflow' || variant === 'style' ? "w-[15rem] md:w-[14.375rem]" : "w-full md:w-[14.9rem]"
+            )}>
+              <img
+                src={getAvatarUrl()}
+                alt={getDisplayName()}
+                className="w-4 h-4 rounded-full flex-shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = avatarSvg
+                }}
+              />
+              <span className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark truncate">
+                {getDisplayName()}
+              </span>
+            </div>
+          ) : (
             <div className="flex items-center gap-1.5 h-4 mt-auto">
               <img
                 src={getAvatarUrl()}

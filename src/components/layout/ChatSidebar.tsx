@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
+import { useLocation } from 'react-router-dom'
 import { chatSidebarAtom, closeChatSidebar } from '../../store/chatSidebarStore'
 import { chatAtom, clearChat, sendHeartbeat, fetchConnectionStatus, sendMessage } from '../../store/assistantStore'
 import { userStateAtom, showLoginModalAtom } from '../../store/loginStore'
@@ -23,6 +24,7 @@ const ChatSidebar: React.FC = () => {
   const showLoginModal = useSetAtom(showLoginModalAtom)
   const sendMessageAction = useSetAtom(sendMessage)
   const { t } = useI18n()
+  const location = useLocation()
 
   // 添加useRef和useEffect for scrolling - 必须在条件渲染之前
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -100,8 +102,14 @@ const ChatSidebar: React.FC = () => {
     };
   }, [sidebarState.isOpen, chatState.connection.isActive, chatState.userUuid, chatState.betaMode, setChatState]);
 
-  // 当侧边栏关闭时不渲染
-  if (!sidebarState.isOpen) {
+  // 判断是否在workflow或model详情页
+  const isDetailPage = (() => {
+    const path = location.pathname
+    return /\/(en|zh-CN|zh-HK)\/workflow\//.test(path) || /\/(en|zh-CN|zh-HK)\/model\//.test(path)
+  })()
+
+  // 当侧边栏关闭时或不在详情页面时不渲染
+  if (!sidebarState.isOpen || !isDetailPage) {
     return null
   }
 

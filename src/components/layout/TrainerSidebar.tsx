@@ -5,7 +5,6 @@ import { useLang } from '../../hooks/useLang'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 import BgLogo from '../../assets/web2/workflow_setting.svg'
 import CoverSelectIcon from '../../assets/web2/cover_select.svg'
-import CloseIcon from '../../assets/web2/close.svg'
 import StyleImageDeleteIcon from '../../assets/mavae/style_image_delete.svg'
 import StyleImageDeleteIconDark from '../../assets/mavae/dark/style_image_delete.svg'
 import PublishIcon from '../../assets/web2/publish.svg'
@@ -26,7 +25,7 @@ const TrainerSidebar: React.FC = () => {
   const [modelCreationState] = useAtom(modelCreationStateAtom)
   const [, createModel] = useAtom(createModelAtom)
   const [status] = useAtom(styleTrainerStatusAtom)
-  
+
   const [nameFocus, setNameFocus] = useState(false)
   const [descFocus, setDescFocus] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -77,7 +76,7 @@ const TrainerSidebar: React.FC = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragOver(false)
-    
+
     const files = e.dataTransfer.files
     if (files && files[0]) {
       handleFileUpload(files[0])

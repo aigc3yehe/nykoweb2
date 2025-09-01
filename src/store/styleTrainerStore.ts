@@ -2,13 +2,11 @@ import { atom } from 'jotai'
 import { modelsApi } from '../services/api/models'
 import { uploadFileToS3 } from './imagesStore'
 import { userStateAtom } from './loginStore'
-import type { 
-  CreateModelRequest, 
-  CreateModelResponse, 
-  TrainModelRequest, 
-  TrainModelResponse,
-  FetchTrainStateResponse 
-} from '../services/api/types'
+import type {
+  CreateModelRequest,
+  CreateModelResponse,
+  TrainModelRequest,
+} from '../services/api'
 
 // 模型创建表单数据接口
 export interface StyleTrainerFormData {
@@ -111,7 +109,7 @@ export const showToastAtom = atom(
       severity,
       open: true
     })
-    
+
     // 自动关闭通知
     setTimeout(() => {
       set(toastNotificationAtom, (prev) => ({
@@ -127,7 +125,7 @@ export const uploadImagesAtom = atom(
   null,
   async (get, set, files: File[]): Promise<string[]> => {
     const totalFiles = files.length
-    
+
     set(updateImageUploadStateAtom, {
       isUploading: true,
       progress: 0,
@@ -135,27 +133,27 @@ export const uploadImagesAtom = atom(
       totalFilesToUpload: totalFiles,
       currentUploadIndex: 0
     })
-    
+
     try {
       const uploadedUrls: string[] = []
       let completedUploads = 0
-      
+
       // 串行上传所有文件
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
-        
+
         // 更新当前上传索引
         set(updateImageUploadStateAtom, {
           currentUploadIndex: i + 1
         })
-        
+
         try {
           const url = await uploadFileToS3(file)
           uploadedUrls.push(url)
-          
+
           completedUploads++
           const progress = Math.round((completedUploads / totalFiles) * 100)
-          
+
           set(updateImageUploadStateAtom, {
             progress,
             uploadedUrls: [...uploadedUrls]
@@ -165,42 +163,42 @@ export const uploadImagesAtom = atom(
           // 继续处理其他文件
         }
       }
-      
+
       set(updateImageUploadStateAtom, {
         isUploading: false,
         progress: 100,
         totalFilesToUpload: 0,
         currentUploadIndex: 0
       })
-      
+
       // 更新表单中的参考图片
       const currentForm = get(styleTrainerFormAtom)
       set(styleTrainerFormAtom, {
         ...currentForm,
         referenceImages: [...currentForm.referenceImages, ...uploadedUrls]
       })
-      
+
       set(showToastAtom, {
         message: `Successfully uploaded ${uploadedUrls.length} image(s)`,
         severity: 'success'
       })
-      
+
       return uploadedUrls
     } catch (error) {
       console.error('Upload process failed:', error)
-      
+
       set(updateImageUploadStateAtom, {
         isUploading: false,
         error: error instanceof Error ? error.message : 'Failed to upload images',
         totalFilesToUpload: 0,
         currentUploadIndex: 0
       })
-      
+
       set(showToastAtom, {
         message: 'Failed to upload images',
         severity: 'error'
       })
-      
+
       throw error
     }
   }
@@ -212,15 +210,15 @@ export const removeImageAtom = atom(
   (get, set, imageUrl: string) => {
     const currentForm = get(styleTrainerFormAtom)
     const currentUploadState = get(imageUploadStateAtom)
-    
+
     const updatedReferenceImages = currentForm.referenceImages.filter(url => url !== imageUrl)
     const updatedUploadedUrls = currentUploadState.uploadedUrls.filter(url => url !== imageUrl)
-    
+
     set(styleTrainerFormAtom, {
       ...currentForm,
       referenceImages: updatedReferenceImages
     })
-    
+
     set(imageUploadStateAtom, {
       ...currentUploadState,
       uploadedUrls: updatedUploadedUrls
@@ -233,12 +231,12 @@ export const removeAllImagesAtom = atom(
   null,
   (get, set) => {
     const currentForm = get(styleTrainerFormAtom)
-    
+
     set(styleTrainerFormAtom, {
       ...currentForm,
       referenceImages: []
     })
-    
+
     set(imageUploadStateAtom, initialImageUploadState)
   }
 )
@@ -248,7 +246,7 @@ export const createModelAtom = atom(
   null,
   async (get, set, navigate?: (path: string) => void): Promise<CreateModelResponse | null> => {
     const userState = get(userStateAtom)
-    
+
     // 检查用户登录状态
     if (!userState.isAuthenticated || !userState.user?.tokens?.did) {
       const errorMessage = 'User not authenticated or user ID not available'
@@ -264,17 +262,17 @@ export const createModelAtom = atom(
       })
       return null
     }
-    
+
     set(modelCreationStateAtom, {
       isCreating: true,
       error: null,
       success: false,
       isTraining: false
     })
-    
+
     try {
       const form = get(styleTrainerFormAtom)
-      
+
       // 验证必填字段
       if (!form.name.trim()) {
         throw new Error('Model name is required')
@@ -282,7 +280,7 @@ export const createModelAtom = atom(
       if (form.referenceImages.length === 0) {
         throw new Error('At least one reference image is required')
       }
-      
+
       // 第一步：创建模型
       const createRequest: CreateModelRequest = {
         name: form.name.trim(),
@@ -291,13 +289,13 @@ export const createModelAtom = atom(
         cover: form.cover || undefined,
         urls: form.referenceImages,
       }
-      
+
       const createResponse = await modelsApi.createModel(createRequest)
-      
+
       if (!createResponse?.model_id || createResponse.model_id === 0) {
         throw new Error('Failed to create model - no model ID returned')
       }
-      
+
       // 第二步：开始训练模型
       set(modelCreationStateAtom, {
         isCreating: false,
@@ -306,15 +304,15 @@ export const createModelAtom = atom(
         isTraining: true,
         modelId: createResponse.model_id
       })
-      
+
       const trainRequest: TrainModelRequest = {
         user: userState.user.tokens.did,
         model_id: createResponse.model_id,
         version: 1 // 默认版本
       }
-      
+
       const trainResponse = await modelsApi.trainModel(trainRequest)
-      
+
       set(modelCreationStateAtom, {
         isCreating: false,
         error: null,
@@ -323,69 +321,41 @@ export const createModelAtom = atom(
         modelId: createResponse.model_id,
         trainTaskId: trainResponse.model_train_id?.toString()
       })
-      
+
       set(showToastAtom, {
         message: 'Style training started successfully!',
         severity: 'success'
       })
-      
+
       // 创建成功后重置表单
       set(styleTrainerFormAtom, initialFormData)
       set(imageUploadStateAtom, initialImageUploadState)
-      
+
       // 如果返回的 model_id 不为空且不为0，则跳转到模型详情页面
       if (createResponse?.model_id && createResponse.model_id !== 0 && navigate) {
         // 这里不处理语言前缀，由调用方传入 navigate 时自行构造语言化路径
         navigate(`/model/${createResponse.model_id}`)
       }
-      
+
       return createResponse
     } catch (error) {
       console.error('Failed to create or train model:', error)
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Failed to create or train model'
-      
+
       set(modelCreationStateAtom, {
         isCreating: false,
         error: errorMessage,
         success: false,
         isTraining: false
       })
-      
+
       set(showToastAtom, {
         message: errorMessage,
         severity: 'error'
       })
-      
-      return null
-    }
-  }
-)
 
-// 获取训练状态的异步action
-export const getTrainStateAtom = atom(
-  null,
-  async (get, set, taskId: string): Promise<FetchTrainStateResponse | null> => {
-    try {
-      const response = await modelsApi.getTrainState(taskId)
-      return response
-    } catch (error) {
-      console.error('Failed to get train state:', error)
       return null
-    }
-  }
-)
-
-// 刷新所有模型训练状态的异步action
-export const refreshTrainModelsStateAtom = atom(
-  null,
-  async (get, set): Promise<boolean> => {
-    try {
-      const response = await modelsApi.refreshTrainModelsState()
-      return true
-    } catch (error) {
-      console.error('Failed to refresh train models state:', error)
-      return false
     }
   }
 )
@@ -404,12 +374,12 @@ export const resetStyleTrainerAtom = atom(
 // 获取当前表单验证状态的计算原子
 export const formValidationAtom = atom((get) => {
   const form = get(styleTrainerFormAtom)
-  
+
   return {
     isNameValid: form.name.trim().length > 0,
     isStyleValid: form.style.trim().length > 0,
     hasImages: form.referenceImages.length > 0,
-    isFormValid: form.name.trim().length > 0 && 
+    isFormValid: form.name.trim().length > 0 &&
                  form.referenceImages.length > 0
   }
 })
@@ -419,7 +389,7 @@ export const styleTrainerStatusAtom = atom((get) => {
   const imageUploadState = get(imageUploadStateAtom)
   const modelCreationState = get(modelCreationStateAtom)
   const formValidation = get(formValidationAtom)
-  
+
   return {
     isUploading: imageUploadState.isUploading,
     isCreating: modelCreationState.isCreating,

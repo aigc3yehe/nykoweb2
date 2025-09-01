@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
-import { userStateAtom, initUserStateAtom, logoutAtom } from '../store/loginStore'
+import { userStateAtom, initUserStateAtom } from '../store/loginStore'
 import ProfileWorkflowsList from '../components/profile/ProfileWorkflowsList'
 import ProfileModelsList from '../components/profile/ProfileModelsList'
 import ProfileContentsList from '../components/profile/ProfileContentsList'
 import ProfileTabComponent from '../components/profile/ProfileTab'
 import ProfileActions from '../components/profile/ProfileActions'
-import { cn } from '../utils/cn'
+//import { cn } from '../utils/cn'
 
 // Tab 类型
 type ProfileTab = 'published' | 'liked'
@@ -17,7 +17,6 @@ type ContentTypeFilter = 'workflows' | 'models' | 'images' | 'videos'
 const Profile: React.FC = () => {
   const [userState] = useAtom(userStateAtom)
   const initUserState = useSetAtom(initUserStateAtom)
-  const logout = useSetAtom(logoutAtom)
 
   // 本地状态
   const [activeTab, setActiveTab] = useState<ProfileTab>('published')
@@ -38,11 +37,6 @@ const Profile: React.FC = () => {
     setSelectedFilter(newFilter)
   }
 
-  // 退出登录处理
-  const handleLogout = () => {
-    logout()
-  }
-
   if (!userState.isAuthenticated || !userState.user) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -57,8 +51,6 @@ const Profile: React.FC = () => {
       </div>
     )
   }
-
-  const { user } = userState
 
   // 渲染列表内容
   const renderListContent = () => {
@@ -83,7 +75,7 @@ const Profile: React.FC = () => {
       <h1 className="md:hidden h-16 py-4 font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark"> {/* height: 64px, padding: 16px, font-size: 24px, line-height: 32px */}
         My creations
       </h1>
-      
+
       {/* Tab 导航 */}
       <ProfileTabComponent activeTab={activeTab} onTabChange={handleTabChange} />
 

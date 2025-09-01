@@ -1,11 +1,6 @@
 import React, { useRef, useState } from 'react'
 import { useAtom } from 'jotai'
 import { useNavigate } from 'react-router-dom'
-import CheckIcon from '../assets/web2/check.svg'
-import UploadSmallIcon from '../assets/web2/upload_small.svg'
-import RemoveAllIcon from '../assets/web2/remove_all.svg'
-import AddImageIcon from '../assets/web2/add_image.svg'
-import RemoveIcon from '../assets/web2/remove.svg'
 import CloseIcon from '../assets/web2/close.svg'
 import StyleImageDeleteIcon from '../assets/mavae/style_image_delete.svg'
 import StyleImageDeleteIconDark from '../assets/mavae/dark/style_image_delete.svg'
@@ -47,10 +42,10 @@ const StyleTrainer: React.FC = () => {
   const [modelCreationState] = useAtom(modelCreationStateAtom)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const coverFileInputRef = useRef<HTMLInputElement>(null)
-  
+
   // 封面图片上传相关状态
   const [isUploadingCover, setIsUploadingCover] = useState(false)
-  const [isDragOverCover, setIsDragOverCover] = useState(false)
+  const [, setIsDragOverCover] = useState(false)
 
   // 上传图片到S3
   const handleRefImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +99,7 @@ const StyleTrainer: React.FC = () => {
   const handleCoverDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragOverCover(false)
-    
+
     const files = e.dataTransfer.files
     if (files && files[0]) {
       await handleCoverFileUpload(files[0])
@@ -184,7 +179,7 @@ const StyleTrainer: React.FC = () => {
           disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
           onClick={handleStartTraining}
         >
-          {modelCreationState.isCreating ? 'Creating...' : 
+          {modelCreationState.isCreating ? 'Creating...' :
            modelCreationState.isTraining ? 'Training...' : 'Start Training'}
         </button>
       </div>
@@ -292,7 +287,7 @@ const StyleTrainer: React.FC = () => {
           disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
           onClick={handleStartTraining}
         >
-          {modelCreationState.isCreating ? 'Creating...' : 
+          {modelCreationState.isCreating ? 'Creating...' :
            modelCreationState.isTraining ? 'Training...' : 'Start Training'}
         </button>
       </div>
@@ -619,7 +614,7 @@ const StyleTrainer: React.FC = () => {
                     disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
                     onClick={handleStartTraining}
                   >
-                    {modelCreationState.isCreating ? 'Creating...' : 
+                    {modelCreationState.isCreating ? 'Creating...' :
                      modelCreationState.isTraining ? 'Training...' : 'Start Training'}
                   </button>
                 </div>
@@ -708,7 +703,7 @@ const StyleTrainer: React.FC = () => {
                     disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
                     onClick={handleStartTraining}
                   >
-                    {modelCreationState.isCreating ? 'Creating...' : 
+                    {modelCreationState.isCreating ? 'Creating...' :
                      modelCreationState.isTraining ? 'Training...' : 'Start Training'}
                   </button>
                 </div>
