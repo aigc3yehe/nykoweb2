@@ -170,8 +170,9 @@ const Account: React.FC = () => {
                         </div>
                         {/* 会员等级标识 - 下边居中 */}
                         <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-[3.375rem] h-6">
-                            <img
-                                src={getMembershipIcon().light}
+                            <ThemeAdaptiveIcon
+                                lightIcon={getMembershipIcon().light}
+                                darkIcon={getMembershipIcon().dark}
                                 alt="Membership"
                                 className="w-full h-full"
                             />
