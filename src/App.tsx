@@ -19,6 +19,7 @@ import Account from './pages/Account'
 import WorkflowDetail from './pages/WorkflowDetail'
 import ModelDetail from './pages/ModelDetail'
 import WorkflowBuilder from './pages/WorkflowBuilder'
+import WorkflowEdit from './pages/WorkflowEdit'
 import StyleTrainer from './pages/StyleTrainer'
 import Pricing from './pages/Pricing'
 import ThemeDemoPage from './pages/ThemeDemo'
@@ -56,6 +57,7 @@ function App() {
           <Route path=":lang/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path=":lang/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
           <Route path=":lang/workflow/builder" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />
+          <Route path=":lang/workflow/:id/edit" element={<ProtectedRoute><WorkflowEdit /></ProtectedRoute>} />
           <Route path=":lang/style/trainer" element={<ProtectedRoute><StyleTrainer /></ProtectedRoute>} />
 
           {/* 根路径重定向到默认语言 */}

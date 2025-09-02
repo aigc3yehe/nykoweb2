@@ -82,6 +82,7 @@ export const API_ENDPOINTS = {
     LIST: '/workflows',
     GET_BY_ID: (id: number) => `/workflows/${id}`,
     CREATE: '/workflow',
+    UPDATE: (id: number) => `/workflows/${id}`,
     GENERATE: '/workflows/generate',
     RETRY: '/workflows/generate/retry',
     USER_LIKED: '/workflows/user/liked',

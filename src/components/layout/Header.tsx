@@ -97,6 +97,7 @@ const Header: React.FC = React.memo(() => {
     const pathWithoutLang = path.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, '')
     if (pathWithoutLang.includes('/workflow/builder')) return false
     if (pathWithoutLang.includes('/style/trainer')) return false
+    if (pathWithoutLang.includes('/edit')) return false
     return (pathWithoutLang.includes('/workflow/') && pathWithoutLang.split('/').length > 2) || // 工作流详情页面
       (pathWithoutLang.includes('/model/') && pathWithoutLang.split('/').length > 2) // model详情页面
   }

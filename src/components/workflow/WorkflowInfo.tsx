@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-//import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useSetAtom } from 'jotai'
 import avatarSvg from '../../assets/Avatar.svg'
 import AvatarIcon from '../../assets/mavae/avatar.svg'
@@ -12,8 +12,6 @@ import LikeOutlineIcon from '../../assets/mavae/Like_outline.svg'
 import LikeOutlineIconDark from '../../assets/mavae/dark/Like_outline.svg'
 import LikedIcon from '../../assets/mavae/Liked.svg'
 import LikedIconDark from '../../assets/mavae/dark/Liked.svg'
-import CopyIcon from '../../assets/mavae/copy.svg'
-import CopyIconDark from '../../assets/mavae/dark/copy.svg'
 import AddIcon from '../../assets/mavae/add.svg'
 import AddIconDark from '../../assets/mavae/dark/add.svg'
 import FinishIcon from '../../assets/mavae/finish.svg'
@@ -37,26 +35,29 @@ import WorkflowDeleteIconDark from '../../assets/mavae/dark/Workflow_Delete.svg'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { toggleLikeWorkflowAtom, workflowDetailAtom } from '../../store/workflowDetailStore'
 import { useI18n } from '../../hooks/useI18n'
+import { useLang } from '../../hooks/useLang'
 import { addToastAtom } from '../../store/toastStore'
 import { shareCurrentPage } from '../../utils/share'
 import { sendMessage } from '../../store/assistantStore'
 import { userStateAtom } from '../../store/loginStore'
 import { useAtom } from 'jotai'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
+import {WorkflowDto} from "../../services/api";
 
 interface WorkflowInfoProps {
-  workflow: any
+  workflow: WorkflowDto
   className?: string
 }
 
 const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' }) => {
-  //const navigate = useNavigate()
+  const navigate = useNavigate()
   const { openChat } = useChatSidebar()
   const toggleLikeWorkflow = useSetAtom(toggleLikeWorkflowAtom)
   const { t } = useI18n()
+  const lang = useLang()
   const addToast = useSetAtom(addToastAtom)
   const sendMessageAction = useSetAtom(sendMessage)
-  const [isPromptExpanded, setIsPromptExpanded] = useState(false)
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [userState] = useAtom(userStateAtom)
   const [workflowDetailState] = useAtom(workflowDetailAtom)
 
@@ -209,25 +210,10 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
     }
   }
 
-  const handleCopyPrompt = async () => {
-    try {
-      await navigator.clipboard.writeText(workflow.prompt || '')
-      addToast({
-        message: 'Prompt copied to clipboard',
-        type: 'success'
-      })
-    } catch (error) {
-      addToast({
-        message: 'Failed to copy prompt',
-        type: 'error'
-      })
-    }
-  }
-
   // 处理编辑按钮点击
   const handleEdit = () => {
-    // TODO: 跳转到编辑页面或打开编辑弹窗
-    console.log('Edit workflow:', workflow.workflow_id)
+    // 跳转到编辑页面，需要包含语言前缀
+    navigate(`/${lang}/workflow/${workflow.workflow_id}/edit`)
   }
 
   // 处理删除按钮点击
@@ -332,47 +318,33 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
           </span>
         </div>
 
-        {/* 第三行：Prompt块 */}
+        {/* 第三行：Description块 */}
         <div className="flex flex-col gap-2">
-          {/* Prompt第一行：标题和复制按钮 */}
-          <div className="flex items-center justify-between h-5">
+          {/* Description第一行*/}
+          <div className="flex items-center h-5">
             <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-              Prompt
+              Description
             </span>
-            <button
-              onClick={handleCopyPrompt}
-              className="flex items-center gap-1"
-            >
-              <ThemeAdaptiveIcon
-                lightIcon={CopyIcon}
-                darkIcon={CopyIconDark}
-                alt="Copy"
-                size="sm"
-              />
-              <span className="font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark">
-                Copy
-              </span>
-            </button>
           </div>
 
-          {/* Prompt第二行：内容 */}
+          {/* Description第二行：内容 */}
           <div className="flex flex-col gap-1">
             <div className="rounded-xl p-3 bg-gray-50 dark:bg-gray-800">
               <p
-                className={`font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark ${isPromptExpanded ? '' : 'line-clamp-2'
+                className={`font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark ${isDescriptionExpanded ? '' : 'line-clamp-2'
                   }`}
               >
-                {workflow.prompt || 'No prompt available'}
+                {workflow.description || 'No description available'}
               </p>
             </div>
 
             {/* Prompt第三行：展开/收起按钮 */}
             {workflow.prompt && workflow.prompt.length > 100 && (
               <button
-                onClick={() => setIsPromptExpanded(!isPromptExpanded)}
+                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                 className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start"
               >
-                {isPromptExpanded ? 'Show less' : 'Show more'}
+                {isDescriptionExpanded ? 'Show less' : 'Show more'}
               </button>
             )}
           </div>

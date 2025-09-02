@@ -108,8 +108,18 @@ const ChatSidebar: React.FC = () => {
     return /\/(en|zh-CN|zh-HK)\/workflow\//.test(path) || /\/(en|zh-CN|zh-HK)\/model\//.test(path)
   })()
 
-  // 当侧边栏关闭时或不在详情页面时不渲染
-  if (!sidebarState.isOpen || !isDetailPage) {
+  // 判断是否在需要隐藏聊天侧边栏的页面
+  const shouldHideChatSidebar = (() => {
+    const path = location.pathname
+    // match /{lang}/pricing, /{lang}/workflow/builder, /{lang}/workflow/{id}/edit, /{lang}/style/trainer
+    return /\/(en|zh-CN|zh-HK)\/pricing$/.test(path) ||
+           /\/(en|zh-CN|zh-HK)\/workflow\/builder(\/.*)?$/.test(path) ||
+           /\/(en|zh-CN|zh-HK)\/workflow\/.*\/edit$/.test(path) ||
+           /\/(en|zh-CN|zh-HK)\/style\/trainer(\/.*)?$/.test(path)
+  })()
+
+  // 当侧边栏关闭时、不在详情页面时或在需要隐藏的页面时不渲染
+  if (!sidebarState.isOpen || !isDetailPage || shouldHideChatSidebar) {
     return null
   }
 

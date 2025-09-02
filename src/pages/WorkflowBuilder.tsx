@@ -330,15 +330,15 @@ const WorkflowBuilder: React.FC = () => {
           {successMessage && (
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg z-50">
               <span className="text-green-600 dark:text-green-400 text-sm font-lexend">{successMessage}</span>
-          </div>
+            </div>
           )}
 
           {/* 错误提示 */}
           {createWorkflowError && (
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg z-50">
               <span className="text-red-600 dark:text-red-400 text-sm font-lexend">{createWorkflowError}</span>
-        </div>
-      )}
+            </div>
+          )}
 
           {/* Display 组件 */}
           <div className="w-[22.5rem] max-w-[22.5rem] flex flex-col gap-6 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-secondary dark:bg-secondary-dark p-6">
@@ -397,7 +397,7 @@ const WorkflowBuilder: React.FC = () => {
                     alt="cover"
                     className="w-full h-full object-cover rounded-[0.625rem]"
                   />
-        <button
+                  <button
                     type="button"
                     className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
                     onClick={handleRemoveCover}
@@ -409,7 +409,7 @@ const WorkflowBuilder: React.FC = () => {
                       size="sm"
                       className="w-5 h-5"
                     />
-        </button>
+                  </button>
                 </div>
               ) : (
                 <div
@@ -453,7 +453,7 @@ const WorkflowBuilder: React.FC = () => {
               <div className="w-6 h-6 flex items-center justify-center gap-2.5 rounded-full bg-link-default dark:bg-link-default-dark">
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">2</span>
               </div>
-            {/* 标题 */}
+              {/* 标题 */}
               <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Template</span>
             </div>
 
@@ -483,11 +483,11 @@ const WorkflowBuilder: React.FC = () => {
 
             {/* Model 组件 */}
             <div className="flex flex-col gap-1">
-            {/* 标题 */}
+              {/* 标题 */}
               <div className="flex items-center gap-1">
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Models</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
-            </div>
+              </div>
               {/* Model 选择 */}
               <div className="w-[19.5rem] flex flex-col gap-2">
                 {availableModels.map(model => (
@@ -637,8 +637,8 @@ const WorkflowBuilder: React.FC = () => {
             >
               {isCreatingWorkflow ? 'Creating...' : 'Save The Template'}
             </button>
-                          </div>
-                        </div>
+          </div>
+        </div>
 
         {/* 移动端容器 */}
         <div className="lg:hidden w-full flex flex-col px-4 gap-6 bg-secondary dark:bg-secondary-dark">
@@ -845,32 +845,32 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入框 */}
-                <textarea
+              <textarea
                 className="w-full h-[6.75rem] pt-3 pr-3 pb-3 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark resize-none focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
                 placeholder="This is the system prompt for this case. Each time the case runs, this set of prompts will be used."
-                  value={workflowForm.prompt}
-                  onChange={(e) => updateWorkflowForm({ prompt: e.target.value })}
+                value={workflowForm.prompt}
+                onChange={(e) => updateWorkflowForm({ prompt: e.target.value })}
                 onFocus={() => setPromptFocus(true)}
                 onBlur={() => setPromptFocus(false)}
-                />
-              </div>
+              />
+            </div>
 
             {/* Reference Image 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Reference Image</span>
               {/* 图片上传组件 */}
-                {refImage && refImageUrl ? (
+              {refImage && refImageUrl ? (
                 <div className="relative w-[8.125rem] h-[8.125rem] gap-1 rounded-[0.625rem]">
-                    <img
-                      src={refImageUrl}
-                      alt="ref"
-                      className="w-full h-full object-cover rounded-[0.625rem]"
-                    />
-                    <button
-                      type="button"
+                  <img
+                    src={refImageUrl}
+                    alt="ref"
+                    className="w-full h-full object-cover rounded-[0.625rem]"
+                  />
+                  <button
+                    type="button"
                     className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
-                      onClick={handleRemoveRefImage}
+                    onClick={handleRemoveRefImage}
                   >
                     <ThemeAdaptiveIcon
                       lightIcon={StyleImageDeleteIcon}
@@ -879,18 +879,18 @@ const WorkflowBuilder: React.FC = () => {
                       size="sm"
                       className="w-5 h-5"
                     />
-                    </button>
-                  </div>
-                ) : (
-                  <div
+                  </button>
+                </div>
+              ) : (
+                <div
                   className={`w-[8.125rem] h-[8.125rem] pt-10 pr-6.5 pb-10 pl-6.5 gap-1 rounded-[0.625rem] border border-dashed border-line-subtle dark:border-line-subtle-dark flex flex-col items-center justify-center cursor-pointer transition-colors hover:border-link-default dark:hover:border-link-default-dark ${isUploadingRefImage ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   onClick={isUploadingRefImage ? undefined : () => refImageInputRef.current?.click()}
                   onDragOver={isUploadingRefImage ? undefined : handleRefImageDragOver}
                   onDragLeave={isUploadingRefImage ? undefined : handleRefImageDragLeave}
                   onDrop={isUploadingRefImage ? undefined : handleRefImageDrop}
-                  >
-                    {isUploadingRefImage ? (
+                >
+                  {isUploadingRefImage ? (
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-link-default dark:border-link-default-dark"></div>
                   ) : (
                     <div className="w-8 h-[1.9375rem]">
@@ -902,18 +902,18 @@ const WorkflowBuilder: React.FC = () => {
                         className='w-8 h-8'
                       />
                     </div>
-                    )}
-                    <input
+                  )}
+                  <input
                     ref={refImageInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleRefImageChange}
-                    />
-                  </div>
-                )}
-              </div>
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleRefImageChange}
+                  />
+                </div>
+              )}
             </div>
+          </div>
 
           {/* Output 组件 - 移动端 */}
           <div className="w-full flex flex-col gap-6 pb-8">
@@ -922,8 +922,8 @@ const WorkflowBuilder: React.FC = () => {
               {/* 序号 */}
               <div className="w-6 h-6 flex items-center justify-center gap-2.5 rounded-full bg-link-default dark:bg-link-default-dark">
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">3</span>
-          </div>
-            {/* 标题 */}
+              </div>
+              {/* 标题 */}
               <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Case Output</span>
             </div>
 

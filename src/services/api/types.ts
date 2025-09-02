@@ -293,6 +293,17 @@ export interface CreateWorkflowResponse {
   workflow_id: number
 }
 
+export interface UpdateWorkflowRequest {
+  user?: string
+  name?: string
+  cover?: string
+  description?: string
+  tags?: string[]
+  reference_images?: string[]
+  input_type?: string[]
+  prompt?: string
+}
+
 export interface WorkflowGenerateRequest {
   user: string
   workflow_id: number
