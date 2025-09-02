@@ -65,15 +65,15 @@ const AuthCallback: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-secondary dark:bg-secondary-dark">
+      <div className="w-full max-w-md p-8 bg-pop-ups dark:bg-pop-ups-dark rounded-xl shadow-glass border border-line-subtle dark:border-line-subtle-dark">
         {status === 'loading' && (
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-link-default dark:border-link-default-dark mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold text-text-main dark:text-text-main-dark mb-2 font-switzer">
               Authenticating...
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-text-secondary dark:text-text-secondary-dark font-switzer">
               Please wait while we log you in.
             </p>
           </div>
@@ -81,9 +81,9 @@ const AuthCallback: React.FC = () => {
 
         {status === 'success' && (
           <div className="text-center">
-            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-green-100 rounded-full">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-text-success/10 dark:bg-text-success/10 rounded-full">
               <svg
-                className="w-6 h-6 text-green-600"
+                className="w-6 h-6 text-text-success dark:text-text-success"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -96,10 +96,10 @@ const AuthCallback: React.FC = () => {
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <h2 className="text-xl font-semibold text-text-main dark:text-text-main-dark mb-2 font-switzer">
               Login Successful!
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-text-secondary dark:text-text-secondary-dark font-switzer">
               Redirecting you to the homepage...
             </p>
           </div>
@@ -107,9 +107,9 @@ const AuthCallback: React.FC = () => {
 
         {status === 'error' && (
           <div className="text-center">
-            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-text-error/10 dark:bg-text-error/10 rounded-full">
               <svg
-                className="w-6 h-6 text-red-600"
+                className="w-6 h-6 text-text-error dark:text-text-error"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -122,15 +122,15 @@ const AuthCallback: React.FC = () => {
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <h2 className="text-xl font-semibold text-text-main dark:text-text-main-dark mb-2 font-switzer">
               Authentication Failed
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-text-secondary dark:text-text-secondary-dark mb-4 font-switzer">
               {error}
             </p>
             <button
               onClick={handleRetry}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed text-text-inverse dark:text-text-inverse-dark rounded-lg transition-colors font-switzer"
             >
               Return to Homepage
             </button>

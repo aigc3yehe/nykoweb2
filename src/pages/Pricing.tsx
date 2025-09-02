@@ -19,7 +19,7 @@ import PlusVipIcon from '../assets/mavae/vip/plus.svg'
 import PlusVipIconDark from '../assets/mavae/dark/vip/plus.svg'
 import ProVipIcon from '../assets/mavae/vip/pro.svg'
 import ProVipIconDark from '../assets/mavae/dark/vip/pro.svg'
-import { fetchUserDetailsAtom } from '../store/loginStore'
+import { userStateAtom, fetchUserDetailsAtom } from '../store/loginStore'
 import Seo from '../components/Seo'
 import { useLocaleFromUrl } from '../hooks/useLocaleFromUrl'
 import ThemeAdaptiveIcon from '../components/ui/ThemeAdaptiveIcon'
@@ -31,6 +31,7 @@ const Pricing: React.FC = React.memo(() => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useAtom(selectedPaymentMethodAtom)
   const [showPaymentDropdown, setShowPaymentDropdown] = useAtom(showPaymentDropdownAtom)
   const [pricingState] = useAtom(pricingAtom)
+  const [userState] = useAtom(userStateAtom)
   const showToast = useSetAtom(showToastAtom)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -153,7 +154,22 @@ const Pricing: React.FC = React.memo(() => {
     }
   }
 
-
+  // 判断是否为当前订阅套餐
+  const isCurrentSubscription = (planId: string) => {
+    if (!userState.userPlan) return false
+    
+    // 将API的plan_type映射到套餐ID
+    switch (userState.userPlan.plan_type) {
+      case 'pro':
+        return planId === 'premium'
+      case 'premium':
+        return planId === 'premium_plus'
+      case 'free':
+        return planId === 'free'
+      default:
+        return false
+    }
+  }
 
   return (
     <div className="w-full flex flex-col md:gap-10 bg-secondary dark:bg-secondary-dark md:bg-transparent md:p-8">
@@ -284,18 +300,29 @@ const Pricing: React.FC = React.memo(() => {
 
               {/* 按钮 */}
               {plan.buttonText && (
-                <button
-                  onClick={() => handleSubscribe(plan.id)}
-                  disabled={isProcessing || plan.id === 'free'}
-                  className={`w-full h-12 px-4 gap-1 rounded-full font-switzer font-medium text-base leading-6 text-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${plan.id === 'premium'
-                    ? 'bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark text-white'
-                    : plan.id === 'premium_plus'
-                      ? 'bg-[#FFEDB6] hover:bg-[#FFE5A3] text-black'
-                      : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-text-main dark:text-text-main-dark'
-                    }`}
-                >
-                  {isProcessing ? 'Processing...' : plan.buttonText}
-                </button>
+                isCurrentSubscription(plan.id) ? (
+                  // 当前订阅套餐 - 显示为已订阅状态
+                  <button
+                    disabled={true}
+                    className="w-full h-12 px-4 gap-1 rounded-full font-switzer font-medium text-base leading-6 text-center bg-[#4458FF1A] text-[#4458FF] cursor-default"
+                  >
+                    Current Plan
+                  </button>
+                ) : (
+                  // 其他套餐 - 正常订阅按钮
+                  <button
+                    onClick={() => handleSubscribe(plan.id)}
+                    disabled={isProcessing || plan.id === 'free'}
+                    className={`w-full h-12 px-4 gap-1 rounded-full font-switzer font-medium text-base leading-6 text-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${plan.id === 'premium'
+                      ? 'bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark text-white'
+                      : plan.id === 'premium_plus'
+                        ? 'bg-[#FFEDB6] hover:bg-[#FFE5A3] text-black'
+                        : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-text-main dark:text-text-main-dark'
+                      }`}
+                  >
+                    {isProcessing ? 'Processing...' : plan.buttonText}
+                  </button>
+                )
               )}
             </div>
 

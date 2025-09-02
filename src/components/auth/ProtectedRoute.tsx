@@ -36,10 +36,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // 如果正在加载用户状态，显示加载状态
   if (userState.isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] bg-white dark:bg-gray-900">
+      <div className="flex items-center justify-center min-h-[400px] bg-secondary dark:bg-secondary-dark">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
+          <div className="w-8 h-8 border-4 border-link-default dark:border-link-default-dark border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-text-secondary dark:text-text-secondary-dark text-sm font-switzer">
             {t('auth.verifyingLogin')} {/* 正在验证登录状态... / Verifying login status... */}
           </p>
         </div>
@@ -54,11 +54,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // 如果用户未登录，显示提示信息
   return (
-    <div className="flex items-center justify-center min-h-[400px] bg-white dark:bg-gray-900">
+    <div className="flex items-center justify-center min-h-[400px] bg-secondary dark:bg-secondary-dark">
       <div className="text-center space-y-4 p-8 max-w-md mx-auto">
-        <div className="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+        <div className="w-16 h-16 mx-auto bg-brand-accent dark:bg-brand-accent rounded-full flex items-center justify-center">
           <svg 
-            className="w-8 h-8 text-blue-500 dark:text-blue-400" 
+            className="w-8 h-8 text-link-default dark:text-link-default-dark" 
             fill="none" 
             stroke="currentColor" 
             viewBox="0 0 24 24"
@@ -71,15 +71,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-text-main dark:text-text-main-dark font-switzer">
           {t('auth.loginRequired')} {/* 需要登录 / Login Required */}
         </h3>
-        <p className="text-gray-600 dark:text-gray-400 text-sm">
+        <p className="text-text-secondary dark:text-text-secondary-dark text-sm font-switzer">
           {t('auth.pleaseLogin')} {/* 请登录后访问此页面 / Please log in to access this page */}
         </p>
         <button
           onClick={() => showLoginModal()}
-          className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+          className="inline-flex items-center px-4 py-2 bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed text-text-inverse dark:text-text-inverse-dark text-sm font-medium rounded-lg transition-colors duration-200 font-switzer"
         >
           {t('auth.loginNow')} {/* 立即登录 / Login Now */}
         </button>

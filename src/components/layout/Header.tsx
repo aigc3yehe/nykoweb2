@@ -183,27 +183,48 @@ const Header: React.FC = React.memo(() => {
         {/* 右侧按钮组 */}
         <div className="flex items-center gap-2 h-9 md:h-12">
           {/* 分数显示和Upgrade按钮 - 登录后显示 */}
-          {userState.isAuthenticated && userState.user && (
-            <div className="h-9 md:h-12 pl-4 gap-2 rounded-full bg-[#84CC161A] flex items-center">
-              {/* 左侧分数显示 */}
-              <div className="h-4 md:h-6 gap-1 flex items-center">
-                <img src={CreditIcon} alt="Credit" className="w-4 h-4 md:w-6 md:h-6" />
-                <span className="font-switzer font-medium text-sm md:text-base leading-5 md:leading-6 text-[#65A30D]">
-                  {userState.userDetails?.credit || 0}
-                </span>
-              </div>
+          {userState.isAuthenticated && userState.user && (() => {
+            // 判断是否显示Upgrade按钮
+            const shouldShowUpgrade = !userState.userPlan || userState.userPlan.plan_type !== 'premium'
 
-              {/* 右侧Upgrade按钮 */}
-              <button
-                onClick={() => navigate(withLangPrefix(lang, '/pricing'))}
-                className="w-22 h-9 md:w-28 md:h-12 px-4 md:px-6 gap-2 rounded-full bg-[#84CC16] hover:bg-[#65A30D] transition-colors flex items-center justify-center"
-              >
-                <span className="font-switzer font-medium text-sm md:text-base leading-5 md:leading-6 text-white text-center">
-                  Upgrade
-                </span>
-              </button>
-            </div>
-          )}
+            return (
+              <div className="h-9 md:h-12 pl-4 gap-2 rounded-full bg-[#84CC161A] flex items-center">
+                {/* 左侧分数显示 - 根据是否显示Upgrade按钮调整右侧padding和点击功能 */}
+                {shouldShowUpgrade ? (
+                  // 显示Upgrade按钮时，分数显示不可点击
+                  <div className="h-4 md:h-6 gap-1 flex items-center">
+                    <img src={CreditIcon} alt="Credit" className="w-4 h-4 md:w-6 md:h-6" />
+                    <span className="font-switzer font-medium text-sm md:text-base leading-5 md:leading-6 text-[#65A30D]">
+                      {userState.userDetails?.credit || 0}
+                    </span>
+                  </div>
+                ) : (
+                  // 隐藏Upgrade按钮时，分数显示可点击跳转到pricing页面
+                  <button
+                    onClick={() => navigate(withLangPrefix(lang, '/pricing'))}
+                    className="h-4 md:h-6 gap-1 flex items-center pr-4 hover:opacity-80 transition-opacity cursor-pointer"
+                  >
+                    <img src={CreditIcon} alt="Credit" className="w-4 h-4 md:w-6 md:h-6" />
+                    <span className="font-switzer font-medium text-sm md:text-base leading-5 md:leading-6 text-[#65A30D]">
+                      {userState.userDetails?.credit || 0}
+                    </span>
+                  </button>
+                )}
+
+                {/* 右侧Upgrade按钮 - 非premium会员才显示 */}
+                {shouldShowUpgrade && (
+                  <button
+                    onClick={() => navigate(withLangPrefix(lang, '/pricing'))}
+                    className="w-22 h-9 md:w-28 md:h-12 px-4 md:px-6 gap-2 rounded-full bg-[#84CC16] hover:bg-[#65A30D] transition-colors flex items-center justify-center"
+                  >
+                    <span className="font-switzer font-medium text-sm md:text-base leading-5 md:leading-6 text-white text-center">
+                      Upgrade
+                    </span>
+                  </button>
+                )}
+              </div>
+            )
+          })()}
 
           {/* 登录按钮或用户头像 */}
           {userState.isAuthenticated && userState.user ? (
