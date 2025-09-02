@@ -3,8 +3,8 @@ export const zhHK = {
     discover: '探索',
     creativeTools: '創意工具',
     my: '我的',
-    home: '首頁',
-    recipes: '組合',
+    home: '探索',
+    recipes: '智能體案例',
     creators: '創作者',
     generator: '生成器',
     workflowBuilder: '工作流構建器',
@@ -37,10 +37,10 @@ export const zhHK = {
   },
   workflow: {
     name: '工作流',
-    info: '工作流資訊',
-    namePlaceholder: '名稱',
+    info: '案例資訊',
+    namePlaceholder: '符合功能特色的名稱',
     description: '描述',
-    descriptionPlaceholder: '描述你的工作流',
+    descriptionPlaceholder: '如何充分利用這個案例的功能特色？',
     coverImage: '封面圖片',
     publish: '發布',
     publishing: '發布中...',
@@ -52,5 +52,45 @@ export const zhHK = {
   },
   aria: {
     openChat: '打開聊天'
+  },
+  pages: {
+    home: '探索',
+    return: '返回',
+    agentCases: '智能體案例'
+  },
+  banner: {
+    title1: '參與有趣的創作',
+    description1: '使用智能體案例擴展任何主題創作',
+    title2: '構建智能體案例',
+    description2: '使用自定義AI工作流的高效任務',
+    button1: '生成',
+    button2: '創建'
+  },
+  tabs: {
+    workflows: '模板',
+    cases: '案例',
+    published: '已發佈',
+    liked: '已點讚'
+  },
+  builder: {
+    caseInfo: '案例資訊',
+    caseName: '案例名稱',
+    caseNamePlaceholder: '符合功能特色的名稱',
+    caseDescriptionPlaceholder: '如何充分利用這個案例的功能特色？',
+    userInput: '用戶輸入',
+    referenceImage: '參考圖片',
+    referenceImageAdditionalPrompt: '參考圖片 + 額外提示',
+    additionalPrompt: '額外提示',
+    models: '模型 *',
+    casePrompt: '案例提示 *',
+    casePromptPlaceholder: '這是此案例的系統提示。每次運行案例時，都會使用這組提示。',
+    caseReferenceImage: '案例參考圖片',
+    caseOutput: '案例輸出',
+    image: '圖片'
+  },
+  profile: {
+    myCreations: '我的創作',
+    noCasesFound: '未找到已發佈的案例',
+    createFirstCase: '創建您的第一個智能體案例以開始'
   }
 }

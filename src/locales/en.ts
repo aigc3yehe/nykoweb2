@@ -3,8 +3,8 @@ export const en = {
     discover: 'Discover',
     creativeTools: 'Creative Tools',
     my: 'My',
-    home: 'Sparks',
-    recipes: 'Recipes',
+    home: 'Discover',
+    recipes: 'Agent Cases',
     creators: 'Creators',
     generator: 'Generator',
     workflowBuilder: 'Workflow Builder',
@@ -37,10 +37,10 @@ export const en = {
   },
   workflow: {
     name: 'Workflow',
-    info: 'Workflow Info',
-    namePlaceholder: 'name',
+    info: 'Case Info',
+    namePlaceholder: 'A name matches its features',
     description: 'Description',
-    descriptionPlaceholder: 'Describe your Workflow',
+    descriptionPlaceholder: 'How can we use it to make the most of this case\'s features?',
     coverImage: 'Cover Image',
     publish: 'Publish',
     publishing: 'Publishing...',
@@ -62,5 +62,45 @@ export const en = {
   },
   aria: {
     openChat: 'Open chat'
+  },
+  pages: {
+    home: 'Discover',
+    return: 'Back',
+    agentCases: 'Agent Cases'
+  },
+  banner: {
+    title1: 'Participate in fun creations',
+    description1: 'Use Agent Cases to expand any theme creation',
+    title2: 'Build Agent Cases',
+    description2: 'Efficient tasks with custom AI workflows',
+    button1: 'Generate',
+    button2: 'Create'
+  },
+  tabs: {
+    workflows: 'Template',
+    cases: 'Cases',
+    published: 'Published',
+    liked: 'Liked'
+  },
+  builder: {
+    caseInfo: 'Case Info',
+    caseName: 'Case Name',
+    caseNamePlaceholder: 'A name matches its features',
+    caseDescriptionPlaceholder: 'How can we use it to make the most of this case\'s features?',
+    userInput: 'User Input',
+    referenceImage: 'Reference Image',
+    referenceImageAdditionalPrompt: 'Reference Image + Additional Prompt',
+    additionalPrompt: 'Additional Prompt',
+    models: 'Models *',
+    casePrompt: 'Case Prompt *',
+    casePromptPlaceholder: 'This is the system prompt for this case. Each time the case runs, this set of prompts will be used.',
+    caseReferenceImage: 'Case Reference Image',
+    caseOutput: 'Case Output',
+    image: 'Image'
+  },
+  profile: {
+    myCreations: 'My creations',
+    noCasesFound: 'No published cases found',
+    createFirstCase: 'Create your first agent case to get started'
   }
 }
