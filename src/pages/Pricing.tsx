@@ -107,8 +107,10 @@ const Pricing: React.FC = React.memo(() => {
 
     try {
       setIsProcessing(true)
-      // 根据选择的支付方式调用相应的支付渠道
-      await paymentService.redirectToPayment(planId, selectedPaymentMethod)
+      // 获取当前语言前缀
+      const currentLang = window.location.pathname.split('/')[1] || 'en'
+      // 根据选择的支付方式调用相应的支付渠道，传递语言参数
+      await paymentService.redirectToPayment(planId, selectedPaymentMethod, currentLang)
     } catch (error) {
       showToast({
         severity: 'error',

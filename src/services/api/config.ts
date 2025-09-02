@@ -121,6 +121,7 @@ export const API_ENDPOINTS = {
       VERIFY_SESSION: (sessionId: string) => `/payments/stripe/checkout-sessions/${sessionId}/verify`,
       GET_INFO: (userId: string) => `/payments/stripe/subscriptions/${userId}`,
       CANCEL: (userId: string) => `/payments/stripe/subscriptions/${userId}`,
+      PORTAL: (userId: string) => `/payments/portal/${userId}`,
       WEBHOOK: '/payments/stripe/webhooks',
     },
     // Hel支付

@@ -97,10 +97,10 @@ const SocialIconComponent: React.FC<{
 }> = ({ lightIcon, darkIcon, alt, href }) => {
   const IconElement = (
     <div className="w-9 h-9 flex items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors rounded-lg">
-      <ThemeAdaptiveIcon 
+      <ThemeAdaptiveIcon
         lightIcon={lightIcon}
         darkIcon={darkIcon}
-        alt={alt} 
+        alt={alt}
         size="md"
       />
     </div>
@@ -127,10 +127,10 @@ const MobileCloseButton: React.FC<{
       className="w-9 h-9 flex items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors rounded-lg"
       aria-label="Close menu"
     >
-      <ThemeAdaptiveIcon 
+      <ThemeAdaptiveIcon
         lightIcon={CloseIcon}
         darkIcon={CloseIconDark}
-        alt="Close" 
+        alt="Close"
         size="lg"
       />
     </button>
@@ -174,17 +174,17 @@ const MobileThemeToggle: React.FC = () => {
   return (
     <div className="w-full h-12 flex items-center justify-between px-4">
       <div className="flex items-center gap-2">
-        <ThemeAdaptiveIcon 
+        <ThemeAdaptiveIcon
           lightIcon={ThemeIcon}
           darkIcon={ThemeIconDark}
-          alt="Theme" 
+          alt="Theme"
           size="md"
         />
         <span className="font-switzer font-medium text-base leading-6 text-text-main dark:text-text-main-dark">
           Theme
         </span>
       </div>
-      
+
       {/* 主题切换按钮 */}
       <div className="w-37 h-9 rounded-full border border-line-subtle dark:border-line-subtle-dark bg-quaternary dark:bg-quaternary-dark  relative">
         <button
@@ -192,7 +192,7 @@ const MobileThemeToggle: React.FC = () => {
           className={cn(
             "absolute left-0.5 top-px w-18 h-8 rounded-full transition-all duration-300 ease-in-out",
             "font-switzer font-medium text-sm leading-5 text-center",
-            isDark 
+            isDark
               ? "translate-x-0 text-text-secondary dark:text-text-secondary-dark"
               : "translate-x-0 bg-btn-selected dark:bg-btn-selected-dark text-text-main dark:text-text-main-dark"
           )}
@@ -204,8 +204,8 @@ const MobileThemeToggle: React.FC = () => {
           className={cn(
             "absolute top-px right-0.5 w-18 h-8 rounded-full transition-all duration-300 ease-in-out",
             "font-switzer font-medium text-sm leading-5 text-center",
-            isDark 
-              ? "translate-x-18 bg-btn-selected dark:bg-btn-selected-dark text-text-main dark:text-text-main-dark" 
+            isDark
+              ? "translate-x-18 bg-btn-selected dark:bg-btn-selected-dark text-text-main dark:text-text-main-dark"
               : "translate-x-18 text-text-secondary dark:text-text-secondary-dark"
           )}
         >
@@ -319,14 +319,14 @@ const Sidebar: React.FC = () => {
           {/* PC端Logo区域 */}
           <div className="hidden md:block px-3.3 py-4">
             <Link to={withLangPrefix(lang, '/')} className="block">
-              <img 
-                src={LogoIcon} 
-                alt="Logo" 
+              <img
+                src={LogoIcon}
+                alt="Logo"
                 className="w-33 h-12.36 block dark:hidden"
               />
-              <img 
-                src={LogoIconDark} 
-                alt="Logo" 
+              <img
+                src={LogoIconDark}
+                alt="Logo"
                 className="w-33 h-12.36 hidden dark:block"
               />
             </Link>
@@ -353,15 +353,15 @@ const Sidebar: React.FC = () => {
                       "hover:bg-tertiary dark:hover:bg-tertiary-dark"
                     )}
                   >
-                                         <IconComponent 
-                       lightIcon={item.lightIcon}
-                       darkIcon={item.darkIcon}
-                       lightSelectedIcon={item.lightSelectedIcon}
-                       darkSelectedIcon={item.darkSelectedIcon}
-                       alt={item.label} 
-                       isSelected={isSelected}
-                     />
-                     <span className="flex-1">{item.label}</span>
+                    <IconComponent
+                      lightIcon={item.lightIcon}
+                      darkIcon={item.darkIcon}
+                      lightSelectedIcon={item.lightSelectedIcon}
+                      darkSelectedIcon={item.darkSelectedIcon}
+                      alt={item.label}
+                      isSelected={isSelected}
+                    />
+                    <span className="flex-1">{item.label}</span>
                     {/* 选中状态的右侧线条 */}
                     {isSelected && (
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-link-default dark:bg-link-default-dark rounded-full" />
@@ -395,15 +395,15 @@ const Sidebar: React.FC = () => {
                       "hover:bg-tertiary dark:hover:bg-tertiary-dark"
                     )}
                   >
-                                         <IconComponent 
-                       lightIcon={item.lightIcon}
-                       darkIcon={item.darkIcon}
-                       lightSelectedIcon={item.lightSelectedIcon}
-                       darkSelectedIcon={item.darkSelectedIcon}
-                       alt={item.label} 
-                       isSelected={isSelected}
-                     />
-                     <span className="flex-1">{item.label}</span>
+                    <IconComponent
+                      lightIcon={item.lightIcon}
+                      darkIcon={item.darkIcon}
+                      lightSelectedIcon={item.lightSelectedIcon}
+                      darkSelectedIcon={item.darkSelectedIcon}
+                      alt={item.label}
+                      isSelected={isSelected}
+                    />
+                    <span className="flex-1">{item.label}</span>
                     {/* 选中状态的右侧线条 */}
                     {isSelected && (
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-link-default dark:bg-link-default-dark rounded-full" />
@@ -411,57 +411,57 @@ const Sidebar: React.FC = () => {
                   </Link>
                 )
               })}
-                         </div>
-           </nav>
+            </div>
+          </nav>
 
-           {/* 移动端分割线和额外按钮 */}
-           <div className="md:hidden">
-             {/* 分割线 */}
-             <div className="w-full h-6 px-4 py-3 flex items-center">
-               <div className="w-full h-0 border-t border-line-subtle dark:border-line-subtle-dark" />
-             </div>
+          {/* 移动端分割线和额外按钮 */}
+          <div className="md:hidden">
+            {/* 分割线 */}
+            <div className="w-full h-6 px-4 py-3 flex items-center">
+              <div className="w-full h-0 border-t border-line-subtle dark:border-line-subtle-dark" />
+            </div>
 
-                           {/* 语言按钮 */}
-              <div className="w-full h-12 flex items-center gap-2 px-4">
-                <ThemeAdaptiveIcon 
-                  lightIcon={GlobeIcon}
-                  darkIcon={GlobeIconDark}
-                  alt="Language" 
-                  size="md"
-                />
-                <span className="font-switzer font-medium text-base leading-6 text-text-main dark:text-text-main-dark">
-                  English
-                </span>
-              </div>
+            {/* 语言按钮 */}
+            <div className="w-full h-12 flex items-center gap-2 px-4">
+              <ThemeAdaptiveIcon
+                lightIcon={GlobeIcon}
+                darkIcon={GlobeIconDark}
+                alt="Language"
+                size="md"
+              />
+              <span className="font-switzer font-medium text-base leading-6 text-text-main dark:text-text-main-dark">
+                English
+              </span>
+            </div>
 
-             {/* 主题切换按钮 */}
-             <MobileThemeToggle />
-           </div>
-         </div>
+            {/* 主题切换按钮 */}
+            <MobileThemeToggle />
+          </div>
+        </div>
 
         {/* 下半部分：底部官方链接 */}
         <div className="w-full md:w-40 h-19 pt-3 gap-3 border-t border-line-subtle dark:border-line-subtle-dark flex flex-col">
-                     {/* 社交图标行 */}
-           <div className="w-full md:w-40 h-9 gap-2 flex items-center justify-center">
-             <SocialIconComponent 
-               lightIcon={XIcon}
-               darkIcon={XIconDark}
-               alt="X (Twitter)" 
-               href="https://x.com/mavae"
-             />
-             <SocialIconComponent 
-               lightIcon={DiscordIcon}
-               darkIcon={DiscordIconDark}
-               alt="Discord" 
-               href="https://discord.gg/mavae"
-             />
-             <SocialIconComponent 
-               lightIcon={WeixinIcon}
-               darkIcon={WeixinIconDark}
-               alt="WeChat" 
-             />
-           </div>
-          
+          {/* 社交图标行 */}
+          <div className="w-full md:w-40 h-9 gap-2 flex items-center justify-center">
+            <SocialIconComponent
+              lightIcon={XIcon}
+              darkIcon={XIconDark}
+              alt="X (Twitter)"
+              href="https://x.com/MavaeAI"
+            />
+            <SocialIconComponent
+              lightIcon={DiscordIcon}
+              darkIcon={DiscordIconDark}
+              alt="Discord"
+              href="https://discord.gg/mavae"
+            />
+            <SocialIconComponent
+              lightIcon={WeixinIcon}
+              darkIcon={WeixinIconDark}
+              alt="WeChat"
+            />
+          </div>
+
           {/* 版权文本行 */}
           <div className="w-full md:w-40 h-9 flex items-center justify-center">
             <span className="font-switzer font-medium text-xs leading-4 text-text-main dark:text-text-main-dark text-center">

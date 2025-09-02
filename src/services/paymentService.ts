@@ -11,15 +11,15 @@ export class PaymentService {
    * @param mode 支付模式
    * @returns 支付会话URL
    */
-  async createStripePaymentSession(planId: string, mode: PaymentMode = 'subscription'): Promise<string> {
+  async createStripePaymentSession(planId: string, mode: PaymentMode = 'subscription', lang: string = 'en'): Promise<string> {
     try {
       const request: CreateCheckoutSessionRequest = {
         plan: planId,
         mode: mode,
         //success_url: 'https://www.mavae.ai/pricing?success=true&provider=stripe&session_id={CHECKOUT_SESSION_ID}',
         //cancel_url: 'https://www.mavae.ai/pricing?canceled=true&provider=stripe'
-        success_url: `${window.location.origin}/pricing?success=true&provider=stripe&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${window.location.origin}/pricing?canceled=true&provider=stripe`
+        success_url: `${window.location.origin}/${lang}/pricing?success=true&provider=stripe&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${window.location.origin}/${lang}/pricing?canceled=true&provider=stripe`
       }
 
       const response = await api.payments.createStripeCheckoutSession(request)
@@ -93,11 +93,12 @@ export class PaymentService {
    * 跳转到支付页面
    * @param planId 套餐ID
    * @param provider 支付提供商
+   * @param lang 语言前缀（如 'en', 'zh'）
    */
-  async redirectToPayment(planId: string, provider: 'stripe' | 'hel' = 'stripe') {
+  async redirectToPayment(planId: string, provider: 'stripe' | 'hel' = 'stripe', lang: string = 'en') {
     try {
       if (provider === 'stripe') {
-        const paymentUrl = await this.createStripePaymentSession(planId)
+        const paymentUrl = await this.createStripePaymentSession(planId, 'subscription', lang)
         window.location.href = paymentUrl
       } else if (provider === 'hel') {
         // Helio仅支持premium套餐，直接跳转到测试链接
@@ -120,10 +121,11 @@ export class PaymentService {
    * 创建支付会话（兼容旧版本，默认使用Stripe）
    * @param planId 套餐ID
    * @param mode 支付模式
+   * @param lang 语言前缀（如 'en', 'zh'）
    * @returns 支付会话URL
    */
-  async createPaymentSession(planId: string, mode: PaymentMode = 'subscription'): Promise<string> {
-    return this.createStripePaymentSession(planId, mode)
+  async createPaymentSession(planId: string, mode: PaymentMode = 'subscription', lang: string = 'en'): Promise<string> {
+    return this.createStripePaymentSession(planId, mode, lang)
   }
 
   /**
@@ -133,6 +135,24 @@ export class PaymentService {
    */
   async verifyPaymentSession(sessionId: string) {
     return this.verifyStripePaymentSession(sessionId)
+  }
+
+  /**
+   * 管理订阅 - 跳转到Stripe Portal
+   * @param userId 用户DID
+   */
+  async manageSubscription(userId: string) {
+    try {
+      const portalResponse = await api.payments.getUserPortal(userId)
+      if (portalResponse.url) {
+        window.location.href = portalResponse.url
+      } else {
+        throw new Error('Portal URL not available')
+      }
+    } catch (error) {
+      console.error('Failed to get portal URL:', error)
+      throw new Error('Failed to access subscription management portal')
+    }
   }
 }
 

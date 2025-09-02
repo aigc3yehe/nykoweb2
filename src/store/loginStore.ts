@@ -2,7 +2,7 @@ import { atom } from 'jotai'
 import { authService } from '../services/authService'
 import { usersApi } from '../services/api/users'
 import { authApi } from '../services/api/auth'
-import {ApiError, UserBaseInfo} from '../services/api'
+import {ApiError, UserBaseInfo, PlanState} from '../services/api'
 import { chatAtom } from './assistantStore.ts'
 import { setAgentTokenAtom } from './assistantStore.ts'
 
@@ -25,6 +25,7 @@ export interface UserState {
   isAuthenticated: boolean
   user: GoogleUserInfo | null
   userDetails: UserBaseInfo | null // 详细的用户信息，来自API
+  userPlan: PlanState | null // 用户计划状态信息
   isLoading: boolean
   error: string | null
 }
@@ -34,6 +35,7 @@ export const userStateAtom = atom<UserState>({
   isAuthenticated: false,
   user: null,
   userDetails: null,
+  userPlan: null,
   isLoading: false,
   error: null
 })
@@ -82,6 +84,7 @@ export const initUserStateAtom = atom(
         isAuthenticated: true,
         user,
         userDetails: currentUserState.userDetails,
+        userPlan: currentUserState.userPlan,
         isLoading: false,
         error: null
       })
@@ -100,6 +103,7 @@ export const loginAtom = atom(
       isAuthenticated: false,
       user: null,
       userDetails: null,
+      userPlan: null,
       isLoading: true,
       error: null
     })
@@ -111,6 +115,7 @@ export const loginAtom = atom(
         isAuthenticated: true,
         user: userInfo,
         userDetails: null,
+        userPlan: null,
         isLoading: false,
         error: null
       })
@@ -127,6 +132,7 @@ export const loginAtom = atom(
         isAuthenticated: false,
         user: null,
         userDetails: null,
+        userPlan: null,
         isLoading: false,
         error: errorMessage
       })
@@ -185,6 +191,46 @@ export const fetchUserDetailsAtom = atom(
   }
 )
 
+// 获取用户计划状态
+export const fetchUserPlanAtom = atom(
+  null,
+  async (get, set) => {
+    const currentState = get(userStateAtom)
+
+    if (!currentState.isAuthenticated || !currentState.user) {
+      return
+    }
+
+    try {
+      const did = currentState.user.tokens.did
+      const userPlan = await usersApi.getUserPlan(did, true)
+
+      set(userStateAtom, {
+        ...currentState,
+        userPlan,
+        error: null
+      })
+
+      console.log('User plan fetched successfully:', userPlan)
+    } catch (error) {
+      console.error('Failed to fetch user plan:', error)
+
+      // 如果是401错误，说明token无效，清空登录状态
+      if (error instanceof ApiError && error.statusCode === 401) {
+        console.warn('Access token invalid (401), clearing login state')
+        set(logoutAtom)
+        return
+      }
+
+      // 其他错误不清空登录状态，只记录错误
+      set(userStateAtom, {
+        ...currentState,
+        error: error instanceof Error ? error.message : 'Failed to fetch user plan'
+      })
+    }
+  }
+)
+
 // 登出处理
 export const logoutAtom = atom(
   null,
@@ -195,6 +241,7 @@ export const logoutAtom = atom(
       isAuthenticated: false,
       user: null,
       userDetails: null,
+      userPlan: null,
       isLoading: false,
       error: null
     })

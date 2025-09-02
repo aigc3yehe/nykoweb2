@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toggleSidebarAtom } from '../../store/sidebarStore'
-import { showLoginModalAtom, userStateAtom } from '../../store/loginStore'
+import { showLoginModalAtom, userStateAtom, fetchUserPlanAtom } from '../../store/loginStore'
 //import { useI18n } from '../../hooks/useI18n'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { getCurrentTheme, toggleTheme } from '../../utils/theme'
@@ -20,9 +20,12 @@ import SunIcon from '../../assets/mavae/sun.svg'
 import SunIconDark from '../../assets/mavae/dark/sun.svg'
 import MoonIcon from '../../assets/mavae/moom.svg'
 import MoonIconDark from '../../assets/mavae/dark/moom.svg'
-import FreeIcon from '../../assets/mavae/free.svg'
-//import PlusIcon from '../../assets/mavae/plus.svg'
-//import ProIcon from '../../assets/mavae/pro.svg'
+import FreeIcon from '../../assets/mavae/vip/free.svg'
+import FreeIconDark from '../../assets/mavae/dark/vip/free.svg'
+import ProIcon from '../../assets/mavae/vip/pro.svg'
+import ProIconDark from '../../assets/mavae/dark/vip/pro.svg'
+import PlusIcon from '../../assets/mavae/vip/plus.svg'
+import PlusIconDark from '../../assets/mavae/dark/vip/plus.svg'
 
 const Header: React.FC = React.memo(() => {
   //const { t } = useI18n()
@@ -32,6 +35,7 @@ const Header: React.FC = React.memo(() => {
   const toggleSidebar = useSetAtom(toggleSidebarAtom)
   const showLoginModal = useSetAtom(showLoginModalAtom)
   const [userState] = useAtom(userStateAtom)
+  const fetchUserPlan = useSetAtom(fetchUserPlanAtom)
   const [theme, setTheme] = useState<'light' | 'dark'>(getCurrentTheme())
   const userMenuRef = useRef<HTMLDivElement>(null)
 
@@ -58,6 +62,12 @@ const Header: React.FC = React.memo(() => {
     }
   }, [])
 
+  // 当用户登录后，获取用户计划状态
+  useEffect(() => {
+    if (userState.isAuthenticated && userState.user && !userState.userPlan) {
+      fetchUserPlan()
+    }
+  }, [userState.isAuthenticated, userState.user, userState.userPlan, fetchUserPlan])
 
 
   const handleToggleTheme = () => {
@@ -93,9 +103,19 @@ const Header: React.FC = React.memo(() => {
 
   // 获取会员等级图标
   const getMembershipIcon = () => {
-    // TODO: 从用户信息中获取实际会员等级
-    // 目前默认使用Free
-    return FreeIcon
+    if (!userState.userPlan) {
+      return { light: FreeIcon, dark: FreeIconDark } // 默认使用Free图标
+    }
+
+    switch (userState.userPlan.plan_type) {
+      case 'premium':
+        return { light: ProIcon, dark: ProIconDark }
+      case 'pro':
+        return { light: PlusIcon, dark: PlusIconDark }
+      case 'free':
+      default:
+        return { light: FreeIcon, dark: FreeIconDark }
+    }
   }
 
   return (
@@ -208,14 +228,14 @@ const Header: React.FC = React.memo(() => {
               </button>
 
               {/* 会员等级标识 - 下边居中 */}
-              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-7 h-3 md:w-9 md:h-4.5">
-                <img
-                  src={getMembershipIcon()}
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-7 h-3 md:w-9 md:h-4">
+                <ThemeAdaptiveIcon
+                  lightIcon={getMembershipIcon().light}
+                  darkIcon={getMembershipIcon().dark}
                   alt="Membership"
-                  className="w-full h-full"
+                  className='w-7 h-3 md:w-9 md:h-4'
                 />
               </div>
-
 
             </div>
           ) : (

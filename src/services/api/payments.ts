@@ -6,7 +6,8 @@ import type {
   VerifyCheckoutSessionResponseDto,
   PaymentInfoResponseDto,
   CancelSubscriptionResponseDto,
-  TransactionObjectDto
+  TransactionObjectDto,
+  GetUserPortalResponseDto
 } from './types'
 
 /**
@@ -47,6 +48,19 @@ export class PaymentsApiService {
   async getStripePaymentInfo(userId: string): Promise<PaymentInfoResponseDto> {
     return apiService.get<PaymentInfoResponseDto>(
       API_ENDPOINTS.PAYMENTS.STRIPE.GET_INFO(userId),
+      undefined,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 获取用户Portal URL
+   * @param userId 用户DID
+   * @returns 用户Portal URL响应
+   */
+  async getUserPortal(userId: string): Promise<GetUserPortalResponseDto> {
+    return apiService.get<GetUserPortalResponseDto>(
+      API_ENDPOINTS.PAYMENTS.STRIPE.PORTAL(userId),
       undefined,
       { requiresAuth: true }
     )
@@ -103,6 +117,15 @@ export class PaymentsApiService {
    */
   async getPaymentInfo(userId: string): Promise<PaymentInfoResponseDto> {
     return this.getStripePaymentInfo(userId)
+  }
+
+  /**
+   * 获取用户Portal URL（兼容旧版本）
+   * @param userId 用户DID
+   * @returns 用户Portal URL响应
+   */
+  async getPortal(userId: string): Promise<GetUserPortalResponseDto> {
+    return this.getUserPortal(userId)
   }
 
   /**
