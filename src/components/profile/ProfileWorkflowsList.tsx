@@ -155,12 +155,12 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
         {/* 文本提示 */}
         <div className="flex flex-col items-center gap-1"> {/* 两行文本间距4px */}
           <p className="font-switzer font-medium text-2xl leading-8 text-text-main dark:text-text-main-dark text-center"> {/* font-size: 24px, line-height: 32px */}
-            {tab === 'published' ? 'No published workflows found' : 'No liked workflows found'}
+            {tab === 'published' ? 'No published cases found' : 'No liked cases found'}
           </p>
           <p className="font-switzer font-medium text-sm leading-5 text-[#9CA1AF] text-center"> {/* font-size: 14px, line-height: 20px */}
             {tab === 'published' 
-              ? 'Create your first workflow to get started' 
-              : 'Like some workflows to see them here'
+              ? 'Create your first agent case to get started' 
+              : 'Like some cases to see them here'
             }
           </p>
         </div>
@@ -229,7 +229,7 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
       {/* 无更多数据提示 */}
       {!hasMore && currentGroups.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-400">No more workflows to load</div>
+          <div className="text-gray-400">No more cases to load</div>
         </div>
       )}
     </div>

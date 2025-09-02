@@ -13,8 +13,7 @@ import KlingIcon from '../assets/mavae/klingai.svg'
 import KlingIconDark from '../assets/mavae/dark/klingai.svg'
 //import MidjourneyIcon from '../assets/mavae/midjourney.svg'
 //import MidjourneyIconDark from '../assets/mavae/dark/midjourney.svg'
-import OutputLiveIcon from '../assets/mavae/output_live.svg'
-import OutputLiveIconDark from '../assets/mavae/dark/output_live.svg'
+
 import StyleImageDeleteIcon from '../assets/mavae/style_image_delete.svg'
 import StyleImageDeleteIconDark from '../assets/mavae/dark/style_image_delete.svg'
 import ThemeAdaptiveIcon from '../components/ui/ThemeAdaptiveIcon'
@@ -77,6 +76,41 @@ const WorkflowBuilder: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const refImageInputRef = useRef<HTMLInputElement>(null)
+
+  // 输入类型显示文本映射
+  const getInputTypeDisplayText = (type: string) => {
+    switch (type) {
+      case 'image':
+        return 'Reference Image'
+      case 'text':
+        return 'Additional Prompt'
+      case 'image,text':
+        return 'Reference Image + Additional Prompt'
+      // 也保持对已转换格式的支持
+      case 'Image':
+        return 'Reference Image'
+      case 'Text':
+        return 'Additional Prompt'
+      case 'Image + Text':
+        return 'Reference Image + Additional Prompt'
+      default:
+        return type
+    }
+  }
+
+  // 输出类型显示文本映射
+  const getOutputTypeDisplayText = (type: string) => {
+    switch (type) {
+      case 'image':
+        return 'Image'
+      case 'text':
+        return 'Text'
+      case 'video':
+        return 'Video'
+      default:
+        return type.charAt(0).toUpperCase() + type.slice(1)
+    }
+  }
 
   // 根据提供商名称获取对应的图标
   const getProviderIcon = (provider: string) => {
@@ -315,20 +349,20 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">1</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Display</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Case Info</span>
             </div>
 
             {/* Name 输入框组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Name</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Name</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入框 */}
               <input
                 className="w-[19.5rem] h-10 pt-0 pr-3 pb-0 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="Name"
+                placeholder="A name matches its features"
                 value={workflowForm.name}
                 onChange={(e) => updateWorkflowForm({ name: e.target.value })}
                 onFocus={() => setNameFocus(true)}
@@ -343,7 +377,7 @@ const WorkflowBuilder: React.FC = () => {
               {/* 输入框 */}
               <textarea
                 className="w-[19.5rem] h-[6.75rem] pt-3 pr-3 pb-3 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark resize-none focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="Description"
+                placeholder="How can we use it to make the most of this case's features?"
                 value={workflowForm.description}
                 onChange={(e) => updateWorkflowForm({ description: e.target.value })}
                 onFocus={() => setDescFocus(true)}
@@ -420,28 +454,28 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">2</span>
               </div>
             {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Builder</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Template</span>
             </div>
 
             {/* Input Type 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Input Type</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">User Input</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入类型选择 */}
-              <div className="w-[19.5rem] h-10 flex gap-2">
+              <div className="w-[19.5rem] flex flex-wrap gap-2">
                 {availableInputTypes.map(type => (
                   <button
                     key={type}
                     onClick={() => setSelectedInputType(type)}
-                    className={`w-[6.167rem] h-10 rounded-full border font-switzer text-sm leading-5 text-center align-middle transition-colors ${selectedInputType === type
+                    className={`h-10 px-4 rounded-full border font-switzer text-sm leading-5 text-center align-middle transition-colors whitespace-nowrap ${selectedInputType === type
                       ? 'border-text-main dark:border-text-main-dark font-semibold text-text-main dark:text-text-main-dark'
                       : 'border-line-subtle dark:border-line-subtle-dark font-normal text-text-secondary dark:text-text-secondary-dark'
                       }`}
                   >
-                    {type}
+                    {getInputTypeDisplayText(type)}
                   </button>
                 ))}
               </div>
@@ -451,7 +485,7 @@ const WorkflowBuilder: React.FC = () => {
             <div className="flex flex-col gap-1">
             {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Model</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Models</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
             </div>
               {/* Model 选择 */}
@@ -490,11 +524,14 @@ const WorkflowBuilder: React.FC = () => {
             {/* Prompt 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Prompt</span>
+              <div className="flex items-center gap-1">
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Prompt</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
+              </div>
               {/* 输入框 */}
               <textarea
                 className="w-[19.5rem] h-[6.75rem] pt-3 pr-3 pb-3 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark resize-none focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="Write a Prompt here"
+                placeholder="This is the system prompt for this case. Each time the case runs, this set of prompts will be used."
                 value={workflowForm.prompt}
                 onChange={(e) => updateWorkflowForm({ prompt: e.target.value })}
                 onFocus={() => setPromptFocus(true)}
@@ -505,7 +542,7 @@ const WorkflowBuilder: React.FC = () => {
             {/* Reference Image 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Reference Image</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Reference Image</span>
               {/* 图片上传组件 */}
               {refImage && refImageUrl ? (
                 <div className="relative w-[8.125rem] h-[8.125rem] gap-1 rounded-[0.625rem]">
@@ -571,27 +608,23 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">3</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Output</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Case Output</span>
             </div>
 
             {/* Type 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-secondary dark:text-text-secondary-dark">Type</span>
-              {/* 输出类型列表 */}
-              <div className="flex flex-col gap-1">
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-secondary dark:text-text-secondary-dark">Case Output</span>
+              {/* 输出类型选择 */}
+              <div className="w-[19.5rem] h-10 flex gap-2">
                 {availableOutputTypes.map(type => (
-                  <div key={type} className="flex items-center gap-1">
-                    <ThemeAdaptiveIcon
-                      lightIcon={OutputLiveIcon}
-                      darkIcon={OutputLiveIconDark}
-                      alt="Output"
-                      size="sm"
-                    />
-                    <span className="font-switzer font-medium text-base leading-6 text-text-main dark:text-text-main-dark">
-                      {type}
-                    </span>
-                  </div>
+                  <button
+                    key={type}
+                    className="w-[6.167rem] h-10 rounded-full border font-switzer text-sm leading-5 text-center align-middle border-text-main dark:border-text-main-dark font-semibold text-text-main dark:text-text-main-dark"
+                    disabled
+                  >
+                    {getOutputTypeDisplayText(type)}
+                  </button>
                 ))}
               </div>
             </div>
@@ -602,7 +635,7 @@ const WorkflowBuilder: React.FC = () => {
               disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
               className="w-[19.5rem] h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isCreatingWorkflow ? 'Creating...' : 'Builder'}
+              {isCreatingWorkflow ? 'Creating...' : 'Save The Template'}
             </button>
                           </div>
                         </div>
@@ -632,20 +665,20 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">1</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Display</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Case Info</span>
             </div>
 
             {/* Name 输入框组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Name</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Name</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入框 */}
               <input
                 className="w-full h-10 pt-0 pr-3 pb-0 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="Name"
+                placeholder="A name matches its features"
                 value={workflowForm.name}
                 onChange={(e) => updateWorkflowForm({ name: e.target.value })}
                 onFocus={() => setNameFocus(true)}
@@ -660,7 +693,7 @@ const WorkflowBuilder: React.FC = () => {
               {/* 输入框 */}
               <textarea
                 className="w-full h-[6.75rem] pt-3 pr-3 pb-3 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark resize-none focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="Description"
+                placeholder="How can we use it to make the most of this case's features?"
                 value={workflowForm.description}
                 onChange={(e) => updateWorkflowForm({ description: e.target.value })}
                 onFocus={() => setDescFocus(true)}
@@ -737,28 +770,28 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">2</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Builder</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Template</span>
             </div>
 
             {/* Input Type 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Input Type</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">User Input</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入类型选择 */}
-              <div className="w-full h-10 flex gap-2">
+              <div className="w-full flex flex-wrap gap-2">
                 {availableInputTypes.map(type => (
                   <button
                     key={type}
                     onClick={() => setSelectedInputType(type)}
-                    className={`flex-1 h-10 rounded-full border font-switzer text-sm leading-5 text-center align-middle transition-colors ${selectedInputType === type
+                    className={`h-10 px-4 rounded-full border font-switzer text-sm leading-5 text-center align-middle transition-colors whitespace-nowrap ${selectedInputType === type
                       ? 'border-text-main dark:border-text-main-dark font-semibold text-text-main dark:text-text-main-dark'
                       : 'border-line-subtle dark:border-line-subtle-dark font-normal text-text-secondary dark:text-text-secondary-dark'
                       }`}
                   >
-                    {type}
+                    {getInputTypeDisplayText(type)}
                   </button>
                 ))}
               </div>
@@ -768,7 +801,7 @@ const WorkflowBuilder: React.FC = () => {
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Model</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Models</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* Model 选择 */}
@@ -807,11 +840,14 @@ const WorkflowBuilder: React.FC = () => {
             {/* Prompt 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Prompt</span>
+              <div className="flex items-center gap-1">
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Prompt</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
+              </div>
               {/* 输入框 */}
                 <textarea
                 className="w-full h-[6.75rem] pt-3 pr-3 pb-3 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark resize-none focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="Write a Prompt here"
+                placeholder="This is the system prompt for this case. Each time the case runs, this set of prompts will be used."
                   value={workflowForm.prompt}
                   onChange={(e) => updateWorkflowForm({ prompt: e.target.value })}
                 onFocus={() => setPromptFocus(true)}
@@ -822,7 +858,7 @@ const WorkflowBuilder: React.FC = () => {
             {/* Reference Image 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Reference Image</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Reference Image</span>
               {/* 图片上传组件 */}
                 {refImage && refImageUrl ? (
                 <div className="relative w-[8.125rem] h-[8.125rem] gap-1 rounded-[0.625rem]">
@@ -888,27 +924,23 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">3</span>
           </div>
             {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Output</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Case Output</span>
             </div>
 
             {/* Type 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-secondary dark:text-text-secondary-dark">Type</span>
-              {/* 输出类型列表 */}
-              <div className="flex flex-col gap-1">
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-secondary dark:text-text-secondary-dark">Case Output</span>
+              {/* 输出类型选择 */}
+              <div className="w-[19.5rem] h-10 flex gap-2">
                 {availableOutputTypes.map(type => (
-                  <div key={type} className="flex items-center gap-1">
-                    <ThemeAdaptiveIcon
-                      lightIcon={OutputLiveIcon}
-                      darkIcon={OutputLiveIconDark}
-                      alt="Output"
-                      size="sm"
-                    />
-                    <span className="font-switzer font-medium text-base leading-6 text-text-main dark:text-text-main-dark">
-                      {type}
-                    </span>
-                  </div>
+                  <button
+                    key={type}
+                    className="w-[6.167rem] h-10 rounded-full border font-switzer text-sm leading-5 text-center align-middle border-text-main dark:border-text-main-dark font-semibold text-text-main dark:text-text-main-dark"
+                    disabled
+                  >
+                    {getOutputTypeDisplayText(type)}
+                  </button>
                 ))}
               </div>
             </div>
@@ -919,7 +951,7 @@ const WorkflowBuilder: React.FC = () => {
               disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
               className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isCreatingWorkflow ? 'Creating...' : 'Builder'}
+              {isCreatingWorkflow ? 'Creating...' : 'Save The Template'}
             </button>
           </div>
         </div>

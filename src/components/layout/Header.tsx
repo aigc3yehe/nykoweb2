@@ -3,7 +3,7 @@ import { useAtom, useSetAtom } from 'jotai'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toggleSidebarAtom } from '../../store/sidebarStore'
 import { showLoginModalAtom, userStateAtom, fetchUserPlanAtom } from '../../store/loginStore'
-//import { useI18n } from '../../hooks/useI18n'
+import { useI18n } from '../../hooks/useI18n'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { getCurrentTheme, toggleTheme } from '../../utils/theme'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
@@ -28,7 +28,7 @@ import PlusIcon from '../../assets/mavae/vip/plus.svg'
 import PlusIconDark from '../../assets/mavae/dark/vip/plus.svg'
 
 const Header: React.FC = React.memo(() => {
-  //const { t } = useI18n()
+  const { t } = useI18n()
   const lang = useLang()
   const navigate = useNavigate()
   const location = useLocation()
@@ -84,10 +84,10 @@ const Header: React.FC = React.memo(() => {
     const path = location.pathname
     if (path.includes('/workflow/builder')) return 'Builder'
     if (path.includes('/style/trainer')) return 'Style Trainer'
-    if (path.includes('/recipes')) return 'Agent Cases'
-    if (path.includes('/profile')) return 'My creations'
+    if (path.includes('/recipes')) return t('nav.recipes')
+    if (path.includes('/profile')) return t('profile.myCreations')
     if (path.includes('/account')) return 'Account'
-    return 'Sparks' // Home页面
+    return t('pages.home') // Home页面
   }
 
   // 判断是否显示返回组件
@@ -132,16 +132,16 @@ const Header: React.FC = React.memo(() => {
                   <button
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 h-8"
-                    aria-label="Return"
+                    aria-label={t('pages.return')}
                   >
                     <ThemeAdaptiveIcon
                       lightIcon={LeftIcon}
                       darkIcon={LeftIconDark}
-                      alt="Return"
+                      alt={t('pages.return')}
                       size="lg"
                     />
                     <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark select-none">
-                      Return
+                      {t('pages.return')}
                     </span>
                   </button>
                 </>

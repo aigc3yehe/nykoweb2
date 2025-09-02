@@ -42,24 +42,19 @@ const initialState: PricingState = {
       id: "free",
       name: "Free",
       price: "$0",
-      description: "For starter",
+      description: "For Starter",
       features: [
         {
-          title: "80 Credits Every Week",
-          subtitle: "On Website",
+          title: "80 Credits Every Month",
           supported: true,
         },
         {
-          title: "Model training not supported",
-          supported: false,
+          title: "Use Generator and Cases to create images and videos",
+          supported: true,
         },
         {
-          title: "Not Eligible For Rewards",
-          supported: false,
-        },
-        {
-          title: "Not Eligible For Rewards",
-          supported: false,
+          title: "Use Builder to save generative templates",
+          supported: true,
         },
       ],
       staked: 0,
@@ -67,25 +62,24 @@ const initialState: PricingState = {
     {
       id: "premium",
       name: "Plus",
-      price: "$19.9",
-      description: "For expert-level AI players",
+      price: "$19",
+      description: "For Expert-Level AI Players",
       features: [
         {
-          title: "1,000 Credits Every Week",
-          subtitle: "On Website",
+          title: "2,500 Credits Every Month",
           supported: true,
         },
         {
-          title: "Model training not supported",
-          supported: false,
+          title: "Everything included in Free plan",
+          supported: true,
         },
         {
-          title: "Not Eligible For Rewards",
-          supported: false,
+          title: "Test models in both Generator and Builder",
+          supported: true,
         },
         {
-          title: "Not Eligible For Rewards",
-          supported: false,
+          title: "Join MAVAE VIP community",
+          supported: true,
         },
       ],
       buttonText: "Subscribe",
@@ -95,25 +89,24 @@ const initialState: PricingState = {
     {
       id: "premium_plus",
       name: "Pro",
-      price: "$29.9",
-      description: "For Revolutionary AI creators",
+      price: "$49",
+      description: "For Revolutionary AI Creators",
       features: [
         {
-          title: "8,000 Credits Every Week",
-          subtitle: "On Website & X",
+          title: "8,000 Credits Every Month",
           supported: true,
         },
         {
-          title: "Model training not supported",
-          supported: false,
+          title: "Everything included in Free&Plus plan",
+          supported: true,
         },
         {
-          title: "Not Eligible For Rewards",
-          supported: false,
+          title: "API access is available upon request",
+          supported: true,
         },
         {
-          title: "Not Eligible For Rewards",
-          supported: false,
+          title: "Schedule an online session with MAVAE team, available once a week.",
+          supported: true,
         },
       ],
       buttonText: "Subscribe",

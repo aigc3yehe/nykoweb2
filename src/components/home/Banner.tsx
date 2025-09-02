@@ -16,8 +16,8 @@ const Banner: React.FC = () => {
   const banners = [
     {
       id: 1,
-      title: "Bring your ideas to life",
-      description: "Generate Creations through conversational canvas",
+      title: "Participate in fun creations",
+      description: "Use Agent Cases to expand any theme creation",
       buttonText: "Generate",
       icon: LifeIcon,
       iconDark: LifeIconDark,
@@ -25,7 +25,7 @@ const Banner: React.FC = () => {
     },
     {
       id: 2,
-      title: "Build Custom Workflows",
+      title: "Build Agent Cases",
       description: "Efficient tasks with custom AI workflows",
       buttonText: "Create",
       icon: WorkflowsIcon,

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
+import { useI18n } from '../../hooks/useI18n'
 import { useAtom, useSetAtom } from 'jotai'
 import { sidebarOpenAtom, closeSidebarAtom } from '../../store/sidebarStore'
 import { getCurrentTheme, toggleTheme } from '../../utils/theme'
@@ -217,6 +218,7 @@ const MobileThemeToggle: React.FC = () => {
 }
 
 const Sidebar: React.FC = () => {
+  const { t } = useI18n()
   const lang = useLang()
   const location = useLocation()
   const [isOpen] = useAtom(sidebarOpenAtom)
@@ -231,7 +233,7 @@ const Sidebar: React.FC = () => {
   const topNavItems: NavItem[] = [
     {
       key: 'home',
-      label: 'Home',
+      label: t('nav.home'),
       lightIcon: SparksIcon,
       darkIcon: SparksIconDark,
       lightSelectedIcon: SparksIconSelected,
@@ -241,7 +243,7 @@ const Sidebar: React.FC = () => {
     },
     {
       key: 'recipes',
-      label: 'Agent Cases',
+      label: t('nav.recipes'),
       lightIcon: RecipesIcon,
       darkIcon: RecipesIconDark,
       lightSelectedIcon: RecipesIconSelected,
@@ -251,7 +253,7 @@ const Sidebar: React.FC = () => {
     },
     {
       key: 'assets',
-      label: 'My creations',
+      label: t('profile.myCreations'),
       lightIcon: MyAssetsIcon,
       darkIcon: MyAssetsIconDark,
       lightSelectedIcon: MyAssetsIconSelected,

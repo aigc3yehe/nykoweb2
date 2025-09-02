@@ -6,7 +6,7 @@ import LiveIcon from '../../assets/mavae/live.svg'
 import LiveIconDark from '../../assets/mavae/dark/live.svg'
 
 type ProfileTab = 'published' | 'liked'
-type ContentTypeFilter = 'workflows' | 'models' | 'images' | 'videos'
+type ContentTypeFilter = 'workflows' | 'images' | 'videos'
 
 interface ProfileActionsProps {
   activeTab: ProfileTab
@@ -16,7 +16,7 @@ interface ProfileActionsProps {
 const ProfileActions: React.FC<ProfileActionsProps> = ({onFilterChange }) => {
   const [selectedOption, setSelectedOption] = useState<ContentTypeFilter>('workflows')
 
-  const options: ContentTypeFilter[] = ['workflows', 'models', 'images', 'videos']
+  const options: ContentTypeFilter[] = ['workflows', 'images', 'videos']
 
   const handleOptionSelect = (option: ContentTypeFilter) => {
     setSelectedOption(option)
@@ -65,7 +65,7 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({onFilterChange }) => {
                 ? "text-text-main dark:text-text-main-dark" // 选中状态字体颜色
                 : "text-text-secondary dark:text-text-secondary-dark" // 未选中状态字体颜色
             )}>
-              {option.charAt(0).toUpperCase() + option.slice(1)}
+              {option === 'workflows' ? 'Cases' : option.charAt(0).toUpperCase() + option.slice(1)}
             </span>
           </button>
         ))}

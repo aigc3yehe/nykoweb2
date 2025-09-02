@@ -182,7 +182,7 @@ const Account: React.FC = () => {
                     {/* 用户昵称信息 */}
                     <div className="flex flex-col gap-1">
                         <span className="font-switzer font-medium text-sm leading-5 text-text-secondary dark:text-text-secondary-dark">
-                            Handle
+                            Username
                         </span>
                         <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark">
                             {user.name || 'User'}
@@ -231,7 +231,7 @@ const Account: React.FC = () => {
                             onClick={() => navigate(withLangPrefix(lang, '/pricing'))}
                             className="font-switzer font-medium text-sm leading-6 text-[#65A30D] hover:text-[#4D7C0F] transition-colors"
                         >
-                            View Plan Details
+                            View Plans
                         </button>
                         {/* 管理订阅按钮 - 只在非免费套餐时显示 */}
                         {userState.userPlan && userState.userPlan.plan_type !== 'free' && (
