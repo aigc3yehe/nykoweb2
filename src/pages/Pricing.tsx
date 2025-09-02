@@ -160,15 +160,35 @@ const Pricing: React.FC = React.memo(() => {
     
     // 将API的plan_type映射到套餐ID
     switch (userState.userPlan.plan_type) {
-      case 'pro':
-        return planId === 'premium'
       case 'premium':
+        return planId === 'premium'
+      case 'premium_plus':
         return planId === 'premium_plus'
       case 'free':
         return planId === 'free'
       default:
         return false
     }
+  }
+
+  // 获取按钮文本
+  const getButtonText = (planId: string) => {
+    if (isCurrentSubscription(planId)) {
+      return 'Current Plan'
+    }
+    
+    // 如果用户是Plus（premium），且当前套餐是Pro（premium_plus），显示Upgrade
+    if (userState.userPlan?.plan_type === 'premium' && planId === 'premium_plus') {
+      return 'Upgrade'
+    }
+    
+    // 如果用户是Pro（premium_plus），且当前套餐是Plus（premium），不显示按钮
+    if (userState.userPlan?.plan_type === 'premium_plus' && planId === 'premium') {
+      return null
+    }
+    
+    // 其他情况显示Subscribe
+    return 'Subscribe'
   }
 
   return (
@@ -299,7 +319,7 @@ const Pricing: React.FC = React.memo(() => {
               </div>
 
               {/* 按钮 */}
-              {plan.buttonText && (
+              {plan.buttonText && getButtonText(plan.id) && (
                 isCurrentSubscription(plan.id) ? (
                   // 当前订阅套餐 - 显示为已订阅状态
                   <button
@@ -313,14 +333,14 @@ const Pricing: React.FC = React.memo(() => {
                   <button
                     onClick={() => handleSubscribe(plan.id)}
                     disabled={isProcessing || plan.id === 'free'}
-                    className={`w-full h-12 px-4 gap-1 rounded-full font-switzer font-medium text-base leading-6 text-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${plan.id === 'premium'
+                    className={`w-full h-12 px-4 gap-1 rounded-full font-switzer font-base leading-6 text-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${plan.id === 'premium'
                       ? 'bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark text-white'
                       : plan.id === 'premium_plus'
                         ? 'bg-[#FFEDB6] hover:bg-[#FFE5A3] text-black'
                         : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-text-main dark:text-text-main-dark'
                       }`}
                   >
-                    {isProcessing ? 'Processing...' : plan.buttonText}
+                    {isProcessing ? 'Processing...' : getButtonText(plan.id)}
                   </button>
                 )
               )}

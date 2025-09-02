@@ -108,9 +108,9 @@ const Header: React.FC = React.memo(() => {
     }
 
     switch (userState.userPlan.plan_type) {
-      case 'premium':
+      case 'premium_plus':
         return { light: ProIcon, dark: ProIconDark }
-      case 'pro':
+      case 'premium':
         return { light: PlusIcon, dark: PlusIconDark }
       case 'free':
       default:
@@ -185,7 +185,7 @@ const Header: React.FC = React.memo(() => {
           {/* 分数显示和Upgrade按钮 - 登录后显示 */}
           {userState.isAuthenticated && userState.user && (() => {
             // 判断是否显示Upgrade按钮
-            const shouldShowUpgrade = !userState.userPlan || userState.userPlan.plan_type !== 'premium'
+            const shouldShowUpgrade = !userState.userPlan || userState.userPlan.plan_type !== 'premium_plus'
 
             return (
               <div className="h-9 md:h-12 pl-4 gap-2 rounded-full bg-[#84CC161A] flex items-center">

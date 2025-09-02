@@ -33,9 +33,9 @@ const Account: React.FC = () => {
         }
 
         switch (userState.userPlan.plan_type) {
-            case 'premium':
+            case 'premium_plus':
                 return { light: ProIcon, dark: ProIconDark }
-            case 'pro':
+            case 'premium':
                 return { light: PlusIcon, dark: PlusIconDark }
             case 'free':
             default:
@@ -52,7 +52,7 @@ const Account: React.FC = () => {
         switch (userState.userPlan.plan_type) {
             case 'premium':
                 return 'Premium'
-            case 'pro':
+            case 'premium_plus':
                 return 'Pro'
             case 'free':
             default:
@@ -67,9 +67,9 @@ const Account: React.FC = () => {
         }
 
         switch (userState.userPlan.plan_type) {
-            case 'premium':
+            case 'premium_plus':
                 return 8000 // Pro套餐
-            case 'pro':
+            case 'premium':
                 return 1000 // Plus套餐
             case 'free':
             default:
@@ -97,7 +97,7 @@ const Account: React.FC = () => {
         switch (userState.userPlan.plan_type) {
             case 'premium':
                 return `Your Mavae credit for this month has already reached ${calculateCreditUsage()}% usage`
-            case 'pro':
+            case 'premium_plus':
                 return `Your Mavae credit for this month has already reached ${calculateCreditUsage()}% usage`
             case 'free':
             default:

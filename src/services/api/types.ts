@@ -1,6 +1,6 @@
 // 通用类型
 export type UserRole = 'admin' | 'user' | 'whitelist' | 'banned'
-export type PlanType = 'free' | 'pro' | 'premium'
+export type PlanType = 'free' | 'premium' | 'premium_plus'
 export type PaymentMode = 'subscription' | 'payment'
 export type ContentState = 'success' | 'pending' | 'failed'
 export type ContentType = 'image' | 'video' | 'text' | 'audio'
