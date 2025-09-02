@@ -7,6 +7,15 @@ import PictureIcon from '../../assets/mavae/Picture_white.svg'
 import VideoIconNew from '../../assets/mavae/video_white.svg'
 import UseIconNew from '../../assets/mavae/use_white.svg'
 import BookmarkNormalIcon from '../../assets/mavae/Bookmark_normal.svg'
+import DeleteIcon from '../../assets/mavae/delete.svg'
+import DeleteIconHover from '../../assets/mavae/delete_hover.svg'
+import DeleteIconDark from '../../assets/mavae/dark/delete.svg'
+import DeleteIconHoverDark from '../../assets/mavae/dark/delete_hover.svg'
+import EditIcon from '../../assets/mavae/Edit.svg'
+import EditIconHover from '../../assets/mavae/Edit_hover.svg'
+import EditIconDark from '../../assets/mavae/dark/Edit.svg'
+import EditIconHoverDark from '../../assets/mavae/dark/Edit_hover.svg'
+import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 //import BookmarkYellowIcon from '../../assets/mavae/Bookmark_yellow.svg'
 //import BookmarkNormalIconDark from '../../assets/mavae/dark/Bookmark_normal.svg'
 //import BookmarkYellowIconDark from '../../assets/mavae/dark/Bookmark_yellow.svg'
@@ -40,7 +49,9 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
   variant = 'workflow'
 }) => {
   const [imageError, setImageError] = useState(false)
-  const [, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const [isDeleteButtonHovered, setIsDeleteButtonHovered] = useState(false)
+  const [isEditButtonHovered, setIsEditButtonHovered] = useState(false)
 
   if (onUseClick === undefined) {
     console.log('onUseClick is undefined')
@@ -136,6 +147,20 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
       return item.user.name
     }
     return "Anonymous"
+  }
+
+  // 处理删除按钮点击
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    // TODO: 这里需要调用删除API
+    console.log('Delete workflow:', item.id)
+  }
+
+  // 处理编辑按钮点击
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    // TODO: 这里需要跳转到编辑页面或打开编辑弹窗
+    console.log('Edit workflow:', item.id)
   }
 
   return (
@@ -302,20 +327,68 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         {dimensions.showUser && (
           variant === 'workflow' || variant === 'style' || variant === 'recipes_workflow' || variant === 'recipes_style' || variant === 'profile_workflow' || variant === 'profile_style' ? (
             <div className={cn(
-              "h-4 px-2 flex items-center gap-1",
+              "h-4 px-2 flex items-center justify-between",
               variant === 'workflow' || variant === 'style' ? "w-[15rem] md:w-[14.375rem]" : "w-full md:w-[14.9rem]"
             )}>
-              <img
-                src={getAvatarUrl()}
-                alt={getDisplayName()}
-                className="w-4 h-4 rounded-full flex-shrink-0"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = avatarSvg
-                }}
-              />
-              <span className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark truncate">
-                {getDisplayName()}
-              </span>
+              {/* 左侧用户信息 */}
+              <div className="flex items-center gap-1">
+                <img
+                  src={getAvatarUrl()}
+                  alt={getDisplayName()}
+                  className="w-4 h-4 rounded-full flex-shrink-0"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = avatarSvg
+                  }}
+                />
+                <span className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark truncate">
+                  {getDisplayName()}
+                </span>
+              </div>
+
+              {/* 右侧操作按钮 - 仅在profile模式下显示，PC端hover显示，移动端默认显示 */}
+              {(variant === 'profile_workflow' || variant === 'profile_style') && (
+                <div className={`flex items-center gap-3 ${typeof window !== 'undefined' && window.innerWidth < 768 ? 'block' : isHovered ? 'block' : 'hidden'}`}>
+                  {/* 编辑按钮 */}
+                  <button
+                    onClick={handleEditClick}
+                    onMouseEnter={() => setIsEditButtonHovered(true)}
+                    onMouseLeave={() => setIsEditButtonHovered(false)}
+                    className="w-4 h-4 flex items-center justify-center transition-opacity"
+                    title="Edit workflow"
+                  >
+                    <ThemeAdaptiveIcon
+                      lightIcon={EditIcon}
+                      darkIcon={EditIconDark}
+                      lightSelectedIcon={EditIconHover}
+                      darkSelectedIcon={EditIconHoverDark}
+                      alt="Edit"
+                      size="sm"
+                      isSelected={isEditButtonHovered}
+                      className="w-4 h-4"
+                    />
+                  </button>
+
+                  {/* 删除按钮 */}
+                  <button
+                    onClick={handleDeleteClick}
+                    onMouseEnter={() => setIsDeleteButtonHovered(true)}
+                    onMouseLeave={() => setIsDeleteButtonHovered(false)}
+                    className="w-4 h-4 flex items-center justify-center transition-opacity"
+                    title="Delete workflow"
+                  >
+                    <ThemeAdaptiveIcon
+                      lightIcon={DeleteIcon}
+                      darkIcon={DeleteIconDark}
+                      lightSelectedIcon={DeleteIconHover}
+                      darkSelectedIcon={DeleteIconHoverDark}
+                      alt="Delete"
+                      size="sm"
+                      isSelected={isDeleteButtonHovered}
+                      className="w-4 h-4"
+                    />
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex items-center gap-1.5 h-4 mt-auto">

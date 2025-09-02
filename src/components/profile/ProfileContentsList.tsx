@@ -21,14 +21,21 @@ import { userStateAtom } from '../../store/loginStore'
 import { openContentDetailAtom } from '../../store/contentDetailStore'
 import { getScaledImageUrl } from '../../utils'
 import { cn } from '../../utils/cn'
+import { contentsApi } from '../../services/api/contents'
+import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 import LikeIcon from '../../assets/web2/like.svg'
 import LikedIcon from '../../assets/web2/liked.svg'
 import avatarSvg from '../../assets/mavae/avatar.svg'
+import avatarSvgDark from '../../assets/mavae/dark/avatar.svg'
 import PictureIcon from '../../assets/mavae/Picture_white.svg'
 import VideoIconNew from '../../assets/mavae/video_white.svg'
 import NanananaIcon from '../../assets/mavae/nananana.svg'
 import NanananaIconDark from '../../assets/mavae/dark/nananana.svg'
 import WorkflowBuilderIcon from '../../assets/mavae/WorkflowBuilder_white.svg'
+import DeleteIcon from '../../assets/mavae/delete.svg'
+import DeleteIconHover from '../../assets/mavae/delete_hover.svg'
+import DeleteIconDark from '../../assets/mavae/dark/delete.svg'
+import DeleteIconHoverDark from '../../assets/mavae/dark/delete_hover.svg'
 
 interface ProfileContentsListProps {
   type: 'image' | 'video'
@@ -168,7 +175,8 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
   // 内容卡片组件 - 参考 InspirationImageCard 实现
   const ContentCard: React.FC<{ item: ContentItem }> = ({ item }) => {
     const [imageError, setImageError] = useState(false)
-    const [, setIsHovered] = useState(false)
+    const [isHovered, setIsHovered] = useState(false)
+    const [isButtonHovered, setIsButtonHovered] = useState(false)
     const [isLiking, setIsLiking] = useState(false)
     const [localContent, setLocalContent] = useState(item)
     const [, likeContent] = useAtom(likeContentAtom)
@@ -241,6 +249,29 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     const handleCardClick = () => {
       // 默认行为：打开内容详情弹窗（state 为 0 时才强制刷新）
       openContentDetail({ id: item.content_id, state: item.state })
+    }
+
+    // 处理隐藏/显示切换
+    const handleToggleVisibility = async (e: React.MouseEvent) => {
+      e.stopPropagation()
+      
+      try {
+        // 调用API切换内容的可见性
+        // public: 0=私有, 1=公开, -1=管理员隐藏
+        const newPublicState = item.public === 1 ? 0 : 1
+        await contentsApi.toggleVisibility(item.content_id, { public: newPublicState === 1 })
+        
+        // 更新本地状态
+        setLocalContent(prev => ({
+          ...prev,
+          public: newPublicState
+        }))
+        
+        console.log('Content visibility toggled:', item.content_id, 'new state:', newPublicState)
+      } catch (error) {
+        console.error('Failed to toggle content visibility:', error)
+        // 这里可以添加错误提示
+      }
     }
 
     return (
@@ -320,18 +351,44 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
         </div>
 
         {/* Users 区域 */}
-        <div className="h-4 mt-2 px-2 flex items-center gap-1"> {/* height: 16px, padding: 8px, gap: 4px */}
-          <img
-            src={getAvatarUrl()}
-            alt={getDisplayName()}
-            className="w-4 h-4 rounded-full flex-shrink-0"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = avatarSvg
-            }}
-          />
-          <span className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark truncate">
-            {getDisplayName()}
-          </span>
+        <div className="h-4 mt-2 px-2 flex items-center justify-between"> {/* height: 16px, padding: 8px, justify-content: space-between */}
+          {/* 左侧用户信息 */}
+          <div className="flex items-center gap-1">
+            <img
+              src={getAvatarUrl()}
+              alt={getDisplayName()}
+              className="w-4 h-4 rounded-full flex-shrink-0"
+              onError={(e) => {
+                const isDarkMode = document.documentElement.classList.contains('dark')
+                ;(e.target as HTMLImageElement).src = isDarkMode ? avatarSvgDark : avatarSvg
+              }}
+            />
+            <span className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark truncate">
+              {getDisplayName()}
+            </span>
+          </div>
+
+          {/* 右侧删除按钮 - PC端hover显示，移动端默认显示 */}
+          <div className={`flex items-center ${isMobile ? 'block' : isHovered ? 'block' : 'hidden'}`}>
+                         <button
+               onClick={handleToggleVisibility}
+               onMouseEnter={() => setIsButtonHovered(true)}
+               onMouseLeave={() => setIsButtonHovered(false)}
+               className="w-4 h-4 flex items-center justify-center transition-opacity"
+               title="Toggle visibility"
+             >
+               <ThemeAdaptiveIcon
+                 lightIcon={DeleteIcon}
+                 darkIcon={DeleteIconDark}
+                 lightSelectedIcon={DeleteIconHover}
+                 darkSelectedIcon={DeleteIconHoverDark}
+                 alt="Toggle visibility"
+                 size="sm"
+                 isSelected={isButtonHovered}
+                 className="w-4 h-4"
+               />
+             </button>
+          </div>
         </div>
       </div>
     )

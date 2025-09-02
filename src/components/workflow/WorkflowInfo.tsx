@@ -30,12 +30,18 @@ import KlingIcon from '../../assets/mavae/klingai.svg'
 import KlingIconDark from '../../assets/mavae/dark/klingai.svg'
 //import MidjourneyIcon from '../../assets/mavae/midjourney.svg'
 //import MidjourneyIconDark from '../../assets/mavae/dark/midjourney.svg'
+import WorkflowEditIcon from '../../assets/mavae/Workflow_Edit.svg'
+import WorkflowEditIconDark from '../../assets/mavae/dark/Workflow_Edit.svg'
+import WorkflowDeleteIcon from '../../assets/mavae/Workflow_Delete.svg'
+import WorkflowDeleteIconDark from '../../assets/mavae/dark/Workflow_Delete.svg'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
-import { toggleLikeWorkflowAtom } from '../../store/workflowDetailStore'
+import { toggleLikeWorkflowAtom, workflowDetailAtom } from '../../store/workflowDetailStore'
 import { useI18n } from '../../hooks/useI18n'
 import { addToastAtom } from '../../store/toastStore'
 import { shareCurrentPage } from '../../utils/share'
 import { sendMessage } from '../../store/assistantStore'
+import { userStateAtom } from '../../store/loginStore'
+import { useAtom } from 'jotai'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 
 interface WorkflowInfoProps {
@@ -51,6 +57,8 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
   const addToast = useSetAtom(addToastAtom)
   const sendMessageAction = useSetAtom(sendMessage)
   const [isPromptExpanded, setIsPromptExpanded] = useState(false)
+  const [userState] = useAtom(userStateAtom)
+  const [workflowDetailState] = useAtom(workflowDetailAtom)
 
   // 获取用户头像
   const getAvatarUrl = () => {
@@ -216,6 +224,47 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
     }
   }
 
+  // 处理编辑按钮点击
+  const handleEdit = () => {
+    // TODO: 跳转到编辑页面或打开编辑弹窗
+    console.log('Edit workflow:', workflow.workflow_id)
+  }
+
+  // 处理删除按钮点击
+  const handleDelete = () => {
+    // TODO: 显示删除确认对话框
+    console.log('Delete workflow:', workflow.workflow_id)
+  }
+
+  // 判断是否显示编辑和删除按钮
+  const shouldShowEditDelete = () => {
+    // 检查用户是否已登录
+    if (!userState.isAuthenticated || !userState.user) {
+      return false
+    }
+
+    // 检查工作流是否存在
+    if (!workflow || !workflowDetailState.workflow) {
+      return false
+    }
+
+    const currentUserDid = userState.user.tokens.did
+    const workflowAuthorDid = workflow.user?.did || workflowDetailState.workflow.user?.did
+
+    // 当前用户是该工作流的作者
+    if (currentUserDid === workflowAuthorDid) {
+      return true
+    }
+
+    // 检查当前用户是否为管理员
+    // 这里假设用户角色信息存储在 userDetails 中
+    if (userState.userDetails?.role === 'admin') {
+      return true
+    }
+
+    return false
+  }
+
   return (
     <div className={`flex flex-col justify-between md:h-[37.5rem] w-full p-6 md:p-6 pt-4 pr-4 pb-6 pl-4 md:pt-6 md:pr-6 md:pb-6 md:pl-6 gap-4 md:gap-4 ${className}`}>
       {/* 上半部分 */}
@@ -348,57 +397,132 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
       </div>
 
       {/* 下半部分：按钮组 */}
-      <div className="flex items-center gap-3 h-10 w-full md:w-[26.625rem]">
-        {/* Create With this Agent Case按钮 */}
-        <button
-          onClick={handleUseNow}
-          className="flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors flex-1 md:flex-none"
-        >
-          <ThemeAdaptiveIcon
-            lightIcon={CreateIcon}
-            darkIcon={CreateIconDark}
-            alt="Create"
-            size="lg"
-          />
-          <span className="font-switzer font-medium text-sm leading-5 text-white">
-            Create With this Agent Case
-          </span>
-        </button>
+      <div className="flex flex-col gap-3 w-full md:w-[26.625rem]">
+        {/* 第一行：主要按钮 */}
+        <div className="flex items-center gap-3 h-10 w-full">
+          {/* Create With this Agent Case按钮 */}
+          <button
+            onClick={handleUseNow}
+            className="flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors flex-1 md:flex-none"
+          >
+            <ThemeAdaptiveIcon
+              lightIcon={CreateIcon}
+              darkIcon={CreateIconDark}
+              alt="Create"
+              size="lg"
+            />
+            <span className="font-switzer font-medium text-sm leading-5 text-white">
+              Create With this Agent Case
+            </span>
+          </button>
 
-        {/* PC端 - 分享按钮 */}
-        <button
-          onClick={handleShare}
-          className="hidden md:flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-        >
-          <ThemeAdaptiveIcon
-            lightIcon={ShareIcon}
-            darkIcon={ShareIconDark}
-            alt="Share"
-            size="lg"
-          />
-          <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-            Share
-          </span>
-        </button>
+          {/* PC端 - 编辑和删除按钮 - 仅在满足条件时显示 */}
+          {shouldShowEditDelete() && (
+            <>
+              {/* 编辑按钮 */}
+              <button
+                onClick={handleEdit}
+                className="hidden md:flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors min-w-[7.9375rem]"
+              >
+                <ThemeAdaptiveIcon
+                  lightIcon={WorkflowEditIcon}
+                  darkIcon={WorkflowEditIconDark}
+                  alt="Edit"
+                  size="lg"
+                  className="w-5 h-5"
+                />
+                <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
+                  Edit
+                </span>
+              </button>
 
-        {/* PC端 - 点赞按钮 */}
-        <button
-          onClick={() => workflow && toggleLikeWorkflow(workflow.workflow_id)}
-          className="hidden md:flex items-center gap-1 h-5 rounded"
-        >
-          <ThemeAdaptiveIcon
-            lightIcon={workflow?.is_liked ? LikedIcon : LikeOutlineIcon}
-            darkIcon={workflow?.is_liked ? LikedIconDark : LikeOutlineIconDark}
-            alt="Like"
-            size="lg"
-          />
-          <span className={`font-switzer font-medium text-sm leading-5 ${workflow?.is_liked
-              ? 'text-[#F6465D]'
-              : 'text-text-secondary dark:text-text-secondary-dark'
-            }`}>
-            {typeof workflow?.like_count === 'number' ? workflow.like_count : 0}
-          </span>
-        </button>
+              {/* 删除按钮 */}
+              <button
+                onClick={handleDelete}
+                className="hidden md:flex items-center justify-center p-2.5 w-10 h-10 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                <ThemeAdaptiveIcon
+                  lightIcon={WorkflowDeleteIcon}
+                  darkIcon={WorkflowDeleteIconDark}
+                  alt="Delete"
+                  size="lg"
+                  className="w-5 h-5"
+                />
+              </button>
+            </>
+          )}
+
+          {/* PC端 - 分享按钮 */}
+          <button
+            onClick={handleShare}
+            className="hidden md:flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors min-w-24"
+          >
+            <ThemeAdaptiveIcon
+              lightIcon={ShareIcon}
+              darkIcon={ShareIconDark}
+              alt="Share"
+              size="lg"
+            />
+            <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
+              Share
+            </span>
+          </button>
+
+          {/* PC端 - 点赞按钮 */}
+          <button
+            onClick={() => workflow && toggleLikeWorkflow(workflow.workflow_id)}
+            className="hidden md:flex items-center gap-1 h-5 rounded"
+          >
+            <ThemeAdaptiveIcon
+              lightIcon={workflow?.is_liked ? LikedIcon : LikeOutlineIcon}
+              darkIcon={workflow?.is_liked ? LikedIconDark : LikeOutlineIconDark}
+              alt="Like"
+              size="lg"
+            />
+            <span className={`font-switzer font-medium text-sm leading-5 ${workflow?.is_liked
+                ? 'text-[#F6465D]'
+                : 'text-text-secondary dark:text-text-secondary-dark'
+              }`}>
+              {typeof workflow?.like_count === 'number' ? workflow.like_count : 0}
+            </span>
+          </button>
+        </div>
+
+        {/* 移动端 - 编辑和删除按钮 - 仅在满足条件时显示 */}
+        {shouldShowEditDelete() && (
+          <div className="flex items-center gap-4 h-10 w-full md:hidden">
+            {/* 编辑按钮 */}
+            <button
+              onClick={handleEdit}
+              className="flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors min-w-[7.9375rem] flex-1"
+            >
+              <ThemeAdaptiveIcon
+                lightIcon={WorkflowEditIcon}
+                darkIcon={WorkflowEditIconDark}
+                alt="Edit"
+                size="lg"
+                className="w-5 h-5"
+              />
+              <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
+                Edit
+              </span>
+            </button>
+
+            {/* 删除按钮 */}
+            <button
+              onClick={handleDelete}
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            >
+              <ThemeAdaptiveIcon
+                lightIcon={WorkflowDeleteIcon}
+                darkIcon={WorkflowDeleteIconDark}
+                alt="Delete"
+                size="lg"
+                className="w-5 h-5"
+              />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
