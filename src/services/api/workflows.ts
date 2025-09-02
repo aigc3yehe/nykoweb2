@@ -6,6 +6,7 @@ import type {
   CreateWorkflowRequest,
   CreateWorkflowResponse,
   UpdateWorkflowRequest,
+  UpdateWorkflowVisibilityRequest,
   WorkflowGenerateRequest,
   AigcProcesserResponse,
   RetryGenerateRequest,
@@ -129,6 +130,20 @@ export class WorkflowsApiService {
   async updateWorkflow(id: number, request: UpdateWorkflowRequest): Promise<boolean> {
     return apiService.put<boolean>(
       API_ENDPOINTS.WORKFLOWS.UPDATE(id),
+      request,
+      { requiresAuth: true }
+    )
+  }
+
+  /**
+   * 切换工作流可见性
+   * @param id 工作流ID
+   * @param request 可见性请求参数
+   * @returns 更新是否成功
+   */
+  async toggleWorkflowVisibility(id: number, request: UpdateWorkflowVisibilityRequest): Promise<boolean> {
+    return apiService.patch<boolean>(
+      API_ENDPOINTS.WORKFLOWS.TOGGLE_VISIBILITY(id),
       request,
       { requiresAuth: true }
     )

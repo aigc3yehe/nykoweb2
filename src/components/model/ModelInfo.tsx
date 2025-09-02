@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
+import { useNavigate } from 'react-router-dom'
 import avatarSvg from '../../assets/Avatar.svg'
 import AvatarIcon from '../../assets/mavae/avatar.svg'
 import AvatarIconDark from '../../assets/mavae/dark/avatar.svg'
@@ -21,12 +22,20 @@ import PictureIcon from '../../assets/mavae/Picture.svg'
 import PictureIconDark from '../../assets/mavae/dark/Picture.svg'
 import GptIcon from '../../assets/mavae/gpt.svg'
 import GptIconDark from '../../assets/mavae/dark/gpt.svg'
+import WorkflowEditIcon from '../../assets/mavae/Workflow_Edit.svg'
+import WorkflowEditIconDark from '../../assets/mavae/dark/Workflow_Edit.svg'
+import WorkflowDeleteIcon from '../../assets/mavae/Workflow_Delete.svg'
+import WorkflowDeleteIconDark from '../../assets/mavae/dark/Workflow_Delete.svg'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { modelDetailAtom, toggleLikeModelAtom } from '../../store/modelDetailStore'
 import { useI18n } from '../../hooks/useI18n'
+import { useLang } from '../../hooks/useLang'
 import { addToastAtom } from '../../store/toastStore'
 import { shareCurrentPage } from '../../utils/share'
 import { sendMessage } from '../../store/assistantStore'
+import { userStateAtom } from '../../store/loginStore'
+import { showDialogAtom } from '../../store/dialogStore'
+import { modelsApi } from '../../services/api/models'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 
 interface ModelInfoProps {
@@ -34,13 +43,17 @@ interface ModelInfoProps {
 }
 
 const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
+  const navigate = useNavigate()
   const [state] = useAtom(modelDetailAtom)
   const model = state.model
   const { openChat } = useChatSidebar()
   const toggleLikeModel = useSetAtom(toggleLikeModelAtom)
   const { t } = useI18n()
+  const lang = useLang()
   const addToast = useSetAtom(addToastAtom)
   const sendMessageAction = useSetAtom(sendMessage)
+  const showDialog = useSetAtom(showDialogAtom)
+  const [userState] = useAtom(userStateAtom)
   const [isPromptExpanded, setIsPromptExpanded] = useState(false)
 
   // 如果没有模型数据，不渲染
@@ -247,6 +260,97 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
     }
   }
 
+  // 处理编辑按钮点击
+  const handleEdit = () => {
+    // 跳转到编辑页面，需要包含语言前缀
+    navigate(`/${lang}/model/${model?.model_id}/edit`)
+  }
+
+  // 处理删除按钮点击
+  const handleDelete = () => {
+    // 显示删除确认弹窗
+    showDialog({
+      open: true,
+      title: 'Delete Model?',
+      message: `Are you sure you want to delete "${model.name}"? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          if (userState.userDetails?.did) {
+            // 调用模型可见性切换API，设置为不可见
+            const success = await modelsApi.updateModelVisibility(model.model_id, {
+              user: userState.userDetails.did,
+              visibility: false
+            })
+
+            if (success) {
+              console.log('Model deleted successfully:', model.model_id)
+              addToast({
+                message: 'Model deleted successfully',
+                type: 'success'
+              })
+              // 这里可以添加成功后的处理逻辑，比如跳转回列表页
+            } else {
+              console.error('Failed to delete model')
+              addToast({
+                message: 'Failed to delete model',
+                type: 'error'
+              })
+            }
+          }
+          // 关闭弹窗
+          showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
+        } catch (error) {
+          console.error('Error deleting model:', error)
+          addToast({
+            message: 'Error deleting model',
+            type: 'error'
+          })
+          // 关闭弹窗
+          showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
+        }
+      },
+      onCancel: () => {
+        // 关闭弹窗
+        showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
+      },
+      confirmText: 'Delete',
+      cancelText: 'Cancel'
+    })
+  }
+
+  // 判断是否显示编辑和删除按钮
+  const shouldShowEditDelete = () => {
+    // 检查用户是否已登录
+    if (!userState.isAuthenticated || !userState.user) {
+      return false
+    }
+
+    // 检查模型是否存在
+    if (!model) {
+      return false
+    }
+
+    // 只允许对已经完成的模型进行操作
+    if (!isReady) {
+      return false
+    }
+
+    const currentUserDid = userState.user.tokens.did
+    const modelAuthorDid = model.user?.did
+
+    // 当前用户是该模型的作者
+    if (currentUserDid === modelAuthorDid) {
+      return true
+    }
+
+    // 检查当前用户是否为管理员
+    if (userState.userDetails?.role === 'admin') {
+      return true
+    }
+
+    return false
+  }
+
 
 
   return (
@@ -367,58 +471,133 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
       </div>
 
       {/* 下半部分：按钮组 */}
-      <div className="flex items-center gap-3 h-10 w-full md:w-[26.625rem]">
-        {/* Use Now按钮 */}
-        <button
-          onClick={isReady ? handleUseNow : undefined}
-          disabled={!isReady}
-          className={`flex items-center justify-center gap-1 h-10 px-4 rounded-full transition-colors flex-1 md:flex-none min-w-[12.5rem] ${getButtonStyles().background} ${getButtonStyles().cursor}`}
-        >
-          <ThemeAdaptiveIcon
-            lightIcon={isReady ? CreateIcon : TrainingIcon}
-            darkIcon={isReady ? CreateIconDark : TrainingIconDark}
-            alt="Use"
-            size="lg"
-          />
-          <span className={`font-switzer font-medium text-sm leading-5 ${getButtonStyles().textColor}`}>
-            {getButtonText()}
-          </span>
-        </button>
+      <div className="flex flex-col gap-3 w-full md:w-[26.625rem]">
+        {/* 第一行：主要按钮 */}
+        <div className="flex items-center gap-3 h-10 w-full">
+          {/* Use Now按钮 */}
+          <button
+            onClick={isReady ? handleUseNow : undefined}
+            disabled={!isReady}
+            className={`flex items-center justify-center gap-1 h-10 px-4 rounded-full transition-colors flex-1 md:flex-none min-w-[12.5rem] ${getButtonStyles().background} ${getButtonStyles().cursor}`}
+          >
+            <ThemeAdaptiveIcon
+              lightIcon={isReady ? CreateIcon : TrainingIcon}
+              darkIcon={isReady ? CreateIconDark : TrainingIconDark}
+              alt="Use"
+              size="lg"
+            />
+            <span className={`font-switzer font-medium text-sm leading-5 ${getButtonStyles().textColor}`}>
+              {getButtonText()}
+            </span>
+          </button>
 
-        {/* PC端 - 分享按钮 */}
-        <button
-          onClick={handleShare}
-          className="hidden md:flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-        >
-          <ThemeAdaptiveIcon
-            lightIcon={ShareIcon}
-            darkIcon={ShareIconDark}
-            alt="Share"
-            size="lg"
-          />
-          <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-            Share
-          </span>
-        </button>
+          {/* PC端 - 编辑和删除按钮 - 仅在满足条件时显示 */}
+          {shouldShowEditDelete() && (
+            <>
+              {/* 编辑按钮 */}
+              <button
+                onClick={handleEdit}
+                className="hidden md:flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors min-w-[7.9375rem]"
+              >
+                <ThemeAdaptiveIcon
+                  lightIcon={WorkflowEditIcon}
+                  darkIcon={WorkflowEditIconDark}
+                  alt="Edit"
+                  size="lg"
+                  className="w-5 h-5"
+                />
+                <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
+                  Edit
+                </span>
+              </button>
 
-        {/* PC端 - 点赞按钮 */}
-        <button
-          onClick={() => model && toggleLikeModel(model.model_id)}
-          className="hidden md:flex items-center gap-1 h-5 rounded"
-        >
-          <ThemeAdaptiveIcon
-            lightIcon={model?.is_liked ? LikedIcon : LikeOutlineIcon}
-            darkIcon={model?.is_liked ? LikedIconDark : LikeOutlineIconDark}
-            alt="Like"
-            size="lg"
-          />
-          <span className={`font-switzer font-medium text-sm leading-5 ${model?.is_liked
-            ? 'text-[#F6465D]'
-            : 'text-text-secondary dark:text-text-secondary-dark'
-            }`}>
-            {typeof model?.like_count === 'number' ? model.like_count : 0}
-          </span>
-        </button>
+              {/* 删除按钮 */}
+              <button
+                onClick={handleDelete}
+                className="hidden md:flex items-center justify-center p-2.5 w-10 h-10 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                <ThemeAdaptiveIcon
+                  lightIcon={WorkflowDeleteIcon}
+                  darkIcon={WorkflowDeleteIconDark}
+                  alt="Delete"
+                  size="lg"
+                  className="w-5 h-5"
+                />
+              </button>
+            </>
+          )}
+
+          {/* PC端 - 分享按钮 */}
+          <button
+            onClick={handleShare}
+            className="hidden md:flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors min-w-24"
+          >
+            <ThemeAdaptiveIcon
+              lightIcon={ShareIcon}
+              darkIcon={ShareIconDark}
+              alt="Share"
+              size="lg"
+            />
+            <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
+              Share
+            </span>
+          </button>
+
+          {/* PC端 - 点赞按钮 */}
+          <button
+            onClick={() => model && toggleLikeModel(model.model_id)}
+            className="hidden md:flex items-center gap-1 h-5 rounded"
+          >
+            <ThemeAdaptiveIcon
+              lightIcon={model?.is_liked ? LikedIcon : LikeOutlineIcon}
+              darkIcon={model?.is_liked ? LikedIconDark : LikeOutlineIconDark}
+              alt="Like"
+              size="lg"
+            />
+            <span className={`font-switzer font-medium text-sm leading-5 ${model?.is_liked
+              ? 'text-[#F6465D]'
+              : 'text-text-secondary dark:text-text-secondary-dark'
+              }`}>
+              {typeof model?.like_count === 'number' ? model.like_count : 0}
+            </span>
+          </button>
+        </div>
+
+        {/* 移动端 - 编辑和删除按钮 - 仅在满足条件时显示 */}
+        {shouldShowEditDelete() && (
+          <div className="flex items-center gap-4 h-10 w-full md:hidden">
+            {/* 编辑按钮 */}
+            <button
+              onClick={handleEdit}
+              className="flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors min-w-[7.9375rem] flex-1"
+            >
+              <ThemeAdaptiveIcon
+                lightIcon={WorkflowEditIcon}
+                darkIcon={WorkflowEditIconDark}
+                alt="Edit"
+                size="lg"
+                className="w-5 h-5"
+              />
+              <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
+                Edit
+              </span>
+            </button>
+
+            {/* 删除按钮 */}
+            <button
+              onClick={handleDelete}
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            >
+              <ThemeAdaptiveIcon
+                lightIcon={WorkflowDeleteIcon}
+                darkIcon={WorkflowDeleteIconDark}
+                alt="Delete"
+                size="lg"
+                className="w-5 h-5"
+              />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -87,6 +87,7 @@ export const API_ENDPOINTS = {
     RETRY: '/workflows/generate/retry',
     USER_LIKED: '/workflows/user/liked',
     LIKE: (id: number) => `/workflows/${id}/like`,
+    TOGGLE_VISIBILITY: (id: number) => `/workflows/${id}/visibility`,
   },
 
   // 模型模块

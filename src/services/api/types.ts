@@ -304,6 +304,11 @@ export interface UpdateWorkflowRequest {
   prompt?: string
 }
 
+export interface UpdateWorkflowVisibilityRequest {
+  user?: string
+  visibility: boolean
+}
+
 export interface WorkflowGenerateRequest {
   user: string
   workflow_id: number
@@ -377,6 +382,7 @@ export interface UpdateModelRequest {
   name?: string
   description?: string
   tags?: string[]
+  cover?: string
 }
 
 export interface UpdateModelCarouselRequest {

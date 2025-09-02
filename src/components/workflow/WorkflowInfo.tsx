@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useSetAtom } from 'jotai'
 import avatarSvg from '../../assets/Avatar.svg'
 import AvatarIcon from '../../assets/mavae/avatar.svg'
 import AvatarIconDark from '../../assets/mavae/dark/avatar.svg'
@@ -40,9 +39,11 @@ import { addToastAtom } from '../../store/toastStore'
 import { shareCurrentPage } from '../../utils/share'
 import { sendMessage } from '../../store/assistantStore'
 import { userStateAtom } from '../../store/loginStore'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
+import { showDialogAtom } from '../../store/dialogStore'
+import { workflowsApi } from '../../services/api/workflows'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
-import {WorkflowDto} from "../../services/api";
+import { WorkflowDto } from "../../services/api";
 
 interface WorkflowInfoProps {
   workflow: WorkflowDto
@@ -57,6 +58,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
   const lang = useLang()
   const addToast = useSetAtom(addToastAtom)
   const sendMessageAction = useSetAtom(sendMessage)
+  const showDialog = useSetAtom(showDialogAtom)
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [userState] = useAtom(userStateAtom)
   const [workflowDetailState] = useAtom(workflowDetailAtom)
@@ -218,8 +220,54 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
 
   // 处理删除按钮点击
   const handleDelete = () => {
-    // TODO: 显示删除确认对话框
-    console.log('Delete workflow:', workflow.workflow_id)
+    // 显示删除确认弹窗
+    showDialog({
+      open: true,
+      title: 'Delete Workflow?',
+      message: `Are you sure you want to delete "${workflow.name}"? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          if (userState.userDetails?.did) {
+            // 调用工作流可见性切换API，设置为不可见
+            const success = await workflowsApi.toggleWorkflowVisibility(workflow.workflow_id, {
+              user: userState.userDetails.did,
+              visibility: false
+            })
+
+            if (success) {
+              console.log('Workflow deleted successfully:', workflow.workflow_id)
+              addToast({
+                message: 'Workflow deleted successfully',
+                type: 'success'
+              })
+              // 这里可以添加成功后的处理逻辑，比如跳转回列表页
+            } else {
+              console.error('Failed to delete workflow')
+              addToast({
+                message: 'Failed to delete workflow',
+                type: 'error'
+              })
+            }
+          }
+          // 关闭弹窗
+          showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
+        } catch (error) {
+          console.error('Error deleting workflow:', error)
+          addToast({
+            message: 'Error deleting workflow',
+            type: 'error'
+          })
+          // 关闭弹窗
+          showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
+        }
+      },
+      onCancel: () => {
+        // 关闭弹窗
+        showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
+      },
+      confirmText: 'Delete',
+      cancelText: 'Cancel'
+    })
   }
 
   // 判断是否显示编辑和删除按钮
@@ -274,8 +322,8 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
               size="lg"
             />
             <span className={`font-switzer font-medium text-sm leading-5 ${workflow?.is_liked
-                ? 'text-[#F6465D]'
-                : 'text-text-secondary dark:text-text-secondary-dark'
+              ? 'text-[#F6465D]'
+              : 'text-text-secondary dark:text-text-secondary-dark'
               }`}>
               {typeof workflow?.like_count === 'number' ? workflow.like_count : 0}
             </span>
@@ -412,11 +460,12 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
               <button
                 onClick={handleDelete}
                 className="hidden md:flex items-center justify-center p-2.5 w-10 h-10 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                title="Delete workflow"
               >
                 <ThemeAdaptiveIcon
                   lightIcon={WorkflowDeleteIcon}
                   darkIcon={WorkflowDeleteIconDark}
-                  alt="Delete"
+                  alt="Hide"
                   size="lg"
                   className="w-5 h-5"
                 />
@@ -452,8 +501,8 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
               size="lg"
             />
             <span className={`font-switzer font-medium text-sm leading-5 ${workflow?.is_liked
-                ? 'text-[#F6465D]'
-                : 'text-text-secondary dark:text-text-secondary-dark'
+              ? 'text-[#F6465D]'
+              : 'text-text-secondary dark:text-text-secondary-dark'
               }`}>
               {typeof workflow?.like_count === 'number' ? workflow.like_count : 0}
             </span>
@@ -483,12 +532,13 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
             {/* 删除按钮 */}
             <button
               onClick={handleDelete}
-              className="flex items-center justify-center w-10 h-10 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              title="Delete workflow"
             >
               <ThemeAdaptiveIcon
                 lightIcon={WorkflowDeleteIcon}
                 darkIcon={WorkflowDeleteIconDark}
-                alt="Delete"
+                alt="Hide"
                 size="lg"
                 className="w-5 h-5"
               />

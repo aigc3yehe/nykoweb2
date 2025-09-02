@@ -22,6 +22,7 @@ import { openContentDetailAtom } from '../../store/contentDetailStore'
 import { getScaledImageUrl } from '../../utils'
 import { cn } from '../../utils/cn'
 import { contentsApi } from '../../services/api/contents'
+import { showDialogAtom } from '../../store/dialogStore'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 import LikeIcon from '../../assets/web2/like.svg'
 import LikedIcon from '../../assets/web2/liked.svg'
@@ -181,6 +182,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     const [localContent, setLocalContent] = useState(item)
     const [, likeContent] = useAtom(likeContentAtom)
     const [userState] = useAtom(userStateAtom)
+    const showDialog = useSetAtom(showDialogAtom)
     const openContentDetail = useSetAtom(openContentDetailAtom)
 
     // 判断是否为视频
@@ -252,26 +254,46 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     }
 
     // 处理隐藏/显示切换
-    const handleToggleVisibility = async (e: React.MouseEvent) => {
+    const handleToggleVisibility = (e: React.MouseEvent) => {
       e.stopPropagation()
-      
-      try {
-        // 调用API切换内容的可见性
-        // public: 0=私有, 1=公开, -1=管理员隐藏
-        const newPublicState = item.public === 1 ? 0 : 1
-        await contentsApi.toggleVisibility(item.content_id, { public: newPublicState === 1 })
-        
-        // 更新本地状态
-        setLocalContent(prev => ({
-          ...prev,
-          public: newPublicState
-        }))
-        
-        console.log('Content visibility toggled:', item.content_id, 'new state:', newPublicState)
-      } catch (error) {
-        console.error('Failed to toggle content visibility:', error)
-        // 这里可以添加错误提示
-      }
+
+      const contentType = isVideo ? 'video' : 'image'
+      const actionText = item.public === 1 ? 'hide' : 'show'
+
+      // 显示确认弹窗
+      showDialog({
+        open: true,
+        title: `${actionText === 'hide' ? 'Hide' : 'Show'} ${contentType}?`,
+        message: `Are you sure you want to ${actionText} this ${contentType}? ${actionText === 'hide' ? 'It will no longer be visible to other users.' : 'It will become visible to other users.'}`,
+        onConfirm: async () => {
+          try {
+            // 调用API切换内容的可见性
+            // public: 0=私有, 1=公开, -1=管理员隐藏
+            const newPublicState = item.public === 1 ? 0 : 1
+            await contentsApi.toggleVisibility(item.content_id, { public: newPublicState === 1 })
+
+            // 更新本地状态
+            setLocalContent(prev => ({
+              ...prev,
+              public: newPublicState
+            }))
+
+            console.log('Content visibility toggled:', item.content_id, 'new state:', newPublicState)
+            // 关闭弹窗
+            showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
+          } catch (error) {
+            console.error('Failed to toggle content visibility:', error)
+            // 关闭弹窗
+            showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
+          }
+        },
+        onCancel: () => {
+          // 关闭弹窗
+          showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
+        },
+        confirmText: actionText === 'hide' ? 'Hide' : 'Show',
+        cancelText: 'Cancel'
+      })
     }
 
     return (
@@ -360,7 +382,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
               className="w-4 h-4 rounded-full flex-shrink-0"
               onError={(e) => {
                 const isDarkMode = document.documentElement.classList.contains('dark')
-                ;(e.target as HTMLImageElement).src = isDarkMode ? avatarSvgDark : avatarSvg
+                  ; (e.target as HTMLImageElement).src = isDarkMode ? avatarSvgDark : avatarSvg
               }}
             />
             <span className="font-switzer font-normal text-xs leading-4 text-text-secondary dark:text-text-secondary-dark truncate">
@@ -370,24 +392,24 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
 
           {/* 右侧删除按钮 - PC端hover显示，移动端默认显示 */}
           <div className={`flex items-center ${isMobile ? 'block' : isHovered ? 'block' : 'hidden'}`}>
-                         <button
-               onClick={handleToggleVisibility}
-               onMouseEnter={() => setIsButtonHovered(true)}
-               onMouseLeave={() => setIsButtonHovered(false)}
-               className="w-4 h-4 flex items-center justify-center transition-opacity"
-               title="Toggle visibility"
-             >
-               <ThemeAdaptiveIcon
-                 lightIcon={DeleteIcon}
-                 darkIcon={DeleteIconDark}
-                 lightSelectedIcon={DeleteIconHover}
-                 darkSelectedIcon={DeleteIconHoverDark}
-                 alt="Toggle visibility"
-                 size="sm"
-                 isSelected={isButtonHovered}
-                 className="w-4 h-4"
-               />
-             </button>
+            <button
+              onClick={handleToggleVisibility}
+              onMouseEnter={() => setIsButtonHovered(true)}
+              onMouseLeave={() => setIsButtonHovered(false)}
+              className="w-4 h-4 flex items-center justify-center transition-opacity"
+              title={item.public === 1 ? 'Hide content' : 'Show content'}
+            >
+              <ThemeAdaptiveIcon
+                lightIcon={DeleteIcon}
+                darkIcon={DeleteIconDark}
+                lightSelectedIcon={DeleteIconHover}
+                darkSelectedIcon={DeleteIconHoverDark}
+                alt="Toggle visibility"
+                size="sm"
+                isSelected={isButtonHovered}
+                className="w-4 h-4"
+              />
+            </button>
           </div>
         </div>
       </div>

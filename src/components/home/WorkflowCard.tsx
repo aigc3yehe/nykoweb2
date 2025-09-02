@@ -1,8 +1,15 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useSetAtom, useAtom } from 'jotai'
 import { cn } from '../../utils'
 import { FeaturedItem } from '../../store/featuredStore'
 import { getScaledImageUrl } from '../../utils'
 import avatarSvg from '../../assets/Avatar.svg'
+import { useLang } from '../../hooks/useLang'
+import { showDialogAtom } from '../../store/dialogStore'
+import { workflowsApi } from '../../services/api/workflows'
+import { modelsApi } from '../../services/api/models'
+import { userStateAtom } from '../../store/loginStore'
 import PictureIcon from '../../assets/mavae/Picture_white.svg'
 import VideoIconNew from '../../assets/mavae/video_white.svg'
 import UseIconNew from '../../assets/mavae/use_white.svg'
@@ -48,6 +55,10 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
   onUseClick,
   variant = 'workflow'
 }) => {
+  const navigate = useNavigate()
+  const lang = useLang()
+  const showDialog = useSetAtom(showDialogAtom)
+  const [userState] = useAtom(userStateAtom)
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [isDeleteButtonHovered, setIsDeleteButtonHovered] = useState(false)
@@ -152,15 +163,71 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
   // 处理删除按钮点击
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    // TODO: 这里需要调用删除API
-    console.log('Delete workflow:', item.id)
+    // 显示删除确认弹窗
+    const itemType = variant === 'profile_workflow' ? 'workflow' : 'style'
+    showDialog({
+      open: true,
+      title: `Delete ${itemType}?`,
+      message: `Are you sure you want to delete "${item.name}"? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          if (userState.userDetails?.did) {
+            if (variant === 'profile_workflow') {
+              // 调用工作流可见性切换API，设置为不可见
+              const success = await workflowsApi.toggleWorkflowVisibility(item.id, {
+                user: userState.userDetails.did,
+                visibility: false
+              })
+              
+              if (success) {
+                console.log('Workflow deleted successfully:', item.id)
+                // 这里可以添加成功提示或者刷新列表
+              } else {
+                console.error('Failed to delete workflow')
+              }
+            } else if (variant === 'profile_style') {
+              // 调用模型可见性切换API，设置为不可见
+              const success = await modelsApi.updateModelVisibility(item.id, {
+                user: userState.userDetails.did,
+                visibility: false
+              })
+              
+              if (success) {
+                console.log('Model deleted successfully:', item.id)
+                // 这里可以添加成功提示或者刷新列表
+              } else {
+                console.error('Failed to delete model')
+              }
+            }
+          }
+          // 关闭弹窗
+          showDialog({ open: false, title: '', message: '', onConfirm: () => {}, onCancel: () => {} })
+        } catch (error) {
+          console.error('Error deleting item:', error)
+          // 关闭弹窗
+          showDialog({ open: false, title: '', message: '', onConfirm: () => {}, onCancel: () => {} })
+        }
+      },
+      onCancel: () => {
+        // 关闭弹窗
+        showDialog({ open: false, title: '', message: '', onConfirm: () => {}, onCancel: () => {} })
+      },
+      confirmText: 'Delete',
+      cancelText: 'Cancel'
+    })
   }
 
   // 处理编辑按钮点击
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    // TODO: 这里需要跳转到编辑页面或打开编辑弹窗
-    console.log('Edit workflow:', item.id)
+    // 根据variant决定跳转目标
+    if (variant === 'profile_workflow') {
+      // 工作流编辑页面
+      navigate(`/${lang}/workflow/${item.id}/edit`)
+    } else if (variant === 'profile_style') {
+      // 模型编辑页面
+      navigate(`/${lang}/model/${item.id}/edit`)
+    }
   }
 
   return (
@@ -368,14 +435,14 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
                     />
                   </button>
 
-                  {/* 删除按钮 */}
-                  <button
-                    onClick={handleDeleteClick}
-                    onMouseEnter={() => setIsDeleteButtonHovered(true)}
-                    onMouseLeave={() => setIsDeleteButtonHovered(false)}
-                    className="w-4 h-4 flex items-center justify-center transition-opacity"
-                    title="Delete workflow"
-                  >
+                                                        {/* 删除按钮 */}
+                    <button
+                      onClick={handleDeleteClick}
+                      onMouseEnter={() => setIsDeleteButtonHovered(true)}
+                      onMouseLeave={() => setIsDeleteButtonHovered(false)}
+                      className="w-4 h-4 flex items-center justify-center transition-opacity"
+                      title="Delete workflow"
+                    >
                     <ThemeAdaptiveIcon
                       lightIcon={DeleteIcon}
                       darkIcon={DeleteIconDark}

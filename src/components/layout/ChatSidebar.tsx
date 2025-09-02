@@ -71,9 +71,9 @@ const ChatSidebar: React.FC = () => {
           setChatState(prev => ({ ...prev, connection: status }));
         } catch (error) {
           console.error('Heartbeat failed:', error);
-          setChatState(prev => ({ 
-            ...prev, 
-            connection: { ...prev.connection, isActive: false } 
+          setChatState(prev => ({
+            ...prev,
+            connection: { ...prev.connection, isActive: false }
           }));
         }
       }
@@ -111,11 +111,12 @@ const ChatSidebar: React.FC = () => {
   // 判断是否在需要隐藏聊天侧边栏的页面
   const shouldHideChatSidebar = (() => {
     const path = location.pathname
-    // match /{lang}/pricing, /{lang}/workflow/builder, /{lang}/workflow/{id}/edit, /{lang}/style/trainer
+    // match /{lang}/pricing, /{lang}/workflow/builder, /{lang}/workflow/{id}/edit, /{lang}/model/{id}/edit, /{lang}/style/trainer
     return /\/(en|zh-CN|zh-HK)\/pricing$/.test(path) ||
-           /\/(en|zh-CN|zh-HK)\/workflow\/builder(\/.*)?$/.test(path) ||
-           /\/(en|zh-CN|zh-HK)\/workflow\/.*\/edit$/.test(path) ||
-           /\/(en|zh-CN|zh-HK)\/style\/trainer(\/.*)?$/.test(path)
+      /\/(en|zh-CN|zh-HK)\/workflow\/builder(\/.*)?$/.test(path) ||
+      /\/(en|zh-CN|zh-HK)\/workflow\/.*\/edit$/.test(path) ||
+      /\/(en|zh-CN|zh-HK)\/model\/.*\/edit$/.test(path) ||
+      /\/(en|zh-CN|zh-HK)\/style\/trainer(\/.*)?$/.test(path)
   })()
 
   // 当侧边栏关闭时、不在详情页面时或在需要隐藏的页面时不渲染
@@ -143,10 +144,10 @@ const ChatSidebar: React.FC = () => {
       message: 'Are you sure you want to clear the chat history?',
       onConfirm: () => {
         clearChatMessages()
-        showDialog({ open: false, title: '', message: '', onConfirm: () => {}, onCancel: () => {} })
+        showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
       },
       onCancel: () => {
-        showDialog({ open: false, title: '', message: '', onConfirm: () => {}, onCancel: () => {} })
+        showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
       },
       confirmText: 'Delete',
       cancelText: 'Cancel',
@@ -176,7 +177,7 @@ const ChatSidebar: React.FC = () => {
           <h3 className="font-lexend font-medium text-base leading-none text-text-main dark:text-text-main-dark">
             Chat with Mavae
           </h3>
-          <div 
+          <div
             className="w-2 h-2 rounded-full flex-shrink-0"
             style={{ backgroundColor: connectionStatus.color }}
             title={connectionStatus.label}
@@ -239,8 +240,8 @@ const ChatSidebar: React.FC = () => {
           // 已登录状态 - 显示聊天界面
           <div className="flex flex-col min-h-full">
             {chatState.messages.map((message, index) => (
-              <ChatMessage 
-                key={index} 
+              <ChatMessage
+                key={index}
                 {...message}
                 imageWidth={message.imageInfo?.width || 256}
                 imageHeight={message.imageInfo?.height || 256}
@@ -249,7 +250,7 @@ const ChatSidebar: React.FC = () => {
                 onPartiallyModify={handlePartiallyModify}
               />
             ))}
-            
+
             {/* AI回复loading状态 */}
             {chatState.isLoading && (
               <div className="flex items-start mt-4">
@@ -262,7 +263,7 @@ const ChatSidebar: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
             {/* 留白div，高度与输入框一致 */}
             <div style={{ height: inputHeight, minHeight: 0, pointerEvents: 'none' }} aria-hidden />

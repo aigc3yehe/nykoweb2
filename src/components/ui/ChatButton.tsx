@@ -20,11 +20,12 @@ const ChatButton: React.FC = () => {
   // 判断是否在需要隐藏聊天按钮的页面
   const shouldHideChatButton = (() => {
     const path = location.pathname
-    // match /{lang}/pricing, /{lang}/workflow/builder, /{lang}/workflow/{id}/edit, /{lang}/style/trainer
+    // match /{lang}/pricing, /{lang}/workflow/builder, /{lang}/workflow/{id}/edit, /{lang}/model/{id}/edit, /{lang}/style/trainer
     return /\/(en|zh-CN|zh-HK)\/pricing$/.test(path) ||
-           /\/(en|zh-CN|zh-HK)\/workflow\/builder(\/.*)?$/.test(path) ||
-           /\/(en|zh-CN|zh-HK)\/workflow\/.*\/edit$/.test(path) ||
-           /\/(en|zh-CN|zh-HK)\/style\/trainer(\/.*)?$/.test(path)
+      /\/(en|zh-CN|zh-HK)\/workflow\/builder(\/.*)?$/.test(path) ||
+      /\/(en|zh-CN|zh-HK)\/workflow\/.*\/edit$/.test(path) ||
+      /\/(en|zh-CN|zh-HK)\/model\/.*\/edit$/.test(path) ||
+      /\/(en|zh-CN|zh-HK)\/style\/trainer(\/.*)?$/.test(path)
   })()
 
   // 判断是否在workflow或model详情页
