@@ -1,7 +1,7 @@
 import React from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { useNavigate } from 'react-router-dom'
-import { userStateAtom, logoutAtom, fetchUserPlanAtom } from '../store/loginStore'
+import { userStateAtom, logoutAtom } from '../store/loginStore'
 import { useLang, withLangPrefix } from '../hooks/useLang'
 import ThemeAdaptiveIcon from '../components/ui/ThemeAdaptiveIcon'
 import FreeIcon from '../assets/mavae/vip/free.svg'
@@ -17,14 +17,6 @@ const Account: React.FC = () => {
     const lang = useLang()
     const [userState] = useAtom(userStateAtom)
     const logout = useSetAtom(logoutAtom)
-    const fetchUserPlan = useSetAtom(fetchUserPlanAtom)
-
-    // 当用户登录后，获取用户计划状态
-    React.useEffect(() => {
-        if (userState.isAuthenticated && userState.user && !userState.userPlan) {
-            fetchUserPlan()
-        }
-    }, [userState.isAuthenticated, userState.user, userState.userPlan, fetchUserPlan])
 
     // 获取会员等级图标
     const getMembershipIcon = () => {

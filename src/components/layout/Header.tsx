@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toggleSidebarAtom } from '../../store/sidebarStore'
-import { showLoginModalAtom, userStateAtom, fetchUserPlanAtom } from '../../store/loginStore'
+import { showLoginModalAtom, userStateAtom, fetchUserDataAtom } from '../../store/loginStore'
 import { useI18n } from '../../hooks/useI18n'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { getCurrentTheme, toggleTheme } from '../../utils/theme'
@@ -35,7 +35,7 @@ const Header: React.FC = React.memo(() => {
   const toggleSidebar = useSetAtom(toggleSidebarAtom)
   const showLoginModal = useSetAtom(showLoginModalAtom)
   const [userState] = useAtom(userStateAtom)
-  const fetchUserPlan = useSetAtom(fetchUserPlanAtom)
+  const fetchUserData = useSetAtom(fetchUserDataAtom)
   const [theme, setTheme] = useState<'light' | 'dark'>(getCurrentTheme())
   const userMenuRef = useRef<HTMLDivElement>(null)
 
@@ -62,12 +62,12 @@ const Header: React.FC = React.memo(() => {
     }
   }, [])
 
-  // 当用户登录后，获取用户计划状态
+  // 当用户登录后，获取用户数据
   useEffect(() => {
-    if (userState.isAuthenticated && userState.user && !userState.userPlan) {
-      fetchUserPlan()
+    if (userState.isAuthenticated && userState.user && !userState.isUserDataLoaded) {
+      fetchUserData()
     }
-  }, [userState.isAuthenticated, userState.user, userState.userPlan, fetchUserPlan])
+  }, [userState.isAuthenticated, userState.user, userState.isUserDataLoaded, fetchUserData])
 
 
   const handleToggleTheme = () => {
@@ -183,8 +183,8 @@ const Header: React.FC = React.memo(() => {
 
         {/* 右侧按钮组 */}
         <div className="flex items-center gap-2 h-9 md:h-12">
-          {/* 分数显示和Upgrade按钮 - 登录后显示 */}
-          {userState.isAuthenticated && userState.user && (() => {
+          {/* 分数显示和Upgrade按钮 - 登录后且数据加载完成才显示 */}
+          {userState.isAuthenticated && userState.user && userState.isUserDataLoaded && (() => {
             // 判断是否显示Upgrade按钮
             const shouldShowUpgrade = !userState.userPlan || userState.userPlan.plan_type !== 'premium_plus'
 

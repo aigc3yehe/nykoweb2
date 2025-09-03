@@ -27,6 +27,7 @@ export interface UserState {
   userDetails: UserBaseInfo | null // 详细的用户信息，来自API
   userPlan: PlanState | null // 用户计划状态信息
   isLoading: boolean
+  isUserDataLoaded: boolean // 用户数据是否完全加载（包括userDetails和userPlan）
   error: string | null
 }
 
@@ -37,6 +38,7 @@ export const userStateAtom = atom<UserState>({
   userDetails: null,
   userPlan: null,
   isLoading: false,
+  isUserDataLoaded: false,
   error: null
 })
 
@@ -86,11 +88,12 @@ export const initUserStateAtom = atom(
         userDetails: currentUserState.userDetails,
         userPlan: currentUserState.userPlan,
         isLoading: false,
+        isUserDataLoaded: currentUserState.userDetails !== null && currentUserState.userPlan !== null,
         error: null
       })
 
-      // 获取详细用户信息
-      set(fetchUserDetailsAtom)
+      // 获取用户数据（userDetails和userPlan）
+      set(fetchUserDataAtom)
     }
   }
 )
@@ -105,6 +108,7 @@ export const loginAtom = atom(
       userDetails: null,
       userPlan: null,
       isLoading: true,
+      isUserDataLoaded: false,
       error: null
     })
 
@@ -117,11 +121,12 @@ export const loginAtom = atom(
         userDetails: null,
         userPlan: null,
         isLoading: false,
+        isUserDataLoaded: false,
         error: null
       })
 
-      // 获取详细用户信息
-      set(fetchUserDetailsAtom)
+      // 获取用户数据（userDetails和userPlan）
+      set(fetchUserDataAtom)
 
       return userInfo
     } catch (error) {
@@ -134,6 +139,7 @@ export const loginAtom = atom(
         userDetails: null,
         userPlan: null,
         isLoading: false,
+        isUserDataLoaded: false,
         error: errorMessage
       })
 
@@ -160,6 +166,7 @@ export const fetchUserDetailsAtom = atom(
       set(userStateAtom, {
         ...currentState,
         userDetails,
+        isUserDataLoaded: currentState.userPlan !== null, // 只有当userPlan也存在时才标记为已加载
         error: null
       })
 
@@ -208,6 +215,7 @@ export const fetchUserPlanAtom = atom(
       set(userStateAtom, {
         ...currentState,
         userPlan,
+        isUserDataLoaded: currentState.userDetails !== null, // 只有当userDetails也存在时才标记为已加载
         error: null
       })
 
@@ -231,6 +239,68 @@ export const fetchUserPlanAtom = atom(
   }
 )
 
+// 统一获取用户数据（userDetails和userPlan）
+export const fetchUserDataAtom = atom(
+  null,
+  async (get, set) => {
+    const currentState = get(userStateAtom)
+
+    if (!currentState.isAuthenticated || !currentState.user) {
+      return
+    }
+
+    // 如果数据已经完全加载，直接返回
+    if (currentState.isUserDataLoaded) {
+      return
+    }
+
+    try {
+      const agentToken = currentState.user.tokens.access_token
+      const did = currentState.user.tokens.did
+
+      // 并行获取用户详情和计划状态
+      const [userDetails, userPlan] = await Promise.all([
+        currentState.userDetails ? Promise.resolve(currentState.userDetails) : usersApi.getUserInfo(did, true),
+        currentState.userPlan ? Promise.resolve(currentState.userPlan) : usersApi.getUserPlan(did, true)
+      ])
+
+      set(userStateAtom, {
+        ...currentState,
+        userDetails,
+        userPlan,
+        isUserDataLoaded: true,
+        error: null
+      })
+
+      // 更新assistantStore的chatState
+      set(setAgentTokenAtom, agentToken)
+      set(chatAtom, prev => ({
+        ...prev,
+        userUuid: userDetails.did || '',
+        did: userDetails.did,
+        agentToken: agentToken
+      }))
+
+      console.log('User data fetched successfully:', { userDetails, userPlan })
+    } catch (error) {
+      console.error('Failed to fetch user data:', error)
+
+      // 如果是401错误，说明token无效，清空登录状态
+      if (error instanceof ApiError && error.statusCode === 401) {
+        console.warn('Access token invalid (401), clearing login state')
+        set(logoutAtom)
+        return
+      }
+
+      // 其他错误不清空登录状态，只记录错误
+      set(userStateAtom, {
+        ...currentState,
+        error: error instanceof Error ? error.message : 'Failed to fetch user data'
+      })
+    }
+  }
+)
+
 // 登出处理
 export const logoutAtom = atom(
   null,
@@ -243,6 +313,7 @@ export const logoutAtom = atom(
       userDetails: null,
       userPlan: null,
       isLoading: false,
+      isUserDataLoaded: false,
       error: null
     })
 
