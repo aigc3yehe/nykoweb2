@@ -42,8 +42,8 @@ function App() {
         <Routes>
           {/* 公开页面 - 不需要登录 */}
           <Route path=":lang" element={<ProtectedRoute requireAuth={false}><Home /></ProtectedRoute>} />
-          <Route path=":lang/recipes" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
-          <Route path=":lang/recipes/:tab" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
+          <Route path=":lang/cases" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
+          <Route path=":lang/cases/:tab" element={<ProtectedRoute requireAuth={false}><Recipes /></ProtectedRoute>} />
           <Route path=":lang/theme-demo" element={<ProtectedRoute requireAuth={false}><ThemeDemoPage /></ProtectedRoute>} />
           {/* 新增：无语言前缀的 OAuth 回调路径，保证第三方重定向可命中 */}
           <Route path="api/auth/callback/google" element={<AuthCallback />} />

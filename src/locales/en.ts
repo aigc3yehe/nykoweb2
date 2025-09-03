@@ -77,7 +77,7 @@ export const en = {
     button2: 'Create'
   },
   tabs: {
-    workflows: 'Template',
+    workflows: 'Workflow',
     cases: 'Cases',
     published: 'Published',
     liked: 'Liked'

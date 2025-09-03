@@ -142,7 +142,7 @@ export const loadMoreRecipesWorkflowsAtom = atom(
     const currentState = get(recipesWorkflowsAtom)
 
     if (currentState.hasMore && !currentState.isLoading) {
-      console.log('RecipesWorkflows: Loading more...', 'page', currentState.page)
+      console.log('RecipesWorkflows: Loading more Agent Cases...', 'page', currentState.page)
       return set(fetchRecipesWorkflowsAtom, { reset: false })
     } else {
       console.log('RecipesWorkflows: Cannot load more -',

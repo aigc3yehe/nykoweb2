@@ -84,7 +84,7 @@ const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => 
   const handleLoadMore = useCallback(() => {
     if (workflowState.hasMore && !workflowState.isLoading && !isLoadingRef.current) {
       isLoadingRef.current = true
-      console.log('WorkflowsList: Loading more workflows')
+      console.log('WorkflowsList: Loading more Agent Cases')
       loadMore().finally(() => {
         isLoadingRef.current = false
       })
@@ -134,7 +134,7 @@ const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => 
   if (workflowState.isLoading && workflowState.items.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-gray-500">Loading workflows...</div>
+        <div className="text-gray-500">Loading Agent Cases...</div>
       </div>
     )
   }
@@ -144,7 +144,7 @@ const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => 
     return (
       <div className="flex justify-center items-center py-12">
         <div className="text-center">
-          <p className="text-red-500 mb-2">Error loading workflows: {workflowState.error}</p>
+          <p className="text-red-500 mb-2">Error loading Agent Cases: {workflowState.error}</p>
           <button
             onClick={() => fetchData({ reset: true })}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
@@ -184,7 +184,7 @@ const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => 
       {/* 加载更多状态 */}
       {workflowState.isLoading && workflowState.items.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-500">Loading more workflows...</div>
+          <div className="text-gray-500">Loading more Agent Cases...</div>
         </div>
       )}
 

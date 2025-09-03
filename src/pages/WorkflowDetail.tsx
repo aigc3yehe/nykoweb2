@@ -68,7 +68,7 @@ const WorkflowDetail: React.FC = () => {
         {/* 加载状态 */}
         {state.isLoading && (
           <div className="flex justify-center items-center h-96">
-            <div className="text-gray-500">Loading workflow details...</div>
+            <div className="text-gray-500">Loading Agent Case details...</div>
           </div>
         )}
 

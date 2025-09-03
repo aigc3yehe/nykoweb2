@@ -22,14 +22,14 @@ const Recipes: React.FC = () => {
       setActiveTab(tab)
     } else if (tab) {
       // 如果URL参数不正确，重定向到workflows
-      navigate(withLangPrefix(lang, '/recipes/workflows'), { replace: true })
+      navigate(withLangPrefix(lang, '/cases/workflows'), { replace: true })
     }
   }, [tab, navigate])
 
   // 处理tab切换
   const handleTabChange = (newTab: RecipeType) => {
     setActiveTab(newTab)
-    navigate(withLangPrefix(lang, `/recipes/${newTab}`))
+    navigate(withLangPrefix(lang, `/cases/${newTab}`))
   }
 
   // 处理排序变化
@@ -40,7 +40,7 @@ const Recipes: React.FC = () => {
   // 如果没有tab参数，默认重定向到workflows
   useEffect(() => {
     if (!tab) {
-      navigate(withLangPrefix(lang, '/recipes/workflows'), { replace: true })
+      navigate(withLangPrefix(lang, '/cases/workflows'), { replace: true })
     }
   }, [tab, navigate])
 

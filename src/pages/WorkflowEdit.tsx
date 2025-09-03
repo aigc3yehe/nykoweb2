@@ -238,7 +238,7 @@ const WorkflowEdit: React.FC = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-link-default dark:border-link-default-dark mx-auto mb-4"></div>
           <span className="font-switzer text-sm text-text-secondary dark:text-text-secondary-dark">
-            {workflowDetailState.isLoading ? 'Loading workflow...' : 'Workflow not found'}
+            {workflowDetailState.isLoading ? 'Loading Agent Case...' : 'Agent Case not found'}
           </span>
         </div>
       </div>

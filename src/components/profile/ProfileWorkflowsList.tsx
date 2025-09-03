@@ -63,7 +63,7 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
   const handleLoadMore = useCallback(() => {
     if (tab === 'published' && state.publishedHasMore && !state.isLoading && !isLoadingRef.current) {
       isLoadingRef.current = true
-      console.log('ProfileWorkflowsList: Loading more published workflows')
+      console.log('ProfileWorkflowsList: Loading more published Agent Cases')
       loadMorePublished().finally(() => {
         isLoadingRef.current = false
       })
@@ -108,7 +108,7 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
   if (state.isLoading && currentGroups.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-gray-500">Loading workflows...</div>
+        <div className="text-gray-500">Loading Agent Cases...</div>
       </div>
     )
   }
@@ -118,7 +118,7 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="text-center">
-          <p className="text-red-500 mb-2">Error loading workflows: {state.error}</p>
+          <p className="text-red-500 mb-2">Error loading Agent Cases: {state.error}</p>
           <button 
             onClick={() => {
               if (tab === 'published') {
@@ -210,7 +210,7 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
       {/* 加载更多状态 */}
       {state.isLoading && currentGroups.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-500">Loading more workflows...</div>
+          <div className="text-gray-500">Loading more Agent Cases...</div>
         </div>
       )}
 

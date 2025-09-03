@@ -474,7 +474,7 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">2</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Template</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Workflow</span>
             </div>
 
             {/* Input Type 组件 */}
@@ -652,7 +652,7 @@ const WorkflowBuilder: React.FC = () => {
               disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
               className="w-[19.5rem] h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isCreatingWorkflow ? 'Creating...' : 'Save The Template'}
+              {isCreatingWorkflow ? 'Creating...' : 'Save The Workflow'}
             </button>
           </div>
         </div>
@@ -787,7 +787,7 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">2</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Template</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Workflow</span>
             </div>
 
             {/* Input Type 组件 */}
@@ -965,7 +965,7 @@ const WorkflowBuilder: React.FC = () => {
               disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
               className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isCreatingWorkflow ? 'Creating...' : 'Save The Template'}
+              {isCreatingWorkflow ? 'Creating...' : 'Save The Workflow'}
             </button>
           </div>
         </div>

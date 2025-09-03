@@ -300,7 +300,7 @@ export const loadMorePublishedWorkflowsAtom = atom(
   async (get, set) => {
     const currentState = get(profileWorkflowsAtom)
     if (currentState.publishedHasMore && !currentState.isLoading) {
-      console.log('ProfileWorkflows: Loading more published workflows')
+      console.log('ProfileWorkflows: Loading more published Agent Cases')
       return set(fetchPublishedWorkflowsAtom, { reset: false })
     }
   }

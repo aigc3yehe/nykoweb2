@@ -84,7 +84,7 @@ const Header: React.FC = React.memo(() => {
     const path = location.pathname
     if (path.includes('/workflow/builder')) return 'Builder'
     if (path.includes('/style/trainer')) return 'Style Trainer'
-    if (path.includes('/recipes')) return t('nav.recipes')
+    if (path.includes('/cases')) return t('nav.recipes')
     if (path.includes('/profile')) return t('profile.myCreations')
     if (path.includes('/account')) return 'Account'
     return t('pages.home') // Home页面

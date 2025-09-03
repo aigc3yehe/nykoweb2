@@ -98,7 +98,7 @@ const TrendingStyles: React.FC = () => {
 
   const handleViewAll = () => {
     // 导航到Recipes页面的Styles标签
-    navigate(withLangPrefix(lang, '/recipes/styles'))
+    navigate(withLangPrefix(lang, '/cases/styles'))
   }
 
   const handleStyleClick = (styleId: number) => {

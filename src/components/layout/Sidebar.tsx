@@ -248,8 +248,8 @@ const Sidebar: React.FC = () => {
       darkIcon: RecipesIconDark,
       lightSelectedIcon: RecipesIconSelected,
       darkSelectedIcon: RecipesIconDarkSelected,
-      path: withLangPrefix(lang, '/recipes'),
-      matchPaths: [`/${lang}/recipes`, `/${lang}/recipes/workflows`, `/${lang}/recipes/styles`]
+      path: withLangPrefix(lang, '/cases'),
+      matchPaths: [`/${lang}/cases`, `/${lang}/cases/workflows`, `/${lang}/cases/styles`]
     },
     {
       key: 'assets',

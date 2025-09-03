@@ -17,7 +17,7 @@ const RecipesTab: React.FC<RecipesTabProps> = ({ activeTab, onTabChange }) => {
   const lang = useLang()
   
   const tabs = [
-    { key: 'workflows' as RecipeType, label: 'Template' },
+    { key: 'workflows' as RecipeType, label: 'Workflow' },
     { key: 'styles' as RecipeType, label: 'Styles' }
   ]
 

@@ -114,7 +114,7 @@ const PopularWorkflows: React.FC = () => {
 
   const handleViewAll = () => {
     // 导航到Recipes页面的Workflows标签
-    navigate(withLangPrefix(lang, '/recipes/workflows'))
+    navigate(withLangPrefix(lang, '/cases/workflows'))
   }
 
   return (
