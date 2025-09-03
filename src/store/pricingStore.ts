@@ -45,7 +45,7 @@ const initialState: PricingState = {
       description: "For Starter",
       features: [
         {
-          title: "80 Credits Every Month",
+          title: "10 Credits Every Day",
           supported: true,
         },
         {
