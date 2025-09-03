@@ -54,7 +54,7 @@ function App() {
           <Route path=":lang/model/:id" element={<ProtectedRoute requireAuth={false}><ModelDetail /></ProtectedRoute>} />
 
           {/* 需要登录的页面 */}
-          <Route path=":lang/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path=":lang/creations" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path=":lang/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path=":lang/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
           <Route path=":lang/workflow/builder" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />

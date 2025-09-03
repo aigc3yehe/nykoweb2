@@ -244,7 +244,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
             <button
               onClick={handleConfirm}
               disabled={isUploading || !workflowForm.name.trim()}
-              className="w-full flex items-center justify-center gap-1.5 rounded-[6px] py-3 bg-[#0900FF] hover:bg-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="w-full flex items-center justify-center gap-1.5 rounded-[6px] py-3 bg-[#0900FF] hover:bg-blue-800 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors"
             >
               {isUploading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

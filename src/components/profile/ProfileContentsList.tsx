@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import {
   profileImageAtom,
@@ -38,8 +38,8 @@ import DeleteIconHover from '../../assets/mavae/delete_hover.svg'
 import DeleteIconDark from '../../assets/mavae/dark/delete.svg'
 import DeleteIconHoverDark from '../../assets/mavae/dark/delete_hover.svg'
 
-interface ProfileContentsListProps {
-  type: 'image' | 'video'
+export interface ProfileContentsListProps {
+  type: 'image' | 'video' | 'mixed'
   tab: 'published' | 'liked'
 }
 
@@ -59,7 +59,8 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
   const isLoadingRef = useRef(false)
 
   // 根据类型选择对应的状态和函数
-  const isImage = type === 'image'
+  const isMixed = type === 'mixed'
+  const isImage = type === 'image' || isMixed
   const state = tab === 'liked'
     ? (isImage ? likedImageState : likedVideoState)
     : (isImage ? imageState : videoState)
@@ -71,10 +72,23 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     : (isImage ? loadMoreImage : loadMoreVideo)
 
   useEffect(() => {
-    fetchContents({ reset: true }).catch((error: any) => {
-      console.error('ProfileContentsList: Failed to fetch contents:', error)
-    })
-  }, [type, tab, fetchContents])
+    if (isMixed) {
+      // 对于mixed类型，同时获取image和video数据
+      const fetchImageData = tab === 'liked' ? fetchLikedImages : fetchImageContents
+      const fetchVideoData = tab === 'liked' ? fetchLikedVideos : fetchVideoContents
+      
+      Promise.all([
+        fetchImageData({ reset: true }),
+        fetchVideoData({ reset: true })
+      ]).catch((error: any) => {
+        console.error('ProfileContentsList: Failed to fetch mixed contents:', error)
+      })
+    } else {
+      fetchContents({ reset: true }).catch((error: any) => {
+        console.error('ProfileContentsList: Failed to fetch contents:', error)
+      })
+    }
+  }, [type, tab, fetchContents, isMixed, fetchLikedImages, fetchLikedVideos, fetchImageContents, fetchVideoContents])
 
   // 处理加载更多
   const handleLoadMore = useCallback(() => {
@@ -111,12 +125,53 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
   }, [handleScroll])
 
   // 根据类型获取对应的分组数据
-  const groups = isImage ? (state as any).imageGroups : (state as any).videoGroups
+  const groups = useMemo(() => {
+    if (isMixed) {
+      // 对于mixed类型，合并image和video的数据
+      const imageGroups = tab === 'liked' 
+        ? (likedImageState as any).imageGroups || []
+        : (imageState as any).imageGroups || []
+      const videoGroups = tab === 'liked'
+        ? (likedVideoState as any).videoGroups || []
+        : (videoState as any).videoGroups || []
+      
+      // 简单合并：将所有内容放在一起，按时间重新分组
+      const allContents = [
+        ...imageGroups.flatMap((group: any) => group.contents || []),
+        ...videoGroups.flatMap((group: any) => group.contents || [])
+      ]
+      
+      // 按created_at重新分组
+      const groupedByTime: { [key: string]: any[] } = {}
+      allContents.forEach(content => {
+        const date = new Date(content.created_at || content.liked_at || Date.now())
+        const key = date.toDateString()
+        if (!groupedByTime[key]) {
+          groupedByTime[key] = []
+        }
+        groupedByTime[key].push(content)
+      })
+      
+      // 转换为TimeGroup格式
+      return Object.entries(groupedByTime)
+        .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+        .map(([dateKey, contents]) => ({
+          groupKey: dateKey,
+          groupLabel: dateKey,
+          contents: contents.sort((a, b) => 
+            new Date(b.created_at || b.liked_at || 0).getTime() - 
+            new Date(a.created_at || a.liked_at || 0).getTime()
+          )
+        }))
+    } else {
+      return isImage ? (state as any).imageGroups : (state as any).videoGroups
+    }
+  }, [isMixed, tab, likedImageState, likedVideoState, imageState, videoState, isImage, state])
 
   if (state.isLoading && groups.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-gray-500">Loading {type === 'image' ? 'images' : 'videos'}...</div>
+        <div className="text-gray-500">Loading {isMixed ? 'content' : (type === 'image' ? 'images' : 'videos')}...</div>
       </div>
     )
   }
@@ -125,7 +180,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     return (
       <div className="flex justify-center items-center py-12">
         <div className="text-center">
-          <p className="text-red-500 mb-2">Error loading {type === 'image' ? 'images' : 'videos'}: {state.error}</p>
+          <p className="text-red-500 mb-2">Error loading {isMixed ? 'content' : (type === 'image' ? 'images' : 'videos')}: {state.error}</p>
           <button
             onClick={() => fetchContents({ reset: true })}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
@@ -192,8 +247,18 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     const getImageHeight = () => {
       // 根据屏幕宽度动态计算卡片宽度
       const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-      const cardWidthRem = isMobile ? ((window.innerWidth - 48) / 16) : 18.375 // 移动端适配宽度，PC端294px
-      if (item.width && item.height) {
+      let cardWidthRem: number
+      
+      if (isMobile) {
+        // 移动端2列布局：(屏幕宽度 - 左右padding - 中间gap) / 2
+        // padding: 32px (16px * 2), gap: 24px
+        cardWidthRem = ((window.innerWidth - 32 - 24) / 2) / 16
+      } else {
+        // PC端4列布局：固定宽度
+        cardWidthRem = 18.375 // 294px
+      }
+      
+      if (item.width && item.height && item.width > 0) {
         return (cardWidthRem * item.height) / item.width
       }
       return 12.5 // 默认200px in rem
@@ -244,7 +309,17 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
 
     // 根据屏幕宽度动态计算图片宽度
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-    const cardWidthRem = isMobile ? ((window.innerWidth - 48) / 16) : 18.375
+    let cardWidthRem: number
+    
+    if (isMobile) {
+      // 移动端2列布局：(屏幕宽度 - 左右padding - 中间gap) / 2
+      // padding: 32px (16px * 2), gap: 24px
+      cardWidthRem = ((window.innerWidth - 32 - 24) / 2) / 16
+    } else {
+      // PC端4列布局：固定宽度
+      cardWidthRem = 18.375 // 294px
+    }
+    
     const widthPx = cardWidthRem * 16
 
     // 处理卡片点击
@@ -298,7 +373,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
 
     return (
       <div
-        className="w-full md:w-[18.375rem] cursor-pointer rounded-xl bg-secondary dark:bg-secondary-dark pb-2 gap-2 hover:shadow-[0px_8px_16px_0px_rgba(18,18,26,0.1)] transition-shadow" // 移动端全宽，PC端294px，padding-bottom: 8px, gap: 8px, border-radius: 12px, background: #FFFFFF, hover效果
+        className="w-full md:w-[18.375rem] cursor-pointer rounded-xl bg-secondary dark:bg-secondary-dark pb-2 gap-2 hover:shadow-[0px_8px_16px_0px_rgba(18,18,26,0.1)] transition-shadow" // 移动端全宽（通过grid控制），PC端294px，padding-bottom: 8px, gap: 8px, border-radius: 12px, background: #FFFFFF, hover效果
         onClick={handleCardClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -390,27 +465,29 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
             </span>
           </div>
 
-          {/* 右侧删除按钮 - PC端hover显示，移动端默认显示 */}
-          <div className={`flex items-center ${isMobile ? 'block' : isHovered ? 'block' : 'hidden'}`}>
-            <button
-              onClick={handleToggleVisibility}
-              onMouseEnter={() => setIsButtonHovered(true)}
-              onMouseLeave={() => setIsButtonHovered(false)}
-              className="w-4 h-4 flex items-center justify-center transition-opacity"
-              title={item.public === 1 ? 'Hide content' : 'Show content'}
-            >
-              <ThemeAdaptiveIcon
-                lightIcon={DeleteIcon}
-                darkIcon={DeleteIconDark}
-                lightSelectedIcon={DeleteIconHover}
-                darkSelectedIcon={DeleteIconHoverDark}
-                alt="Toggle visibility"
-                size="sm"
-                isSelected={isButtonHovered}
-                className="w-4 h-4"
-              />
-            </button>
-          </div>
+          {/* 右侧删除按钮 - PC端hover显示，移动端默认显示，但在liked tab下不显示 */}
+          {tab !== 'liked' && (
+            <div className={`flex items-center ${isMobile ? 'block' : isHovered ? 'block' : 'hidden'}`}>
+              <button
+                onClick={handleToggleVisibility}
+                onMouseEnter={() => setIsButtonHovered(true)}
+                onMouseLeave={() => setIsButtonHovered(false)}
+                className="w-4 h-4 flex items-center justify-center transition-opacity"
+                title={item.public === 1 ? 'Hide content' : 'Show content'}
+              >
+                <ThemeAdaptiveIcon
+                  lightIcon={DeleteIcon}
+                  darkIcon={DeleteIconDark}
+                  lightSelectedIcon={DeleteIconHover}
+                  darkSelectedIcon={DeleteIconHoverDark}
+                  alt="Toggle visibility"
+                  size="sm"
+                  isSelected={isButtonHovered}
+                  className="w-4 h-4"
+                />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -431,8 +508,8 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
             </span>
           </div>
 
-          {/* 内容网格 - 移动端1列，PC端4列，gap 24px */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* 内容网格 - 移动端2列，PC端4列，gap 24px */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {group.contents.map((item) => (
               <ContentCard key={`${item.content_id}`} item={item} />
             ))}
@@ -443,7 +520,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
       {/* 加载更多状态 */}
       {state.isLoading && groups.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-500">Loading more {type === 'image' ? 'images' : 'videos'}...</div>
+          <div className="text-gray-500">Loading more {isMixed ? 'content' : (type === 'image' ? 'images' : 'videos')}...</div>
         </div>
       )}
 
@@ -462,7 +539,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
       {/* 无更多数据提示 */}
       {!state.hasMore && groups.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-400">No more {type === 'image' ? 'images' : 'videos'} to load</div>
+          <div className="text-gray-400">No more {isMixed ? 'content' : (type === 'image' ? 'images' : 'videos')} to load</div>
         </div>
       )}
     </div>

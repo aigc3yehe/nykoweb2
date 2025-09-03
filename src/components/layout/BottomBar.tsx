@@ -75,7 +75,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ onOpenSettings }) => {
         <button
           onClick={handlePublish}
           disabled={isCreatingWorkflow || !workflowForm.name.trim() || !userState.isAuthenticated}
-          className="flex-1 flex items-center justify-center gap-1.5 p-3 bg-[#0900FF] hover:bg-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 p-3 bg-[#0900FF] hover:bg-blue-800 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed rounded-lg transition-colors"
         >
           {isCreatingWorkflow ? (
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>

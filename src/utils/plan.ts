@@ -42,3 +42,24 @@ export const CREATE_WORKFLOW_SERVICE_CONFIG: ServiceConfig = {
   name: SERVICE_TYPE.CREATE_WORKFLOW,
   cu: 800,
 };
+
+/**
+ * 将API返回的计划类型转换为显示名称
+ * @param planType API返回的计划类型
+ * @returns 显示用的计划名称
+ */
+export const formatPlanType = (planType: string | null | undefined): string => {
+  if (!planType) {
+    return 'Free'
+  }
+
+  switch (planType) {
+    case 'premium_plus':
+      return 'Pro'
+    case 'premium':
+      return 'Plus'
+    case 'free':
+    default:
+      return 'Free'
+  }
+}

@@ -230,7 +230,7 @@ const ChatSidebar: React.FC = () => {
                   showLoginModal()
                   closeSidebar() // 关闭侧边栏，让用户专注于登录
                 }}
-                className="px-6 py-3 bg-link-default dark:bg-link-default-dark text-text-inverse dark:text-text-inverse-dark rounded-lg hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors font-medium"
+                className="px-6 py-3 bg-link-default dark:bg-link-default-dark text-text-inverse dark:text-text-inverse-dark rounded-lg hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors font-medium"
               >
                 {t('auth.loginNow')} {/* en: Login Now / zh: 立即登录 */}
               </button>

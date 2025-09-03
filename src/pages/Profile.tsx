@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { userStateAtom, initUserStateAtom } from '../store/loginStore'
 import ProfileWorkflowsList from '../components/profile/ProfileWorkflowsList'
-import ProfileModelsList from '../components/profile/ProfileModelsList'
-import ProfileContentsList from '../components/profile/ProfileContentsList'
+
+import ProfileContentsList, { ProfileContentsListProps } from '../components/profile/ProfileContentsList'
 import ProfileTabComponent from '../components/profile/ProfileTab'
 import ProfileActions from '../components/profile/ProfileActions'
 //import { cn } from '../utils/cn'
@@ -12,7 +12,8 @@ import ProfileActions from '../components/profile/ProfileActions'
 type ProfileTab = 'published' | 'liked'
 
 // 内容类型过滤器
-type ContentTypeFilter = 'workflows' | 'models' | 'images' | 'videos'
+type ContentTypeFilter = 'images' | 'workflows'
+type ProfileContentType = ProfileContentsListProps['type']
 
 const Profile: React.FC = () => {
   const [userState] = useAtom(userStateAtom)
@@ -20,7 +21,7 @@ const Profile: React.FC = () => {
 
   // 本地状态
   const [activeTab, setActiveTab] = useState<ProfileTab>('published')
-  const [selectedFilter, setSelectedFilter] = useState<ContentTypeFilter>('workflows')
+  const [selectedFilter, setSelectedFilter] = useState<ContentTypeFilter>('images')
 
   // 初始化用户状态
   useEffect(() => {
@@ -57,14 +58,8 @@ const Profile: React.FC = () => {
     if (selectedFilter === 'workflows') {
       return <ProfileWorkflowsList tab={activeTab} />
     }
-    if (selectedFilter === 'models') {
-      return <ProfileModelsList tab={activeTab} />
-    }
     if (selectedFilter === 'images') {
-      return <ProfileContentsList type="image" tab={activeTab} />
-    }
-    if (selectedFilter === 'videos') {
-      return <ProfileContentsList type="video" tab={activeTab} />
+      return <ProfileContentsList type={'mixed' as ProfileContentType} tab={activeTab} />
     }
     return null
   }
@@ -73,7 +68,7 @@ const Profile: React.FC = () => {
     <div className="w-full px-4 md:px-8 pb-10 flex flex-col md:gap-6"> {/* width: 1352px (full), padding: 32px 32px 40px 32px, gap: 24px */}
       {/* 移动端标题 */}
       <h1 className="md:hidden h-16 py-4 font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark"> {/* height: 64px, padding: 16px, font-size: 24px, line-height: 32px */}
-        My creations
+        My Creations
       </h1>
 
       {/* Tab 导航 */}

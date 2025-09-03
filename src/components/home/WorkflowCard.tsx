@@ -47,13 +47,15 @@ interface WorkflowCardProps {
   onClick?: () => void
   onUseClick?: () => void
   variant?: 'workflow' | 'style' | 'recipes_workflow' | 'recipes_style' | 'profile_workflow' | 'profile_style'
+  profileTab?: 'published' | 'liked'
 }
 
 const WorkflowCard: React.FC<WorkflowCardProps> = ({
   item,
   onClick,
   onUseClick,
-  variant = 'workflow'
+  variant = 'workflow',
+  profileTab
 }) => {
   const navigate = useNavigate()
   const lang = useLang()
@@ -412,8 +414,8 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
                 </span>
               </div>
 
-              {/* 右侧操作按钮 - 仅在profile模式下显示，PC端hover显示，移动端默认显示 */}
-              {(variant === 'profile_workflow' || variant === 'profile_style') && (
+              {/* 右侧操作按钮 - 仅在profile模式下且published tab显示，PC端hover显示，移动端默认显示 */}
+              {(variant === 'profile_workflow' || variant === 'profile_style') && profileTab === 'published' && (
                 <div className={`flex items-center gap-3 ${typeof window !== 'undefined' && window.innerWidth < 768 ? 'block' : isHovered ? 'block' : 'hidden'}`}>
                   {/* 编辑按钮 */}
                   <button

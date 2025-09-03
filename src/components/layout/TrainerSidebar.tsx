@@ -192,7 +192,7 @@ const TrainerSidebar: React.FC = () => {
         <button
           className={`w-full flex items-center justify-center gap-1.5 rounded-[6px] py-3 transition-colors ${
             !status.canCreate
-              ? 'bg-gray-400 cursor-not-allowed'
+              ? 'bg-gray-400 dark:bg-gray-500 cursor-not-allowed'
               : 'bg-[#0900FF] hover:bg-blue-800'
           }`}
           onClick={handleCreateModel}

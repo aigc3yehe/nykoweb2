@@ -130,7 +130,7 @@ const AuthCallback: React.FC = () => {
             </p>
             <button
               onClick={handleRetry}
-              className="px-4 py-2 bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed text-text-inverse dark:text-text-inverse-dark rounded-lg transition-colors font-switzer"
+              className="px-4 py-2 bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark text-text-inverse dark:text-text-inverse-dark rounded-lg transition-colors font-switzer"
             >
               Return to Homepage
             </button>

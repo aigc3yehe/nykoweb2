@@ -263,7 +263,7 @@ const PublishModal: React.FC<PublishModalProps> = ({ isOpen, onClose }) => {
           <button
             onClick={handlePublish}
             disabled={isCreatingWorkflow || isUploading || !workflowForm.name.trim() || !userState.isAuthenticated}
-            className="w-full flex items-center justify-center gap-2 py-4 px-6 bg-[#0900FF] hover:bg-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-4 px-6 bg-[#0900FF] hover:bg-blue-800 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed rounded-lg transition-colors"
           >
             {isCreatingWorkflow || isUploading ? (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

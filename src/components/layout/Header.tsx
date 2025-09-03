@@ -85,7 +85,7 @@ const Header: React.FC = React.memo(() => {
     if (path.includes('/workflow/builder')) return 'Builder'
     if (path.includes('/style/trainer')) return 'Style Trainer'
     if (path.includes('/cases')) return t('nav.recipes')
-    if (path.includes('/profile')) return t('profile.myCreations')
+    if (path.includes('/creations')) return t('profile.myCreations')
     if (path.includes('/account')) return 'Account'
     return t('pages.home') // Home页面
   }
@@ -227,6 +227,18 @@ const Header: React.FC = React.memo(() => {
             )
           })()}
 
+          {/* Daily free credits按钮 - 仅在未登录状态下显示 */}
+          {!userState.isAuthenticated && (
+            <button
+              onClick={() => showLoginModal()}
+              className="h-9 md:h-12 px-4 md:px-6 gap-2 rounded-full bg-[#84CC16] hover:bg-[#65A30D] transition-colors flex items-center justify-center"
+            >
+              <span className="font-switzer font-medium text-sm md:text-base leading-5 md:leading-6 text-white text-center whitespace-nowrap">
+                {t('auth.dailyFreeCredits')}
+              </span>
+            </button>
+          )}
+
           {/* 登录按钮或用户头像 */}
           {userState.isAuthenticated && userState.user ? (
             /* 用户头像 - 移动端36*36px / PC端48*48px 圆形 + 会员等级标识 */
@@ -264,10 +276,10 @@ const Header: React.FC = React.memo(() => {
             /* 登录按钮 */
             <button
               onClick={() => showLoginModal()}
-              className="flex items-center justify-center w-17.5 h-9 md:w-27 md:h-12 px-4 md:px-8 gap-2.5 rounded-full bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors"
+              className="flex items-center justify-center w-17.5 h-9 md:w-27 md:h-12 px-4 md:px-8 gap-2.5 rounded-full bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors"
             >
               <span className="font-switzer font-medium text-sm md:text-base leading-5 md:leading-6 text-white text-center">
-                Log in
+                {t('header.login')}
               </span>
             </button>
           )}

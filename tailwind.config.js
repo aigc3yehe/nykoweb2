@@ -99,13 +99,13 @@ export default {
         'link-default': {
           DEFAULT: '#4458FF',
           dark: {
-            DEFAULT: '#8B99FF',
+            DEFAULT: '#3A49D6',
           }
         },
         'link-pressed': {
           DEFAULT: '#3A49D6',
           dark: {
-            DEFAULT: '#3A49D6',
+            DEFAULT: '#8B99FF',
           }
         },
         'link-disable': {

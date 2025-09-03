@@ -257,7 +257,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
   const getButtonStyles = () => {
     if (!model?.model_tran || model.model_tran.length === 0) {
       return {
-        background: 'bg-text-disable dark:bg-text-disable-dark',
+        background: 'bg-gray-400 dark:bg-gray-500',
         textColor: 'text-white',
         cursor: 'cursor-not-allowed'
       }
@@ -285,7 +285,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
       }
     }
     return {
-      background: 'bg-text-disable dark:bg-text-disable-dark',
+      background: 'bg-gray-400 dark:bg-gray-500',
       textColor: 'text-white',
       cursor: 'cursor-not-allowed'
     }

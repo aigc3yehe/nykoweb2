@@ -175,7 +175,7 @@ const StyleTrainer: React.FC = () => {
       {/* Builder 按钮 */}
       <div className="w-full flex items-center justify-center">
         <button
-          className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
           disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
           onClick={handleStartTraining}
         >
@@ -283,7 +283,7 @@ const StyleTrainer: React.FC = () => {
       {/* 第四个区域：Builder 按钮 */}
       <div className="w-full flex items-center justify-center">
         <button
-          className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
           disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
           onClick={handleStartTraining}
         >
@@ -610,7 +610,7 @@ const StyleTrainer: React.FC = () => {
                 {/* Builder 按钮 */}
                 <div className="w-full flex items-center justify-center">
                   <button
-                    className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
                     disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
                     onClick={handleStartTraining}
                   >
@@ -699,7 +699,7 @@ const StyleTrainer: React.FC = () => {
                 {/* 第四个区域：Builder 按钮 */}
                 <div className="w-full flex items-center justify-center">
                   <button
-                    className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
                     disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
                     onClick={handleStartTraining}
                   >

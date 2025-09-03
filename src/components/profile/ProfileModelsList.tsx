@@ -186,6 +186,7 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
                 <WorkflowCard
                   item={convertModelToFeaturedItem(model)}
                   variant="profile_style"
+                  profileTab={tab}
                   onClick={() => {
     navigate(withLangPrefix(lang, `/model/${model.model_id}`))
                   }}

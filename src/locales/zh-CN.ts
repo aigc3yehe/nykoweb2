@@ -33,7 +33,9 @@ export const zhCN = {
     pleaseLogin: '请登录后访问此页面',
     loginNow: '立即登录',
     verifyingLogin: '正在验证登录状态...',
-    chatLoginMessage: '请登录后开始与 Mavae 聊天'
+    chatLoginMessage: '请登录后开始与 Mavae 聊天',
+    loginToReceiveFreeCredits: '登录即可获得免费积分！',
+    dailyFreeCredits: '每日免费积分！'
   },
   workflow: {
     name: '工作流',

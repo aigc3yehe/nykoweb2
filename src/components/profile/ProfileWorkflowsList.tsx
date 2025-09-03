@@ -198,6 +198,7 @@ const ProfileWorkflowsList: React.FC<ProfileWorkflowsListProps> = ({ tab }) => {
                 <WorkflowCard
                   item={convertWorkflowToFeaturedItem(workflow)}
                   variant="profile_workflow"
+                  profileTab={tab}
                   onClick={() => handleWorkflowClick(workflow.workflow_id)}
                   onUseClick={() => handleUseWorkflow(workflow.workflow_id)}
                 />

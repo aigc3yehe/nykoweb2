@@ -166,7 +166,7 @@ const ModelEdit: React.FC = () => {
           <span className="font-switzer text-sm text-red-500 mb-4 block">Error: {modelDetailState.error}</span>
           <button
             onClick={() => id && fetchModelDetail({ modelId: parseInt(id), refresh: true })}
-            className="px-4 py-2 bg-link-default dark:bg-link-default-dark text-white rounded-lg hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors"
+            className="px-4 py-2 bg-link-default dark:bg-link-default-dark text-white rounded-lg hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors"
           >
             Retry
           </button>
@@ -316,7 +316,7 @@ const ModelEdit: React.FC = () => {
         <button
           onClick={handleSave}
           disabled={modelEditState.isUpdating || isUploading || !modelEditState.form.name.trim()}
-          className="w-full h-12 px-4 gap-1 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full h-12 px-4 gap-1 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
         >
           {modelEditState.isUpdating ? 'Saving...' : 'Save'}
         </button>

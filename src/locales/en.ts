@@ -33,7 +33,9 @@ export const en = {
     pleaseLogin: 'Please log in to access this page',
     loginNow: 'Login Now',
     verifyingLogin: 'Verifying login status...',
-    chatLoginMessage: 'Please log in to start chatting with Mavae'
+    chatLoginMessage: 'Please log in to start chatting with Mavae',
+    loginToReceiveFreeCredits: 'Log in to receive free credits!',
+    dailyFreeCredits: 'Daily free credits!'
   },
   workflow: {
     name: 'Workflow',
@@ -99,7 +101,7 @@ export const en = {
     image: 'Image'
   },
   profile: {
-    myCreations: 'My creations',
+    myCreations: 'My Creations',
     noCasesFound: 'No published cases found',
     createFirstCase: 'Create your first agent case to get started'
   }

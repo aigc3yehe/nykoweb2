@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { loginModalAtom, hideLoginModalAtom, userStateAtom } from '../../store/loginStore'
 import { authService } from '../../services/authService'
+import { useI18n } from '../../hooks/useI18n'
 import LoginTitleBg from '../../assets/web2/login_title_bg.svg'
 import LoginClose from '../../assets/web2/login_close.svg'
 import LoginLogoBg from '../../assets/web2/login_logo_bg.svg'
@@ -9,6 +10,7 @@ import Logo from '../../assets/web2/Logo.png'
 import GoogleIcon from '../../assets/web2/google.svg'
 
 const LoginModal: React.FC = () => {
+  const { t } = useI18n()
   const [loginState] = useAtom(loginModalAtom)
   const [userState] = useAtom(userStateAtom)
   const hideLoginModal = useSetAtom(hideLoginModalAtom)
@@ -115,7 +117,7 @@ const LoginModal: React.FC = () => {
           {/* 提示文本 */}
           <div className="text-center">
             <span className="font-lexend font-normal text-[0.875rem] leading-none text-[#9CA3AF] capitalize">
-              Tip Here
+              {t('auth.loginToReceiveFreeCredits')}
             </span>
           </div>
         </div>

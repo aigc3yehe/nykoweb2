@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import avatarSvg from '../../assets/Avatar.svg'
 import AvatarIcon from '../../assets/mavae/avatar.svg'
 import AvatarIconDark from '../../assets/mavae/dark/avatar.svg'
-import CreateIcon from '../../assets/mavae/create.svg'
-import CreateIconDark from '../../assets/mavae/dark/create.svg'
+import ChatIcon from '../../assets/mavae/chat.svg'
+import ChatIconDark from '../../assets/mavae/dark/chat.svg'
 import ShareIcon from '../../assets/mavae/share.svg'
 import ShareIconDark from '../../assets/mavae/dark/share.svg'
-import LikeOutlineIcon from '../../assets/mavae/Like_outline.svg'
-import LikeOutlineIconDark from '../../assets/mavae/dark/Like_outline.svg'
-import LikedIcon from '../../assets/mavae/Liked.svg'
-import LikedIconDark from '../../assets/mavae/dark/Liked.svg'
+import BookmarkIcon from '../../assets/mavae/Bookmark.svg'
+import BookmarkIconDark from '../../assets/mavae/dark/Bookmark.svg'
+import BookmarkYellowIcon from '../../assets/mavae/Bookmark_yellow.svg'
+import BookmarkYellowIconDark from '../../assets/mavae/dark/Bookmark_yellow.svg'
 import AddIcon from '../../assets/mavae/add.svg'
 import AddIconDark from '../../assets/mavae/dark/add.svg'
 import FinishIcon from '../../assets/mavae/finish.svg'
@@ -373,13 +373,13 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
             className="flex items-center gap-1 h-5 rounded"
           >
             <ThemeAdaptiveIcon
-              lightIcon={workflow?.is_liked ? LikedIcon : LikeOutlineIcon}
-              darkIcon={workflow?.is_liked ? LikedIconDark : LikeOutlineIconDark}
-              alt="Like"
+              lightIcon={workflow?.is_liked ? BookmarkYellowIcon : BookmarkIcon}
+              darkIcon={workflow?.is_liked ? BookmarkYellowIconDark : BookmarkIconDark}
+              alt="Bookmark"
               size="lg"
             />
             <span className={`font-switzer font-medium text-sm leading-5 ${workflow?.is_liked
-              ? 'text-[#F6465D]'
+              ? 'text-[#F59E0B]'
               : 'text-text-secondary dark:text-text-secondary-dark'
               }`}>
               {typeof workflow?.like_count === 'number' ? workflow.like_count : 0}
@@ -423,36 +423,26 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
           </span>
         </div>
 
-        {/* 第三行：Description块 */}
-        <div className="flex flex-col gap-2">
-          {/* Description第一行*/}
-          <div className="flex items-center h-5">
-            <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-              Description
-            </span>
+        {/* Description内容 */}
+        <div className="flex flex-col gap-1">
+          <div className="rounded-xl p-3 bg-gray-50 dark:bg-gray-800">
+            <p
+              className={`font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark ${isDescriptionExpanded ? '' : 'line-clamp-2'
+                }`}
+            >
+              {workflow.description || 'No description available'}
+            </p>
           </div>
 
-          {/* Description第二行：内容 */}
-          <div className="flex flex-col gap-1">
-            <div className="rounded-xl p-3 bg-gray-50 dark:bg-gray-800">
-              <p
-                className={`font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark ${isDescriptionExpanded ? '' : 'line-clamp-2'
-                  }`}
-              >
-                {workflow.description || 'No description available'}
-              </p>
-            </div>
-
-            {/* Prompt第三行：展开/收起按钮 */}
-            {workflow.prompt && workflow.prompt.length > 100 && (
-              <button
-                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start"
-              >
-                {isDescriptionExpanded ? 'Show less' : 'Show more'}
-              </button>
-            )}
-          </div>
+          {/* 展开/收起按钮 - 只有当内容无法完全展示时才显示 */}
+          {workflow.description && workflow.description.length > 100 && (
+            <button
+              onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+              className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start"
+            >
+              {isDescriptionExpanded ? 'Show less' : 'Show more'}
+            </button>
+          )}
         </div>
 
         {/* 第四行：Builder信息 */}
@@ -483,9 +473,9 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
             className="flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors flex-1 md:flex-none"
           >
             <ThemeAdaptiveIcon
-              lightIcon={CreateIcon}
-              darkIcon={CreateIconDark}
-              alt="Create"
+              lightIcon={ChatIcon}
+              darkIcon={ChatIconDark}
+              alt="Chat"
               size="lg"
             />
             <span className="font-switzer font-medium text-sm leading-5 text-white">
@@ -552,13 +542,13 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
             className="hidden md:flex items-center gap-1 h-5 rounded"
           >
             <ThemeAdaptiveIcon
-              lightIcon={workflow?.is_liked ? LikedIcon : LikeOutlineIcon}
-              darkIcon={workflow?.is_liked ? LikedIconDark : LikeOutlineIconDark}
-              alt="Like"
+              lightIcon={workflow?.is_liked ? BookmarkYellowIcon : BookmarkIcon}
+              darkIcon={workflow?.is_liked ? BookmarkYellowIconDark : BookmarkIconDark}
+              alt="Bookmark"
               size="lg"
             />
             <span className={`font-switzer font-medium text-sm leading-5 ${workflow?.is_liked
-              ? 'text-[#F6465D]'
+              ? 'text-[#F59E0B]'
               : 'text-text-secondary dark:text-text-secondary-dark'
               }`}>
               {typeof workflow?.like_count === 'number' ? workflow.like_count : 0}

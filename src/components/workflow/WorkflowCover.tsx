@@ -3,18 +3,12 @@ import { getScaledImageUrl } from '../../utils'
 import PictureIcon from '../../assets/mavae/Picture_white.svg'
 import VideoIconNew from '../../assets/mavae/video_white.svg'
 import UseIconNew from '../../assets/mavae/use_white.svg'
-import BookmarkNormalIcon from '../../assets/mavae/Bookmark_normal.svg'
-import BookmarkYellowIcon from '../../assets/mavae/Bookmark_yellow.svg'
-import BookmarkNormalIconDark from '../../assets/mavae/dark/Bookmark_normal.svg'
-import BookmarkYellowIconDark from '../../assets/mavae/dark/Bookmark_yellow.svg'
-import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
+
 
 interface WorkflowCoverProps {
   cover?: string
   name?: string
   usage?: number
-  like_count?: number
-  is_liked?: boolean
   className?: string
 }
 
@@ -22,8 +16,6 @@ const WorkflowCover: React.FC<WorkflowCoverProps> = ({
   cover,
   name,
   usage = 0,
-  like_count = 0,
-  is_liked = false,
   className = ''
 }) => {
   const [imageError, setImageError] = useState(false)
@@ -78,18 +70,7 @@ const WorkflowCover: React.FC<WorkflowCoverProps> = ({
           </span>
         </div>
 
-        {/* 收藏数 */}
-        <div className="flex items-center gap-0.5 h-5">
-          <ThemeAdaptiveIcon
-            lightIcon={is_liked ? BookmarkYellowIcon : BookmarkNormalIcon}
-            darkIcon={is_liked ? BookmarkYellowIconDark : BookmarkNormalIconDark}
-            alt="Bookmark"
-            size="sm"
-          />
-          <span className="pb-px font-switzer font-medium text-xs leading-4 text-white text-center">
-            {like_count}
-          </span>
-        </div>
+
       </div>
     </div>
   )

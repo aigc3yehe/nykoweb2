@@ -2,11 +2,11 @@ import React, { useState } from 'react'
 import { cn } from '../../utils'
 import PictureIcon from '../../assets/mavae/Picture.svg'
 import PictureIconDark from '../../assets/mavae/dark/Picture.svg'
-import LiveIcon from '../../assets/mavae/live.svg'
-import LiveIconDark from '../../assets/mavae/dark/live.svg'
+import GptIcon from '../../assets/mavae/gpt.svg'
+import GptIconDark from '../../assets/mavae/dark/gpt.svg'
 
 type ProfileTab = 'published' | 'liked'
-type ContentTypeFilter = 'workflows' | 'images' | 'videos'
+type ContentTypeFilter = 'images' | 'workflows'
 
 interface ProfileActionsProps {
   activeTab: ProfileTab
@@ -14,9 +14,9 @@ interface ProfileActionsProps {
 }
 
 const ProfileActions: React.FC<ProfileActionsProps> = ({onFilterChange }) => {
-  const [selectedOption, setSelectedOption] = useState<ContentTypeFilter>('workflows')
+  const [selectedOption, setSelectedOption] = useState<ContentTypeFilter>('images')
 
-  const options: ContentTypeFilter[] = ['workflows', 'images', 'videos']
+  const options: ContentTypeFilter[] = ['images', 'workflows']
 
   const handleOptionSelect = (option: ContentTypeFilter) => {
     setSelectedOption(option)
@@ -40,32 +40,28 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({onFilterChange }) => {
               "md:min-w-[6.875rem]", // PC端: min-width: 110px
               "w-1/4 md:w-auto md:flex-none", // 移动端: 平分1/4宽度, PC端: 自适应
               selectedOption === option
-                ? "bg-btn-selected dark:bg-btn-selected-dark shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.1)]" // 选中状态
+                ? "bg-btn-selected dark:bg-btn-selected-dark shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)]" // 选中状态
                 : "hover:bg-quaternary dark:hover:bg-quaternary-dark" // 未选中状态
             )}
           >
-            {/* 图标 - 仅对 images 和 videos 显示 */}
-            {(option === 'images' || option === 'videos') && (
-              <img
-                src={option === 'images' ? PictureIcon : LiveIcon}
-                alt={option}
-                className="w-4 h-4 flex-shrink-0 dark:hidden" // 16x16px, 浅色模式显示
-              />
-            )}
-            {(option === 'images' || option === 'videos') && (
-              <img
-                src={option === 'images' ? PictureIconDark : LiveIconDark}
-                alt={option}
-                className="w-4 h-4 flex-shrink-0 hidden dark:block" // 16x16px, 深色模式显示
-              />
-            )}
+            {/* 图标 - 为所有选项显示 */}
+            <img
+              src={option === 'images' ? PictureIcon : GptIcon}
+              alt={option}
+              className="w-4 h-4 flex-shrink-0 dark:hidden" // 16x16px, 浅色模式显示
+            />
+            <img
+              src={option === 'images' ? PictureIconDark : GptIconDark}
+              alt={option}
+              className="w-4 h-4 flex-shrink-0 hidden dark:block" // 16x16px, 深色模式显示
+            />
             <span className={cn(
               "font-switzer font-medium text-sm leading-[1.375rem] text-center", // font-size: 14px, line-height: 22px
               selectedOption === option
                 ? "text-text-main dark:text-text-main-dark" // 选中状态字体颜色
                 : "text-text-secondary dark:text-text-secondary-dark" // 未选中状态字体颜色
             )}>
-              {option === 'workflows' ? 'Cases' : option.charAt(0).toUpperCase() + option.slice(1)}
+              {option === 'workflows' ? 'Cases' : 'Images'}
             </span>
           </button>
         ))}

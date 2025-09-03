@@ -650,7 +650,7 @@ const WorkflowBuilder: React.FC = () => {
             <button
               onClick={handleBuilder}
               disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
-              className="w-[19.5rem] h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-[19.5rem] h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
             >
               {isCreatingWorkflow ? 'Creating...' : 'Save The Workflow'}
             </button>
@@ -963,7 +963,7 @@ const WorkflowBuilder: React.FC = () => {
             <button
               onClick={handleBuilder}
               disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
-              className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
             >
               {isCreatingWorkflow ? 'Creating...' : 'Save The Workflow'}
             </button>

@@ -104,8 +104,6 @@ const WorkflowDetail: React.FC = () => {
                   cover={state.workflow.cover}
                   name={state.workflow.name}
                   usage={state.workflow.usage}
-                  like_count={state.workflow.like_count}
-                  is_liked={state.workflow.is_liked}
                 />
 
                 {/* 右侧详情信息区 */}
@@ -122,8 +120,6 @@ const WorkflowDetail: React.FC = () => {
                     cover={state.workflow.cover}
                     name={state.workflow.name}
                     usage={state.workflow.usage}
-                    like_count={state.workflow.like_count}
-                    is_liked={state.workflow.is_liked}
                     className="w-full h-[25rem]"
                   />
                 </div>

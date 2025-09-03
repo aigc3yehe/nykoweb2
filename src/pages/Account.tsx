@@ -11,6 +11,7 @@ import ProIconDark from '../assets/mavae/dark/vip/pro.svg'
 import PlusIcon from '../assets/mavae/vip/plus.svg'
 import PlusIconDark from '../assets/mavae/dark/vip/plus.svg'
 import { paymentService } from '../services/paymentService'
+import { formatPlanType } from '../utils/plan'
 
 const Account: React.FC = () => {
     const navigate = useNavigate()
@@ -37,19 +38,7 @@ const Account: React.FC = () => {
 
     // 获取当前计划名称
     const getCurrentPlan = () => {
-        if (!userState.userPlan) {
-            return 'Free'
-        }
-
-        switch (userState.userPlan.plan_type) {
-            case 'premium':
-                return 'Premium'
-            case 'premium_plus':
-                return 'Pro'
-            case 'free':
-            default:
-                return 'Free'
-        }
+        return formatPlanType(userState.userPlan?.plan_type)
     }
 
     // 获取计划总积分

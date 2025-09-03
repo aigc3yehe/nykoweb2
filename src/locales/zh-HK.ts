@@ -33,7 +33,9 @@ export const zhHK = {
     pleaseLogin: '請登入後訪問此頁面',
     loginNow: '立即登入',
     verifyingLogin: '正在驗證登入狀態...',
-    chatLoginMessage: '請登入後開始與 Mavae 聊天'
+    chatLoginMessage: '請登入後開始與 Mavae 聊天',
+    loginToReceiveFreeCredits: '登入即可獲得免費積分！',
+    dailyFreeCredits: '每日免費積分！'
   },
   workflow: {
     name: '工作流',
