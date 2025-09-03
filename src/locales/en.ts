@@ -23,6 +23,10 @@ export const en = {
     retry: 'Retry',
     cancel: 'Cancel',
     confirm: 'Confirm',
+    tips: 'Tips',
+    delete: 'Delete',
+    hide: 'Hide',
+    show: 'Show',
     share: {
       copied: 'Link copied to clipboard!',
       copyFailed: 'Failed to copy link'
@@ -61,6 +65,32 @@ export const en = {
   pricing: {
     title: 'Plans & pricing',
     subtitle: 'Upgrade to gain access to Premium features'
+  },
+  dialog: {
+    deleteWorkflow: {
+      title: 'Delete Workflow?',
+      message: 'Are you sure you want to delete "{name}"? This action cannot be undone.'
+    },
+    deleteModel: {
+      title: 'Delete Model?', 
+      message: 'Are you sure you want to delete "{name}"? This action cannot be undone.'
+    },
+    deleteStyle: {
+      title: 'Delete Style?',
+      message: 'Are you sure you want to delete "{name}"? This action cannot be undone.'
+    },
+    hideImage: {
+      title: 'Hide Image?',
+      message: 'Are you sure you want to hide this image? It will no longer be visible to other users.'
+    },
+    showImage: {
+      title: 'Show Image?',
+      message: 'Are you sure you want to show this image? It will become visible to other users.'
+    },
+    clearChat: {
+      title: 'Clear Chat History?',
+      message: 'Are you sure you want to clear the chat history?'
+    }
   },
   aria: {
     openChat: 'Open chat'

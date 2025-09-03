@@ -23,6 +23,10 @@ export const zhCN = {
     retry: '重试',
     cancel: '取消',
     confirm: '确认',
+    tips: '提示',
+    delete: '删除',
+    hide: '隐藏',
+    show: '显示',
     share: {
       copied: '链接已复制到剪贴板！',
       copyFailed: '复制链接失败'
@@ -51,6 +55,32 @@ export const zhCN = {
   pricing: {
     title: '套餐与定价',
     subtitle: '升级以获得高级功能'
+  },
+  dialog: {
+    deleteWorkflow: {
+      title: '删除工作流？',
+      message: '确定要删除"{name}"吗？此操作无法撤销。'
+    },
+    deleteModel: {
+      title: '删除模型？',
+      message: '确定要删除"{name}"吗？此操作无法撤销。'
+    },
+    deleteStyle: {
+      title: '删除风格？',
+      message: '确定要删除"{name}"吗？此操作无法撤销。'
+    },
+    hideImage: {
+      title: '隐藏图片？',
+      message: '确定要隐藏这张图片吗？其他用户将无法看到它。'
+    },
+    showImage: {
+      title: '显示图片？',
+      message: '确定要显示这张图片吗？其他用户将能够看到它。'
+    },
+    clearChat: {
+      title: '清空聊天记录？',
+      message: '确定要清空聊天记录吗？'
+    }
   },
   aria: {
     openChat: '打开聊天'

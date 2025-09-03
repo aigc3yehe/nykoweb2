@@ -13,7 +13,7 @@ const messages = {
 export const useI18n = () => {
   const [language] = useAtom(languageAtom)
   
-  const t = (key: string): string => {
+  const t = (key: string, params?: Record<string, string>): string => {
     const keys = key.split('.')
     let value: any = (messages as any)[language]
     
@@ -21,7 +21,16 @@ export const useI18n = () => {
       value = value?.[k]
     }
     
-    return value || key
+    let result = value || key
+    
+    // 替换参数
+    if (params && typeof result === 'string') {
+      Object.entries(params).forEach(([paramKey, paramValue]) => {
+        result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), paramValue)
+      })
+    }
+    
+    return result
   }
   
   return { t, language }

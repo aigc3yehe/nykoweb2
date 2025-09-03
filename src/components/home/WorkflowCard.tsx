@@ -6,6 +6,7 @@ import { FeaturedItem } from '../../store/featuredStore'
 import { getScaledImageUrl } from '../../utils'
 import avatarSvg from '../../assets/Avatar.svg'
 import { useLang } from '../../hooks/useLang'
+import { useI18n } from '../../hooks/useI18n'
 import { showDialogAtom } from '../../store/dialogStore'
 import { workflowsApi } from '../../services/api/workflows'
 import { modelsApi } from '../../services/api/models'
@@ -59,6 +60,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
 }) => {
   const navigate = useNavigate()
   const lang = useLang()
+  const { t } = useI18n()
   const showDialog = useSetAtom(showDialogAtom)
   const [userState] = useAtom(userStateAtom)
   const [imageError, setImageError] = useState(false)
@@ -103,7 +105,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         showUser: true
       }
     } else {
-      // Popular Workflows: 新的设计 - PC端: width: 230px, height: 437px; 移动端: width: 240px, height: 452px
+      // Featured Workflows: 新的设计 - PC端: width: 230px, height: 437px; 移动端: width: 240px, height: 452px
       return {
         card: 'w-[15rem] md:w-[14.375rem] h-[28.25rem] md:h-[27.3125rem] min-w-[15rem] md:min-w-[14.375rem] max-w-[15rem] pb-2 gap-2', // 移动端: 240x452px, PC端: 230x437px
         cover: 'w-[15rem] md:w-[14.375rem] h-[22.5rem] md:h-[21.5625rem]', // 移动端: 240x360px, PC端: 230x345px
@@ -167,10 +169,11 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
     e.stopPropagation()
     // 显示删除确认弹窗
     const itemType = variant === 'profile_workflow' ? 'workflow' : 'style'
+    const dialogKey = variant === 'profile_workflow' ? 'deleteWorkflow' : 'deleteStyle'
     showDialog({
       open: true,
-      title: `Delete ${itemType}?`,
-      message: `Are you sure you want to delete "${item.name}"? This action cannot be undone.`,
+      title: t(`dialog.${dialogKey}.title`),
+      message: t(`dialog.${dialogKey}.message`, { name: item.name }),
       onConfirm: async () => {
         try {
           if (userState.userDetails?.did) {
@@ -214,8 +217,8 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         // 关闭弹窗
         showDialog({ open: false, title: '', message: '', onConfirm: () => {}, onCancel: () => {} })
       },
-      confirmText: 'Delete',
-      cancelText: 'Cancel'
+      confirmText: t('common.delete'),
+      cancelText: t('common.cancel')
     })
   }
 

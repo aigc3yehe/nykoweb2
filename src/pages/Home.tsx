@@ -61,7 +61,7 @@ const Home: React.FC = () => {
       {/* Banner 区域 */}
       <Banner />
 
-      {/* Popular Workflows */}
+      {/* Featured Workflows */}
       <PopularWorkflows />
 
       {/* Trending Styles */}

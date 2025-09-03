@@ -328,8 +328,8 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
     // 显示删除确认弹窗
     showDialog({
       open: true,
-      title: 'Delete Model?',
-      message: `Are you sure you want to delete "${model.name}"? This action cannot be undone.`,
+      title: t('dialog.deleteModel.title'),
+      message: t('dialog.deleteModel.message', { name: model.name }),
       onConfirm: async () => {
         try {
           if (userState.userDetails?.did) {
@@ -370,8 +370,8 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
         // 关闭弹窗
         showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
       },
-      confirmText: 'Delete',
-      cancelText: 'Cancel'
+      confirmText: t('common.delete'),
+      cancelText: t('common.cancel')
     })
   }
 

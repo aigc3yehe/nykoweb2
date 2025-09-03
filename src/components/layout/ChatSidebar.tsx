@@ -140,8 +140,8 @@ const ChatSidebar: React.FC = () => {
   const handleClear = () => {
     showDialog({
       open: true,
-      title: 'Clear Chat History?',
-      message: 'Are you sure you want to clear the chat history?',
+      title: t('dialog.clearChat.title'),
+      message: t('dialog.clearChat.message'),
       onConfirm: () => {
         clearChatMessages()
         showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
@@ -149,8 +149,8 @@ const ChatSidebar: React.FC = () => {
       onCancel: () => {
         showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
       },
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
+      confirmText: t('common.delete'),
+      cancelText: t('common.cancel'),
     });
   }
 

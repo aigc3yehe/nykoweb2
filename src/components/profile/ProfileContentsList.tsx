@@ -23,6 +23,7 @@ import { getScaledImageUrl } from '../../utils'
 import { cn } from '../../utils/cn'
 import { contentsApi } from '../../services/api/contents'
 import { showDialogAtom } from '../../store/dialogStore'
+import { useI18n } from '../../hooks/useI18n'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 import LikeIcon from '../../assets/web2/like.svg'
 import LikedIcon from '../../assets/web2/liked.svg'
@@ -237,6 +238,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     const [localContent, setLocalContent] = useState(item)
     const [, likeContent] = useAtom(likeContentAtom)
     const [userState] = useAtom(userStateAtom)
+    const { t } = useI18n()
     const showDialog = useSetAtom(showDialogAtom)
     const openContentDetail = useSetAtom(openContentDetailAtom)
 
@@ -332,14 +334,14 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     const handleToggleVisibility = (e: React.MouseEvent) => {
       e.stopPropagation()
 
-      const contentType = isVideo ? 'video' : 'image'
       const actionText = item.public === 1 ? 'hide' : 'show'
+      const dialogKey = actionText === 'hide' ? 'hideImage' : 'showImage'
 
       // 显示确认弹窗
       showDialog({
         open: true,
-        title: `${actionText === 'hide' ? 'Hide' : 'Show'} ${contentType}?`,
-        message: `Are you sure you want to ${actionText} this ${contentType}? ${actionText === 'hide' ? 'It will no longer be visible to other users.' : 'It will become visible to other users.'}`,
+        title: t(`dialog.${dialogKey}.title`),
+        message: t(`dialog.${dialogKey}.message`),
         onConfirm: async () => {
           try {
             // 调用API切换内容的可见性
@@ -366,8 +368,8 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
           // 关闭弹窗
           showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
         },
-        confirmText: actionText === 'hide' ? 'Hide' : 'Show',
-        cancelText: 'Cancel'
+        confirmText: actionText === 'hide' ? t('common.hide') : t('common.show'),
+        cancelText: t('common.cancel')
       })
     }
 

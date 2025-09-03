@@ -280,8 +280,8 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
     // 显示删除确认弹窗
     showDialog({
       open: true,
-      title: 'Delete Workflow?',
-      message: `Are you sure you want to delete "${workflow.name}"? This action cannot be undone.`,
+      title: t('dialog.deleteWorkflow.title'),
+      message: t('dialog.deleteWorkflow.message', { name: workflow.name }),
       onConfirm: async () => {
         try {
           if (userState.userDetails?.did) {
@@ -322,8 +322,8 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
         // 关闭弹窗
         showDialog({ open: false, title: '', message: '', onConfirm: () => { }, onCancel: () => { } })
       },
-      confirmText: 'Delete',
-      cancelText: 'Cancel'
+      confirmText: t('common.delete'),
+      cancelText: t('common.cancel')
     })
   }
 

@@ -79,7 +79,7 @@ const PopularWorkflows: React.FC = () => {
   if (workflowsState.isLoading && workflowsState.items.length === 0) {
     return (
       <div className="w-full h-[33.3125rem] px-8 pb-10 gap-4">
-        <SectionHeader title="Popular Workflows" />
+        <SectionHeader title="Featured Workflows" />
         <div className="h-[17.5rem] md:h-[20rem] flex items-center justify-center">
           <span className="text-gray-500">Loading...</span>
         </div>
@@ -91,7 +91,7 @@ const PopularWorkflows: React.FC = () => {
   if (workflowsState.error && workflowsState.items.length === 0) {
     return (
       <div className="w-full h-[33.3125rem] px-8 pb-10 gap-4">
-        <SectionHeader title="Popular Workflows" />
+        <SectionHeader title="Featured Workflows" />
         <div className="h-[17.5rem] md:h-[20rem] flex items-center justify-center">
           <div className="text-center">
             <p className="text-red-500 mb-2">Failed to load workflows</p>

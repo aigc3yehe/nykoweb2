@@ -303,7 +303,7 @@ const Sidebar: React.FC = () => {
       {/* 侧边栏 */}
       <aside className={cn(
         "fixed md:relative inset-y-0 left-0 z-50 md:z-auto",
-        "w-full md:w-40 border-r border-line-subtle dark:border-line-subtle-dark bg-secondary dark:bg-secondary-dark",
+        "w-full md:w-42.5 border-r border-line-subtle dark:border-line-subtle-dark bg-secondary dark:bg-secondary-dark",
         "flex flex-col justify-between",
         "pt-0 md:pt-8 pb-5",
         "transform transition-transform duration-300 ease-in-out md:transform-none",
@@ -345,7 +345,7 @@ const Sidebar: React.FC = () => {
                     key={item.key}
                     to={item.path}
                     className={cn(
-                      "relative flex items-center gap-2 w-full md:w-40 h-12 px-4 py-3",
+                      "relative flex items-center gap-2 w-full md:w-42.5 h-12 px-4 py-3",
                       "font-switzer text-base leading-6 font-medium transition-all duration-200",
                       // 选中状态
                       isSelected
@@ -387,7 +387,7 @@ const Sidebar: React.FC = () => {
                     key={item.key}
                     to={item.path}
                     className={cn(
-                      "relative flex items-center gap-2 w-full md:w-40 h-12 px-4 py-3",
+                      "relative flex items-center gap-2 w-full md:w-42.5 h-12 px-4 py-3",
                       "font-switzer text-base leading-6 font-medium transition-all duration-200",
                       // 选中状态
                       isSelected

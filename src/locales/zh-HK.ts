@@ -23,6 +23,10 @@ export const zhHK = {
     retry: '重試',
     cancel: '取消',
     confirm: '確認',
+    tips: '提示',
+    delete: '刪除',
+    hide: '隱藏',
+    show: '顯示',
     share: {
       copied: '連結已複製到剪貼簿！',
       copyFailed: '複製連結失敗'
@@ -51,6 +55,32 @@ export const zhHK = {
   pricing: {
     title: '方案與定價',
     subtitle: '升級以獲得高級功能'
+  },
+  dialog: {
+    deleteWorkflow: {
+      title: '刪除工作流？',
+      message: '確定要刪除"{name}"嗎？此操作無法撤銷。'
+    },
+    deleteModel: {
+      title: '刪除模型？',
+      message: '確定要刪除"{name}"嗎？此操作無法撤銷。'
+    },
+    deleteStyle: {
+      title: '刪除風格？',
+      message: '確定要刪除"{name}"嗎？此操作無法撤銷。'
+    },
+    hideImage: {
+      title: '隱藏圖片？',
+      message: '確定要隱藏這張圖片嗎？其他用戶將無法看到它。'
+    },
+    showImage: {
+      title: '顯示圖片？',
+      message: '確定要顯示這張圖片嗎？其他用戶將能夠看到它。'
+    },
+    clearChat: {
+      title: '清空聊天記錄？',
+      message: '確定要清空聊天記錄嗎？'
+    }
   },
   aria: {
     openChat: '打開聊天'
