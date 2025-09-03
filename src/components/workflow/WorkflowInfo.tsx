@@ -99,8 +99,65 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
     }
   }
 
+  // 获取模型名称的用户友好显示文本
+  const getModelDisplayName = (modelName: string) => {
+    switch (modelName) {
+      case 'gpt-image-1-vip':
+        return 'GPT Image'
+      case 'flux-kontext-pro':
+        return 'FLUX Kontext'
+      case 'StableDiffusionXL':
+        return 'Stable Diffusion XL'
+      case 'kling-video-v1':
+        return 'Kling V2'
+      case 'pollo-kling':
+        return 'Kling V2 (Pollo)'
+      case 'pollo-veo3':
+        return 'Google VEO3 (Pollo)'
+      default:
+        return modelName
+    }
+  }
+
+  // 获取类型显示文本
+  const getTypeDisplayText = (type: string, stepTitle?: string) => {
+    // 如果是Models类型，进行模型名称转换
+    if (stepTitle === 'Models') {
+      return getModelDisplayName(type)
+    }
+    
+    // 如果是Input类型，使用特殊的文案
+    if (stepTitle === 'User Input') {
+      switch (type.toLowerCase().trim()) {
+        case 'image':
+          return 'Reference Image'
+        case 'text':
+          return 'Additional Prompt'
+        default:
+          return type
+      }
+    }
+    
+    // 如果是Output类型，使用Builder页面的文案
+    if (stepTitle === 'Case Output') {
+      switch (type.toLowerCase().trim()) {
+        case 'image':
+          return 'Image'
+        case 'text':
+          return 'Text'
+        case 'video':
+          return 'Video'
+        default:
+          return type.charAt(0).toUpperCase() + type.slice(1)
+      }
+    }
+    
+    // 默认返回原值
+    return type
+  }
+
   // 渲染类型标签
-  const renderTypeTags = (types: string[], _typeName: string, provider?: string) => {
+  const renderTypeTags = (types: string[], typeName: string, provider?: string) => {
     if (!types || types.length === 0) return null
 
     return (
@@ -117,7 +174,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
                   size="sm"
                 />
                 <span className="font-switzer font-medium text-xs leading-4 text-text-main dark:text-text-main-dark">
-                  {type}
+                  {getTypeDisplayText(type, typeName)}
                 </span>
               </div>
               {index < types.length - 1 && (
@@ -404,14 +461,14 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
             Builder
           </span>
           <div className="flex flex-col">
-            {/* 第一行：Input */}
-            {renderBuilderStep(1, 'Input', workflow.input_type ? workflow.input_type.split(',').map((t: string) => t.trim()) : [])}
+            {/* 第一行：User Input */}
+            {renderBuilderStep(1, 'User Input', workflow.input_type ? workflow.input_type.split(',').map((t: string) => t.trim()) : [])}
 
-            {/* 第二行：Model */}
-            {renderBuilderStep(2, 'Model', workflow.model ? [workflow.model] : [], workflow.provider)}
+            {/* 第二行：Models */}
+            {renderBuilderStep(2, 'Models', workflow.model ? [workflow.model] : [], workflow.provider)}
 
-            {/* 第三行：Output */}
-            {renderBuilderStep(3, 'Output', workflow.output_type ? workflow.output_type.split(',').map((t: string) => t.trim()) : [])}
+            {/* 第三行：Case Output */}
+            {renderBuilderStep(3, 'Case Output', workflow.output_type ? workflow.output_type.split(',').map((t: string) => t.trim()) : [])}
           </div>
         </div>
       </div>

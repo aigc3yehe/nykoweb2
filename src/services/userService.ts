@@ -202,7 +202,7 @@ export const queryUser = async (params: {
   address?: string
 }): Promise<QueryUserResponse> => {
   try {
-    const userInfo = await api.users.getUserInfo(params.did)
+    const userInfo = await api.users.getUserInfo(params.did, true)
 
     return {
       message: 'success',

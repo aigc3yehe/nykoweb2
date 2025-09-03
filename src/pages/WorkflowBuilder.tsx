@@ -77,6 +77,26 @@ const WorkflowBuilder: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const refImageInputRef = useRef<HTMLInputElement>(null)
 
+  // 获取模型名称的用户友好显示文本
+  const getModelDisplayName = (modelName: string) => {
+    switch (modelName) {
+      case 'gpt-image-1-vip':
+        return 'GPT Image'
+      case 'flux-kontext-pro':
+        return 'FLUX Kontext'
+      case 'StableDiffusionXL':
+        return 'Stable Diffusion XL'
+      case 'kling-video-v1':
+        return 'Kling V2'
+      case 'pollo-kling':
+        return 'Kling V2 (Pollo)'
+      case 'pollo-veo3':
+        return 'Google VEO3 (Pollo)'
+      default:
+        return modelName
+    }
+  }
+
   // 输入类型显示文本映射
   const getInputTypeDisplayText = (type: string) => {
     switch (type) {
@@ -510,10 +530,7 @@ const WorkflowBuilder: React.FC = () => {
                         ? 'font-semibold text-text-main dark:text-text-main-dark'
                         : 'font-normal text-text-secondary dark:text-text-secondary-dark'
                         }`}>
-                        {model.name}
-                      </span>
-                      <span className="font-switzer font-normal text-xs leading-5 text-text-secondary dark:text-text-secondary-dark">
-                        {model.provider}
+                        {getModelDisplayName(model.name)}
                       </span>
                     </div>
                   </button>
@@ -826,10 +843,7 @@ const WorkflowBuilder: React.FC = () => {
                         ? 'font-semibold text-text-main dark:text-text-main-dark'
                         : 'font-normal text-text-secondary dark:text-text-secondary-dark'
                         }`}>
-                        {model.name}
-                      </span>
-                      <span className="font-switzer font-normal text-xs leading-5 text-text-secondary dark:text-text-secondary-dark">
-                        {model.provider}
+                        {getModelDisplayName(model.name)}
                       </span>
                     </div>
                   </button>
