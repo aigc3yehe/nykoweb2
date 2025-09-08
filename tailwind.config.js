@@ -6,6 +6,9 @@ export default {
   ],
   darkMode: 'class', // 添加这行确保暗色模式正常工作
   theme: {
+    fontSize: {
+      '3xl': '2rem', // 32px
+    },
     extend: {
       colors: {
         // 基础颜色系统 - 遵循Tailwind CSS dark mode规范
@@ -99,13 +102,13 @@ export default {
         'link-default': {
           DEFAULT: '#4458FF',
           dark: {
-            DEFAULT: '#3A49D6',
+            DEFAULT: '#8B99FF',
           }
         },
         'link-pressed': {
           DEFAULT: '#3A49D6',
           dark: {
-            DEFAULT: '#8B99FF',
+            DEFAULT: '#3A49D6',
           }
         },
         'link-disable': {

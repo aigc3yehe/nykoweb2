@@ -7,6 +7,7 @@ import { useI18n } from '../../hooks/useI18n'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { getCurrentTheme, toggleTheme } from '../../utils/theme'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
+import LanguageSelector from '../ui/LanguageSelector'
 import LeftIcon from '../../assets/mavae/left.svg'
 import LeftIconDark from '../../assets/mavae/dark/left.svg'
 import CreditIcon from '../../assets/mavae/credit_btn.svg'
@@ -14,8 +15,6 @@ import RadixIcon from '../../assets/mavae/Radix.svg'
 import RadixIconDark from '../../assets/mavae/dark/Radix.svg'
 import LogoMobileIcon from '../../assets/mavae/logo_mobile.svg'
 import LogoMobileIconDark from '../../assets/mavae/dark/logo_mobile.svg'
-import GlobeIcon from '../../assets/mavae/globe.svg'
-import GlobeIconDark from '../../assets/mavae/dark/globe.svg'
 import SunIcon from '../../assets/mavae/sun.svg'
 import SunIconDark from '../../assets/mavae/dark/sun.svg'
 import MoonIcon from '../../assets/mavae/moom.svg'
@@ -285,22 +284,14 @@ const Header: React.FC = React.memo(() => {
           )}
 
           {/* 语言切换按钮 - 仅PC端显示 */}
-          <button
-            className="hidden md:flex w-12 h-12 rounded-full bg-secondary dark:bg-secondary-dark border border-line-subtle dark:border-line-subtle-dark items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors"
-            aria-label="Language"
-          >
-            <ThemeAdaptiveIcon
-              lightIcon={GlobeIcon}
-              darkIcon={GlobeIconDark}
-              alt="Language"
-              size="lg"
-            />
-          </button>
+          <div className="hidden md:flex">
+            <LanguageSelector />
+          </div>
 
           {/* 主题切换按钮 - 仅PC端显示 */}
           <button
             onClick={handleToggleTheme}
-            className="hidden md:flex w-12 h-12 rounded-full bg-secondary dark:bg-secondary-dark border border-line-subtle dark:border-line-subtle-dark items-center justify-center hover:bg-tertiary dark:hover:bg-tertiary-dark transition-colors"
+            className="hidden md:flex w-12 h-12 rounded-full items-center justify-center hover:bg-secondary dark:hover:bg-secondary-dark transition-colors"
             aria-label={`切换到${theme === 'light' ? '暗色' : '亮色'}主题`}
           >
             {theme === 'light' ? (

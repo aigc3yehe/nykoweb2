@@ -1,6 +1,9 @@
 import React, { useState, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAtom, useSetAtom } from 'jotai'
+import GlobeIcon from '../../assets/mavae/globe.svg'
+import GlobeIconDark from '../../assets/mavae/dark/globe.svg'
+import ThemeAdaptiveIcon from './ThemeAdaptiveIcon'
 import { languageAtom, setLanguageAtom } from '../../store/i18nStore'
 import { SUPPORTED_LANGUAGES, Language } from '../../i18n/config'
 
@@ -35,26 +38,38 @@ const LanguageSelector: React.FC = React.memo(() => {
     <div className="relative">
       <button
         onClick={handleToggle}
-        className="flex items-center justify-center h-8 px-2 rounded-md border border-border bg-background hover:bg-accent dark:bg-background dark:hover:bg-accent transition-colors gap-1"
+        className="flex items-center justify-center w-12 h-12 rounded-full hover:bg-secondary dark:hover:bg-secondary-dark transition-colors"
+        aria-label="Language"
       >
-        <span className="text-xs">{currentLanguage.shortName || currentLanguage.name}</span>
-        <svg className="h-3 w-3 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <ThemeAdaptiveIcon
+          lightIcon={GlobeIcon}
+          darkIcon={GlobeIconDark}
+          alt="Language"
+          size="md"
+          className="w-6 h-6"
+        />
       </button>
-      
+
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-background dark:bg-background border border-border rounded-lg shadow-lg z-50">
-          {languages.map((lang) => (
-            <button
-              key={lang.code}
-              onClick={() => handleLanguageSelect(lang.code)}
-              className="w-full px-4 py-2 text-left hover:bg-accent dark:hover:bg-accent transition-colors flex items-center space-x-3 first:rounded-t-lg last:rounded-b-lg text-foreground"
-            >
-              <span className="text-sm">{lang.name}</span>
-            </button>
-          ))}
-        </div>
+        <>
+          {/* 点击其他地方关闭菜单 */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute right-0 mt-1 py-2 bg-pop-ups dark:bg-pop-ups rounded-xl z-50" style={{width: '200px', boxShadow: '0px 8px 16px 0px #12121A1A, 0px 4px 8px 0px #12121A33'}}>
+            {languages.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => handleLanguageSelect(lang.code)}
+                className="h-12 px-4 text-left hover:bg-switch-hover dark:hover:bg-switch-hover transition-colors flex items-center gap-2 text-text-main dark:text-text-main-dark font-switzer font-medium text-base leading-6"
+                style={{width: '200px'}}
+              >
+                <span>{lang.name}</span>
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )

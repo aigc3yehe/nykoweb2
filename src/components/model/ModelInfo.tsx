@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { useNavigate } from 'react-router-dom'
 import avatarSvg from '../../assets/Avatar.svg'
@@ -55,6 +55,8 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
   const showDialog = useSetAtom(showDialogAtom)
   const [userState] = useAtom(userStateAtom)
   const [isPromptExpanded, setIsPromptExpanded] = useState(false)
+  const descriptionRef = useRef<HTMLParagraphElement>(null)
+  const [isTextTruncated, setIsTextTruncated] = useState(false)
 
   // 如果没有模型数据，不渲染
   if (!model) {
@@ -226,6 +228,44 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
     }
     return "Anonymous"
   }
+
+  // 检查文本是否被截断 - 使用真实的DOM测量
+  const checkTextTruncation = () => {
+    if (descriptionRef.current && !isPromptExpanded) {
+      const element = descriptionRef.current
+
+      // scrollHeight 与 clientHeight 相差超过阈值时才认为是截断
+      const heightDifference = element.scrollHeight - element.clientHeight
+      const truncationThreshold = 5 // 允许5px的误差范围
+      const isTruncated = heightDifference > truncationThreshold
+
+      // 如果DOM测量显示没有截断，但文本长度较长，也认为是截断的（兜底逻辑）
+      const textLength = model?.description?.length || 0
+      const fallbackTruncated = textLength > 150 // 如果文本超过150个字符，认为是截断的
+
+      setIsTextTruncated(isTruncated || fallbackTruncated)
+    } else if (isPromptExpanded) {
+      // 展开状态下，不检测截断
+      setIsTextTruncated(false)
+    }
+  }
+
+  // 当组件渲染后或文本变化时检查截断状态
+  useEffect(() => {
+    // 使用setTimeout确保DOM完全渲染后再检查
+    const timeoutId = setTimeout(checkTextTruncation, 0)
+    return () => clearTimeout(timeoutId)
+  }, [model?.description, isPromptExpanded])
+
+  // 当窗口大小改变时也重新检查
+  useEffect(() => {
+    const handleResize = () => {
+      setTimeout(checkTextTruncation, 0)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // 获取训练状态文本
   const getTrainStatusText = () => {
@@ -488,24 +528,27 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
 
           {/* Description第二行：内容 */}
           <div className="flex flex-col gap-1">
-            <div className="rounded-xl p-3 bg-gray-50 dark:bg-gray-800">
+            <div className="rounded-xl p-3 bg-tertiary dark:bg-tertiary-dark">
               <p
+                ref={descriptionRef}
                 className={`font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark ${isPromptExpanded ? '' : 'line-clamp-2'
                   }`}
               >
                 {model.description || 'No description available'}
               </p>
-            </div>
 
-            {/* Description第三行：展开/收起按钮 */}
-            {model.description && model.description.length > 100 && (
-              <button
-                onClick={() => setIsPromptExpanded(!isPromptExpanded)}
-                className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start"
-              >
-                {isPromptExpanded ? 'Show less' : 'Show more'}
-              </button>
-            )}
+              {/* 展开/收起按钮 */}
+              {model.description && (isTextTruncated || isPromptExpanded) && (
+                <button
+                  onClick={() => {
+                    setIsPromptExpanded(!isPromptExpanded)
+                  }}
+                  className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start mt-2"
+                >
+                  {isPromptExpanded ? 'Show less' : 'Show more'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

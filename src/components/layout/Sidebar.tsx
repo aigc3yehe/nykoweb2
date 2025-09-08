@@ -4,6 +4,8 @@ import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { useI18n } from '../../hooks/useI18n'
 import { useAtom, useSetAtom } from 'jotai'
 import { sidebarOpenAtom, closeSidebarAtom } from '../../store/sidebarStore'
+import { languageAtom } from '../../store/i18nStore'
+import { SUPPORTED_LANGUAGES } from '../../i18n/config'
 import { getCurrentTheme, toggleTheme } from '../../utils/theme'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 
@@ -187,7 +189,7 @@ const MobileThemeToggle: React.FC = () => {
       </div>
 
       {/* 主题切换按钮 */}
-      <div className="w-37 h-9 rounded-full border border-line-subtle dark:border-line-subtle-dark bg-quaternary dark:bg-quaternary-dark  relative">
+      <div className="w-37 h-9 rounded-full hover:bg-secondary dark:hover:bg-secondary-dark transition-colors relative">
         <button
           onClick={handleToggle}
           className={cn(
@@ -223,6 +225,7 @@ const Sidebar: React.FC = () => {
   const location = useLocation()
   const [isOpen] = useAtom(sidebarOpenAtom)
   const closeSidebar = useSetAtom(closeSidebarAtom)
+  const [currentLanguage] = useAtom(languageAtom)
 
   // 路由变化时关闭移动端侧边栏
   useEffect(() => {
@@ -319,7 +322,7 @@ const Sidebar: React.FC = () => {
           </div>
 
           {/* PC端Logo区域 */}
-          <div className="hidden md:block px-3.3 py-4">
+          <div className="hidden md:block px-0.5 py-1">
             <Link to={withLangPrefix(lang, '/')} className="block">
               <img
                 src={LogoIcon}
@@ -345,7 +348,7 @@ const Sidebar: React.FC = () => {
                     key={item.key}
                     to={item.path}
                     className={cn(
-                      "relative flex items-center gap-2 w-full md:w-42.5 h-12 px-4 py-3",
+                      "relative flex items-center gap-2 w-full md:w-42.5 h-12 pl-4 py-3",
                       "font-switzer text-base leading-6 font-medium transition-all duration-200",
                       // 选中状态
                       isSelected
@@ -432,7 +435,7 @@ const Sidebar: React.FC = () => {
                 size="md"
               />
               <span className="font-switzer font-medium text-base leading-6 text-text-main dark:text-text-main-dark">
-                English
+                {SUPPORTED_LANGUAGES.find(lang => lang.code === currentLanguage)?.shortName || 'EN'}
               </span>
             </div>
 

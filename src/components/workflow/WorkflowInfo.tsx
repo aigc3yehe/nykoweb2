@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import avatarSvg from '../../assets/Avatar.svg'
 import AvatarIcon from '../../assets/mavae/avatar.svg'
@@ -62,6 +62,8 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [userState] = useAtom(userStateAtom)
   const [workflowDetailState] = useAtom(workflowDetailAtom)
+  const descriptionRef = useRef<HTMLParagraphElement>(null)
+  const [isTextTruncated, setIsTextTruncated] = useState(false)
 
   // 获取用户头像
   const getAvatarUrl = () => {
@@ -247,6 +249,44 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
     return "Anonymous"
   }
 
+  // 检查文本是否被截断 - 使用真实的DOM测量
+  const checkTextTruncation = () => {
+    if (descriptionRef.current && !isDescriptionExpanded) {
+      const element = descriptionRef.current
+
+      // scrollHeight 与 clientHeight 相差超过阈值时才认为是截断
+      const heightDifference = element.scrollHeight - element.clientHeight
+      const truncationThreshold = 5 // 允许5px的误差范围
+      const isTruncated = heightDifference > truncationThreshold
+
+      // 如果DOM测量显示没有截断，但文本长度较长，也认为是截断的（兜底逻辑）
+      const textLength = workflow?.description?.length || 0
+      const fallbackTruncated = textLength > 150 // 如果文本超过150个字符，认为是截断的
+
+      setIsTextTruncated(isTruncated || fallbackTruncated)
+    } else if (isDescriptionExpanded) {
+      // 展开状态下，不检测截断
+      setIsTextTruncated(false)
+    }
+  }
+
+  // 当组件渲染后或文本变化时检查截断状态
+  useEffect(() => {
+    // 使用setTimeout确保DOM完全渲染后再检查
+    const timeoutId = setTimeout(checkTextTruncation, 0)
+    return () => clearTimeout(timeoutId)
+  }, [workflow?.description, isDescriptionExpanded])
+
+  // 当窗口大小改变时也重新检查
+  useEffect(() => {
+    const handleResize = () => {
+      setTimeout(checkTextTruncation, 0)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const handleUseNow = () => {
     // 1. 打开右侧聊天窗口（包含登录检查）
     // 2. 发送消息：I want to use this workflow.
@@ -424,25 +464,38 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
         </div>
 
         {/* Description内容 */}
-        <div className="flex flex-col gap-1">
-          <div className="rounded-xl p-3 bg-gray-50 dark:bg-gray-800">
-            <p
-              className={`font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark ${isDescriptionExpanded ? '' : 'line-clamp-2'
-                }`}
-            >
-              {workflow.description || 'No description available'}
-            </p>
+        <div className="flex flex-col gap-2">
+          {/* Description第一行：标题 */}
+          <div className="flex items-center h-5">
+            <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
+              Description
+            </span>
           </div>
 
-          {/* 展开/收起按钮 - 只有当内容无法完全展示时才显示 */}
-          {workflow.description && workflow.description.length > 100 && (
-            <button
-              onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-              className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start"
-            >
-              {isDescriptionExpanded ? 'Show less' : 'Show more'}
-            </button>
-          )}
+          {/* Description第二行：内容 */}
+          <div className="flex flex-col gap-1">
+            <div className="rounded-xl p-3 bg-tertiary dark:bg-tertiary-dark">
+              <p
+                ref={descriptionRef}
+                className={`font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark ${isDescriptionExpanded ? '' : 'line-clamp-2'
+                  }`}
+              >
+                {workflow.description || 'No description available'}
+              </p>
+
+              {/* 展开/收起按钮 */}
+              {workflow.description && (isTextTruncated || isDescriptionExpanded) && (
+                <button
+                  onClick={() => {
+                    setIsDescriptionExpanded(!isDescriptionExpanded)
+                  }}
+                  className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start mt-2"
+                >
+                  {isDescriptionExpanded ? 'Show less' : 'Show more'}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* 第四行：Builder信息 */}
