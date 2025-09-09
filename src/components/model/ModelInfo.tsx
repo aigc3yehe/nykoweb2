@@ -107,7 +107,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
     if (stepTitle === 'Models') {
       return getModelDisplayName(type)
     }
-    
+
     // 如果是Input类型，使用特殊的文案
     if (stepTitle === 'User Input') {
       switch (type.toLowerCase().trim()) {
@@ -119,7 +119,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
           return type
       }
     }
-    
+
     // 如果是Output类型，使用Builder页面的文案
     if (stepTitle === 'Case Output') {
       switch (type.toLowerCase().trim()) {
@@ -133,7 +133,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
           return type.charAt(0).toUpperCase() + type.slice(1)
       }
     }
-    
+
     // 默认返回原值
     return type
   }
@@ -369,7 +369,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
     showDialog({
       open: true,
       title: t('dialog.deleteModel.title'),
-      message: t('dialog.deleteModel.message', { name: model.name }),
+      message: t('dialog.deleteModel.message', { name: model.name || "" }),
       onConfirm: async () => {
         try {
           if (userState.userDetails?.did) {

@@ -134,17 +134,17 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
     return (
       <div className="flex flex-col items-center justify-center py-10 gap-6"> {/* padding-top: 40px, padding-bottom: 40px, gap: 24px */}
         {/* 图标 */}
-        <img 
-          src={NanananaIcon} 
-          alt="Empty" 
+        <img
+          src={NanananaIcon}
+          alt="Empty"
           className="w-[7.5rem] h-[7.5rem] dark:hidden" // 120x120px, 浅色模式显示
         />
-        <img 
-          src={NanananaIconDark} 
-          alt="Empty" 
+        <img
+          src={NanananaIconDark}
+          alt="Empty"
           className="w-[7.5rem] h-[7.5rem] hidden dark:block" // 120x120px, 深色模式显示
         />
-        
+
         {/* 文本提示 */}
         <div className="flex flex-col items-center gap-1"> {/* 两行文本间距4px */}
           <p className="font-switzer font-medium text-2xl leading-8 text-text-main dark:text-text-main-dark text-center"> {/* font-size: 24px, line-height: 32px */}
@@ -188,13 +188,13 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
                   variant="profile_style"
                   profileTab={tab}
                   onClick={() => {
-    navigate(withLangPrefix(lang, `/model/${model.model_id}`))
+                    navigate(withLangPrefix(lang, `/model/${model.model_id}`))
                   }}
                   onUseClick={() => {
                     // 1. 设置延迟发送的消息
                     setPendingMessage('I want to generate an image.')
                     // 2. 打开详情页面（详情数据加载完成后会自动发送消息）
-    navigate(withLangPrefix(lang, `/model/${model.model_id}`))
+                    navigate(withLangPrefix(lang, `/model/${model.model_id}`))
                     // 3. 打开右侧聊天窗口（包含登录检查）
                     openChat()
                   }}
@@ -204,7 +204,7 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
           </div>
         </div>
       ))}
-      
+
       {/* 加载更多状态 */}
       {state.isLoading && currentGroups.length > 0 && (
         <div className="flex justify-center py-6">

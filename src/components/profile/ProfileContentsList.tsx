@@ -38,6 +38,7 @@ import DeleteIcon from '../../assets/mavae/Delete.svg'
 import DeleteIconHover from '../../assets/mavae/Delete_hover.svg'
 import DeleteIconDark from '../../assets/mavae/dark/Delete.svg'
 import DeleteIconHoverDark from '../../assets/mavae/dark/Delete_hover.svg'
+import MaskImage from '../../assets/mavae/Mask.svg'
 
 export interface ProfileContentsListProps {
   type: 'image' | 'video' | 'mixed'
@@ -77,7 +78,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
       // 对于mixed类型，同时获取image和video数据
       const fetchImageData = tab === 'liked' ? fetchLikedImages : fetchImageContents
       const fetchVideoData = tab === 'liked' ? fetchLikedVideos : fetchVideoContents
-      
+
       Promise.all([
         fetchImageData({ reset: true }),
         fetchVideoData({ reset: true })
@@ -129,19 +130,19 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
   const groups = useMemo(() => {
     if (isMixed) {
       // 对于mixed类型，合并image和video的数据
-      const imageGroups = tab === 'liked' 
+      const imageGroups = tab === 'liked'
         ? (likedImageState as any).imageGroups || []
         : (imageState as any).imageGroups || []
       const videoGroups = tab === 'liked'
         ? (likedVideoState as any).videoGroups || []
         : (videoState as any).videoGroups || []
-      
+
       // 简单合并：将所有内容放在一起，按时间重新分组
       const allContents = [
         ...imageGroups.flatMap((group: any) => group.contents || []),
         ...videoGroups.flatMap((group: any) => group.contents || [])
       ]
-      
+
       // 按created_at重新分组
       const groupedByTime: { [key: string]: any[] } = {}
       allContents.forEach(content => {
@@ -152,15 +153,15 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
         }
         groupedByTime[key].push(content)
       })
-      
+
       // 转换为TimeGroup格式
       return Object.entries(groupedByTime)
         .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
         .map(([dateKey, contents]) => ({
           groupKey: dateKey,
           groupLabel: dateKey,
-          contents: contents.sort((a, b) => 
-            new Date(b.created_at || b.liked_at || 0).getTime() - 
+          contents: contents.sort((a, b) =>
+            new Date(b.created_at || b.liked_at || 0).getTime() -
             new Date(a.created_at || a.liked_at || 0).getTime()
           )
         }))
@@ -250,7 +251,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
       // 根据屏幕宽度动态计算卡片宽度
       const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
       let cardWidthRem: number
-      
+
       if (isMobile) {
         // 移动端2列布局：(屏幕宽度 - 左右padding - 中间gap) / 2
         // padding: 32px (16px * 2), gap: 24px
@@ -259,7 +260,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
         // PC端4列布局：固定宽度
         cardWidthRem = 18.375 // 294px
       }
-      
+
       if (item.width && item.height && item.width > 0) {
         return (cardWidthRem * item.height) / item.width
       }
@@ -312,7 +313,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     // 根据屏幕宽度动态计算图片宽度
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
     let cardWidthRem: number
-    
+
     if (isMobile) {
       // 移动端2列布局：(屏幕宽度 - 左右padding - 中间gap) / 2
       // padding: 32px (16px * 2), gap: 24px
@@ -321,7 +322,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
       // PC端4列布局：固定宽度
       cardWidthRem = 18.375 // 294px
     }
-    
+
     const widthPx = cardWidthRem * 16
 
     // 处理卡片点击
@@ -411,7 +412,11 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
           )}
 
           {/* Mask阴影区域 */}
-          <div className="absolute bottom-0 left-0 right-0 h-[3.25rem] bg-gradient-to-t from-black/72 to-transparent"></div>
+          <img
+            src={MaskImage}
+            alt="Mask"
+            className="absolute bottom-0 left-0 right-0 w-full h-[3.25rem] object-cover opacity-80"
+          />
 
           {/* 类型标签 - 左下角 */}
           <div className="absolute bottom-2 left-2 flex items-center p-0.5 bg-black/20 rounded">

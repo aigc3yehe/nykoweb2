@@ -15,6 +15,7 @@ import PictureIcon from '../../assets/mavae/Picture_white.svg'
 import VideoIconNew from '../../assets/mavae/video_white.svg'
 import UseIconNew from '../../assets/mavae/use_white.svg'
 import BookmarkNormalIcon from '../../assets/mavae/Bookmark_normal.svg'
+import MaskImage from '../../assets/mavae/Mask.svg'
 import DeleteIcon from '../../assets/mavae/Delete.svg'
 import DeleteIconHover from '../../assets/mavae/Delete_hover.svg'
 import DeleteIconDark from '../../assets/mavae/dark/Delete.svg'
@@ -168,7 +169,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     // 显示删除确认弹窗
-    const itemType = variant === 'profile_workflow' ? 'workflow' : 'style'
+    // const itemType = variant === 'profile_workflow' ? 'workflow' : 'style'
     const dialogKey = variant === 'profile_workflow' ? 'deleteWorkflow' : 'deleteStyle'
     showDialog({
       open: true,
@@ -183,7 +184,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
                 user: userState.userDetails.did,
                 visibility: false
               })
-              
+
               if (success) {
                 console.log('Workflow deleted successfully:', item.id)
                 // 这里可以添加成功提示或者刷新列表
@@ -196,7 +197,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
                 user: userState.userDetails.did,
                 visibility: false
               })
-              
+
               if (success) {
                 console.log('Model deleted successfully:', item.id)
                 // 这里可以添加成功提示或者刷新列表
@@ -296,7 +297,11 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
         )}
 
         {/* Mask阴影区域 */}
-        <div className="absolute bottom-0 left-0 right-0 h-[3.25rem] bg-gradient-to-t from-black/72 to-transparent"></div>
+        <img
+          src={MaskImage}
+          alt="Mask"
+          className="absolute bottom-0 left-0 right-0 w-full h-[3.25rem] object-cover opacity-80"
+        />
 
         {/* 类型标签 - 左下角 */}
         <div className="absolute bottom-2 left-2 flex items-center p-0.5 bg-black/20 rounded">

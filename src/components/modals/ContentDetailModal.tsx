@@ -12,7 +12,8 @@ import modifyIcon from '../../assets/mavae/modify.svg'
 import modifyIconDark from '../../assets/mavae/dark/modify.svg'
 import animateIcon from '../../assets/mavae/animate.svg'
 import animateIconDark from '../../assets/mavae/dark/animate.svg'
-import closeIcon from '../../assets/web2/image_detail_close.svg'
+import closeIcon from '../../assets/mavae/content_close.svg'
+import closeIconDark from '../../assets/mavae/dark/content_close.svg'
 import copyIcon from '../../assets/mavae/copy.svg'
 import copyIconDark from '../../assets/mavae/dark/copy.svg'
 import LikeIcon from '../../assets/web2/like.svg'
@@ -22,6 +23,9 @@ import AvatarIcon from '../../assets/mavae/avatar.svg'
 import AvatarIconDark from '../../assets/mavae/dark/avatar.svg'
 import SizeIcon from '../../assets/mavae/size.svg'
 import SizeIconDark from '../../assets/mavae/dark/size.svg'
+import MaskImage from '../../assets/mavae/Mask.svg'
+import BookmarkNormalIcon from '../../assets/mavae/Bookmark_normal.svg'
+import UseIconNew from '../../assets/mavae/use_white.svg'
 
 const ContentDetailModal: React.FC = () => {
   const [state] = useAtom(contentDetailAtom)
@@ -151,39 +155,30 @@ const ContentDetailModal: React.FC = () => {
     sendMessageAction('I want to animate this image.')
   }
 
+  const handleCreateWithThisAgentCaseClick = () => {
+    if (!content?.url) return
+
+    // 关闭模态框
+    closeModal()
+
+    // 如果不在对应的详情页面，先导航到详情页面
+    if (!isInDetailPage()) {
+      navigateToDetailPage()
+    }
+
+    // 打开聊天侧边栏
+    openChat()
+
+    // 清空聊天记录
+    clearChatMessages()
+
+    // 发送创建与这个Agent Case消息
+    sendMessageAction('I want to generate an image.')
+  }
+
   const handleCopyPrompt = () => {
     if (content?.prompt) {
       navigator.clipboard.writeText(content.prompt)
-    }
-  }
-
-  const handleGoToSource = () => {
-    console.log('Go to source:', content?.source, content?.source_info?.id)
-    const source_id = content?.source_info?.id
-    if (content?.source === 'model') {
-      navigate(withLangPrefix(lang, `/model/${source_id}`))
-      closeModal()
-    } else if (content?.source === 'workflow') {
-      navigate(withLangPrefix(lang, `/workflow/${source_id}`))
-      closeModal()
-    }
-  }
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return ''
-    try {
-      const date = new Date(dateString)
-      if (isNaN(date.getTime())) return dateString
-
-      const year = date.getFullYear()
-      const month = String(date.getMonth() + 1).padStart(2, '0')
-      const day = String(date.getDate()).padStart(2, '0')
-      const hours = String(date.getHours()).padStart(2, '0')
-      const minutes = String(date.getMinutes()).padStart(2, '0')
-
-      return `${year}.${month}.${day} ${hours}:${minutes}`
-    } catch {
-      return dateString
     }
   }
 
@@ -225,15 +220,22 @@ const ContentDetailModal: React.FC = () => {
     return content?.source === 'workflow' ? 'Workflow' : 'Style'
   }
 
-  const getSourceName = () => {
-    return content?.source_info?.name || 'Unknown'
-  }
 
   const getDimensions = () => {
     if (content?.width && content?.height) {
       return `${content.width} × ${content.height}`
     }
     return 'Unknown'
+  }
+
+  const getPrompt = () => {
+    if (content?.show_prompt) {
+      return content?.show_prompt
+    }
+    if (content?.prompt) {
+      return content?.prompt
+    }
+    return 'No prompt available'
   }
 
   return (
@@ -243,20 +245,28 @@ const ContentDetailModal: React.FC = () => {
     >
       {/* 外层包裹内容和关闭按钮 */}
       <div className="relative flex md:items-start items-center md:flex-row flex-col w-full h-full md:w-auto md:h-auto">
-        {/* 移动端关闭按钮 */}
-        <div className="block md:hidden w-full h-[60px] relative">
-          <button
-            onClick={handleClose}
-            className="absolute right-5 top-1/2 -translate-y-1/2 size-8 rounded-[0.625rem] flex items-center justify-center hover:bg-gray-600 transition-colors z-20"
-          >
-            <img src={closeIcon} alt="Close" className="size-8" />
-          </button>
-        </div>
         {/* 内容区域 */}
         <div
           className="bg-pop-ups dark:bg-pop-ups-dark rounded-[1.25rem] flex md:flex-row flex-col md:w-[62.25rem] md:h-[41.125rem] w-full h-[calc(100vh-60px)] relative overflow-y-auto overflow-x-hidden"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* 内部关闭按钮 - 右上角 */}
+          <button
+            onClick={handleClose}
+            className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center z-10"
+          >
+            <img
+              src={closeIcon}
+              alt="Close"
+              className="w-8 h-8 dark:hidden"
+            />
+            <img
+              src={closeIconDark}
+              alt="Close"
+              className="w-8 h-8 hidden dark:block"
+            />
+          </button>
+
           {/* 左侧/上方内容区域 */}
           <div className="flex flex-col md:p-8 md:gap-6 md:w-[37.125rem] w-full p-5 gap-3">
             {/* 媒体展示区域 */}
@@ -273,11 +283,22 @@ const ContentDetailModal: React.FC = () => {
                 <>
                   {renderMediaContent()}
 
+                  {/* Source 类型标签 - 右上角 */}
+                  <div className="absolute top-3 right-3 h-8 px-2 rounded-full bg-black/20 flex items-center justify-center">
+                    <span className="font-switzer font-medium text-base leading-6 text-white text-center">
+                      {content?.source === 'workflow' ? 'Workflow' : 'Style'}
+                    </span>
+                  </div>
+
                   {/* 只有图片才显示遮罩层和标签 */}
                   {content?.type !== 'video' && (
                     <>
                       {/* Mask阴影区域 */}
-                      <div className="absolute bottom-0 left-0 right-0 h-[3.25rem] bg-gradient-to-t from-black/72 to-transparent"></div>
+                      <img
+                        src={MaskImage}
+                        alt="Mask"
+                        className="absolute bottom-0 left-0 right-0 w-full h-[3.25rem] object-cover opacity-80"
+                      />
 
                       {/* 类型标签 - 左下角 */}
                       <div className="absolute bottom-2 left-2 flex items-center p-0.5 bg-black/20 rounded">
@@ -387,11 +408,6 @@ const ContentDetailModal: React.FC = () => {
                   {content?.user?.name || 'Unknown'}
                 </span>
               </div>
-
-              {/* 创建时间 */}
-              <span className="font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark">
-                {formatDate(content?.created_at)}
-              </span>
             </div>
 
             {/* 详情区域 */}
@@ -421,21 +437,21 @@ const ContentDetailModal: React.FC = () => {
 
                 {/* Prompt第二行：内容 */}
                 <div className="flex flex-col gap-1">
-                  <div className="rounded-xl p-3 bg-gray-50 dark:bg-gray-800">
+                  <div className="rounded-xl p-3 bg-tertiary dark:bg-tertiary-dark">
                     <p className={`font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark break-words whitespace-pre-wrap ${isPromptExpanded ? '' : 'line-clamp-2'}`}>
-                      {content?.prompt || 'No prompt available'}
+                      {getPrompt()}
                     </p>
-                  </div>
 
-                  {/* Prompt第三行：展开/收起按钮 */}
-                  {content?.prompt && content.prompt.length > 100 && (
-                    <button
-                      onClick={() => setIsPromptExpanded(!isPromptExpanded)}
-                      className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start"
-                    >
-                      {isPromptExpanded ? 'Show less' : 'Show more'}
-                    </button>
-                  )}
+                    {/* 展开/收起按钮 */}
+                    {content?.prompt && content.prompt.length > 100 && (
+                      <button
+                        onClick={() => setIsPromptExpanded(!isPromptExpanded)}
+                        className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start mt-2"
+                      >
+                        {isPromptExpanded ? 'Show less' : 'Show more'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -468,13 +484,10 @@ const ContentDetailModal: React.FC = () => {
                     {getSourceTitle()}
                   </span>
                 </div>
-                {/* Source Content - 参考ChatInput.tsx的工作流显示样式 */}
-                <div
-                  className="flex items-center gap-1 h-14 p-1 rounded bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                  onClick={handleGoToSource}
-                >
+                {/* Source Content */}
+                <div className="w-full h-[18.0625rem] flex flex-col items-center justify-center gap-2.5 rounded-xl p-3 bg-tertiary dark:bg-tertiary-dark">
                   {/* 封面 */}
-                  <div className="w-8 h-12 rounded overflow-hidden bg-gray-200 flex-shrink-0">
+                  <div className="relative w-[9.0625rem] h-[13.5625rem] rounded-xl overflow-hidden bg-gray-200 flex-shrink-0">
                     {content?.source_info?.cover ? (
                       <img
                         src={content.source_info.cover}
@@ -488,28 +501,56 @@ const ContentDetailModal: React.FC = () => {
                     ) : (
                       <div className="w-full h-full bg-gray-200" />
                     )}
+
+                    {/* Mask阴影区域 */}
+                    <img
+                      src={MaskImage}
+                      alt="Mask"
+                      className="absolute bottom-0 left-0 right-0 w-full h-[3.25rem] object-cover opacity-80"
+                    />
+
+                    {/* 类型标签 - 左下角 */}
+                    <div className="absolute bottom-2 left-2 flex items-center p-0.5 bg-black/20 rounded">
+                      <img src={PictureIcon} alt="Picture" className="w-4 h-4 min-w-4 min-h-4" />
+                    </div>
+
+                    {/* 使用量和收藏数 - 右下角 */}
+                    <div className="absolute bottom-2 right-2 flex items-center gap-2">
+                      {/* 使用量 */}
+                      <div className="flex items-center gap-0.5 h-5">
+                        <img src={UseIconNew} alt="Uses" className="w-3 h-3" />
+                        <span className="pb-px font-switzer font-medium text-xs leading-4 text-white text-center">
+                          0
+                        </span>
+                      </div>
+
+                      {/* 收藏数 */}
+                      <div className="flex items-center gap-0.5 h-5">
+                        <img src={BookmarkNormalIcon} alt="Likes" className="w-3 h-3" />
+                        <span className="pb-px font-switzer font-medium text-xs leading-4 text-white text-center">
+                          0
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  {/* 名称 */}
-                  <div className="flex items-center">
-                    <span className="font-switzer font-normal text-xs leading-5 text-text-main dark:text-text-main-dark">
-                      {getSourceName()}
+
+                  {/* Create With this Agent Case 按钮 */}
+                  <button
+                    onClick={handleCreateWithThisAgentCaseClick}
+                    className="flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors flex-1"
+                  >
+                    <span className="font-switzer font-medium text-sm leading-5 text-white">
+                      Create With this Agent Case
                     </span>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        {/* PC端关闭按钮 - 内容区域外侧右上角，ml-4 mt-2，32x32 */}
-        <button
-          onClick={handleClose}
-          className="ml-4 mt-2 size-8 flex items-center justify-center hover:bg-gray-600 rounded-[0.625rem] transition-colors z-20 hidden md:flex"
-        >
-          <img src={closeIcon} alt="Close" className="size-8" />
-        </button>
       </div>
     </div>
   )
 }
 
-export default ContentDetailModal 
+export default ContentDetailModal

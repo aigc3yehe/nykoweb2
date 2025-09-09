@@ -295,18 +295,18 @@ const Header: React.FC = React.memo(() => {
             aria-label={`切换到${theme === 'light' ? '暗色' : '亮色'}主题`}
           >
             {theme === 'light' ? (
-              // 月亮图标 - 切换到暗色主题
-              <ThemeAdaptiveIcon
-                lightIcon={MoonIcon}
-                darkIcon={MoonIconDark}
-                alt="Dark Theme"
-                size="lg"
-              />
-            ) : (
               // 太阳图标 - 切换到亮色主题
               <ThemeAdaptiveIcon
                 lightIcon={SunIcon}
                 darkIcon={SunIconDark}
+                alt="Dark Theme"
+                size="lg"
+              />
+            ) : (
+              // 月亮图标 - 切换到暗色主题
+              <ThemeAdaptiveIcon
+                lightIcon={MoonIcon}
+                darkIcon={MoonIconDark}
                 alt="Light Theme"
                 size="lg"
               />

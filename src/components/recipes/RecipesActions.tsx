@@ -45,7 +45,7 @@ const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab, onSortChange
   return (
     <div className="w-full h-auto md:h-9 flex items-center justify-between pt-3 pb-6 md:pt-0 md:pb-0"> {/* 移动端: height: auto, padding: 12px 16px 24px 16px, PC端: height: 36px */}
       {/* 左侧分段选择器 */}
-      <div className="w-full md:w-auto h-9 py-px rounded-full bg-quaternary dark:bg-quaternary-dark border border-line-subtle dark:border-line-subtle-dark"> {/* 移动端: 宽度占满, PC端: 自适应宽度 */}
+      <div className="w-full md:w-auto h-9 px-px py-px rounded-full bg-quaternary dark:bg-quaternary-dark border border-line-subtle dark:border-line-subtle-dark"> {/* 移动端: 宽度占满, PC端: 自适应宽度 */}
         {options.map((option) => (
           <button
             key={option}

@@ -8,6 +8,7 @@ import BookmarkYellowIcon from '../../assets/mavae/Bookmark_yellow.svg'
 import BookmarkNormalIconDark from '../../assets/mavae/dark/Bookmark_normal.svg'
 import BookmarkYellowIconDark from '../../assets/mavae/dark/Bookmark_yellow.svg'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
+import MaskImage from '../../assets/mavae/Mask.svg'
 
 interface ModelCoverProps {
   cover?: string
@@ -57,7 +58,11 @@ const ModelCover: React.FC<ModelCoverProps> = ({
       )}
 
       {/* Mask阴影区域 */}
-      <div className="absolute bottom-0 left-0 right-0 h-[3.25rem] bg-gradient-to-t from-black/72 to-transparent"></div>
+      <img
+        src={MaskImage}
+        alt="Mask"
+        className="absolute bottom-0 left-0 right-0 w-full h-[3.25rem] object-cover opacity-70"
+      />
 
       {/* 类型标签 - 左下角 */}
       <div className="absolute bottom-2 left-2 flex items-center p-0.5 bg-black/20 rounded">

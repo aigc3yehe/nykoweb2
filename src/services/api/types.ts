@@ -153,6 +153,7 @@ export interface Content {
   url?: string
   text?: string
   prompt?: string
+  show_prompt?: string
   task_id?: string
   created_at?: string
   height?: number

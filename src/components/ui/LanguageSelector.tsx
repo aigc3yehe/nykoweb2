@@ -1,22 +1,22 @@
 import React, { useState, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useAtom, useSetAtom } from 'jotai'
+import { useSetAtom } from 'jotai'
 import GlobeIcon from '../../assets/mavae/globe.svg'
 import GlobeIconDark from '../../assets/mavae/dark/globe.svg'
 import ThemeAdaptiveIcon from './ThemeAdaptiveIcon'
-import { languageAtom, setLanguageAtom } from '../../store/i18nStore'
+import { setLanguageAtom } from '../../store/i18nStore'
 import { SUPPORTED_LANGUAGES, Language } from '../../i18n/config'
 
 const languages = SUPPORTED_LANGUAGES
 
 const LanguageSelector: React.FC = React.memo(() => {
-  const [language] = useAtom(languageAtom)
+  //const [language] = useAtom(languageAtom)
   const setLanguage = useSetAtom(setLanguageAtom)
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
 
-  const currentLanguage = languages.find(lang => lang.code === language) || languages[0]
+  //const currentLanguage = languages.find(lang => lang.code === language) || languages[0]
 
   const handleToggle = useCallback(() => {
     setIsOpen(!isOpen)
