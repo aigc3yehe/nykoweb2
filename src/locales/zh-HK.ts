@@ -11,6 +11,12 @@ export const zhHK = {
     styleTrainer: '風格訓練器',
     assets: '我的資產'
   },
+  sidebar: {
+    theme: '主題',
+    light: '淺色',
+    dark: '深色',
+    copyright: 'MAVAE © 2025'
+  },
   header: {
     search: '搜尋...',
     credits: '積分',

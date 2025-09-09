@@ -11,6 +11,12 @@ export const zhCN = {
     styleTrainer: '风格训练器',
     assets: '我的资产'
   },
+  sidebar: {
+    theme: '主题',
+    light: '浅色',
+    dark: '深色',
+    copyright: 'MAVAE © 2025'
+  },
   header: {
     search: '搜索...',
     credits: '积分',

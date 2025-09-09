@@ -10,6 +10,7 @@ import { getCurrentTheme, toggleTheme } from '../../utils/theme'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 
 import { cn } from '../../utils/cn'
+import MobileLanguageSelector from '../ui/MobileLanguageSelector'
 
 // 导入新的MAVAE图标
 import LogoIcon from '../../assets/mavae/logo.svg'
@@ -140,13 +141,16 @@ const MobileCloseButton: React.FC<{
   )
 }
 
+
 // 移动端主题切换组件
-const MobileThemeToggle: React.FC = () => {
+const MobileThemeToggle: React.FC<{ t: (key: string) => string }> = ({ t }) => {
   const [theme, setTheme] = useState<'light' | 'dark'>(getCurrentTheme())
 
-  const handleToggle = () => {
-    const newTheme = toggleTheme()
-    setTheme(newTheme)
+  const handleThemeSelect = (selectedTheme: 'light' | 'dark') => {
+    if (selectedTheme !== theme) {
+      const newTheme = toggleTheme()
+      setTheme(newTheme)
+    }
   }
 
   // 监听主题变化
@@ -184,35 +188,49 @@ const MobileThemeToggle: React.FC = () => {
           size="md"
         />
         <span className="font-switzer font-medium text-base leading-6 text-text-main dark:text-text-main-dark">
-          Theme
+          {t('sidebar.theme')}
         </span>
       </div>
 
-      {/* 主题切换按钮 */}
-      <div className="w-37 h-9 rounded-full hover:bg-secondary dark:hover:bg-secondary-dark transition-colors relative">
+      {/* 分段选择器样式 */}
+      <div className="w-37 h-9 px-px py-px rounded-full bg-quaternary dark:bg-quaternary-dark border border-line-subtle dark:border-line-subtle-dark flex">
         <button
-          onClick={handleToggle}
+          onClick={() => handleThemeSelect('light')}
           className={cn(
-            "absolute left-0.5 top-px w-18 h-8 rounded-full transition-all duration-300 ease-in-out",
-            "font-switzer font-medium text-sm leading-5 text-center",
-            isDark
-              ? "translate-x-0 text-text-secondary dark:text-text-secondary-dark"
-              : "translate-x-0 bg-btn-selected dark:bg-btn-selected-dark text-text-main dark:text-text-main-dark"
+            "h-8 px-4 rounded-full transition-all duration-200 flex items-center justify-center gap-1",
+            "w-1/2",
+            !isDark
+              ? "bg-btn-selected dark:bg-btn-selected-dark shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.1)]"
+              : "hover:bg-quaternary dark:hover:bg-quaternary-dark"
           )}
         >
-          Light
+          <span className={cn(
+            "font-switzer font-medium text-sm leading-[1.375rem] text-center",
+            !isDark
+              ? "text-text-main dark:text-text-main-dark"
+              : "text-text-secondary dark:text-text-secondary-dark"
+          )}>
+            {t('sidebar.light')}
+          </span>
         </button>
         <button
-          onClick={handleToggle}
+          onClick={() => handleThemeSelect('dark')}
           className={cn(
-            "absolute top-px right-0.5 w-18 h-8 rounded-full transition-all duration-300 ease-in-out",
-            "font-switzer font-medium text-sm leading-5 text-center",
+            "h-8 px-4 rounded-full transition-all duration-200 flex items-center justify-center gap-1",
+            "w-1/2",
             isDark
-              ? "translate-x-18 bg-btn-selected dark:bg-btn-selected-dark text-text-main dark:text-text-main-dark"
-              : "translate-x-18 text-text-secondary dark:text-text-secondary-dark"
+              ? "bg-btn-selected dark:bg-btn-selected-dark shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.1)]"
+              : "hover:bg-quaternary dark:hover:bg-quaternary-dark"
           )}
         >
-          Dark
+          <span className={cn(
+            "font-switzer font-medium text-sm leading-[1.375rem] text-center",
+            isDark
+              ? "text-text-main dark:text-text-main-dark"
+              : "text-text-secondary dark:text-text-secondary-dark"
+          )}>
+            {t('sidebar.dark')}
+          </span>
         </button>
       </div>
     </div>
@@ -226,6 +244,7 @@ const Sidebar: React.FC = () => {
   const [isOpen] = useAtom(sidebarOpenAtom)
   const closeSidebar = useSetAtom(closeSidebarAtom)
   const [currentLanguage] = useAtom(languageAtom)
+  const [isLanguageSelectorOpen, setIsLanguageSelectorOpen] = useState(false)
 
   // 路由变化时关闭移动端侧边栏
   useEffect(() => {
@@ -269,7 +288,7 @@ const Sidebar: React.FC = () => {
   const bottomNavItems: NavItem[] = [
     {
       key: 'workflow-builder',
-      label: 'Builder',
+      label: t('nav.workflowBuilder'),
       lightIcon: WorkflowBuilderIcon,
       darkIcon: WorkflowBuilderIconDark,
       lightSelectedIcon: WorkflowBuilderIconSelected,
@@ -279,7 +298,7 @@ const Sidebar: React.FC = () => {
     },
     {
       key: 'style-trainer',
-      label: 'Style Trainer',
+      label: t('nav.styleTrainer'),
       lightIcon: StyleTrainerIcon,
       darkIcon: StyleTrainerIconDark,
       lightSelectedIcon: StyleTrainerIconSelected,
@@ -427,7 +446,10 @@ const Sidebar: React.FC = () => {
             </div>
 
             {/* 语言按钮 */}
-            <div className="w-full h-12 flex items-center gap-2 px-4">
+            <button
+              onClick={() => setIsLanguageSelectorOpen(true)}
+              className="w-full h-12 flex items-center gap-2 px-4 hover:bg-tertiary dark:hover:bg-tertiary-dark rounded-lg transition-colors"
+            >
               <ThemeAdaptiveIcon
                 lightIcon={GlobeIcon}
                 darkIcon={GlobeIconDark}
@@ -435,12 +457,12 @@ const Sidebar: React.FC = () => {
                 size="md"
               />
               <span className="font-switzer font-medium text-base leading-6 text-text-main dark:text-text-main-dark">
-                {SUPPORTED_LANGUAGES.find(lang => lang.code === currentLanguage)?.shortName || 'EN'}
+                {SUPPORTED_LANGUAGES.find(lang => lang.code === currentLanguage)?.shortName || 'English'}
               </span>
-            </div>
+            </button>
 
             {/* 主题切换按钮 */}
-            <MobileThemeToggle />
+            <MobileThemeToggle t={t} />
           </div>
         </div>
 
@@ -470,11 +492,17 @@ const Sidebar: React.FC = () => {
           {/* 版权文本行 */}
           <div className="w-full md:w-40 h-9 flex items-center justify-center">
             <span className="font-switzer font-medium text-xs leading-4 text-text-main dark:text-text-main-dark text-center">
-              MAVAE © 2025
+              {t('sidebar.copyright')}
             </span>
           </div>
         </div>
       </aside>
+
+      {/* 移动端语言选择器 */}
+      <MobileLanguageSelector
+        isOpen={isLanguageSelectorOpen}
+        onClose={() => setIsLanguageSelectorOpen(false)}
+      />
     </>
   )
 }

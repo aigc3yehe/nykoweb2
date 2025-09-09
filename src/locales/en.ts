@@ -7,9 +7,15 @@ export const en = {
     recipes: 'Agent Cases',
     creators: 'Creators',
     generator: 'Generator',
-    workflowBuilder: 'Workflow Builder',
+    workflowBuilder: 'Builder',
     styleTrainer: 'Style Trainer',
     assets: 'My Assets'
+  },
+  sidebar: {
+    theme: 'Theme',
+    light: 'Light',
+    dark: 'Dark',
+    copyright: 'MAVAE © 2025'
   },
   header: { // 整个 header 部分缺失
     search: 'Search...',
