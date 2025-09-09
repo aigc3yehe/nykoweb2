@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { userStateAtom, initUserStateAtom } from '../store/loginStore'
+import { useI18n } from '../hooks/useI18n'
 import ProfileWorkflowsList from '../components/profile/ProfileWorkflowsList'
 
 import ProfileContentsList, { ProfileContentsListProps } from '../components/profile/ProfileContentsList'
@@ -16,6 +17,7 @@ type ContentTypeFilter = 'images' | 'workflows'
 type ProfileContentType = ProfileContentsListProps['type']
 
 const Profile: React.FC = () => {
+  const { t } = useI18n()
   const [userState] = useAtom(userStateAtom)
   const initUserState = useSetAtom(initUserStateAtom)
 
@@ -43,10 +45,10 @@ const Profile: React.FC = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Please log in to view your profile
+            {t('pages.pleaseLoginToViewProfile')}
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            You need to be logged in to access this page.
+            {t('pages.needLoginToAccess')}
           </p>
         </div>
       </div>
@@ -68,7 +70,7 @@ const Profile: React.FC = () => {
     <div className="w-full px-4 md:px-8 pb-10 flex flex-col md:gap-6"> {/* width: 1352px (full), padding: 32px 32px 40px 32px, gap: 24px */}
       {/* 移动端标题 */}
       <h1 className="md:hidden h-16 py-4 font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark"> {/* height: 64px, padding: 16px, font-size: 24px, line-height: 32px */}
-        My Creations
+        {t('pages.myCreations')}
       </h1>
 
       {/* Tab 导航 */}

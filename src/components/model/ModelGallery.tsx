@@ -2,12 +2,14 @@ import React, { useEffect, useCallback, useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { modelGalleryAtom, fetchModelGalleryAtom, ContentItem } from '../../store/contentsStore'
 import InspirationImageCard from '../home/InspirationImageCard'
+import { useI18n } from '../../hooks/useI18n'
 
 interface ModelGalleryProps {
   modelId: number
 }
 
 const ModelGallery: React.FC<ModelGalleryProps> = ({ modelId }) => {
+  const { t } = useI18n()
   const [contentsState] = useAtom(modelGalleryAtom)
   const setFetchContents = useSetAtom(fetchModelGalleryAtom)
   const isLoadingRef = useRef(false)
@@ -91,28 +93,28 @@ const ModelGallery: React.FC<ModelGalleryProps> = ({ modelId }) => {
     <div className="w-full">
       {/* Gallery 标题 */}
       <div className="mt-5 mb-3 md:my-6">
-        <h2 className="font-lexend font-bold text-xl md:text-2xl leading-8 text-design-main-text dark:text-design-dark-main-text">Gallery</h2>
+        <h2 className="font-lexend font-bold text-xl md:text-2xl leading-8 text-design-main-text dark:text-design-dark-main-text">{t('model.gallery')}</h2>
       </div>
       {/* 瀑布流内容 */}
       {contentsState.isLoading && contentsState.items.length === 0 ? (
         <div className="h-64 flex items-center justify-center">
-          <span className="text-gray-500">Loading...</span>
+          <span className="text-gray-500">{t('model.loading')}</span>
         </div>
       ) : contentsState.error && contentsState.items.length === 0 ? (
         <div className="h-64 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-red-500 mb-2">Failed to load contents</p>
+            <p className="text-red-500 mb-2">{t('model.failedToLoadContents')}</p>
             <button
               onClick={() => loadContents(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
             >
-              Retry
+              {t('model.retry')}
             </button>
           </div>
         </div>
       ) : contentsState.items.length === 0 ? (
         <div className="h-64 flex items-center justify-center">
-          <span className="text-gray-500">No contents found</span>
+          <span className="text-gray-500">{t('model.noContentsFound')}</span>
         </div>
       ) : (
         <>
@@ -132,7 +134,7 @@ const ModelGallery: React.FC<ModelGalleryProps> = ({ modelId }) => {
           {/* 加载更多指示器 */}
           {contentsState.isLoading && contentsState.items.length > 0 && (
             <div className="py-8 flex items-center justify-center">
-              <span className="text-gray-500">Loading more...</span>
+              <span className="text-gray-500">{t('model.loadingMore')}</span>
             </div>
           )}
           {/* 加载更多按钮 */}
@@ -142,14 +144,14 @@ const ModelGallery: React.FC<ModelGalleryProps> = ({ modelId }) => {
                 onClick={handleLoadMore}
                 className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
-                Load More
+                {t('model.loadMore')}
               </button>
             </div>
           )}
           {/* 没有更多数据提示 */}
           {!contentsState.hasMore && contentsState.items.length > 0 && (
             <div className="py-8 flex items-center justify-center">
-              <span className="text-gray-400">No more contents</span>
+              <span className="text-gray-400">{t('model.noMoreContents')}</span>
             </div>
           )}
         </>

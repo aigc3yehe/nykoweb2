@@ -81,12 +81,12 @@ const Header: React.FC = React.memo(() => {
   // 获取当前页面标题
   const getPageTitle = () => {
     const path = location.pathname
-    if (path.includes('/workflow/builder')) return 'Builder'
-    if (path.includes('/style/trainer')) return 'Style Trainer'
+    if (path.includes('/workflow/builder')) return t('nav.workflowBuilder')
+    if (path.includes('/style/trainer')) return t('nav.styleTrainer')
     if (path.includes('/cases')) return t('nav.recipes')
     if (path.includes('/creations')) return t('profile.myCreations')
-    if (path.includes('/account')) return 'Account'
-    return t('pages.home') // Home页面
+    if (path.includes('/account')) return t('nav.account')
+    return t('nav.home') // Home页面
   }
 
   // 判断是否显示返回组件
@@ -218,7 +218,7 @@ const Header: React.FC = React.memo(() => {
                     className="w-22 h-9 md:w-28 md:h-12 px-4 md:px-6 gap-2 rounded-full bg-[#84CC16] hover:bg-[#65A30D] transition-colors flex items-center justify-center"
                   >
                     <span className="font-switzer font-medium text-sm md:text-base leading-5 md:leading-6 text-white text-center">
-                      Upgrade
+                      {t('header.upgrade')}
                     </span>
                   </button>
                 )}

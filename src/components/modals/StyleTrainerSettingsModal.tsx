@@ -194,7 +194,7 @@ const StyleTrainerSettingsModal: React.FC<StyleTrainerSettingsModalProps> = ({ i
                       className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-gray-100"
                       onClick={handleRemoveCover}
                     >
-                      <img src={CloseIcon} alt="Remove" className="w-5 h-5" />
+                      <img src={CloseIcon} alt={t('modal.remove')} className="w-5 h-5" />
                     </button>
                   </div>
                 ) : (
@@ -221,7 +221,7 @@ const StyleTrainerSettingsModal: React.FC<StyleTrainerSettingsModalProps> = ({ i
                       <>
                         <img src={CoverSelectIcon} alt="select" className="w-8 h-[1.9375rem] mb-2" />
                         <span className="font-lexend font-normal text-xs leading-[100%] text-[#9CA3AF] text-center">
-                          {isDragOver ? 'Drop image here' : t('style.uploadCover') || 'Click to upload or drag here'}
+                          {isDragOver ? t('modal.dropImageHere') : t('style.uploadCover') || 'Click to upload or drag here'}
                         </span>
                       </>
                     )}

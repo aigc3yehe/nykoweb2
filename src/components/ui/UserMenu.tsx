@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
+import { useI18n } from '../../hooks/useI18n'
 
 const UserMenu: React.FC = () => {
+  const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -16,14 +18,14 @@ const UserMenu: React.FC = () => {
         <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-lg shadow-lg z-50">
           <div className="py-1">
             <a href="#" className="block px-4 py-2 text-sm hover:bg-muted transition-colors">
-              Profile
+              {t('ui.profile')}
             </a>
             <a href="#" className="block px-4 py-2 text-sm hover:bg-muted transition-colors">
-              Settings
+              {t('ui.settings')}
             </a>
             <hr className="my-1 border-border" />
             <a href="#" className="block px-4 py-2 text-sm hover:bg-muted transition-colors">
-              Sign out
+              {t('ui.signOut')}
             </a>
           </div>
         </div>

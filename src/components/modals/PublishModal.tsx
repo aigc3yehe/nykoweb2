@@ -103,7 +103,7 @@ const PublishModal: React.FC<PublishModalProps> = ({ isOpen, onClose }) => {
       const result = await createWorkflow(userId)
       if (result && result.workflow_id) {
         // 创建成功，显示成功提示
-        setSuccessMessage('Workflow created successfully!')
+        setSuccessMessage(t('modal.workflowCreatedSuccessfully'))
         
         // 重置本地状态
         setCover(null)

@@ -16,7 +16,7 @@ const Home: React.FC = () => {
   const [, loadMore] = useAtom(loadMoreContentsAtom)
   const isLoadingRef = useRef(false)
 
-  // 监听滚动，当接近底部时加载更多
+  // {t('common.loading')} - 监听滚动，当接近底部时加载更多
   const handleScroll = useCallback(() => {
     // 获取MainContent的滚动容器
     const mainContent = document.querySelector('main')

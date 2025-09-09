@@ -5,8 +5,10 @@ import LifeIcon from '../../assets/mavae/life.svg'
 import LifeIconDark from '../../assets/mavae/dark/life.svg'
 import WorkflowsIcon from '../../assets/mavae/Workflows.svg'
 import WorkflowsIconDark from '../../assets/mavae/dark/Workflows.svg'
+import { useI18n } from '../../hooks/useI18n'
 
 const Banner: React.FC = () => {
+  const { t } = useI18n()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [startX, setStartX] = useState(0)
@@ -16,18 +18,18 @@ const Banner: React.FC = () => {
   const banners = [
     {
       id: 1,
-      title: "Participate in fun creations",
-      description: "Use Agent Cases to expand any theme creation",
-      buttonText: "Generate",
+      title: t('banner.title1'),
+      description: t('banner.description1'),
+      buttonText: t('banner.button1'),
       icon: LifeIcon,
       iconDark: LifeIconDark,
       onClick: () => console.log('Generate clicked')
     },
     {
       id: 2,
-      title: "Build Agent Cases",
-      description: "Efficient tasks with custom AI workflows",
-      buttonText: "Create",
+      title: t('banner.title2'),
+      description: t('banner.description2'),
+      buttonText: t('banner.button2'),
       icon: WorkflowsIcon,
       iconDark: WorkflowsIconDark,
       onClick: () => console.log('Create clicked')

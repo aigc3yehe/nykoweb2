@@ -1,6 +1,7 @@
 import React from 'react'
 import { cn } from '../../utils/cn'
 import { ContentTypeFilter } from '../../store/contentsStore'
+import { useI18n } from '../../hooks/useI18n'
 
 interface InspirationSectionHeaderProps {
   title: string
@@ -13,11 +14,12 @@ const InspirationSectionHeader: React.FC<InspirationSectionHeaderProps> = ({
   selectedFilter,
   onFilterChange
 }) => {
+  const { t } = useI18n()
   // 固定的过滤选项
   const filterOptions = [
-    { id: 'all' as ContentTypeFilter, label: 'All' },
-    { id: 'image' as ContentTypeFilter, label: 'Images' },
-    { id: 'video' as ContentTypeFilter, label: 'Videos' }
+    { id: 'all' as ContentTypeFilter, label: t('home.all') },
+    { id: 'image' as ContentTypeFilter, label: t('home.images') },
+    { id: 'video' as ContentTypeFilter, label: t('home.videos') }
   ]
 
   return (

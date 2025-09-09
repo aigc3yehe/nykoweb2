@@ -226,7 +226,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
     if (model?.user?.name) {
       return model.user.name
     }
-    return "Anonymous"
+    return t('model.anonymous')
   }
 
   // 检查文本是否被截断 - 使用真实的DOM测量
@@ -270,27 +270,27 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
   // 获取训练状态文本
   const getTrainStatusText = () => {
     if (!model?.model_tran || model.model_tran.length === 0) {
-      return 'No Training'
+      return t('model.noTraining')
     }
     const latestTrain = model.model_tran[model.model_tran.length - 1]
-    if (latestTrain.train_state === 2) return 'Ready'
-    if (latestTrain.train_state === 1) return 'Training'
-    if (latestTrain.train_state === 0) return 'Queuing'
-    if (latestTrain.train_state === -1) return 'Failed'
-    return 'Training'
+    if (latestTrain.train_state === 2) return t('model.ready')
+    if (latestTrain.train_state === 1) return t('model.training')
+    if (latestTrain.train_state === 0) return t('model.queuing')
+    if (latestTrain.train_state === -1) return t('model.failed')
+    return t('model.training')
   }
 
   // 获取按钮显示文本
   const getButtonText = () => {
     if (!model?.model_tran || model.model_tran.length === 0) {
-      return 'Create With this Agent Case'
+      return t('model.createWithThisAgentCase')
     }
     const latestTrain = model.model_tran[model.model_tran.length - 1]
-    if (latestTrain.train_state === 2) return 'Create With this Agent Case'
-    if (latestTrain.train_state === 1) return 'Training'
-    if (latestTrain.train_state === 0) return 'Queuing'
-    if (latestTrain.train_state === -1) return 'Training Failed'
-    return 'Training'
+    if (latestTrain.train_state === 2) return t('model.createWithThisAgentCase')
+    if (latestTrain.train_state === 1) return t('model.training')
+    if (latestTrain.train_state === 0) return t('model.queuing')
+    if (latestTrain.train_state === -1) return t('model.trainingFailed')
+    return t('model.training')
   }
 
   // 获取按钮样式
@@ -399,7 +399,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
         } catch (error) {
           console.error('Error deleting model:', error)
           addToast({
-            message: 'Error deleting model',
+            message: t('model.errorDeletingModel'),
             type: 'error'
           })
           // 关闭弹窗
@@ -488,11 +488,11 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
             <ThemeAdaptiveIcon
               lightIcon={ShareIcon}
               darkIcon={ShareIconDark}
-              alt="Share"
+              alt={t('model.share')}
               size="lg"
             />
             <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-              Share
+              {t('model.share')}
             </span>
           </button>
         </div>
@@ -522,7 +522,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
           {/* Description第一行：标题 */}
           <div className="flex items-center h-5">
             <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-              Description
+              {t('model.description')}
             </span>
           </div>
 
@@ -534,7 +534,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
                 className={`font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark ${isPromptExpanded ? '' : 'line-clamp-2'
                   }`}
               >
-                {model.description || 'No description available'}
+                {model.description || t('model.noDescriptionAvailable')}
               </p>
 
               {/* 展开/收起按钮 */}
@@ -545,7 +545,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
                   }}
                   className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start mt-2"
                 >
-                  {isPromptExpanded ? 'Show less' : 'Show more'}
+                  {isPromptExpanded ? t('modal.showLess') : t('modal.showMore')}
                 </button>
               )}
             </div>
@@ -555,17 +555,17 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
         {/* 第四行：Builder信息 */}
         <div className="flex flex-col gap-2">
           <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-            Builder
+            {t('model.builder')}
           </span>
           <div className="flex flex-col">
             {/* 第一行：User Input */}
-            {renderBuilderStep(1, 'User Input', ['Text'])}
+            {renderBuilderStep(1, t('model.userInput'), ['Text'])}
 
             {/* 第二行：Models */}
-            {renderBuilderStep(2, 'Models', ['StableDiffusionXL'])}
+            {renderBuilderStep(2, t('model.models'), ['StableDiffusionXL'])}
 
             {/* 第三行：Case Output */}
-            {renderBuilderStep(3, 'Case Output', ['Image'])}
+            {renderBuilderStep(3, t('model.caseOutput'), ['Image'])}
           </div>
         </div>
       </div>
@@ -607,7 +607,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
                   className="w-5 h-5"
                 />
                 <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-                  Edit
+                  {t('model.edit')}
                 </span>
               </button>
 
@@ -639,7 +639,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
               size="lg"
             />
             <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-              Share
+              {t('model.share')}
             </span>
           </button>
 
@@ -679,7 +679,7 @@ const ModelInfo: React.FC<ModelInfoProps> = ({ className = '' }) => {
                 className="w-5 h-5"
               />
               <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-                Edit
+                {t('model.edit')}
               </span>
             </button>
 

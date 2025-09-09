@@ -1,4 +1,5 @@
 import { atom } from "jotai";
+
 // 定义功能项类型
 export interface PricingFeature {
   title: string;
@@ -165,3 +166,86 @@ export const selectedPaymentMethodAtom = atom<PaymentMethod>('stripe')
 
 // 新增：支付方式下拉菜单显示状态
 export const showPaymentDropdownAtom = atom<boolean>(false)
+
+// 创建翻译后的定价数据的辅助函数
+// 用法示例：
+// const { t } = useI18n();
+// const translatedPlans = createTranslatedPricingPlans(t);
+// 然后在组件中使用translatedPlans
+export const createTranslatedPricingPlans = (t: (key: string) => string) => [
+  {
+    id: "free",
+    name: t('pricing.free'),
+    price: "$0",
+    description: t('pricing.forStarter'),
+    features: [
+      {
+        title: t('pricing.tenCreditsEveryDay'),
+        supported: true,
+      },
+      {
+        title: t('pricing.useGeneratorAndCases'),
+        supported: true,
+      },
+      {
+        title: t('pricing.useBuilderToSaveTemplates'),
+        supported: true,
+      },
+    ],
+    staked: 0,
+  },
+  {
+    id: "premium",
+    name: t('pricing.plus'),
+    price: "$19",
+    description: t('pricing.forExpertLevelAIPlayers'),
+    features: [
+      {
+        title: t('pricing.twoThousandFiveHundredCreditsEveryMonth'),
+        supported: true,
+      },
+      {
+        title: t('pricing.everythingIncludedInFree'),
+        supported: true,
+      },
+      {
+        title: t('pricing.testModelsInGeneratorAndBuilder'),
+        supported: true,
+      },
+      {
+        title: t('pricing.joinMAVAEVIPCommunity'),
+        supported: true,
+      },
+    ],
+    buttonText: t('pricing.subscribe'),
+    tips: t('pricing.cancelSubscriptionTip'),
+    staked: 75_000,
+  },
+  {
+    id: "premium_plus",
+    name: t('pricing.pro'),
+    price: "$49",
+    description: t('pricing.forRevolutionaryAICreators'),
+    features: [
+      {
+        title: t('pricing.eightThousandCreditsEveryMonth'),
+        supported: true,
+      },
+      {
+        title: t('pricing.everythingIncludedInFreeAndPlus'),
+        supported: true,
+      },
+      {
+        title: t('pricing.apiAccessAvailable'),
+        supported: true,
+      },
+      {
+        title: t('pricing.scheduleOnlineSession'),
+        supported: true,
+      },
+    ],
+    buttonText: t('pricing.subscribe'),
+    tips: t('pricing.cancelSubscriptionTip'),
+    staked: 300_000,
+  },
+];

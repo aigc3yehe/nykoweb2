@@ -4,6 +4,7 @@ import PictureIcon from '../../assets/mavae/Picture_white.svg'
 import VideoIconNew from '../../assets/mavae/video_white.svg'
 import UseIconNew from '../../assets/mavae/use_white.svg'
 import MaskImage from '../../assets/mavae/Mask.svg'
+import { useI18n } from '../../hooks/useI18n'
 
 
 interface WorkflowCoverProps {
@@ -19,6 +20,7 @@ const WorkflowCover: React.FC<WorkflowCoverProps> = ({
   usage = 0,
   className = ''
 }) => {
+  const { t } = useI18n()
   const [imageError, setImageError] = useState(false)
 
   // 判断是否为视频
@@ -36,16 +38,16 @@ const WorkflowCover: React.FC<WorkflowCoverProps> = ({
             preload="metadata"
           />
         ) : (
-                      <img
-              src={getScaledImageUrl(cover, 450)}
-              alt={name || 'Workflow cover'}
-              className="w-full h-full object-cover"
-              onError={() => setImageError(true)}
-            />
+          <img
+            src={getScaledImageUrl(cover, 450)}
+            alt={name || t('workflow.workflowCover')}
+            className="w-full h-full object-cover"
+            onError={() => setImageError(true)}
+          />
         )
       ) : (
         <div className="w-full h-full flex items-center justify-center">
-          <span className="text-gray-400">No cover image</span>
+          <span className="text-gray-400">{t('workflow.noCoverImage')}</span>
         </div>
       )}
 
@@ -74,8 +76,6 @@ const WorkflowCover: React.FC<WorkflowCoverProps> = ({
             {usage}
           </span>
         </div>
-
-
       </div>
     </div>
   )

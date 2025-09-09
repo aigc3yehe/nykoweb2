@@ -17,6 +17,7 @@ import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 import imageIcon from '../../assets/mavae/input_size_img.svg';
 import imageIconDark from '../../assets/mavae/dark/input_size_img.svg';
 import downIcon from '../../assets/mavae/input_size_down.svg';
+import { useI18n } from '../../hooks/useI18n';
 import downIconDark from '../../assets/mavae/dark/input_size_down.svg';
 import upIcon from '../../assets/mavae/input_size_up.svg';
 import upIconDark from '../../assets/mavae/dark/input_size_up.svg';
@@ -28,6 +29,7 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
+  const { t } = useI18n()
   const [message, setMessage] = useState('')
   const [chatState] = useAtom(chatAtom)
   const sendMsg = useSetAtom(sendMessage)
@@ -191,7 +193,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onHeightChange }) => {
                     </span>
                     {/* Strength 标签 */}
                     <span className="font-lexend font-normal text-[0.625rem] leading-none text-design-lightest-gray">
-                      Strength
+                      {t('chat.strength')}
                     </span>
                     {/* 强度滑块 - 新设计 */}
                     <div

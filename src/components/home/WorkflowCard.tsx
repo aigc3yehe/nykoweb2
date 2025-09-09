@@ -162,7 +162,7 @@ const WorkflowCard: React.FC<WorkflowCardProps> = ({
     if (item.user?.name) {
       return item.user.name
     }
-    return "Anonymous"
+    return t('home.anonymous')
   }
 
   // 处理删除按钮点击

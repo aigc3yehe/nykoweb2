@@ -75,7 +75,7 @@ const ModelEdit: React.FC = () => {
         // 用户没有权限编辑此模型，重定向到详情页
         navigate(withLangPrefix(lang, `/model/${id}`))
         addToast({
-          message: 'You do not have permission to edit this model',
+          message: t('model.youDoNotHavePermissionToEditThisModel'),
           type: 'error'
         })
       }
@@ -85,7 +85,7 @@ const ModelEdit: React.FC = () => {
   const handleFileUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       addToast({
-        message: 'Please select an image file',
+        message: t('model.pleaseSelectAnImageFile'),
         type: 'error'
       })
       return
@@ -102,7 +102,7 @@ const ModelEdit: React.FC = () => {
     } catch (error) {
       console.error('Failed to upload cover image:', error)
       addToast({
-        message: 'Failed to upload cover image',
+        message: t('model.failedToUploadCoverImage'),
         type: 'error'
       })
     } finally {
@@ -132,7 +132,7 @@ const ModelEdit: React.FC = () => {
         modelId: parseInt(id),
         onSuccess: () => {
           addToast({
-            message: 'Model updated successfully!',
+            message: t('model.modelUpdatedSuccessfully'),
             type: 'success'
           })
 
@@ -145,14 +145,14 @@ const ModelEdit: React.FC = () => {
 
       if (!success) {
         addToast({
-          message: modelEditState.updateError || 'Failed to update model',
+          message: modelEditState.updateError || t('model.failedToUpdateModel'),
           type: 'error'
         })
       }
     } catch (error) {
       console.error('Failed to update model:', error)
       addToast({
-        message: 'Failed to update model',
+        message: t('model.failedToUpdateModel'),
         type: 'error'
       })
     }
@@ -163,12 +163,12 @@ const ModelEdit: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-full w-full p-8">
         <div className="text-center">
-          <span className="font-switzer text-sm text-red-500 mb-4 block">Error: {modelDetailState.error}</span>
+          <span className="font-switzer text-sm text-red-500 mb-4 block">{t('model.errorPrefix')}{modelDetailState.error}</span>
           <button
             onClick={() => id && fetchModelDetail({ modelId: parseInt(id), refresh: true })}
             className="px-4 py-2 bg-link-default dark:bg-link-default-dark text-white rounded-lg hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors"
           >
-            Retry
+            {t('model.retry')}
           </button>
         </div>
       </div>
@@ -181,7 +181,7 @@ const ModelEdit: React.FC = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-link-default dark:border-link-default-dark mx-auto mb-4"></div>
           <span className="font-switzer text-sm text-text-secondary dark:text-text-secondary-dark">
-            {modelDetailState.isLoading ? 'Loading model...' : 'Model not found'}
+            {modelDetailState.isLoading ? t('model.loadingModel') : t('model.modelNotFound')}
           </span>
         </div>
       </div>
@@ -318,7 +318,7 @@ const ModelEdit: React.FC = () => {
           disabled={modelEditState.isUpdating || isUploading || !modelEditState.form.name.trim()}
           className="w-full h-12 px-4 gap-1 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
         >
-          {modelEditState.isUpdating ? 'Saving...' : 'Save'}
+          {modelEditState.isUpdating ? t('model.saving') : t('model.save')}
         </button>
       </div>
     </div>

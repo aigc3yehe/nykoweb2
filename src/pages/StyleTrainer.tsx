@@ -13,6 +13,7 @@ import StyleAddIconDark from '../assets/mavae/dark/style_add.svg'
 import StyleRemoveIcon from '../assets/mavae/style_remove.svg'
 import StyleRemoveIconDark from '../assets/mavae/dark/style_remove.svg'
 import ThemeAdaptiveIcon from '../components/ui/ThemeAdaptiveIcon'
+import { useI18n } from '../hooks/useI18n'
 
 import {
   styleTrainerFormAtom,
@@ -31,6 +32,7 @@ const MAX_IMAGES = 30
 
 const StyleTrainer: React.FC = () => {
   const navigate = useNavigate()
+  const { t } = useI18n()
   const [formData] = useAtom(styleTrainerFormAtom)
   const [imageUploadState] = useAtom(imageUploadStateAtom)
   const [status] = useAtom(styleTrainerStatusAtom)
@@ -69,7 +71,7 @@ const StyleTrainer: React.FC = () => {
   // 封面图片上传处理函数
   const handleCoverFileUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      alert('请选择图片文件')
+      alert(t('styleTrainer.pleaseSelectAnImageFile'))
       return
     }
 
@@ -79,7 +81,7 @@ const StyleTrainer: React.FC = () => {
       updateForm({ cover: url })
     } catch (error) {
       console.error('封面上传失败:', error)
-      alert('封面上传失败，请重试')
+      alert(t('styleTrainer.failedToUploadCoverImage'))
     } finally {
       setIsUploadingCover(false)
     }
@@ -109,14 +111,14 @@ const StyleTrainer: React.FC = () => {
   // 处理开始训练
   const handleStartTraining = async () => {
     if (!status.canCreate) {
-      console.error('Cannot start training - requirements not met')
+      console.error(t('styleTrainer.failedToStartTraining'))
       return
     }
 
     try {
       await createModel(navigate)
     } catch (error) {
-      console.error('Failed to start training:', error)
+      console.error(t('styleTrainer.failedToCreateModel'), error)
     }
   }
 
@@ -179,8 +181,8 @@ const StyleTrainer: React.FC = () => {
           disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
           onClick={handleStartTraining}
         >
-          {modelCreationState.isCreating ? 'Creating...' :
-           modelCreationState.isTraining ? 'Training...' : 'Start Training'}
+          {modelCreationState.isCreating ? t('styleTrainer.creating') :
+            modelCreationState.isTraining ? t('styleTrainer.training') : t('styleTrainer.startTraining')}
         </button>
       </div>
     </div>
@@ -210,7 +212,7 @@ const StyleTrainer: React.FC = () => {
         {/* 第一行文本 */}
         <div className="text-center px-5 md:px-0">
           <span className="font-lexend font-semibold text-2xl leading-[100%] text-text-main dark:text-text-main-dark">
-            Upload 10 more images to build Your style
+            {t('styleTrainer.upload10MoreImages')}
           </span>
         </div>
         {/* 第二行：提示列表 - 移动端一行一个 */}
@@ -223,7 +225,7 @@ const StyleTrainer: React.FC = () => {
               size="sm"
             />
             <span className="font-lexend font-normal text-sm leading-[140%] text-text-secondary dark:text-text-secondary-dark">
-              Consistent style
+              {t('styleTrainer.consistentStyle')}
             </span>
           </div>
           <div className="flex items-center gap-2 h-5">
@@ -234,7 +236,7 @@ const StyleTrainer: React.FC = () => {
               size="sm"
             />
             <span className="font-lexend font-normal text-sm leading-[140%] text-text-secondary dark:text-text-secondary-dark">
-              Distinct features
+              {t('styleTrainer.distinctFeatures')}
             </span>
           </div>
           <div className="flex items-center gap-2 h-5">
@@ -245,7 +247,7 @@ const StyleTrainer: React.FC = () => {
               size="sm"
             />
             <span className="font-lexend font-normal text-sm leading-[140%] text-text-secondary dark:text-text-secondary-dark">
-              Show diversity
+              {t('styleTrainer.showDiversity')}
             </span>
           </div>
           <div className="flex items-center gap-2 h-5">
@@ -256,7 +258,7 @@ const StyleTrainer: React.FC = () => {
               size="sm"
             />
             <span className="font-lexend font-normal text-sm leading-[140%] text-text-secondary dark:text-text-secondary-dark">
-              Clear & No watermark
+              {t('styleTrainer.clearNoWatermark')}
             </span>
           </div>
         </div>
@@ -275,7 +277,7 @@ const StyleTrainer: React.FC = () => {
             size="lg"
           />
           <span className="font-switzer font-medium text-base leading-6 text-[#0DA3A3]">
-            Upload Images
+            {t('styleTrainer.uploadImages')}
           </span>
         </button>
       </div>
@@ -287,8 +289,8 @@ const StyleTrainer: React.FC = () => {
           disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
           onClick={handleStartTraining}
         >
-          {modelCreationState.isCreating ? 'Creating...' :
-           modelCreationState.isTraining ? 'Training...' : 'Start Training'}
+          {modelCreationState.isCreating ? t('styleTrainer.creating') :
+            modelCreationState.isTraining ? t('styleTrainer.training') : t('styleTrainer.startTraining')}
         </button>
       </div>
     </div>
@@ -307,20 +309,20 @@ const StyleTrainer: React.FC = () => {
               <span className="font-roboto font-bold text-base leading-6 text-center text-white">1</span>
             </div>
             {/* 标题 */}
-            <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Display</span>
+            <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">{t('styleTrainer.display')}</span>
           </div>
 
           {/* Style Name 输入框组件 */}
           <div className="flex flex-col gap-1">
             {/* 标题 */}
             <div className="flex items-center gap-1">
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Name</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('styleTrainer.name')}</span>
               <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
             </div>
             {/* 输入框 */}
             <input
               className="w-[19.5rem] h-10 pt-0 pr-3 pb-0 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-              placeholder="Style name"
+              placeholder={t('styleTrainer.styleNamePlaceholder')}
               value={formData.name}
               onChange={(e) => updateForm({ name: e.target.value })}
             />
@@ -329,11 +331,11 @@ const StyleTrainer: React.FC = () => {
           {/* Description 输入框组件 */}
           <div className="flex flex-col gap-1">
             {/* 标题 */}
-            <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Description</span>
+            <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('styleTrainer.description')}</span>
             {/* 输入框 */}
             <textarea
               className="w-[19.5rem] h-[6.75rem] pt-3 pr-3 pb-3 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark resize-none focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-              placeholder="Describe your style"
+              placeholder={t('styleTrainer.describeYourStyle')}
               value={formData.description}
               onChange={(e) => updateForm({ description: e.target.value })}
             />
@@ -342,7 +344,7 @@ const StyleTrainer: React.FC = () => {
           {/* Cover Image 组件 */}
           <div className="flex flex-col gap-1">
             {/* 标题 */}
-            <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Cover Image</span>
+            <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('styleTrainer.coverImage')}</span>
             {/* 图片上传组件 */}
             {formData.cover ? (
               <div className="relative w-[8.125rem] h-[8.125rem] gap-1 rounded-[0.625rem]">
@@ -403,7 +405,7 @@ const StyleTrainer: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">2</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Builder</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">{t('styleTrainer.styleTrainerBuilder')}</span>
             </div>
             {/* Remove All 按钮 */}
             {formData.referenceImages.length > 0 && (
@@ -419,7 +421,7 @@ const StyleTrainer: React.FC = () => {
                   size="sm"
                   className="w-4 h-4"
                 />
-                <span className="font-switzer font-medium text-sm leading-[100%] text-text-main dark:text-text-main-dark">Remove All</span>
+                <span className="font-switzer font-medium text-sm leading-[100%] text-text-main dark:text-text-main-dark">{t('styleTrainer.removeAll')}</span>
               </button>
             )}
           </div>
@@ -435,7 +437,7 @@ const StyleTrainer: React.FC = () => {
           {status.isUploading && (
             <div className="absolute inset-0 z-50 flex items-center justify-center" style={{ background: '#FFFFFFB2', backdropFilter: 'blur(20px)' }}>
               <div className="flex flex-col items-center w-[27.375rem] h-[3.125rem] gap-5">
-                <span className="font-lexend font-normal text-2xl leading-[100%] text-[#1F2937]">Uploading {imageUploadState.currentUploadIndex}/{imageUploadState.totalFilesToUpload}</span>
+                <span className="font-lexend font-normal text-2xl leading-[100%] text-[#1F2937]">{t('styleTrainer.uploading')} {imageUploadState.currentUploadIndex}/{imageUploadState.totalFilesToUpload}</span>
                 <div className="w-[27.375rem] h-1.5 rounded-[1.875rem] bg-[#E5E7EB] overflow-hidden">
                   <div className="h-full rounded-[1.875rem] bg-[#0900FF] transition-all" style={{ width: `${status.uploadProgress}%` }}></div>
                 </div>
@@ -449,7 +451,7 @@ const StyleTrainer: React.FC = () => {
       <div className="lg:hidden w-full flex flex-col bg-secondary dark:bg-secondary-dark">
         {/* 移动端标题 */}
         <div className="h-16 flex items-center p-4">
-          <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark">Style Trainer</span>
+          <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark">{t('styleTrainer.styleTrainer')}</span>
         </div>
 
         {/* 移动端内容区域 */}
@@ -463,20 +465,20 @@ const StyleTrainer: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">1</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Display</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">{t('styleTrainer.display')}</span>
             </div>
 
             {/* Style Name 输入框组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Name</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('styleTrainer.name')}</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入框 */}
               <input
                 className="w-full h-10 pt-0 pr-3 pb-0 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="Style name"
+                placeholder={t('styleTrainer.styleNamePlaceholder')}
                 value={formData.name}
                 onChange={(e) => updateForm({ name: e.target.value })}
               />
@@ -485,11 +487,11 @@ const StyleTrainer: React.FC = () => {
             {/* Description 输入框组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Description</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('styleTrainer.description')}</span>
               {/* 输入框 */}
               <textarea
                 className="w-full h-[6.75rem] pt-3 pr-3 pb-3 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark resize-none focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="Describe your style"
+                placeholder={t('styleTrainer.describeYourStyle')}
                 value={formData.description}
                 onChange={(e) => updateForm({ description: e.target.value })}
               />
@@ -498,7 +500,7 @@ const StyleTrainer: React.FC = () => {
             {/* Cover Image 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Cover Image</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('styleTrainer.coverImage')}</span>
               {/* 图片上传组件 */}
               {formData.cover ? (
                 <div className="relative w-[8.125rem] h-[8.125rem] gap-1 rounded-[0.625rem]">
@@ -564,7 +566,7 @@ const StyleTrainer: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">2</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Builder</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">{t('styleTrainer.styleTrainerBuilder')}</span>
             </div>
 
             {/* 根据状态显示不同内容 */}
@@ -614,8 +616,8 @@ const StyleTrainer: React.FC = () => {
                     disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
                     onClick={handleStartTraining}
                   >
-                    {modelCreationState.isCreating ? 'Creating...' :
-                     modelCreationState.isTraining ? 'Training...' : 'Start Training'}
+                    {modelCreationState.isCreating ? t('styleTrainer.creating') :
+                      modelCreationState.isTraining ? t('styleTrainer.training') : t('styleTrainer.startTraining')}
                   </button>
                 </div>
               </div>
@@ -626,7 +628,7 @@ const StyleTrainer: React.FC = () => {
                   {/* 第一行文本 */}
                   <div className="md:px-0">
                     <span className="font-lexend font-semibold text-2xl leading-[100%] text-text-main dark:text-text-main-dark">
-                      Upload 10 more images to build Your style
+                      {t('styleTrainer.upload10MoreImages')}
                     </span>
                   </div>
                   {/* 第二行：提示列表 - 移动端左对齐 */}
@@ -639,7 +641,7 @@ const StyleTrainer: React.FC = () => {
                         size="sm"
                       />
                       <span className="font-lexend font-normal text-sm leading-[140%] text-text-secondary dark:text-text-secondary-dark">
-                        Consistent style
+                        {t('styleTrainer.consistentStyle')}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 h-5">
@@ -650,7 +652,7 @@ const StyleTrainer: React.FC = () => {
                         size="sm"
                       />
                       <span className="font-lexend font-normal text-sm leading-[140%] text-text-secondary dark:text-text-secondary-dark">
-                        Distinct features
+                        {t('styleTrainer.distinctFeatures')}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 h-5">
@@ -661,7 +663,7 @@ const StyleTrainer: React.FC = () => {
                         size="sm"
                       />
                       <span className="font-lexend font-normal text-sm leading-[140%] text-text-secondary dark:text-text-secondary-dark">
-                        Show diversity
+                        {t('styleTrainer.showDiversity')}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 h-5">
@@ -672,7 +674,7 @@ const StyleTrainer: React.FC = () => {
                         size="sm"
                       />
                       <span className="font-lexend font-normal text-sm leading-[140%] text-text-secondary dark:text-text-secondary-dark">
-                        Clear & No watermark
+                        {t('styleTrainer.clearNoWatermark')}
                       </span>
                     </div>
                   </div>
@@ -691,7 +693,7 @@ const StyleTrainer: React.FC = () => {
                       size="lg"
                     />
                     <span className="font-switzer font-medium text-base leading-6 text-[#0DA3A3]">
-                      Upload Images
+                      {t('styleTrainer.uploadImages')}
                     </span>
                   </button>
                 </div>
@@ -703,8 +705,8 @@ const StyleTrainer: React.FC = () => {
                     disabled={!status.canCreate || modelCreationState.isCreating || modelCreationState.isTraining}
                     onClick={handleStartTraining}
                   >
-                    {modelCreationState.isCreating ? 'Creating...' :
-                     modelCreationState.isTraining ? 'Training...' : 'Start Training'}
+                    {modelCreationState.isCreating ? t('styleTrainer.creating') :
+                      modelCreationState.isTraining ? t('styleTrainer.training') : t('styleTrainer.startTraining')}
                   </button>
                 </div>
               </div>
@@ -714,7 +716,7 @@ const StyleTrainer: React.FC = () => {
             {status.isUploading && (
               <div className="absolute inset-0 z-50 flex items-center justify-center" style={{ background: '#FFFFFFB2', backdropFilter: 'blur(20px)' }}>
                 <div className="flex flex-col items-center w-[27.375rem] h-[3.125rem] gap-5">
-                  <span className="font-lexend font-normal text-2xl leading-[100%] text-[#1F2937]">Uploading {imageUploadState.currentUploadIndex}/{imageUploadState.totalFilesToUpload}</span>
+                  <span className="font-lexend font-normal text-2xl leading-[100%] text-[#1F2937]">{t('styleTrainer.uploading')} {imageUploadState.currentUploadIndex}/{imageUploadState.totalFilesToUpload}</span>
                   <div className="w-[27.375rem] h-1.5 rounded-[1.875rem] bg-[#E5E7EB] overflow-hidden">
                     <div className="h-full rounded-[1.875rem] bg-[#0900FF] transition-all" style={{ width: `${status.uploadProgress}%` }}></div>
                   </div>

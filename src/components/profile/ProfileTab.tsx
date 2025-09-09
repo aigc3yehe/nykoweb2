@@ -1,4 +1,5 @@
 import React from 'react'
+import { useI18n } from '../../hooks/useI18n'
 
 type ProfileTab = 'published' | 'liked'
 
@@ -8,9 +9,10 @@ interface ProfileTabProps {
 }
 
 const ProfileTab: React.FC<ProfileTabProps> = ({ activeTab, onTabChange }) => {
+  const { t } = useI18n()
   const tabs = [
-    { key: 'published' as ProfileTab, label: 'Published' },
-    { key: 'liked' as ProfileTab, label: 'Liked' }
+    { key: 'published' as ProfileTab, label: t('profile.published') },
+    { key: 'liked' as ProfileTab, label: t('profile.liked') }
   ]
 
   return (

@@ -4,6 +4,7 @@ import PictureIcon from '../../assets/mavae/Picture.svg'
 import PictureIconDark from '../../assets/mavae/dark/Picture.svg'
 import GptIcon from '../../assets/mavae/gpt.svg'
 import GptIconDark from '../../assets/mavae/dark/gpt.svg'
+import { useI18n } from '../../hooks/useI18n'
 
 type ProfileTab = 'published' | 'liked'
 type ContentTypeFilter = 'images' | 'workflows'
@@ -14,6 +15,7 @@ interface ProfileActionsProps {
 }
 
 const ProfileActions: React.FC<ProfileActionsProps> = ({onFilterChange }) => {
+  const { t } = useI18n()
   const [selectedOption, setSelectedOption] = useState<ContentTypeFilter>('images')
 
   const options: ContentTypeFilter[] = ['images', 'workflows']
@@ -61,7 +63,7 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({onFilterChange }) => {
                 ? "text-text-main dark:text-text-main-dark" // 选中状态字体颜色
                 : "text-text-secondary dark:text-text-secondary-dark" // 未选中状态字体颜色
             )}>
-              {option === 'workflows' ? 'Cases' : 'Images'}
+              {option === 'workflows' ? t('profile.cases') : t('profile.images')}
             </span>
           </button>
         ))}

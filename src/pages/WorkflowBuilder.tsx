@@ -36,10 +36,12 @@ import {
 import { uploadFileToS3 } from '../store/imagesStore'
 import { userStateAtom } from '../store/loginStore'
 import { useLang, withLangPrefix } from '../hooks/useLang'
+import { useI18n } from '../hooks/useI18n'
 
 const WorkflowBuilder: React.FC = () => {
   const navigate = useNavigate()
   const lang = useLang()
+  const { t } = useI18n()
 
   // Store状态
   const [availableModels] = useAtom(availableModelsAtom)
@@ -163,7 +165,7 @@ const WorkflowBuilder: React.FC = () => {
 
   const handleFileUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      console.error('Please select an image file')
+      console.error(t('builder.pleaseSelectAnImageFile'))
       return
     }
 
@@ -176,7 +178,7 @@ const WorkflowBuilder: React.FC = () => {
       const uploadedUrl = await uploadFileToS3(file)
       updateWorkflowForm({ cover: uploadedUrl })
     } catch (error) {
-      console.error('Failed to upload cover image:', error)
+      console.error(t('builder.failedToUploadCoverImage'), error)
     } finally {
       setIsUploading(false)
     }
@@ -218,7 +220,7 @@ const WorkflowBuilder: React.FC = () => {
   // Reference Image 相关函数
   const handleRefImageUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      console.error('Please select an image file')
+      console.error(t('builder.pleaseSelectAnImageFile'))
       return
     }
 
@@ -231,7 +233,7 @@ const WorkflowBuilder: React.FC = () => {
       // 只保留最后一次上传的参考图，替换而不是追加
       updateWorkflowForm({ referenceImages: [uploadedUrl] })
     } catch (error) {
-      console.error('Failed to upload reference image:', error)
+      console.error(t('builder.failedToUploadReferenceImage'), error)
       // 如果上传失败，清除图片
       handleRemoveRefImage()
     } finally {
@@ -276,7 +278,7 @@ const WorkflowBuilder: React.FC = () => {
   const handleBuilder = async () => {
     // 检查用户是否已登录
     if (!userState.isAuthenticated || !userState.userDetails?.did) {
-      console.error('User not authenticated or missing user ID')
+      console.error(t('builder.userNotAuthenticated'))
       return
     }
 
@@ -286,7 +288,7 @@ const WorkflowBuilder: React.FC = () => {
       const result = await createWorkflow(userId)
       if (result && result.workflow_id) {
         // 创建成功，显示成功提示
-        setSuccessMessage('Workflow created successfully!')
+        setSuccessMessage(t('builder.workflowCreatedSuccessfully'))
 
         // 重置本地状态
         setCover(null)
@@ -312,7 +314,7 @@ const WorkflowBuilder: React.FC = () => {
       <div className="flex items-center justify-center h-full w-full p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-link-default dark:border-link-default-dark mx-auto mb-4"></div>
-          <span className="font-switzer text-sm text-text-secondary dark:text-text-secondary-dark">Loading AI providers...</span>
+          <span className="font-switzer text-sm text-text-secondary dark:text-text-secondary-dark">{t('builder.loadingAiProviders')}</span>
         </div>
       </div>
     )
@@ -323,12 +325,12 @@ const WorkflowBuilder: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-full w-full p-8">
         <div className="text-center">
-          <span className="font-switzer text-sm text-red-500">Error: {providersError}</span>
+          <span className="font-switzer text-sm text-red-500">{t('builder.error')} {providersError}</span>
           <button
             onClick={() => fetchAiProviders()}
             className="mt-4 px-4 py-2 bg-link-default dark:bg-link-default-dark text-white rounded-lg hover:bg-link-pressed dark:hover:bg-link-pressed transition-colors"
           >
-            Retry
+{t('builder.retry')}
           </button>
         </div>
       </div>
@@ -339,7 +341,7 @@ const WorkflowBuilder: React.FC = () => {
     <div className="flex flex-col h-full w-full">
       {/* 移动端标题 */}
       <div className="lg:hidden h-16 flex items-center gap-6 p-4 bg-secondary dark:bg-secondary-dark">
-        <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark">Builder</span>
+        <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark">{t('builder.workflow')}</span>
       </div>
 
       {/* 三个组件容器 */}
@@ -369,20 +371,20 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">1</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Case Info</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">{t('builder.caseInfo')}</span>
             </div>
 
             {/* Name 输入框组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Name</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.caseName')}</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入框 */}
               <input
                 className="w-[19.5rem] h-10 pt-0 pr-3 pb-0 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="A name matches its features"
+                placeholder={t('builder.caseNamePlaceholder')}
                 value={workflowForm.name}
                 onChange={(e) => updateWorkflowForm({ name: e.target.value })}
                 onFocus={() => setNameFocus(true)}
@@ -393,11 +395,11 @@ const WorkflowBuilder: React.FC = () => {
             {/* Description 输入框组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Description</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.description')}</span>
               {/* 输入框 */}
               <textarea
                 className="w-[19.5rem] h-[6.75rem] pt-3 pr-3 pb-3 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark resize-none focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="How can we use it to make the most of this case's features?"
+                placeholder={t('builder.descriptionPlaceholder')}
                 value={workflowForm.description}
                 onChange={(e) => updateWorkflowForm({ description: e.target.value })}
                 onFocus={() => setDescFocus(true)}
@@ -408,7 +410,7 @@ const WorkflowBuilder: React.FC = () => {
             {/* Cover Image 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Cover Image</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.coverImage')}</span>
               {/* 图片上传组件 */}
               {cover && coverUrl ? (
                 <div className="relative w-[8.125rem] h-[8.125rem] gap-1 rounded-[0.625rem]">
@@ -474,14 +476,14 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">2</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Workflow</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">{t('builder.workflow')}</span>
             </div>
 
             {/* Input Type 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">User Input</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.userInput')}</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入类型选择 */}
@@ -505,7 +507,7 @@ const WorkflowBuilder: React.FC = () => {
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Models</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.models')}</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* Model 选择 */}
@@ -542,13 +544,13 @@ const WorkflowBuilder: React.FC = () => {
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Prompt</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.casePrompt')}</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入框 */}
               <textarea
                 className="w-[19.5rem] h-[6.75rem] pt-3 pr-3 pb-3 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark resize-none focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="This is the system prompt for this case. Each time the case runs, this set of prompts will be used."
+                placeholder={t('builder.casePromptPlaceholder')}
                 value={workflowForm.prompt}
                 onChange={(e) => updateWorkflowForm({ prompt: e.target.value })}
                 onFocus={() => setPromptFocus(true)}
@@ -559,7 +561,7 @@ const WorkflowBuilder: React.FC = () => {
             {/* Reference Image 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Reference Image</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.caseReferenceImage')}</span>
               {/* 图片上传组件 */}
               {refImage && refImageUrl ? (
                 <div className="relative w-[8.125rem] h-[8.125rem] gap-1 rounded-[0.625rem]">
@@ -625,13 +627,13 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">3</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Case Output</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">{t('builder.caseOutput')}</span>
             </div>
 
             {/* Type 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-secondary dark:text-text-secondary-dark">Case Output</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-secondary dark:text-text-secondary-dark">{t('builder.caseOutput')}</span>
               {/* 输出类型选择 */}
               <div className="w-[19.5rem] h-10 flex gap-2">
                 {availableOutputTypes.map(type => (
@@ -652,7 +654,7 @@ const WorkflowBuilder: React.FC = () => {
               disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
               className="w-[19.5rem] h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
             >
-              {isCreatingWorkflow ? 'Creating...' : 'Save The Workflow'}
+              {isCreatingWorkflow ? t('builder.creating') : t('builder.saveTheWorkflow')}
             </button>
           </div>
         </div>
@@ -682,20 +684,20 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">1</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Case Info</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">{t('builder.caseInfo')}</span>
             </div>
 
             {/* Name 输入框组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Name</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.caseName')}</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入框 */}
               <input
                 className="w-full h-10 pt-0 pr-3 pb-0 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="A name matches its features"
+                placeholder={t('builder.caseNamePlaceholder')}
                 value={workflowForm.name}
                 onChange={(e) => updateWorkflowForm({ name: e.target.value })}
                 onFocus={() => setNameFocus(true)}
@@ -706,11 +708,11 @@ const WorkflowBuilder: React.FC = () => {
             {/* Description 输入框组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Description</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.description')}</span>
               {/* 输入框 */}
               <textarea
                 className="w-full h-[6.75rem] pt-3 pr-3 pb-3 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark resize-none focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="How can we use it to make the most of this case's features?"
+                placeholder={t('builder.descriptionPlaceholder')}
                 value={workflowForm.description}
                 onChange={(e) => updateWorkflowForm({ description: e.target.value })}
                 onFocus={() => setDescFocus(true)}
@@ -721,7 +723,7 @@ const WorkflowBuilder: React.FC = () => {
             {/* Cover Image 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Cover Image</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.coverImage')}</span>
               {/* 图片上传组件 */}
               {cover && coverUrl ? (
                 <div className="relative w-[8.125rem] h-[8.125rem] gap-1 rounded-[0.625rem]">
@@ -787,14 +789,14 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">2</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Workflow</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">{t('builder.workflow')}</span>
             </div>
 
             {/* Input Type 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">User Input</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.userInput')}</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入类型选择 */}
@@ -818,7 +820,7 @@ const WorkflowBuilder: React.FC = () => {
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Models</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.models')}</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* Model 选择 */}
@@ -855,13 +857,13 @@ const WorkflowBuilder: React.FC = () => {
             <div className="flex flex-col gap-1">
               {/* 标题 */}
               <div className="flex items-center gap-1">
-                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Prompt</span>
+                <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.casePrompt')}</span>
                 <span className="font-switzer font-normal text-sm leading-5 align-middle text-red-500">*</span>
               </div>
               {/* 输入框 */}
               <textarea
                 className="w-full h-[6.75rem] pt-3 pr-3 pb-3 pl-3 gap-2 rounded-xl border border-line-subtle dark:border-line-subtle-dark bg-tertiary dark:bg-tertiary-dark font-switzer font-medium text-sm leading-[100%] align-middle text-text-main dark:text-text-main-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark resize-none focus:outline-none focus:ring-2 focus:ring-link-default dark:focus:ring-link-default-dark focus:border-transparent"
-                placeholder="This is the system prompt for this case. Each time the case runs, this set of prompts will be used."
+                placeholder={t('builder.casePromptPlaceholder')}
                 value={workflowForm.prompt}
                 onChange={(e) => updateWorkflowForm({ prompt: e.target.value })}
                 onFocus={() => setPromptFocus(true)}
@@ -872,7 +874,7 @@ const WorkflowBuilder: React.FC = () => {
             {/* Reference Image 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">Case Reference Image</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-main dark:text-text-main-dark">{t('builder.caseReferenceImage')}</span>
               {/* 图片上传组件 */}
               {refImage && refImageUrl ? (
                 <div className="relative w-[8.125rem] h-[8.125rem] gap-1 rounded-[0.625rem]">
@@ -938,13 +940,13 @@ const WorkflowBuilder: React.FC = () => {
                 <span className="font-roboto font-bold text-base leading-6 text-center text-white">3</span>
               </div>
               {/* 标题 */}
-              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">Case Output</span>
+              <span className="font-switzer font-bold text-xl leading-6 text-text-main dark:text-text-main-dark">{t('builder.caseOutput')}</span>
             </div>
 
             {/* Type 组件 */}
             <div className="flex flex-col gap-1">
               {/* 标题 */}
-              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-secondary dark:text-text-secondary-dark">Case Output</span>
+              <span className="font-switzer font-normal text-sm leading-5 align-middle text-text-secondary dark:text-text-secondary-dark">{t('builder.caseOutput')}</span>
               {/* 输出类型选择 */}
               <div className="w-[19.5rem] h-10 flex gap-2">
                 {availableOutputTypes.map(type => (
@@ -965,7 +967,7 @@ const WorkflowBuilder: React.FC = () => {
               disabled={isCreatingWorkflow || isUploading || isUploadingRefImage || !workflowForm.name.trim() || !userState.isAuthenticated}
               className="w-full h-12 pr-4 pl-4 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
             >
-              {isCreatingWorkflow ? 'Creating...' : 'Save The Workflow'}
+              {isCreatingWorkflow ? t('builder.creating') : t('builder.saveTheWorkflow')}
             </button>
           </div>
         </div>

@@ -9,8 +9,10 @@ import {
 } from '../../store/contentsStore'
 import InspirationSectionHeader from './InspirationSectionHeader'
 import InspirationImageCard from './InspirationImageCard'
+import { useI18n } from '../../hooks/useI18n'
 
 const InspirationFeed: React.FC = () => {
+  const { t } = useI18n()
   const [contentsState] = useAtom(inspirationFeedAtom)
   const [, filterByType] = useAtom(filterContentsByTypeAtom)
   const [, loadMore] = useAtom(loadMoreContentsAtom)
@@ -89,7 +91,7 @@ const InspirationFeed: React.FC = () => {
   return (
     <div className="w-full px-4 md:px-8">
       <InspirationSectionHeader
-        title="Inspiration Feed"
+        title={t('home.inspirationFeed')}
         selectedFilter={selectedFilter}
         onFilterChange={handleFilterChange}
       />
@@ -97,23 +99,23 @@ const InspirationFeed: React.FC = () => {
       {/* 瀑布流内容 */}
       {contentsState.isLoading && contentsState.items.length === 0 ? (
         <div className="h-64 flex items-center justify-center">
-          <span className="text-gray-500">Loading...</span>
+          <span className="text-gray-500">{t('home.loading')}</span>
         </div>
       ) : contentsState.error && contentsState.items.length === 0 ? (
         <div className="h-64 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-red-500 mb-2">Failed to load contents</p>
+            <p className="text-red-500 mb-2">{t('home.failedToLoad')} {t('home.all').toLowerCase()}</p>
             <button
               onClick={() => loadContents(selectedFilter, true)}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
             >
-              Retry
+              {t('home.retry')}
             </button>
           </div>
         </div>
       ) : contentsState.items.length === 0 ? (
         <div className="h-64 flex items-center justify-center">
-          <span className="text-gray-500">No contents found</span>
+          <span className="text-gray-500">{t('home.noContentsFound')}</span>
         </div>
       ) : (
         <>
@@ -134,7 +136,7 @@ const InspirationFeed: React.FC = () => {
           {/* 加载更多指示器 */}
           {contentsState.isLoading && contentsState.items.length > 0 && (
             <div className="py-8 flex items-center justify-center">
-              <span className="text-gray-500">Loading more...</span>
+              <span className="text-gray-500">{t('home.loadingMore')}</span>
             </div>
           )}
 
@@ -145,7 +147,7 @@ const InspirationFeed: React.FC = () => {
                 onClick={handleLoadMore}
                 className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
-                Load More
+                {t('home.loadMore')}
               </button>
             </div>
           )}
@@ -153,7 +155,7 @@ const InspirationFeed: React.FC = () => {
           {/* 没有更多数据提示 */}
           {!contentsState.hasMore && contentsState.items.length > 0 && (
             <div className="py-8 flex items-center justify-center">
-              <span className="text-gray-400">No more contents</span>
+              <span className="text-gray-400">{t('home.noMoreContents')}</span>
             </div>
           )}
         </>

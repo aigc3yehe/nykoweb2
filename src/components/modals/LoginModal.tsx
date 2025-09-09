@@ -60,7 +60,7 @@ const LoginModal: React.FC = () => {
           />
           {/* 标题 */}
           <h2 className="relative z-10 font-lexend font-normal text-[0.875rem] leading-none text-white capitalize text-center">
-            Login or sign up
+            {t('modal.loginOrSignup')}
           </h2>
           {/* 关闭按钮 */}
           <button
@@ -110,7 +110,7 @@ const LoginModal: React.FC = () => {
               <img src={GoogleIcon} alt="Google" className="w-4 h-4 flex-shrink-0" />
               {/* 文本 */}
               <span className="font-lexend font-normal text-[0.875rem] leading-none text-[#4B5563] capitalize">
-                Continue with Google
+                {t('modal.continueWithGoogle')}
               </span>
             </div>
           </button>

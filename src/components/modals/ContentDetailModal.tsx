@@ -5,6 +5,7 @@ import { openChatSidebar } from '../../store/chatSidebarStore'
 import { clearChat, addMessage, sendMessage } from '../../store/assistantStore'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
+import { useI18n } from '../../hooks/useI18n'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 
 // 导入图标
@@ -28,6 +29,7 @@ import BookmarkNormalIcon from '../../assets/mavae/Bookmark_normal.svg'
 import UseIconNew from '../../assets/mavae/use_white.svg'
 
 const ContentDetailModal: React.FC = () => {
+  const { t } = useI18n()
   const [state] = useAtom(contentDetailAtom)
   const closeModal = useSetAtom(closeContentDetailAtom)
   const toggleLike = useSetAtom(toggleLikeContentAtom)
@@ -106,7 +108,7 @@ const ContentDetailModal: React.FC = () => {
     const messageType = content.source === 'workflow' ? 'workflow_generate_result' : 'generate_result'
 
     addMessageToChat(
-      'Here is the image you want to modify:',
+      t('modal.hereIsImageToModify'),
       messageType,
       task_id,
       content.url,
@@ -116,7 +118,7 @@ const ContentDetailModal: React.FC = () => {
     )
 
     // 发送修改消息
-    sendMessageAction('I want to modify this image.')
+    sendMessageAction(t('modal.iWantToModifyThisImage'))
   }
 
   const handleAnimateClick = () => {
@@ -142,7 +144,7 @@ const ContentDetailModal: React.FC = () => {
     const messageType = content.source === 'workflow' ? 'workflow_generate_result' : 'generate_result'
 
     addMessageToChat(
-      'Here is the image you want to animate:',
+      t('modal.hereIsImageToAnimate'),
       messageType,
       task_id,
       content.url,
@@ -152,7 +154,7 @@ const ContentDetailModal: React.FC = () => {
     )
 
     // 发送动画化消息
-    sendMessageAction('I want to animate this image.')
+    sendMessageAction(t('modal.iWantToAnimateThisImage'))
   }
 
   const handleCreateWithThisAgentCaseClick = () => {
@@ -173,7 +175,7 @@ const ContentDetailModal: React.FC = () => {
     clearChatMessages()
 
     // 发送创建与这个Agent Case消息
-    sendMessageAction('I want to generate an image.')
+    sendMessageAction(t('modal.iWantToGenerateAnImage'))
   }
 
   const handleCopyPrompt = () => {
@@ -186,7 +188,7 @@ const ContentDetailModal: React.FC = () => {
     if (!content?.url) {
       return (
         <div className="w-full h-full bg-design-bg-light-gray rounded-lg flex items-center justify-center">
-          <span className="text-design-medium-gray">No media</span>
+          <span className="text-design-medium-gray">{t('modal.noMedia')}</span>
         </div>
       )
     }
@@ -217,7 +219,7 @@ const ContentDetailModal: React.FC = () => {
   }
 
   const getSourceTitle = () => {
-    return content?.source === 'workflow' ? 'Workflow' : 'Style'
+    return content?.source === 'workflow' ? t('modal.workflow') : t('modal.style')
   }
 
 
@@ -225,7 +227,7 @@ const ContentDetailModal: React.FC = () => {
     if (content?.width && content?.height) {
       return `${content.width} × ${content.height}`
     }
-    return 'Unknown'
+    return t('modal.unknown')
   }
 
   const getPrompt = () => {
@@ -235,7 +237,7 @@ const ContentDetailModal: React.FC = () => {
     if (content?.prompt) {
       return content?.prompt
     }
-    return 'No prompt available'
+    return t('modal.noPromptAvailable')
   }
 
   return (
@@ -286,7 +288,7 @@ const ContentDetailModal: React.FC = () => {
                   {/* Source 类型标签 - 右上角 */}
                   <div className="absolute top-3 right-3 h-8 px-2 rounded-full bg-black/20 flex items-center justify-center">
                     <span className="font-switzer font-medium text-base leading-6 text-white text-center">
-                      {content?.source === 'workflow' ? 'Workflow' : 'Style'}
+                      {content?.source === 'workflow' ? t('modal.workflow') : t('modal.style')}
                     </span>
                   </div>
 
@@ -346,7 +348,7 @@ const ContentDetailModal: React.FC = () => {
                         className="w-4 h-4"
                       />
                       <span className="font-lexend font-normal text-sm leading-[100%] text-center text-link-default dark:text-link-default-dark">
-                        Modify
+                        {t('modal.modify')}
                       </span>
                     </button>
 
@@ -362,7 +364,7 @@ const ContentDetailModal: React.FC = () => {
                         className="w-4 h-4"
                       />
                       <span className="font-lexend font-normal text-sm leading-[100%] text-center text-link-default dark:text-link-default-dark">
-                        Animate
+                        {t('modal.animate')}
                       </span>
                     </button>
                   </>
@@ -405,7 +407,7 @@ const ContentDetailModal: React.FC = () => {
 
                 {/* 作者名 */}
                 <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-                  {content?.user?.name || 'Unknown'}
+                  {content?.user?.name || t('modal.unknown')}
                 </span>
               </div>
             </div>
@@ -417,7 +419,7 @@ const ContentDetailModal: React.FC = () => {
                 {/* Prompt第一行：标题和复制按钮 */}
                 <div className="flex items-center justify-between h-5">
                   <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-                    Prompt
+                    {t('modal.prompt')}
                   </span>
                   <button
                     onClick={handleCopyPrompt}
@@ -430,7 +432,7 @@ const ContentDetailModal: React.FC = () => {
                       size="sm"
                     />
                     <span className="font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark">
-                      Copy
+                      {t('modal.copy')}
                     </span>
                   </button>
                 </div>
@@ -448,7 +450,7 @@ const ContentDetailModal: React.FC = () => {
                         onClick={() => setIsPromptExpanded(!isPromptExpanded)}
                         className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start mt-2"
                       >
-                        {isPromptExpanded ? 'Show less' : 'Show more'}
+                        {isPromptExpanded ? t('modal.showLess') : t('modal.showMore')}
                       </button>
                     )}
                   </div>
@@ -459,7 +461,7 @@ const ContentDetailModal: React.FC = () => {
               <div className="flex items-center justify-between h-5">
                 {/* 左侧标题 */}
                 <span className="font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark">
-                  Dimensions
+                  {t('modal.dimensions')}
                 </span>
 
                 {/* 右侧内容 */}
@@ -540,7 +542,7 @@ const ContentDetailModal: React.FC = () => {
                     className="flex items-center justify-center gap-1 h-10 px-4 rounded-full bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors flex-1"
                   >
                     <span className="font-switzer font-medium text-sm leading-5 text-white">
-                      Create With this Agent Case
+                      {t('modal.createWithThisAgentCase')}
                     </span>
                   </button>
                 </div>

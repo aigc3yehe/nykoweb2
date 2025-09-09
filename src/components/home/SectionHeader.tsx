@@ -10,6 +10,7 @@ import RightIconDark from '../../assets/mavae/dark/right.svg'
 import RightDisabledIconDark from '../../assets/mavae/dark/right_disabled.svg'
 import Right2Icon from '../../assets/mavae/right2.svg'
 import Right2IconDark from '../../assets/mavae/dark/right2.svg'
+import { useI18n } from '../../hooks/useI18n'
 
 interface SectionHeaderProps {
   title: string
@@ -28,6 +29,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   canGoPrevious = true,
   canGoNext = true
 }) => {
+  const { t } = useI18n()
   return (
     <div className="flex items-center justify-between h-6 md:h-10 mb-4"> {/* height: 40px */}
       {/* 移动端 - 只有标题和右箭头 */}
@@ -38,10 +40,10 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
         <button
             onClick={onViewAll}
             className="w-6 h-6 flex items-center justify-center" // 24x24
-            aria-label="View All"
+            aria-label={t('home.viewAll')}
         >
-          <img src={Right2Icon} alt="View All" className="w-6 h-6 block dark:hidden" />
-          <img src={Right2IconDark} alt="View All" className="w-6 h-6 hidden dark:block" />
+          <img src={Right2Icon} alt={t('home.viewAll')} className="w-6 h-6 block dark:hidden" />
+          <img src={Right2IconDark} alt={t('home.viewAll')} className="w-6 h-6 hidden dark:block" />
         </button>
       </div>
       {/* 左侧标题 */}
@@ -61,17 +63,17 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
               "flex-1 flex items-center justify-center transition-opacity",
               canGoPrevious ? "hover:opacity-80" : "opacity-40 cursor-not-allowed"
             )}
-            aria-label="Previous"
+            aria-label={t('home.previous')}
           >
             {canGoPrevious ? (
               <>
-                <img src={LeftIcon} alt="Previous" className="w-5 h-5 block dark:hidden" /> {/* 20x20 */}
-                <img src={LeftIconDark} alt="Previous" className="w-5 h-5 hidden dark:block" />
+                <img src={LeftIcon} alt={t('home.previous')} className="w-5 h-5 block dark:hidden" /> {/* 20x20 */}
+                <img src={LeftIconDark} alt={t('home.previous')} className="w-5 h-5 hidden dark:block" />
               </>
             ) : (
               <>
-                <img src={LeftDisabledIcon} alt="Previous" className="w-5 h-5 block dark:hidden" />
-                <img src={LeftDisabledIconDark} alt="Previous" className="w-5 h-5 hidden dark:block" />
+                <img src={LeftDisabledIcon} alt={t('home.previous')} className="w-5 h-5 block dark:hidden" />
+                <img src={LeftDisabledIconDark} alt={t('home.previous')} className="w-5 h-5 hidden dark:block" />
               </>
             )}
           </button>
@@ -84,17 +86,17 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
               "flex-1 flex items-center justify-center transition-opacity",
               canGoNext ? "hover:opacity-80" : "opacity-40 cursor-not-allowed"
             )}
-            aria-label="Next"
+            aria-label={t('home.next')}
           >
             {canGoNext ? (
               <>
-                <img src={RightIcon} alt="Next" className="w-5 h-5 block dark:hidden" /> {/* 20x20 */}
-                <img src={RightIconDark} alt="Next" className="w-5 h-5 hidden dark:block" />
+                <img src={RightIcon} alt={t('home.next')} className="w-5 h-5 block dark:hidden" /> {/* 20x20 */}
+                <img src={RightIconDark} alt={t('home.next')} className="w-5 h-5 hidden dark:block" />
               </>
             ) : (
               <>
-                <img src={RightDisabledIcon} alt="Next" className="w-5 h-5 block dark:hidden" />
-                <img src={RightDisabledIconDark} alt="Next" className="w-5 h-5 hidden dark:block" />
+                <img src={RightDisabledIcon} alt={t('home.next')} className="w-5 h-5 block dark:hidden" />
+                <img src={RightDisabledIconDark} alt={t('home.next')} className="w-5 h-5 hidden dark:block" />
               </>
             )}
           </button>
@@ -106,7 +108,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           className="h-9 px-4 rounded-full hover:bg-quaternary dark:hover:bg-quaternary-dark transition-colors" // height: 36px, padding: 16px, gap: 4px
         >
           <span className="font-lexend font-normal text-sm leading-none text-text-main dark:text-text-main-dark">
-            View All
+            {t('home.viewAll')}
           </span>
         </button>
       </div>

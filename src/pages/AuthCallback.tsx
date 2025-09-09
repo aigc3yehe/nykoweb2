@@ -3,8 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang, withLangPrefix } from '../hooks/useLang'
 import { useSetAtom } from 'jotai'
 import { loginAtom, hideLoginModalAtom } from '../store/loginStore'
+import { useI18n } from '../hooks/useI18n'
 
 const AuthCallback: React.FC = () => {
+  const { t } = useI18n()
   const navigate = useNavigate()
   const lang = useLang()
   const [searchParams] = useSearchParams()
@@ -71,10 +73,10 @@ const AuthCallback: React.FC = () => {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-link-default dark:border-link-default-dark mx-auto mb-4"></div>
             <h2 className="text-xl font-semibold text-text-main dark:text-text-main-dark mb-2 font-switzer">
-              Authenticating...
+              {t('auth.authenticating')}
             </h2>
             <p className="text-text-secondary dark:text-text-secondary-dark font-switzer">
-              Please wait while we log you in.
+              {t('auth.pleaseWaitWhileWeLogYouIn')}
             </p>
           </div>
         )}
@@ -97,10 +99,10 @@ const AuthCallback: React.FC = () => {
               </svg>
             </div>
             <h2 className="text-xl font-semibold text-text-main dark:text-text-main-dark mb-2 font-switzer">
-              Login Successful!
+              {t('auth.loginSuccessful')}
             </h2>
             <p className="text-text-secondary dark:text-text-secondary-dark font-switzer">
-              Redirecting you to the homepage...
+              {t('auth.redirectingYouToTheHomepage')}
             </p>
           </div>
         )}
@@ -123,7 +125,7 @@ const AuthCallback: React.FC = () => {
               </svg>
             </div>
             <h2 className="text-xl font-semibold text-text-main dark:text-text-main-dark mb-2 font-switzer">
-              Authentication Failed
+              {t('auth.authenticationFailed')}
             </h2>
             <p className="text-text-secondary dark:text-text-secondary-dark mb-4 font-switzer">
               {error}
@@ -132,7 +134,7 @@ const AuthCallback: React.FC = () => {
               onClick={handleRetry}
               className="px-4 py-2 bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark text-text-inverse dark:text-text-inverse-dark rounded-lg transition-colors font-switzer"
             >
-              Return to Homepage
+              {t('auth.returnToHomepage')}
             </button>
           </div>
         )}

@@ -246,7 +246,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
     if (workflow?.user?.name) {
       return workflow.user.name
     }
-    return "Anonymous"
+    return t('workflow.anonymous')
   }
 
   // 检查文本是否被截断 - 使用真实的DOM测量
@@ -291,7 +291,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
     // 1. 打开右侧聊天窗口（包含登录检查）
     // 2. 发送消息：I want to use this workflow.
     openChat()
-    sendMessageAction('I want to use this workflow.')
+    sendMessageAction(t('workflow.useThisWorkflow'))
   }
 
   const handleShare = async () => {
@@ -321,7 +321,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
     showDialog({
       open: true,
       title: t('dialog.deleteWorkflow.title'),
-      message: t('dialog.deleteWorkflow.message', { name: workflow.name }),
+      message: t('dialog.deleteWorkflow.message', { name: workflow.name || 'this workflow' }),
       onConfirm: async () => {
         try {
           if (userState.userDetails?.did) {
@@ -351,7 +351,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
         } catch (error) {
           console.error('Error deleting workflow:', error)
           addToast({
-            message: 'Error deleting workflow',
+            message: t('workflow.errorDeletingWorkflow'),
             type: 'error'
           })
           // 关闭弹窗
@@ -405,7 +405,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
           {workflow.name}
         </h1>
 
-        {/* 移动端 - 点赞和分析按钮行 */}
+          {/* 移动端 - 点赞和分析按钮行 */}
         <div className="flex items-center gap-6 h-5 md:hidden">
           {/* 点赞按钮 */}
           <button
@@ -438,7 +438,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
               size="lg"
             />
             <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-              Share
+              {t('workflow.share')}
             </span>
           </button>
         </div>
@@ -468,7 +468,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
           {/* Description第一行：标题 */}
           <div className="flex items-center h-5">
             <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-              Description
+              {t('workflow.description')}
             </span>
           </div>
 
@@ -480,7 +480,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
                 className={`font-switzer font-medium text-xs leading-5 text-text-secondary dark:text-text-secondary-dark ${isDescriptionExpanded ? '' : 'line-clamp-2'
                   }`}
               >
-                {workflow.description || 'No description available'}
+                {workflow.description || t('workflow.noDescriptionAvailable')}
               </p>
 
               {/* 展开/收起按钮 */}
@@ -491,7 +491,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
                   }}
                   className="font-switzer font-medium text-xs leading-5 text-link-default dark:text-link-default-dark self-start mt-2"
                 >
-                  {isDescriptionExpanded ? 'Show less' : 'Show more'}
+                  {isDescriptionExpanded ? t('workflow.showLess') : t('workflow.showMore')}
                 </button>
               )}
             </div>
@@ -501,17 +501,17 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
         {/* 第四行：Builder信息 */}
         <div className="flex flex-col gap-2">
           <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-            Builder
+            {t('workflow.builder')}
           </span>
           <div className="flex flex-col">
             {/* 第一行：User Input */}
-            {renderBuilderStep(1, 'User Input', workflow.input_type ? workflow.input_type.split(',').map((t: string) => t.trim()) : [])}
+            {renderBuilderStep(1, t('workflow.userInput'), workflow.input_type ? workflow.input_type.split(',').map((t: string) => t.trim()) : [])}
 
             {/* 第二行：Models */}
-            {renderBuilderStep(2, 'Models', workflow.model ? [workflow.model] : [], workflow.provider)}
+            {renderBuilderStep(2, t('workflow.models'), workflow.model ? [workflow.model] : [], workflow.provider)}
 
             {/* 第三行：Case Output */}
-            {renderBuilderStep(3, 'Case Output', workflow.output_type ? workflow.output_type.split(',').map((t: string) => t.trim()) : [])}
+            {renderBuilderStep(3, t('workflow.caseOutput'), workflow.output_type ? workflow.output_type.split(',').map((t: string) => t.trim()) : [])}
           </div>
         </div>
       </div>
@@ -532,7 +532,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
               size="lg"
             />
             <span className="font-switzer font-medium text-sm leading-5 text-white">
-              Create With this Agent Case
+              {t('workflow.createWithThisAgentCase')}
             </span>
           </button>
 
@@ -552,7 +552,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
                   className="w-5 h-5"
                 />
                 <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-                  Edit
+                  {t('workflow.edit')}
                 </span>
               </button>
 
@@ -560,7 +560,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
               <button
                 onClick={handleDelete}
                 className="hidden md:flex items-center justify-center p-2.5 w-10 h-10 rounded-full bg-quaternary dark:bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                title="Delete workflow"
+                title={t('workflow.deleteWorkflow')}
               >
                 <ThemeAdaptiveIcon
                   lightIcon={WorkflowDeleteIcon}
@@ -585,7 +585,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
               size="lg"
             />
             <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-              Share
+              {t('workflow.share')}
             </span>
           </button>
 
@@ -625,7 +625,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
                 className="w-5 h-5"
               />
               <span className="font-switzer font-medium text-sm leading-5 text-text-main dark:text-text-main-dark">
-                Edit
+                {t('workflow.edit')}
               </span>
             </button>
 
@@ -633,7 +633,7 @@ const WorkflowInfo: React.FC<WorkflowInfoProps> = ({ workflow, className = '' })
             <button
               onClick={handleDelete}
               className="flex items-center justify-center w-10 h-10 rounded-full bg-quaternary-dark hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              title="Delete workflow"
+              title={t('workflow.deleteWorkflow')}
             >
               <ThemeAdaptiveIcon
                 lightIcon={WorkflowDeleteIcon}

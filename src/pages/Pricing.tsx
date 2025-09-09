@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { useSearchParams } from 'react-router-dom'
-import { selectedPaymentMethodAtom, showPaymentDropdownAtom, pricingAtom } from '../store/pricingStore'
+import { selectedPaymentMethodAtom, showPaymentDropdownAtom, createTranslatedPricingPlans } from '../store/pricingStore'
 import { useI18n } from '../hooks/useI18n'
 import { paymentService } from '../services/paymentService'
 import { showToastAtom } from '../store/imagesStore'
@@ -30,7 +30,6 @@ const Pricing: React.FC = React.memo(() => {
   const [searchParams] = useSearchParams()
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useAtom(selectedPaymentMethodAtom)
   const [showPaymentDropdown, setShowPaymentDropdown] = useAtom(showPaymentDropdownAtom)
-  const [pricingState] = useAtom(pricingAtom)
   const [userState] = useAtom(userStateAtom)
   const showToast = useSetAtom(showToastAtom)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -42,6 +41,11 @@ const Pricing: React.FC = React.memo(() => {
     { id: 'stripe' as const, name: 'Stripe', icon: StripeIcon },
     { id: 'hel' as const, name: 'Hel', icon: HelIcon }
   ]
+
+  // 使用useMemo缓存翻译后的plans，避免无限循环
+  const translatedPlans = useMemo(() => {
+    return createTranslatedPricingPlans(t)
+  }, [t])
 
   // 检测移动端
   useEffect(() => {
@@ -69,7 +73,7 @@ const Pricing: React.FC = React.memo(() => {
       // 支付取消
       showToast({
         severity: 'info',
-        message: 'Payment canceled'
+        message: t('pricing.paymentCanceled')
       })
     }
   }, [searchParams])
@@ -82,14 +86,14 @@ const Pricing: React.FC = React.memo(() => {
       console.log('Payment successful:', result)
       showToast({
         severity: 'success',
-        message: 'Payment successful'
+        message: t('pricing.paymentSuccessful')
       })
       // 支付成功后刷新用户信息
       fetchUserDetails()
     } catch (error) {
       showToast({
         severity: 'error',
-        message: 'Payment verification failed, please contact customer service'
+        message: t('pricing.paymentVerificationFailed')
       })
     } finally {
       setIsProcessing(false)
@@ -101,7 +105,7 @@ const Pricing: React.FC = React.memo(() => {
     if (planId === 'free') {
       showToast({
         severity: 'info',
-        message: 'Free plan does not require subscription'
+        message: t('pricing.freePlanDoesNotRequireSubscription')
       })
       return
     }
@@ -115,7 +119,7 @@ const Pricing: React.FC = React.memo(() => {
     } catch (error) {
       showToast({
         severity: 'error',
-        message: 'Failed to create payment session, please try again later'
+        message: t('pricing.failedToCreatePaymentSession')
       })
       setIsProcessing(false)
     }
@@ -174,21 +178,21 @@ const Pricing: React.FC = React.memo(() => {
   // 获取按钮文本
   const getButtonText = (planId: string) => {
     if (isCurrentSubscription(planId)) {
-      return 'Current Plan'
+      return t('pricing.currentPlan')
     }
     
     // 如果用户是Plus（premium），且当前套餐是Pro（premium_plus），显示Upgrade
     if (userState.userPlan?.plan_type === 'premium' && planId === 'premium_plus') {
-      return 'Upgrade'
+      return t('pricing.upgrade')
     }
     
     // 如果用户是Pro（premium_plus），且当前套餐是Plus（premium），不显示按钮
     if (userState.userPlan?.plan_type === 'premium_plus' && planId === 'premium') {
-      return null
+      return t('pricing.subscribe')
     }
     
     // 其他情况显示Subscribe
-    return 'Subscribe'
+    return t('pricing.subscribe')
   }
 
   return (
@@ -256,7 +260,7 @@ const Pricing: React.FC = React.memo(() => {
       {/* 套餐列表 */}
       <div className="w-full flex flex-col md:flex-row gap-8 md:gap-6 justify-center px-4 md:px-0">
         {/* 移动端倒序显示：Pro, Plus, Free；PC端正常顺序：Free, Plus, Pro */}
-        {(isMobile ? [...pricingState.plans].reverse() : pricingState.plans).map((plan) => (
+        {(isMobile ? [...translatedPlans].reverse() : translatedPlans).map((plan: any) => (
           <div
             key={plan.id}
             className={`${getPlanStyle(plan.id)} w-full md:w-auto rounded-xl p-[1.875rem] flex flex-col transition-all hover:shadow-lg gap-6`}
@@ -275,7 +279,7 @@ const Pricing: React.FC = React.memo(() => {
                   {plan.price}
                 </div>
                 <div className="font-switzer font-normal text-xs leading-[100%] text-text-secondary dark:text-text-secondary-dark capitalize mb-1">
-                  /Month
+                  /{t('pricing.month')}
                 </div>
               </div>
               {/* 套餐描述 */}
@@ -288,14 +292,14 @@ const Pricing: React.FC = React.memo(() => {
             <div className="flex flex-col gap-4">
               {/* 功能列表 */}
               <div className="flex flex-col gap-4">
-                {plan.features.map((feature, featureIndex) => (
+                {plan.features.map((feature: any, featureIndex: number) => (
                   <React.Fragment key={featureIndex}>
                     <div className="flex items-start gap-4">
                       <div className="w-5 h-5 rounded-full flex items-center justify-center mt-0.5">
                         <ThemeAdaptiveIcon
                           lightIcon={feature.supported ? OkIcon : NoIcon}
                           darkIcon={feature.supported ? OkIconDark : NoIconDark}
-                          alt={feature.supported ? "Supported" : "Not supported"}
+                          alt={feature.supported ? t('pricing.supported') : t('pricing.notSupported')}
                           className="w-5 h-5"
                         />
                       </div>
@@ -326,7 +330,7 @@ const Pricing: React.FC = React.memo(() => {
                     disabled={true}
                     className="w-full h-12 px-4 gap-1 rounded-full font-switzer font-medium text-base leading-6 text-center bg-[#4458FF1A] text-[#4458FF] cursor-default"
                   >
-                    Current Plan
+                    {t('pricing.currentPlan')}
                   </button>
                 ) : (
                   // 其他套餐 - 正常订阅按钮
@@ -340,7 +344,7 @@ const Pricing: React.FC = React.memo(() => {
                         : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-text-main dark:text-text-main-dark'
                       }`}
                   >
-                    {isProcessing ? 'Processing...' : getButtonText(plan.id)}
+                    {isProcessing ? t('pricing.processing') : getButtonText(plan.id)}
                   </button>
                 )
               )}

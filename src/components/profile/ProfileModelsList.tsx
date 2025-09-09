@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
+import { useI18n } from '../../hooks/useI18n'
 import WorkflowCard from '../home/WorkflowCard'
 import {
   profileModelsAtom,
@@ -34,13 +35,14 @@ const convertModelToFeaturedItem = (model: FetchModelDto): FeaturedItem => ({
   description: model.description,
   user: model.user || {
     did: '',
-    name: 'Anonymous',
+    name: 'Anonymous', // 这个将在组件中被替换为多语言
     avatar: '',
     email: ''
   }
 })
 
 const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
+  const { t } = useI18n()
   const [state] = useAtom(profileModelsAtom)
   const [, fetchPublished] = useAtom(fetchPublishedModelsAtom)
   const [, fetchLiked] = useAtom(fetchLikedModelsAtom)
@@ -103,7 +105,7 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
   if (state.isLoading && currentGroups.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-gray-500">Loading styles...</div>
+        <div className="text-gray-500">{t('profile.loadingStyles')}</div>
       </div>
     )
   }
@@ -112,7 +114,7 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="text-center">
-          <p className="text-red-500 mb-2">Error loading styles: {state.error}</p>
+          <p className="text-red-500 mb-2">{t('profile.errorLoadingStyles')} {state.error}</p>
           <button
             onClick={() => {
               if (tab === 'published') {
@@ -123,7 +125,7 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
             }}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
-            Retry
+            {t('profile.retry')}
           </button>
         </div>
       </div>
@@ -148,20 +150,20 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
         {/* 文本提示 */}
         <div className="flex flex-col items-center gap-1"> {/* 两行文本间距4px */}
           <p className="font-switzer font-medium text-2xl leading-8 text-text-main dark:text-text-main-dark text-center"> {/* font-size: 24px, line-height: 32px */}
-            {tab === 'published' ? 'No published styles found' : 'No liked styles found'}
+            {tab === 'published' ? t('profile.noPublishedStylesFound') : t('profile.noLikedStylesFound')}
           </p>
           <p className="font-switzer font-medium text-sm leading-5 text-[#9CA1AF] text-center"> {/* font-size: 14px, line-height: 20px */}
             {tab === 'published'
-              ? 'Create your first style to get started'
-              : 'Like some styles to see them here'}
+              ? t('profile.createFirstStyle')
+              : t('profile.likeStyles')}
           </p>
         </div>
 
         {/* 创建按钮 */}
         <button className="w-40 h-9 min-w-40 px-4 flex items-center justify-center gap-1 rounded-full bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors"> {/* width: 160px, height: 36px, gap: 4px */}
-          <img src={WorkflowBuilderIcon} alt="Builder" className="w-5 h-5" /> {/* 20x20px */}
+          <img src={WorkflowBuilderIcon} alt={t('recipes.builder')} className="w-5 h-5" /> {/* 20x20px */}
           <span className="font-switzer font-medium text-sm leading-5 text-white"> {/* font-size: 14px, line-height: 20px */}
-            Builder
+            {t('recipes.builder')}
           </span>
         </button>
       </div>
@@ -208,7 +210,7 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
       {/* 加载更多状态 */}
       {state.isLoading && currentGroups.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-500">Loading more styles...</div>
+          <div className="text-gray-500">{t('profile.loadingMoreStyles')}</div>
         </div>
       )}
 
@@ -219,7 +221,7 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
             onClick={handleLoadMore}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
-            Load More
+            {t('profile.loadMore')}
           </button>
         </div>
       )}
@@ -227,7 +229,7 @@ const ProfileModelsList: React.FC<ProfileModelsListProps> = ({ tab }) => {
       {/* 无更多数据提示 */}
       {!hasMore && currentGroups.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-400">No more styles to load</div>
+          <div className="text-gray-400">{t('profile.noMoreStyles')}</div>
         </div>
       )}
     </div>

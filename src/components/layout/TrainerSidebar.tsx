@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react'
 import { useAtom } from 'jotai'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
+import { useI18n } from '../../hooks/useI18n'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 import BgLogo from '../../assets/web2/workflow_setting.svg'
 import CoverSelectIcon from '../../assets/web2/cover_select.svg'
@@ -18,6 +19,7 @@ import {
 } from '../../store/styleTrainerStore'
 
 const TrainerSidebar: React.FC = () => {
+  const { t } = useI18n()
   const navigate = useNavigate()
   useLang()
   const [formData] = useAtom(styleTrainerFormAtom)
@@ -100,10 +102,10 @@ const TrainerSidebar: React.FC = () => {
       <div className="flex flex-col gap-6 relative z-10 w-full">
         {/* Style Name */}
         <div className="flex flex-col gap-2 w-full">
-          <span className="font-lexend font-semibold text-[1.5rem] leading-[100%] text-[#1F2937]">Style</span>
+          <span className="font-lexend font-semibold text-[1.5rem] leading-[100%] text-[#1F2937]">{t('styleTrainer.style')}</span>
           <input
             className={`w-full border rounded-[0.625rem] px-3 py-3 text-[#1F2937] font-lexend text-base outline-none transition-colors ${nameFocus ? 'border-[#0900FF]' : 'border-[#E5E7EB]'}`}
-            placeholder="style name"
+            placeholder={t('styleTrainer.styleNamePlaceholder')}
             value={formData.name}
             onChange={e => updateForm({ name: e.target.value })}
             onFocus={() => setNameFocus(true)}
@@ -113,10 +115,10 @@ const TrainerSidebar: React.FC = () => {
         </div>
         {/* Description */}
         <div className="flex flex-col gap-2 w-full">
-          <span className="font-lexend font-normal text-sm leading-[100%] text-[#1F2937]">Description</span>
+          <span className="font-lexend font-normal text-sm leading-[100%] text-[#1F2937]">{t('styleTrainer.description')}</span>
           <textarea
             className={`w-full h-[7.5rem] border rounded-[0.625rem] px-3 py-3 text-[#1F2937] font-lexend text-base outline-none resize-none transition-colors ${descFocus ? 'border-[#0900FF]' : 'border-[#E5E7EB]'}`}
-            placeholder="Describe your style"
+            placeholder={t('styleTrainer.describeYourStyle')}
             value={formData.description}
             onChange={e => updateForm({ description: e.target.value })}
             onFocus={() => setDescFocus(true)}
@@ -126,7 +128,7 @@ const TrainerSidebar: React.FC = () => {
         </div>
         {/* Cover Image */}
         <div className="flex flex-col gap-2 w-full">
-          <span className="font-lexend font-normal text-sm leading-[100%] text-[#1F2937]">Cover Image</span>
+          <span className="font-lexend font-normal text-sm leading-[100%] text-[#1F2937]">{t('styleTrainer.coverImage')}</span>
           {formData.cover ? (
             <div className="relative w-full">
               <img

@@ -46,6 +46,7 @@ export interface ProfileContentsListProps {
 }
 
 const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) => {
+  const { t } = useI18n()
   const [imageState] = useAtom(profileImageAtom)
   const [videoState] = useAtom(profileVideoAtom)
   const [, fetchImageContents] = useAtom(fetchProfileImageAtom)
@@ -173,7 +174,12 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
   if (state.isLoading && groups.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-gray-500">Loading {isMixed ? 'content' : (type === 'image' ? 'images' : 'videos')}...</div>
+        <div className="text-gray-500">
+          {isMixed
+            ? t('profile.loadingContent')
+            : (type === 'image' ? t('profile.loadingImages') : t('profile.loadingVideos'))
+          }
+        </div>
       </div>
     )
   }
@@ -182,12 +188,17 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
     return (
       <div className="flex justify-center items-center py-12">
         <div className="text-center">
-          <p className="text-red-500 mb-2">Error loading {isMixed ? 'content' : (type === 'image' ? 'images' : 'videos')}: {state.error}</p>
+          <p className="text-red-500 mb-2">
+            {isMixed
+              ? t('profile.errorLoadingContent')
+              : (type === 'image' ? t('profile.errorLoadingImages') : t('profile.errorLoadingVideos'))
+            }: {state.error}
+          </p>
           <button
             onClick={() => fetchContents({ reset: true })}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
-            Retry
+            {t('profile.retry')}
           </button>
         </div>
       </div>
@@ -212,18 +223,24 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
         {/* 文本提示 */}
         <div className="flex flex-col items-center gap-1"> {/* 两行文本间距4px */}
           <p className="font-switzer font-medium text-2xl leading-8 text-text-main dark:text-text-main-dark text-center"> {/* font-size: 24px, line-height: 32px */}
-            No {type === 'image' ? 'images' : 'videos'} found
+            {tab === 'published'
+              ? (type === 'image' ? t('profile.noPublishedImagesFound') : t('profile.noPublishedVideosFound'))
+              : (type === 'image' ? t('profile.noLikedImagesFound') : t('profile.noLikedVideosFound'))
+            }
           </p>
           <p className="font-switzer font-medium text-sm leading-5 text-[#9CA1AF] text-center"> {/* font-size: 14px, line-height: 20px */}
-            {type === 'image' ? 'Create or upload images to see them here' : 'Create or upload videos to see them here'}
+            {tab === 'published'
+              ? (type === 'image' ? t('profile.createFirstImage') : t('profile.createFirstVideo'))
+              : (type === 'image' ? t('profile.likeImages') : t('profile.likeVideos'))
+            }
           </p>
         </div>
 
         {/* 创建按钮 */}
         <button className="w-40 h-9 min-w-40 px-4 flex items-center justify-center gap-1 rounded-full bg-link-default dark:bg-link-default-dark hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors"> {/* width: 160px, height: 36px, gap: 4px */}
-          <img src={WorkflowBuilderIcon} alt="Create" className="w-5 h-5" /> {/* 20x20px */}
+          <img src={WorkflowBuilderIcon} alt={t('profile.create')} className="w-5 h-5" /> {/* 20x20px */}
           <span className="font-switzer font-medium text-sm leading-5 text-white"> {/* font-size: 14px, line-height: 20px */}
-            Create
+            {t('profile.create')}
           </span>
         </button>
       </div>
@@ -282,7 +299,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
       if (item.user?.name) {
         return item.user.name
       }
-      return "Anonymous"
+      return t('profile.anonymous')
     }
 
     // 处理点赞
@@ -527,7 +544,12 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
       {/* 加载更多状态 */}
       {state.isLoading && groups.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-500">Loading more {isMixed ? 'content' : (type === 'image' ? 'images' : 'videos')}...</div>
+          <div className="text-gray-500">
+            {isMixed
+              ? t('profile.loadingMoreContent')
+              : (type === 'image' ? t('profile.loadingMoreImages') : t('profile.loadingMoreVideos'))
+            }
+          </div>
         </div>
       )}
 
@@ -538,7 +560,7 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
             onClick={handleLoadMore}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
-            Load More
+            {t('profile.loadMore')}
           </button>
         </div>
       )}
@@ -546,7 +568,12 @@ const ProfileContentsList: React.FC<ProfileContentsListProps> = ({ type, tab }) 
       {/* 无更多数据提示 */}
       {!state.hasMore && groups.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-400">No more {isMixed ? 'content' : (type === 'image' ? 'images' : 'videos')} to load</div>
+          <div className="text-gray-400">
+            {isMixed
+              ? t('profile.noMoreContent')
+              : (type === 'image' ? t('profile.noMoreImages') : t('profile.noMoreVideos'))
+            }
+          </div>
         </div>
       )}
     </div>

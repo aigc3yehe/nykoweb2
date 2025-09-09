@@ -9,6 +9,7 @@ import AnimateIconDark from '../../assets/mavae/dark/animate.svg';
 import LoadingIcon from '../../assets/mavae/Loading.svg';
 import LoadingIconDark from '../../assets/mavae/dark/Loading.svg';
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon';
+import { useI18n } from '../../hooks/useI18n';
 
 interface ImageUploadState {
   totalCount: number;
@@ -123,6 +124,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   onAnimate,
   onRetryPolling,
 }) => {
+  const { t } = useI18n()
 
   // 添加图片生成中组件
   const renderGeneratingImageComponent = () => {
@@ -136,7 +138,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             size="sm"
             className="animate-spin"
           />
-          <span>Generating image, please wait...</span>
+          <span>{t('chat.generatingImage')}</span>
         </div>
       </div>
     );
@@ -154,7 +156,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             size="sm"
             className="animate-spin"
           />
-          <span>Modifying image, please wait...(ETA 200 sec)</span>
+          <span>{t('chat.modifyingImage')}</span>
         </div>
       </div>
     );

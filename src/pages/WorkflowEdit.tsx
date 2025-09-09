@@ -220,12 +220,12 @@ const WorkflowEdit: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-full w-full p-8">
         <div className="text-center">
-          <span className="font-switzer text-sm text-red-500 mb-4 block">Error: {workflowDetailState.error}</span>
+          <span className="font-switzer text-sm text-red-500 mb-4 block">{t('workflow.errorPrefix')}{workflowDetailState.error}</span>
           <button
             onClick={() => id && fetchWorkflowDetail({ workflowId: parseInt(id), refresh: true })}
             className="px-4 py-2 bg-link-default dark:bg-link-default-dark text-white rounded-lg hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors"
           >
-            Retry
+            {t('workflow.retry')}
           </button>
         </div>
       </div>
@@ -238,7 +238,7 @@ const WorkflowEdit: React.FC = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-link-default dark:border-link-default-dark mx-auto mb-4"></div>
           <span className="font-switzer text-sm text-text-secondary dark:text-text-secondary-dark">
-            {workflowDetailState.isLoading ? 'Loading Agent Case...' : 'Agent Case not found'}
+            {workflowDetailState.isLoading ? t('workflow.loadingAgentCase') : t('workflow.agentCaseNotFound')}
           </span>
         </div>
       </div>
@@ -262,7 +262,7 @@ const WorkflowEdit: React.FC = () => {
             size="lg"
           />
         </button>
-        <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark">Edit</span>
+        <span className="font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark">{t('workflow.edit')}</span>
       </div>
       {/* 中间容器 */}
       <div className="md:w-[22.5rem] md:max-w-[22.5rem] mx-auto md:border md:border-line-subtle dark:border-line-subtle-dark rounded-xl bg-secondary dark:bg-secondary-dark p-6 flex flex-col gap-6">
@@ -430,7 +430,7 @@ const WorkflowEdit: React.FC = () => {
           disabled={workflowEditState.isUpdating || isUploading || isUploadingRefImage || !workflowEditState.form.name.trim() || !workflowEditState.form.prompt.trim()}
           className="w-full h-12 px-4 gap-1 rounded-full bg-link-default dark:bg-link-default-dark font-switzer font-medium text-sm leading-5 text-center text-white hover:bg-link-pressed dark:hover:bg-link-pressed-dark transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
         >
-          {workflowEditState.isUpdating ? 'Saving...' : 'Save'}
+          {workflowEditState.isUpdating ? t('workflow.saving') : t('workflow.save')}
         </button>
       </div>
     </div>

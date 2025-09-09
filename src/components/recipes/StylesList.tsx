@@ -1,10 +1,10 @@
 import React, { useEffect, useCallback, useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import WorkflowCard from '../home/WorkflowCard'
-import { 
-  recipesModelsAtom, 
-  fetchRecipesModelsAtom, 
-  loadMoreRecipesModelsAtom 
+import {
+  recipesModelsAtom,
+  fetchRecipesModelsAtom,
+  loadMoreRecipesModelsAtom
 } from '../../store/recipesModelStore'
 import type { FetchModelDto } from '../../services/api/types'
 import type { FeaturedItem } from '../../store/featuredStore'
@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { setPendingMessageAtom } from '../../store/assistantStore'
+import { useI18n } from '../../hooks/useI18n'
 
 // 数据转换器：将 FetchModelDto 转换为 FeaturedItem 格式
 const convertModelToFeaturedItem = (model: FetchModelDto): FeaturedItem => ({
@@ -25,7 +26,7 @@ const convertModelToFeaturedItem = (model: FetchModelDto): FeaturedItem => ({
   description: model.description,
   user: model.user || {
     did: '',
-    name: 'Anonymous',
+    name: 'Anonymous', // 这个将在组件中被替换为多语言
     avatar: '',
     email: ''
   }
@@ -36,6 +37,7 @@ interface StylesListProps {
 }
 
 const StylesList: React.FC<StylesListProps> = ({ sortOption = 'All' }) => {
+  const { t } = useI18n()
   const [modelState] = useAtom(recipesModelsAtom)
   const [, fetchData] = useAtom(fetchRecipesModelsAtom)
   const [, loadMore] = useAtom(loadMoreRecipesModelsAtom)
@@ -132,7 +134,7 @@ const StylesList: React.FC<StylesListProps> = ({ sortOption = 'All' }) => {
   if (modelState.isLoading && modelState.items.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-gray-500">Loading styles...</div>
+        <div className="text-gray-500">{t('recipes.loadingStyles')}</div>
       </div>
     )
   }
@@ -142,12 +144,12 @@ const StylesList: React.FC<StylesListProps> = ({ sortOption = 'All' }) => {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="text-center">
-          <p className="text-red-500 mb-2">Error loading styles: {modelState.error}</p>
-          <button 
+          <p className="text-red-500 mb-2">{t('recipes.errorLoadingStyles')} {modelState.error}</p>
+          <button
             onClick={() => fetchData({ reset: true })}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
-            Retry
+            {t('recipes.retry')}
           </button>
         </div>
       </div>
@@ -158,7 +160,7 @@ const StylesList: React.FC<StylesListProps> = ({ sortOption = 'All' }) => {
   if (modelState.items.length === 0 && !modelState.isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-gray-500">No styles found</div>
+        <div className="text-gray-500">{t('recipes.noStylesFound')}</div>
       </div>
     )
   }
@@ -182,7 +184,7 @@ const StylesList: React.FC<StylesListProps> = ({ sortOption = 'All' }) => {
       {/* 加载更多状态 */}
       {modelState.isLoading && modelState.items.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-500">Loading more styles...</div>
+          <div className="text-gray-500">{t('recipes.loadingMoreStyles')}</div>
         </div>
       )}
 
@@ -193,7 +195,7 @@ const StylesList: React.FC<StylesListProps> = ({ sortOption = 'All' }) => {
             onClick={handleLoadMore}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
-            Load More
+            {t('home.loadMore')}
           </button>
         </div>
       )}
@@ -201,7 +203,7 @@ const StylesList: React.FC<StylesListProps> = ({ sortOption = 'All' }) => {
       {/* 无更多数据提示 */}
       {!modelState.hasMore && modelState.items.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-400">No more styles to load</div>
+          <div className="text-gray-400">{t('recipes.noMoreStyles')}</div>
         </div>
       )}
     </div>

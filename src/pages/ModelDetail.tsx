@@ -3,11 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAtom, useSetAtom } from 'jotai'
 import { modelDetailAtom, fetchModelDetailAtom, clearModelDetailAtom } from '../store/modelDetailStore'
 import { setCurrentDetailModelAtom } from '../store/assistantStore'
+import { useI18n } from '../hooks/useI18n'
 import ModelGallery from '../components/model/ModelGallery'
 import ModelCover from '../components/model/ModelCover'
 import ModelInfo from '../components/model/ModelInfo'
 
 const ModelDetail: React.FC = () => {
+  const { t } = useI18n()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [state] = useAtom(modelDetailAtom)
@@ -48,12 +50,12 @@ const ModelDetail: React.FC = () => {
       <div className="px-5 md:px-6 py-8">
         <div className="flex justify-center items-center h-96">
           <div className="text-center">
-            <p className="text-red-500 mb-2">Invalid model ID</p>
+            <p className="text-red-500 mb-2">{t('pages.invalidModelId')}</p>
             <button
               onClick={() => navigate(-1)}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
             >
-              Go Back
+              {t('pages.goBack')}
             </button>
           </div>
         </div>
@@ -68,7 +70,7 @@ const ModelDetail: React.FC = () => {
         {/* 加载状态 */}
         {state.isLoading && (
           <div className="flex justify-center items-center h-96">
-            <div className="text-gray-500">Loading model details...</div>
+            <div className="text-gray-500">{t('pages.loadingModelDetails')}</div>
           </div>
         )}
 
@@ -76,18 +78,18 @@ const ModelDetail: React.FC = () => {
         {state.error && !state.isLoading && (
           <div className="flex justify-center items-center h-96">
             <div className="text-center">
-              <p className="text-red-500 mb-2">Error: {state.error}</p>
+              <p className="text-red-500 mb-2">{t('pages.errorPrefix')}{state.error}</p>
               <button
                 onClick={() => fetchModelDetail({ modelId, refresh: true })}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors mr-2"
               >
-                Retry
+                {t('pages.retry')}
               </button>
               <button
                 onClick={() => navigate(-1)}
                 className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
               >
-                Go Back
+                {t('pages.goBack')}
               </button>
             </div>
           </div>

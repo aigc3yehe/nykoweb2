@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLang, withLangPrefix } from '../hooks/useLang'
+import { useI18n } from '../hooks/useI18n'
 import RecipesTab from '../components/recipes/RecipesTab'
 import RecipesActions from '../components/recipes/RecipesActions'
 import WorkflowsList from '../components/recipes/WorkflowsList'
@@ -9,7 +10,7 @@ import StylesList from '../components/recipes/StylesList'
 export type RecipeType = 'workflows' | 'styles'
 
 const Recipes: React.FC = () => {
-  //const { t } = useI18n()
+  const { t } = useI18n()
   const navigate = useNavigate()
   const lang = useLang()
   const { tab } = useParams<{ tab?: string }>()
@@ -48,7 +49,7 @@ const Recipes: React.FC = () => {
     <div className="w-full px-4 md:px-8 pb-10 flex flex-col md:gap-6"> {/* width: 1352px (full), padding: 32px 32px 40px 32px, gap: 24px */}
       {/* 移动端标题 */}
       <h1 className="md:hidden h-16 py-4 font-switzer font-bold text-2xl leading-8 text-text-main dark:text-text-main-dark"> {/* height: 64px, padding: 16px, font-size: 24px, line-height: 32px */}
-        Recipes
+        {t('pages.recipes')}
       </h1>
 
       {/* Tab 导航 */}

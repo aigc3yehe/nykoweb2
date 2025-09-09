@@ -7,8 +7,10 @@ import SectionHeader from './SectionHeader'
 import { setPendingMessageAtom } from '../../store/assistantStore'
 import WorkflowCard from './WorkflowCard'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
+import { useI18n } from '../../hooks/useI18n'
 
 const PopularWorkflows: React.FC = () => {
+  const { t } = useI18n()
   const navigate = useNavigate()
   const lang = useLang()
   const [workflowsState] = useAtom(featuredWorkflowsAtom)
@@ -79,9 +81,9 @@ const PopularWorkflows: React.FC = () => {
   if (workflowsState.isLoading && workflowsState.items.length === 0) {
     return (
       <div className="w-full h-[33.3125rem] px-8 pb-10 gap-4">
-        <SectionHeader title="Featured Workflows" />
+        <SectionHeader title={t('home.featuredWorkflows')} />
         <div className="h-[17.5rem] md:h-[20rem] flex items-center justify-center">
-          <span className="text-gray-500">Loading...</span>
+          <span className="text-gray-500">{t('home.loading')}</span>
         </div>
       </div>
     )
@@ -91,15 +93,15 @@ const PopularWorkflows: React.FC = () => {
   if (workflowsState.error && workflowsState.items.length === 0) {
     return (
       <div className="w-full h-[33.3125rem] px-8 pb-10 gap-4">
-        <SectionHeader title="Featured Workflows" />
+        <SectionHeader title={t('home.featuredWorkflows')} />
         <div className="h-[17.5rem] md:h-[20rem] flex items-center justify-center">
           <div className="text-center">
-            <p className="text-red-500 mb-2">Failed to load workflows</p>
-            <button 
+            <p className="text-red-500 mb-2">{t('home.failedToLoad')} {t('nav.workflows').toLowerCase()}</p>
+            <button
               onClick={() => fetchWorkflows(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
             >
-              Retry
+              {t('home.retry')}
             </button>
           </div>
         </div>
@@ -120,7 +122,7 @@ const PopularWorkflows: React.FC = () => {
   return (
     <div className="w-full h-[33.3125rem] px-4 md:px-8 pb-10 gap-4"> {/* width: 1352px, height: 533px, padding: 32px 32px 40px 32px, gap: 16px */}
       <SectionHeader
-        title="Featured Workflows"
+        title={t('home.featuredWorkflows')}
         onPrevious={() => scrollTo('left')}
         onNext={() => scrollTo('right')}
         onViewAll={handleViewAll}

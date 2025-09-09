@@ -1,15 +1,17 @@
 import React from 'react';
 import { toggleTheme, getCurrentTheme } from '../../utils/theme';
+import { useI18n } from '../../hooks/useI18n';
 
 interface ThemeToggleProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
 }
 
-const ThemeToggle: React.FC<ThemeToggleProps> = ({ 
-  className = '', 
-  size = 'md' 
+const ThemeToggle: React.FC<ThemeToggleProps> = ({
+  className = '',
+  size = 'md'
 }) => {
+  const { t } = useI18n();
   const [theme, setTheme] = React.useState<'light' | 'dark'>(getCurrentTheme());
 
   const handleToggle = () => {
@@ -68,8 +70,12 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
         focus:ring-opacity-50
         ${className}
       `}
-      aria-label={`切换到${theme === 'light' ? '暗色' : '亮色'}主题`}
-      title={`当前主题: ${theme === 'light' ? '亮色' : '暗色'}`}
+      aria-label={t('ui.themeToggleAriaLabel', {
+        theme: theme === 'light' ? t('ui.darkTheme') : t('ui.lightTheme')
+      })}
+      title={t('ui.themeToggleTitle', {
+        theme: theme === 'light' ? t('ui.lightTheme') : t('ui.darkTheme')
+      })}
     >
       {theme === 'light' ? (
         // 月亮图标 - 暗色主题

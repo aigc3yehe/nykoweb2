@@ -12,6 +12,7 @@ import type { WorkflowDto } from '../../services/api'
 import type { FeaturedItem } from '../../store/featuredStore'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { setPendingMessageAtom } from '../../store/assistantStore'
+import { useI18n } from '../../hooks/useI18n'
 
 // 数据转换器：将 WorkflowDto 转换为 FeaturedItem 格式
 const convertWorkflowToFeaturedItem = (workflow: WorkflowDto): FeaturedItem => ({
@@ -25,7 +26,7 @@ const convertWorkflowToFeaturedItem = (workflow: WorkflowDto): FeaturedItem => (
   description: workflow.description,
   user: workflow.user || {
     did: '',
-    name: 'Anonymous',
+    name: 'Anonymous', // 这个将在组件中被替换为多语言
     avatar: '',
     email: ''
   }
@@ -36,6 +37,7 @@ interface WorkflowsListProps {
 }
 
 const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => {
+  const { t } = useI18n()
   const [workflowState] = useAtom(recipesWorkflowsAtom)
   const [, fetchData] = useAtom(fetchRecipesWorkflowsAtom)
   const [, loadMore] = useAtom(loadMoreRecipesWorkflowsAtom)
@@ -134,7 +136,7 @@ const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => 
   if (workflowState.isLoading && workflowState.items.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-gray-500">Loading Agent Cases...</div>
+        <div className="text-gray-500">{t('recipes.loadingAgentCases')}</div>
       </div>
     )
   }
@@ -144,12 +146,12 @@ const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => 
     return (
       <div className="flex justify-center items-center py-12">
         <div className="text-center">
-          <p className="text-red-500 mb-2">Error loading Agent Cases: {workflowState.error}</p>
+          <p className="text-red-500 mb-2">{t('recipes.errorLoadingAgentCases')} {workflowState.error}</p>
           <button
             onClick={() => fetchData({ reset: true })}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
-            Retry
+            {t('recipes.retry')}
           </button>
         </div>
       </div>
@@ -160,7 +162,7 @@ const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => 
   if (workflowState.items.length === 0 && !workflowState.isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="text-gray-500">No workflows found</div>
+        <div className="text-gray-500">{t('recipes.noAgentCasesFound')}</div>
       </div>
     )
   }
@@ -184,7 +186,7 @@ const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => 
       {/* 加载更多状态 */}
       {workflowState.isLoading && workflowState.items.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-500">Loading more Agent Cases...</div>
+          <div className="text-gray-500">{t('recipes.loadingMoreAgentCases')}</div>
         </div>
       )}
 
@@ -195,7 +197,7 @@ const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => 
             onClick={handleLoadMore}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
-            Load More
+            {t('home.loadMore')}
           </button>
         </div>
       )}
@@ -203,7 +205,7 @@ const WorkflowsList: React.FC<WorkflowsListProps> = ({ sortOption = 'All' }) => 
       {/* 无更多数据提示 */}
       {!workflowState.hasMore && workflowState.items.length > 0 && (
         <div className="flex justify-center py-6">
-          <div className="text-gray-400">No more workflows to load</div>
+          <div className="text-gray-400">{t('recipes.noMoreAgentCases')}</div>
         </div>
       )}
     </div>

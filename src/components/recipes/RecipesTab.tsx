@@ -6,6 +6,7 @@ import CreditBtnIcon from '../../assets/mavae/credit_btn.svg'
 import StyleCreateIcon from '../../assets/mavae/style_create.svg'
 import StyleCreateIconDark from '../../assets/mavae/dark/style_create.svg'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
+import { useI18n } from '../../hooks/useI18n'
 
 interface RecipesTabProps {
   activeTab: RecipeType
@@ -13,12 +14,13 @@ interface RecipesTabProps {
 }
 
 const RecipesTab: React.FC<RecipesTabProps> = ({ activeTab, onTabChange }) => {
+  const { t } = useI18n()
   const navigate = useNavigate()
   const lang = useLang()
-  
+
   const tabs = [
-    { key: 'workflows' as RecipeType, label: 'Workflow' },
-    { key: 'styles' as RecipeType, label: 'Styles' }
+    { key: 'workflows' as RecipeType, label: t('recipes.workflow') },
+    { key: 'styles' as RecipeType, label: t('recipes.styles') }
   ]
 
   // 处理新建按钮点击事件
@@ -75,9 +77,9 @@ const RecipesTab: React.FC<RecipesTabProps> = ({ activeTab, onTabChange }) => {
       >
         {activeTab === 'workflows' ? (
           <>
-            <img src={CreditBtnIcon} alt="Builder" className="w-4 h-4" />
+            <img src={CreditBtnIcon} alt={t('recipes.builder')} className="w-4 h-4" />
             <span className="font-switzer font-medium text-sm leading-6 text-[#65A30D]">
-              Builder
+              {t('recipes.builder')}
             </span>
           </>
         ) : (
@@ -85,12 +87,12 @@ const RecipesTab: React.FC<RecipesTabProps> = ({ activeTab, onTabChange }) => {
             <ThemeAdaptiveIcon
               lightIcon={StyleCreateIcon}
               darkIcon={StyleCreateIconDark}
-              alt="New Style"
+              alt={t('recipes.newStyle')}
               size="sm"
               className="w-4 h-4"
             />
             <span className="font-switzer font-medium text-sm leading-6 text-[#0DA3A3]">
-              New Style
+              {t('recipes.newStyle')}
             </span>
           </>
         )}

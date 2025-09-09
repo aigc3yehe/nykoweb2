@@ -9,6 +9,7 @@ import BookmarkNormalIconDark from '../../assets/mavae/dark/Bookmark_normal.svg'
 import BookmarkYellowIconDark from '../../assets/mavae/dark/Bookmark_yellow.svg'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
 import MaskImage from '../../assets/mavae/Mask.svg'
+import { useI18n } from '../../hooks/useI18n'
 
 interface ModelCoverProps {
   cover?: string
@@ -27,6 +28,7 @@ const ModelCover: React.FC<ModelCoverProps> = ({
   is_liked = false,
   className = ''
 }) => {
+  const { t } = useI18n()
   const [imageError, setImageError] = useState(false)
 
   // 判断是否为视频
@@ -53,7 +55,7 @@ const ModelCover: React.FC<ModelCoverProps> = ({
         )
       ) : (
         <div className="w-full h-full flex items-center justify-center">
-          <span className="text-gray-400">No cover image</span>
+          <span className="text-gray-400">{t('model.noCoverImage')}</span>
         </div>
       )}
 

@@ -3,11 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAtom, useSetAtom } from 'jotai'
 import { workflowDetailAtom, fetchWorkflowDetailAtom, clearWorkflowDetailAtom } from '../store/workflowDetailStore'
 import { setCurrentDetailWorkflowAtom } from '../store/assistantStore'
+import { useI18n } from '../hooks/useI18n'
 import WorkflowGallery from '../components/workflow/WorkflowGallery.tsx'
 import WorkflowCover from '../components/workflow/WorkflowCover'
 import WorkflowInfo from '../components/workflow/WorkflowInfo'
 
 const WorkflowDetail: React.FC = () => {
+  const { t } = useI18n()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [state] = useAtom(workflowDetailAtom)
@@ -48,12 +50,12 @@ const WorkflowDetail: React.FC = () => {
       <div className="px-5 md:px-6 py-8">
         <div className="flex justify-center items-center h-96">
           <div className="text-center">
-            <p className="text-red-500 mb-2">Invalid workflow ID</p>
+            <p className="text-red-500 mb-2">{t('pages.invalidWorkflowId')}</p>
             <button
               onClick={() => navigate(-1)}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
             >
-              Go Back
+              {t('pages.goBack')}
             </button>
           </div>
         </div>
@@ -68,7 +70,7 @@ const WorkflowDetail: React.FC = () => {
         {/* 加载状态 */}
         {state.isLoading && (
           <div className="flex justify-center items-center h-96">
-            <div className="text-gray-500">Loading Agent Case details...</div>
+            <div className="text-gray-500">{t('pages.loadingAgentCaseDetails')}</div>
           </div>
         )}
 
@@ -76,18 +78,18 @@ const WorkflowDetail: React.FC = () => {
         {state.error && !state.isLoading && (
           <div className="flex justify-center items-center h-96">
             <div className="text-center">
-              <p className="text-red-500 mb-2">Error: {state.error}</p>
+              <p className="text-red-500 mb-2">{t('pages.errorPrefix')}{state.error}</p>
               <button
                 onClick={() => fetchWorkflowDetail({ workflowId, refresh: true })}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors mr-2"
               >
-                Retry
+                {t('pages.retry')}
               </button>
               <button
                 onClick={() => navigate(-1)}
                 className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
               >
-                Go Back
+                {t('pages.goBack')}
               </button>
             </div>
           </div>

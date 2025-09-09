@@ -7,8 +7,10 @@ import { useNavigate } from 'react-router-dom'
 import { useLang, withLangPrefix } from '../../hooks/useLang'
 import { useChatSidebar } from '../../hooks/useChatSidebar'
 import { setPendingMessageAtom } from '../../store/assistantStore'
+import { useI18n } from '../../hooks/useI18n'
 
 const TrendingStyles: React.FC = () => {
+  const { t } = useI18n()
   const [modelsState] = useAtom(featuredModelsAtom)
   const [, fetchModels] = useAtom(fetchFeaturedModelsAtom)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -63,9 +65,9 @@ const TrendingStyles: React.FC = () => {
   if (modelsState.isLoading && modelsState.items.length === 0) {
     return (
       <div className="w-full h-[31rem] md:h-[33.3125rem] px-8 pb-10 gap-4">
-        <SectionHeader title="Trending Styles" />
+        <SectionHeader title={t('home.trendingStyles')} />
         <div className="h-[22.25rem] flex items-center justify-center">
-          <span className="text-gray-500">Loading...</span>
+          <span className="text-gray-500">{t('home.loading')}</span>
         </div>
       </div>
     )
@@ -75,15 +77,15 @@ const TrendingStyles: React.FC = () => {
   if (modelsState.error && modelsState.items.length === 0) {
     return (
       <div className="w-full h-[31rem] md:h-[33.3125rem] px-8 pb-10 gap-4">
-        <SectionHeader title="Trending Styles" />
+        <SectionHeader title={t('home.trendingStyles')} />
         <div className="h-[22.25rem] flex items-center justify-center">
           <div className="text-center">
-            <p className="text-red-500 mb-2">Failed to load styles</p>
-            <button 
+            <p className="text-red-500 mb-2">{t('home.failedToLoad')} {t('style.name').toLowerCase()}</p>
+            <button
               onClick={() => fetchModels(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
             >
-              Retry
+              {t('home.retry')}
             </button>
           </div>
         </div>
@@ -117,7 +119,7 @@ const TrendingStyles: React.FC = () => {
   return (
     <div className="w-full h-[31rem] md:h-[33.3125rem] px-4 md:px-8 pb-10 gap-4"> {/* 移动端: height: 496px, PC端: height: 533px, padding: 32px 32px 40px 32px, gap: 16px */}
       <SectionHeader
-        title="Trending Styles"
+        title={t('home.trendingStyles')}
         onPrevious={() => scrollTo('left')}
         onNext={() => scrollTo('right')}
         onViewAll={handleViewAll}

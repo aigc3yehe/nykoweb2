@@ -11,6 +11,7 @@ import avatarSvg from '../../assets/mavae/avatar.svg'
 import PictureIcon from '../../assets/mavae/Picture_white.svg'
 import VideoIconNew from '../../assets/mavae/video_white.svg'
 import MaskImage from '../../assets/mavae/Mask.svg'
+import { useI18n } from '../../hooks/useI18n'
 
 interface InspirationImageCardProps {
   content: ContentItem & { calculatedHeight?: number }
@@ -25,6 +26,7 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
   imageWidthRem,
   onClick
 }) => {
+  const { t } = useI18n()
   const [imageError, setImageError] = useState(false)
   const [, setIsHovered] = useState(false)
   const [isLiking, setIsLiking] = useState(false)
@@ -65,7 +67,7 @@ const InspirationImageCard: React.FC<InspirationImageCardProps> = ({
     if (content.user?.name) {
       return content.user.name
     }
-    return "Anonymous"
+    return t('home.anonymous')
   }
 
   // 处理点赞

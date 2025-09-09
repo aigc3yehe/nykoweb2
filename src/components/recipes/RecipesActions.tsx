@@ -7,6 +7,7 @@ import CreditBtnIcon from '../../assets/mavae/credit_btn.svg'
 import StyleCreateIcon from '../../assets/mavae/style_create.svg'
 import StyleCreateIconDark from '../../assets/mavae/dark/style_create.svg'
 import ThemeAdaptiveIcon from '../ui/ThemeAdaptiveIcon'
+import { useI18n } from '../../hooks/useI18n'
 
 interface RecipesActionsProps {
   activeTab: RecipeType
@@ -14,18 +15,22 @@ interface RecipesActionsProps {
 }
 
 const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab, onSortChange }) => {
+  const { t } = useI18n()
   const navigate = useNavigate()
   const lang = useLang()
-  const [selectedOption, setSelectedOption] = useState('All')
+  const [selectedOption, setSelectedOption] = useState(t('recipes.all'))
 
-  const options = ['All', 'Popular', 'Recent']
+  const options = [t('recipes.all'), t('recipes.popular'), t('recipes.recent')]
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option)
-    
-    // 调用父组件的排序回调
+
+    // 调用父组件的排序回调 - 传递原始排序值
     if (onSortChange) {
-      onSortChange(option)
+      let sortValue = 'All'
+      if (option === t('recipes.popular')) sortValue = 'Popular'
+      else if (option === t('recipes.recent')) sortValue = 'Recent'
+      onSortChange(sortValue)
     }
   }
 
@@ -83,9 +88,9 @@ const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab, onSortChange
       >
         {activeTab === 'workflows' ? (
           <>
-            <img src={CreditBtnIcon} alt="Builder" className="w-4 h-4" />
+            <img src={CreditBtnIcon} alt={t('recipes.builder')} className="w-4 h-4" />
             <span className="h-6 font-switzer font-medium text-sm leading-6 text-[#65A30D]">
-              Builder
+              {t('recipes.builder')}
             </span>
           </>
         ) : (
@@ -93,12 +98,12 @@ const RecipesActions: React.FC<RecipesActionsProps> = ({ activeTab, onSortChange
             <ThemeAdaptiveIcon
               lightIcon={StyleCreateIcon}
               darkIcon={StyleCreateIconDark}
-              alt="New Style"
+              alt={t('recipes.newStyle')}
               size="sm"
               className="w-4 h-4"
             />
             <span className="h-6 font-switzer font-medium text-sm leading-6 text-[#0DA3A3]">
-              New Style
+              {t('recipes.newStyle')}
             </span>
           </>
         )}
